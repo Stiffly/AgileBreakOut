@@ -1,0 +1,5 @@
+# Build Folders
+/bin/
+/lib/
+# CLion
+.idea/
