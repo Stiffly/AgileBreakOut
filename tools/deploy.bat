@@ -8,7 +8,7 @@ MKLINK "%DeployLocation%\Models\" "assets\Models" /J
 MKLINK "%DeployLocation%\Textures\" "assets\Textures\" /J
 MKLINK "%DeployLocation%\Sounds\" "assets\Sounds\" /J
 :: Shaders
-MKLINK "%DeployLocation%\Shaders\" "src\dd\Core\Shaders\" /J
+MKLINK "%DeployLocation%\Shaders\" "src\game\Core\Shaders\" /J
 :: Platform specific binaries
 IF "%~1"=="" GOTO :EOF
 ECHO Deploying %1 binaries to %DeployLocation%

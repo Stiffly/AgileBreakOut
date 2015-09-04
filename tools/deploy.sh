@@ -9,7 +9,7 @@ ln -srf assets/Models ${DeployLocation}
 ln -srf assets/Textures ${DeployLocation}
 ln -srf assets/Sounds ${DeployLocation}
 # Shaders
-ln -srf src/dd/Core/Shaders ${DeployLocation}
+ln -srf src/game/Core/Shaders ${DeployLocation}
 # Platform specific binaries
 if [[ $# -eq 1 ]]; then
     echo "Deploying {$1} binaries to ${DeployLocation}"

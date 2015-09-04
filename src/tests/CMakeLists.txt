@@ -3,7 +3,7 @@ project(tests)
 find_package(Boost REQUIRED COMPONENTS chrono thread unit_test_framework)
 
 include_directories(
-    ${CMAKE_SOURCE_DIR}/include/dd
+    ${CMAKE_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIRS}
 )
 
@@ -19,6 +19,6 @@ endif()
 
 add_executable(tests ${SOURCE_FILES})
 target_link_libraries(tests
-    daydream
+    game
     ${Boost_LIBRARIES}
 )

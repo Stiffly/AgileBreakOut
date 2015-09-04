@@ -9,7 +9,7 @@ find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 # GLM
 
-set(INCLUDE_PATH ${CMAKE_SOURCE_DIR}/include/dd)
+set(INCLUDE_PATH ${CMAKE_SOURCE_DIR}/include)
 include_directories(
     ${INCLUDE_PATH}
     ${OPENGL_INCLUDE_DIR}
@@ -31,29 +31,16 @@ file(GLOB SOURCE_FILES_Core_Util
 source_group(Core FILES ${SOURCE_FILES_Core})
 source_group(Core\\Util FILES ${SOURCE_FILES_Core_Util})
 
-
 file(GLOB SOURCE_FILES_Input
     "${INCLUDE_PATH}/Input/*.h"
     "Input/*.cpp"
 )
 source_group(Input FILES ${SOURCE_FILES_Input})
 
-file(GLOB SOURCE_FILES_Particles
-    "${INCLUDE_PATH}/Particles/*.h"
-    "Particles/*.cpp"
-)
-source_group(Particles FILES ${SOURCE_FILES_Particles})
-
 file(GLOB SOURCE_FILES_Rendering
     "${INCLUDE_PATH}/Rendering/*.h"
 )
 source_group(Rendering FILES ${SOURCE_FILES_Rendering})
-
-file(GLOB SOURCE_FILES_Timer
-    "${INCLUDE_PATH}/Timer/*.h"
-    "Timer/*.cpp"
-)
-source_group(Timer FILES ${SOURCE_FILES_Timer})
 
 file(GLOB SOURCE_FILES_Transform
     "${INCLUDE_PATH}/Transform/*.h"
@@ -61,25 +48,20 @@ file(GLOB SOURCE_FILES_Transform
 )
 source_group(Transform FILES ${SOURCE_FILES_Transform})
 
-file(GLOB SOURCE_FILES_Trigger
-    "${INCLUDE_PATH}/Trigger/*.h"
-    "Trigger/*.cpp"
-)
-source_group(Trigger FILES ${SOURCE_FILES_Trigger})
-
 set(SOURCE_FILES
     ${SOURCE_FILES_Core}
     ${SOURCE_FILES_Core_Util}
     ${SOURCE_FILES_Input}
-    ${SOURCE_FILES_Particles}
     ${SOURCE_FILES_Rendering}
-    ${SOURCE_FILES_Timer}
     ${SOURCE_FILES_Transform}
-    ${SOURCE_FILES_Trigger}
 )
 
-add_library(daydream ${SOURCE_FILES})
-target_link_libraries(daydream
+if(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+endif()
+
+add_library(game ${SOURCE_FILES})
+target_link_libraries(game
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${GLFW_LIBRARIES}
@@ -87,3 +69,17 @@ target_link_libraries(daydream
     ${assimp_LIBRARIES}
     ${PNG_LIBRARIES}
 )
+
+add_executable(breakout 
+	main.cpp
+)
+target_link_libraries(breakout
+	game
+    ${OPENGL_LIBRARIES}
+    ${GLEW_LIBRARIES}
+    ${GLFW_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${assimp_LIBRARIES}
+    ${PNG_LIBRARIES}
+)
+
