@@ -47,12 +47,13 @@ namespace dd
 
 	enum class FileWatcher::FileEventFlags
 	{
-		None = 0,
+		Nothing = 0,
 		Created = 1 << 0,
 		SizeChanged = 1 << 1,
 		TimestampChanged = 1 << 2,
-		Deleted = 1 << 3,
+		Deleted = 1 << 3
 	};
+
 	inline FileWatcher::FileEventFlags operator|(FileWatcher::FileEventFlags a, FileWatcher::FileEventFlags b) { return static_cast<FileWatcher::FileEventFlags>(static_cast<int>(a) | static_cast<int>(b)); }
 	inline bool operator&(FileWatcher::FileEventFlags a, FileWatcher::FileEventFlags b) { return static_cast<int>(a)& static_cast<int>(b); }
 
