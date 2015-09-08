@@ -63,10 +63,18 @@ public:
 
         // Initialize bgfx
         bgfx::glfwSetWindow(m_Window);
-        bgfx::init();
+        bgfx::init(bgfx::RendererType::OpenGL, BGFX_PCI_ID_NONE, 0, nullptr, nullptr);
         bgfx::reset(m_Resolution.Width, m_Resolution.Height, BGFX_RESET_NONE);
         bgfx::setDebug(BGFX_DEBUG_TEXT);
         bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030ff, 1.0f, 0);
+
+        std::stringstream ss;
+        ss << bgfx::getRendererName(bgfx::getRendererType());
+#ifdef DEBUG
+        ss << " DEBUG";
+#endif
+        LOG_INFO(ss.str().c_str());
+        glfwSetWindowTitle(m_Window, ss.str().c_str());
     }
 
     void Draw(RenderQueueCollection& rq)

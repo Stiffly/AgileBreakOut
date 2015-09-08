@@ -7,7 +7,6 @@ find_package(Boost REQUIRED COMPONENTS system filesystem thread chrono)
 find_package(assimp REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
-find_package(X11 REQUIRED)
 find_package(BGFX REQUIRED)
 # GLM
 
@@ -20,7 +19,6 @@ include_directories(
     ${Boost_INCLUDE_DIRS}
     ${assimp_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIRS}
-	${X11_INCLUDE_DIR}
 	${BGFX_INCLUDE_DIRS}
 )
 
@@ -72,7 +70,6 @@ target_link_libraries(game
     ${Boost_LIBRARIES}
     ${assimp_LIBRARIES}
     ${PNG_LIBRARIES}
-	${X11_LIBRARIES}
 	${BGFX_LIBRARIES}
 )
 
