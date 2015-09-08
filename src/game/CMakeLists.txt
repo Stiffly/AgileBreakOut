@@ -9,6 +9,9 @@ find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 find_package(BGFX REQUIRED)
 # GLM
+if(UNIX)
+    find_package(X11 REQUIRED)
+endif()
 
 set(INCLUDE_PATH ${CMAKE_SOURCE_DIR}/include)
 include_directories(
@@ -19,6 +22,7 @@ include_directories(
     ${Boost_INCLUDE_DIRS}
     ${assimp_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIRS}
+    ${X11_INCLUDE_DIRS}
 	${BGFX_INCLUDE_DIRS}
 )
 
@@ -62,6 +66,8 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif()
 
+add_definitions(-DBGFX_CONFIG_RENDERER_OPENGL=33)
+
 add_library(game ${SOURCE_FILES})
 target_link_libraries(game
     ${OPENGL_LIBRARIES}
@@ -70,6 +76,7 @@ target_link_libraries(game
     ${Boost_LIBRARIES}
     ${assimp_LIBRARIES}
     ${PNG_LIBRARIES}
+    ${X11_LIBRARIES}
 	${BGFX_LIBRARIES}
 )
 
