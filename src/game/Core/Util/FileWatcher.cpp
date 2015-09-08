@@ -75,7 +75,7 @@ void dd::FileWatcher::Worker::Check()
 		boost::filesystem::path path = kv.first;
 		FileEventCallback_t& callback = kv.second;
 		FileEventFlags flags = UpdateFileInfo(path);
-		if (flags != FileEventFlags::None && callback != nullptr)
+		if (flags != FileEventFlags::Nothing && callback != nullptr)
 		{
 			callback(path.string(), flags);
 		}
@@ -93,7 +93,7 @@ dd::FileWatcher::Worker::FileInfo dd::FileWatcher::Worker::GetFileInfo(boost::fi
 
 dd::FileWatcher::FileEventFlags dd::FileWatcher::Worker::UpdateFileInfo(boost::filesystem::path path)
 {
-	FileEventFlags flags = FileEventFlags::None;
+	FileEventFlags flags = FileEventFlags::Nothing;
 	if (boost::filesystem::exists(path))
 	{
 		FileInfo fi = GetFileInfo(path);

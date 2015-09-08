@@ -25,7 +25,7 @@
 #include "Texture.h"
 #include "EventBroker.h"
 #include "RenderQueue.h"
-#include "Renderer.h"
+#include "BGFXRenderer.h"
 #include "InputManager.h"
 //TODO: Remove includes that are only here for the temporary draw solution.
 #include "World.h"
@@ -42,30 +42,30 @@ class Engine
 public:
 	Engine(int argc, char* argv[])
 	{
-		m_EventBroker = std::make_shared<EventBroker>();
+//		m_EventBroker = std::make_shared<EventBroker>();
 
-		m_Renderer = std::make_shared<Renderer>();
+		m_Renderer = std::make_shared<BGFXRenderer>();
 		m_Renderer->SetFullscreen(false);
-		m_Renderer->SetResolution(Rectangle(0, 0, 1920, 1080));
+		m_Renderer->SetResolution(Rectangle(0, 0, 1280, 720));
 		m_Renderer->Initialize();
 
-		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
+//		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
+//
+//		m_World = std::make_shared<World>(m_EventBroker);
+//
+//		//TODO: Move this out of engine.h
+//		m_World->ComponentFactory.Register<Components::Transform>();
+//		m_World->SystemFactory.Register<Systems::TransformSystem>([this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
+//		m_World->AddSystem<Systems::TransformSystem>();
+//		m_World->ComponentFactory.Register<Components::Model>();
+//		m_World->ComponentFactory.Register<Components::Template>();
+//		m_World->Initialize();
 
-		m_World = std::make_shared<World>(m_EventBroker);
-
-		//TODO: Move this out of engine.h
-		m_World->ComponentFactory.Register<Components::Transform>();
-		m_World->SystemFactory.Register<Systems::TransformSystem>([this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
-		m_World->AddSystem<Systems::TransformSystem>();
-		m_World->ComponentFactory.Register<Components::Model>();
-		m_World->ComponentFactory.Register<Components::Template>();
-		m_World->Initialize();
-
-		auto ent = m_World->CreateEntity();
-		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-		transform->Position = glm::vec3(0.f, 0.f, -10.f);
-		std::shared_ptr<Components::Model> model = m_World->AddComponent<Components::Model>(ent);
-		model->ModelFile = "Models/Core/UnitSphere.obj";
+//		auto ent = m_World->CreateEntity();
+//		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+//		transform->Position = glm::vec3(0.f, 0.f, -10.f);
+//		std::shared_ptr<Components::Model> model = m_World->AddComponent<Components::Model>(ent);
+//		model->ModelFile = "Models/Core/UnitSphere.obj";
 
 
 		m_LastTime = glfwGetTime();
@@ -79,26 +79,26 @@ public:
 		double dt = currentTime - m_LastTime;
 		m_LastTime = currentTime;
 
-		ResourceManager::Update();
-
-		// Update input
-		m_InputManager->Update(dt);
-
-		m_World->Update(dt);
-
-		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
-			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
-		}
-
-		//TODO Fill up the renderQueue with models (Temp fix)
-		TEMPAddToRenderQueue();
-
-		// Render scene
-		//TODO send renderqueue to draw.
+//		ResourceManager::Update();
+//
+//		// Update input
+//		m_InputManager->Update(dt);
+//
+//		m_World->Update(dt);
+//
+//		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
+//			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
+//		}
+//
+//		//TODO Fill up the renderQueue with models (Temp fix)
+//		TEMPAddToRenderQueue();
+//
+//		// Render scene
+//		//TODO send renderqueue to draw.
 		m_Renderer->Draw(m_RendererQueue);
 
 		// Swap event queues
-		m_EventBroker->Clear();
+//		m_EventBroker->Clear();
 
 		glfwPollEvents();
 	}
@@ -170,7 +170,7 @@ public:
 private:
 	//std::shared_ptr<ResourceManager> m_ResourceManager;
 	std::shared_ptr<EventBroker> m_EventBroker;
-	std::shared_ptr<Renderer> m_Renderer;
+	std::shared_ptr<BGFXRenderer> m_Renderer;
 	RenderQueueCollection m_RendererQueue;
 	std::shared_ptr<InputManager> m_InputManager;
 	std::shared_ptr<World> m_World;
