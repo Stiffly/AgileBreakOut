@@ -30,8 +30,6 @@ namespace dd
 class Renderer
 {
 public:
-	//Render();
-
 	GLFWwindow* Window() const { return m_Window; }
 	Rectangle Resolution() const { return m_Resolution; }
 	void SetResolution(const Rectangle& resolution) { m_Resolution = resolution; }

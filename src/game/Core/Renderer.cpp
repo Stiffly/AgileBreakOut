@@ -256,6 +256,7 @@ void dd::Renderer::DrawDeferred(RenderQueue &objects, RenderQueue &lights)
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred2);
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
+
 	m_spDeferred2->Bind();
 	DrawLightSpheres(lights);
 
@@ -265,6 +266,7 @@ void dd::Renderer::DrawDeferred(RenderQueue &objects, RenderQueue &lights)
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred3);
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
+
 	m_spDeferred3->Bind();
 	glUniform3fv(glGetUniformLocation(*m_spDeferred3, "La"), 1, glm::value_ptr(glm::vec3(0.3f)));
 	glActiveTexture(GL_TEXTURE0);

@@ -7,6 +7,7 @@
 #include "Util/Rectangle.h"
 #include "Core/Camera.h"
 #include "Core/RenderQueue.h"
+#include "Core/ShaderProgram.h"
 
 namespace dd
 {
@@ -33,59 +34,8 @@ public:
         }
     }
 
-    void Initialize()
-    {
-        // Initialize GLFW
-        if (!glfwInit()) {
-            LOG_ERROR("GLFW: Initialization failed");
-            exit(EXIT_FAILURE);
-        }
-
-        // Create a window
-        GLFWmonitor* monitor = nullptr;
-        if (m_Fullscreen) {
-            monitor = glfwGetPrimaryMonitor();
-        }
-        glfwWindowHint(GLFW_SAMPLES, 8);
-        m_Window = glfwCreateWindow(m_Resolution.Width, m_Resolution.Height, "daydream", monitor, nullptr);
-        if (!m_Window) {
-            LOG_ERROR("GLFW: Failed to create window");
-            exit(EXIT_FAILURE);
-        }
-        //glfwMakeContextCurrent(m_Window);
-
-        // Initialize GLEW
-//        if (glewInit() != GLEW_OK) {
-//            LOG_ERROR("GLEW: Initialization failed");
-//            exit(EXIT_FAILURE);
-//        }
-        //LOG_ERROR("STUFF");
-
-        // Initialize bgfx
-        bgfx::glfwSetWindow(m_Window);
-        bgfx::init(bgfx::RendererType::OpenGL, BGFX_PCI_ID_NONE, 0, nullptr, nullptr);
-        bgfx::reset(m_Resolution.Width, m_Resolution.Height, BGFX_RESET_NONE);
-        bgfx::setDebug(BGFX_DEBUG_TEXT);
-        bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030ff, 1.0f, 0);
-
-        std::stringstream ss;
-        ss << bgfx::getRendererName(bgfx::getRendererType());
-#ifdef DEBUG
-        ss << " DEBUG";
-#endif
-        LOG_INFO(ss.str().c_str());
-        glfwSetWindowTitle(m_Window, ss.str().c_str());
-    }
-
-    void Draw(RenderQueueCollection& rq)
-    {
-        bgfx::touch(0);
-
-        bgfx::dbgTextClear();
-        bgfx::dbgTextPrintf(0, 1, 0x4f, "daydream");
-
-        bgfx::frame();
-    }
+    void Initialize();
+    void Draw(RenderQueueCollection& rq);
 
 private:
     Rectangle m_Resolution = Rectangle(1280, 720);
@@ -95,6 +45,21 @@ private:
     const dd::Camera* m_Camera = nullptr;
 
     GLFWwindow* m_Window = nullptr;
+
+    void DrawForward();
+    void DrawDeferred(RenderQueue &objects, RenderQueue &lights);
+    void DrawScene(RenderQueue &objects, ShaderProgram &program);
+    void DrawLightScene(RenderQueue &objects, ShaderProgram &program);
+    void LoadShaders();
+    void CreateBuffers();
+    void debugKeys();
+
+    ShaderProgram* m_spDeferred1;
+    ShaderProgram* m_spDeferred2;
+    ShaderProgram* m_spDeferred3;
+    ShaderProgram* m_spForward;
+    ShaderProgram* m_spScreen;
+    //TODO: Shaders, CreateBuffers, Draw forward, drawdeferred, drawscene, drawlights.
 };
 
 }
