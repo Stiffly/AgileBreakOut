@@ -36,6 +36,7 @@
 #include "EventBroker.h"
 #include "EComponentCreated.h"
 #include "ResourceManager.h"
+#include "Sound.h"
 
 namespace dd
 {
@@ -248,7 +249,6 @@ protected:
 	EntityID GenerateEntityID();
 
 	void RecycleEntityID(EntityID id);
-
 };
 
 template <class T>

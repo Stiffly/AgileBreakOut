@@ -19,6 +19,8 @@
 #include "PrecompiledHeader.h"
 #include "Core/World.h"
 
+//TODO Delete this please
+
 void dd::World::RecycleEntityID(EntityID id)
 {
 	m_RecycledEntityIDs.push(id);

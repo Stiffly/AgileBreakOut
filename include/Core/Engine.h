@@ -33,6 +33,7 @@
 #include "Rendering/CModel.h"
 #include "CTemplate.h"
 #include "Transform/TransformSystem.h"
+#include "Core/Sound.h"
 
 namespace dd
 {
@@ -42,24 +43,26 @@ class Engine
 public:
 	Engine(int argc, char* argv[])
 	{
-//		m_EventBroker = std::make_shared<EventBroker>();
+		m_EventBroker = std::make_shared<EventBroker>();
 
 		m_Renderer = std::make_shared<BGFXRenderer>();
 		m_Renderer->SetFullscreen(false);
 		m_Renderer->SetResolution(Rectangle(0, 0, 1280, 720));
 		m_Renderer->Initialize();
 
-//		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
+		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
 //
-//		m_World = std::make_shared<World>(m_EventBroker);
+		m_World = std::make_shared<World>(m_EventBroker);
 //
-//		//TODO: Move this out of engine.h
-//		m_World->ComponentFactory.Register<Components::Transform>();
-//		m_World->SystemFactory.Register<Systems::TransformSystem>([this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
-//		m_World->AddSystem<Systems::TransformSystem>();
-//		m_World->ComponentFactory.Register<Components::Model>();
-//		m_World->ComponentFactory.Register<Components::Template>();
-//		m_World->Initialize();
+		//TODO: Move this out of engine.h
+		m_World->ComponentFactory.Register<Components::Transform>();
+		m_World->SystemFactory.Register<Systems::TransformSystem>([this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
+		m_World->SystemFactory.Register<Systems::Sound>([this]() {return new Systems::Sound(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::TransformSystem>();
+        m_World->AddSystem<Systems::Sound>();
+		m_World->ComponentFactory.Register<Components::Model>();
+		m_World->ComponentFactory.Register<Components::Template>();
+		m_World->Initialize();
 
 //		auto ent = m_World->CreateEntity();
 //		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
@@ -82,9 +85,9 @@ public:
 //		ResourceManager::Update();
 //
 //		// Update input
-//		m_InputManager->Update(dt);
+		m_InputManager->Update(dt);
 //
-//		m_World->Update(dt);
+		m_World->Update(dt);
 //
 //		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
 //			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
@@ -98,7 +101,7 @@ public:
 		m_Renderer->Draw(m_RendererQueue);
 
 		// Swap event queues
-//		m_EventBroker->Clear();
+		m_EventBroker->Clear();
 
 		glfwPollEvents();
 	}
@@ -174,6 +177,9 @@ private:
 	RenderQueueCollection m_RendererQueue;
 	std::shared_ptr<InputManager> m_InputManager;
 	std::shared_ptr<World> m_World;
+
+    //TODO: Delete this please
+    std::shared_ptr<dd::Systems::Sound> m_Sound;
 
 	double m_LastTime;
 };
