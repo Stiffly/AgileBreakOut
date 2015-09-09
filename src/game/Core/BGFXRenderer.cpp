@@ -47,8 +47,8 @@ void dd::BGFXRenderer::Draw(RenderQueueCollection& rq) {
     //TODO: Fix this shit.
 
     //Draw the different passes.
-    DrawDeferred(rq.Deferred, rq.Lights);
-    //DrawForward(); //For alpha things
+    //DrawDeferred(rq.Deferred, rq.Lights);
+    DrawForward(rq.Forward);
 
     //Settings for the last combination of images.
     //Clear
@@ -88,8 +88,44 @@ void dd::BGFXRenderer::DrawDeferred(RenderQueue &objects, RenderQueue &lights) {
     //Bind light and gbuffer textures to uniforms so the shader can use them.
 }
 
+void dd::BGFXRenderer::DrawForward(RenderQueue &objects){
+    //set view 0 clear state.
+    bgfx::setViewClear(0, BGFX_CLEAR_COLOR|BGFX_CLEAR_DEPTH, 0x303030ff, 1.0f, 0);
+
+    //loadshaders
+    DrawScene(objects, *m_spForward); //Need to load/set this shader program
+}
+
 void dd::BGFXRenderer::DrawScene(RenderQueue &objects, ShaderProgram &program) {
-    //Init shaderprogram
+
+    GLuint shaderProgramHandle = program;
+
+    glm::mat4 viewMatrix = m_Camera->ViewMatrix();
+    glm::mat4 PV = m_Camera->ProjectionMatrix() * viewMatrix;
+    glm::mat4 MVP;
+
+    s_diffTexture = bgfx::createUniform("s_diffTexture", bgfx::UniformType::Int1);
+    m_spForward =
+
+    for (auto &job : objects) {
+        auto spriteJob = std::dynamic_pointer_cast<SpriteJob>(job);
+        if(spriteJob) {
+            glm::mat4 modelMatrix = spriteJob->ModelMatrix;
+            MVP = PV * modelMatrix;
+
+            //Bind uniforms
+
+
+            bgfx::setVertexBuffer(m_vbh);
+            bgfx::setIndexBuffer(m_ibh);
+
+            bgfx::setTexture(0, s_diffTexture, spriteJob->Texture);
+            //BindVertexArray
+            //DrawArrays
+
+            bgfx::submit(0, program);
+        }
+    }
 
     //Fix the camera matrises
 
@@ -105,6 +141,7 @@ void dd::BGFXRenderer::DrawLightScene(RenderQueue &objects, ShaderProgram &progr
 
     //Loop through the jobs and draw them with the right uniforms and shit.
 }
+
 void dd::BGFXRenderer::debugKeys() {
 
     //TODO: Insert keys to debug rendering.

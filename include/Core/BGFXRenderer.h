@@ -46,7 +46,7 @@ private:
 
     GLFWwindow* m_Window = nullptr;
 
-    void DrawForward();
+    void DrawForward(RenderQueue &objects);
     void DrawDeferred(RenderQueue &objects, RenderQueue &lights);
     void DrawScene(RenderQueue &objects, ShaderProgram &program);
     void DrawLightScene(RenderQueue &objects, ShaderProgram &program);
@@ -59,6 +59,12 @@ private:
     ShaderProgram* m_spDeferred3;
     ShaderProgram* m_spForward;
     ShaderProgram* m_spScreen;
+
+    bgfx::UniformHandle s_diffTexture;
+    bgfx::VertexBufferHandle m_vbh;
+    bgfx::IndexBufferHandle  m_ibh;
+    bgfx::ProgramHandle m_spForward;
+
     //TODO: Shaders, CreateBuffers, Draw forward, drawdeferred, drawscene, drawlights.
 };
 
