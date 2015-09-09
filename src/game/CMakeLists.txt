@@ -8,6 +8,7 @@ find_package(assimp REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 find_package(BGFX REQUIRED)
+find_package(liquidfun REQUIRED)
 # GLM
 if(UNIX)
     find_package(X11 REQUIRED)
@@ -23,7 +24,8 @@ include_directories(
     ${assimp_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIRS}
     ${X11_INCLUDE_DIRS}
-	${BGFX_INCLUDE_DIRS}
+    ${BGFX_INCLUDE_DIRS}
+	${liquidfun_INCLUDE_DIRS}
 )
 
 file(GLOB SOURCE_FILES_Core
@@ -77,7 +79,8 @@ target_link_libraries(game
     ${assimp_LIBRARIES}
     ${PNG_LIBRARIES}
     ${X11_LIBRARIES}
-	${BGFX_LIBRARIES}
+    ${BGFX_LIBRARIES}
+	${liquidfun_LIBRARIES}
 )
 
 add_executable(breakout 
@@ -93,5 +96,6 @@ target_link_libraries(breakout
     ${PNG_LIBRARIES}
 	${X11_LIBRARIES}
 	${BGFX_LIBRARIES}
+    ${liquidfun_LIBRARIES}
 )
 
