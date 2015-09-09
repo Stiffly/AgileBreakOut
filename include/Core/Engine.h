@@ -33,6 +33,7 @@
 #include "Rendering/CModel.h"
 #include "CTemplate.h"
 #include "Transform/TransformSystem.h"
+#include "Game/LevelSystem.h"
 
 namespace dd
 {
@@ -42,24 +43,26 @@ class Engine
 public:
 	Engine(int argc, char* argv[])
 	{
-//		m_EventBroker = std::make_shared<EventBroker>();
+		m_EventBroker = std::make_shared<EventBroker>();
 
 		m_Renderer = std::make_shared<BGFXRenderer>();
 		m_Renderer->SetFullscreen(false);
 		m_Renderer->SetResolution(Rectangle(0, 0, 1280, 720));
 		m_Renderer->Initialize();
 
-//		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
-//
-//		m_World = std::make_shared<World>(m_EventBroker);
-//
-//		//TODO: Move this out of engine.h
-//		m_World->ComponentFactory.Register<Components::Transform>();
-//		m_World->SystemFactory.Register<Systems::TransformSystem>([this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
-//		m_World->AddSystem<Systems::TransformSystem>();
-//		m_World->ComponentFactory.Register<Components::Model>();
-//		m_World->ComponentFactory.Register<Components::Template>();
-//		m_World->Initialize();
+		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
+
+		m_World = std::make_shared<World>(m_EventBroker);
+
+		//TODO: Move this out of engine.h
+		m_World->ComponentFactory.Register<Components::Transform>();
+		m_World->SystemFactory.Register<Systems::TransformSystem>([this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::TransformSystem>();
+		m_World->SystemFactory.Register<Systems::LevelSystem>([this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::LevelSystem>();
+		m_World->ComponentFactory.Register<Components::Model>();
+		m_World->ComponentFactory.Register<Components::Template>();
+		m_World->Initialize();
 
 //		auto ent = m_World->CreateEntity();
 //		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
@@ -79,31 +82,32 @@ public:
 		double dt = currentTime - m_LastTime;
 		m_LastTime = currentTime;
 
-//		ResourceManager::Update();
-//
-//		// Update input
-//		m_InputManager->Update(dt);
-//
-//		m_World->Update(dt);
+		ResourceManager::Update();
+
+		// Update input
+		m_InputManager->Update(dt);
+
+		m_World->Update(dt);
 //
 //		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
 //			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
 //		}
 //
-//		//TODO Fill up the renderQueue with models (Temp fix)
+		//TODO Fill up the renderQueue with models (Temp fix)
 //		TEMPAddToRenderQueue();
-//
-//		// Render scene
-//		//TODO send renderqueue to draw.
-		m_Renderer->Draw(m_RendererQueue);
+
+		// Render scene
+		//TODO send renderqueue to draw.
+//		m_Renderer->Draw(m_RendererQueue);
 
 		// Swap event queues
-//		m_EventBroker->Clear();
+		m_EventBroker->Clear();
 
 		glfwPollEvents();
 	}
 
 	std::shared_ptr<Systems::TransformSystem> m_TransformSystem;
+	std::shared_ptr<Systems::LevelSystem> m_LevelSystem;
 
 	//TODO: Get this out of engine.h
 	void TEMPAddToRenderQueue()
