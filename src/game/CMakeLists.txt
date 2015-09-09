@@ -56,12 +56,19 @@ file(GLOB SOURCE_FILES_Transform
 )
 source_group(Transform FILES ${SOURCE_FILES_Transform})
 
+file(GLOB SOURCE_FILES_Game
+    "${INCLUDE_PATH}/Game/*.h"
+    "Game/*.cpp"
+)
+source_group(Game FILES ${SOURCE_FILES_Game})
+
 set(SOURCE_FILES
     ${SOURCE_FILES_Core}
     ${SOURCE_FILES_Core_Util}
     ${SOURCE_FILES_Input}
     ${SOURCE_FILES_Rendering}
     ${SOURCE_FILES_Transform}
+    ${SOURCE_FILES_Game}
 )
 
 if(CMAKE_COMPILER_IS_GNUCXX)
