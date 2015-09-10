@@ -31,6 +31,7 @@
 #include "World.h"
 #include "CTransform.h"
 #include "Rendering/CModel.h"
+#include "Rendering/CSprite.h"
 #include "CTemplate.h"
 #include "Transform/TransformSystem.h"
 #include "Game/LevelSystem.h"
@@ -61,20 +62,17 @@ public:
 		m_World->SystemFactory.Register<Systems::LevelSystem>([this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LevelSystem>();
 		m_World->ComponentFactory.Register<Components::Model>();
+		m_World->ComponentFactory.Register<Components::Sprite>();
 		m_World->ComponentFactory.Register<Components::Template>();
 		m_World->Initialize();
 
-//		auto ent = m_World->CreateEntity();
-//		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-//		transform->Position = glm::vec3(0.f, 0.f, -10.f);
-//		std::shared_ptr<Components::Model> model = m_World->AddComponent<Components::Model>(ent);
-//		model->ModelFile = "Models/Core/UnitSphere.obj";
-		auto ent = m_World->CreateEntity();
-		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-		transform->Position = glm::vec3(0.f, 0.f, -10.f);
-		std::shared_ptr<Components::Model> model = m_World->AddComponent<Components::Model>(ent);
-		model->ModelFile = "Models/Core/UnitSphere.obj";
-
+//		{
+//			auto ent = m_World->CreateEntity();
+//			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+//			transform->Position = glm::vec3(0.f, 0.f, -10.f);
+//			auto sprite = m_World->AddComponent<Components::Sprite>(ent);
+//			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+//		}
 
 		m_LastTime = glfwGetTime();
 	}
@@ -163,6 +161,21 @@ public:
 					EnqueueModel(modelAsset, modelMatrix, modelComponent->Transparent, modelComponent->Color);
 				}
 			}
+
+			auto spriteComponent = m_World->GetComponent<Components::Sprite>(entity);
+			if (spriteComponent)
+			{
+				auto textureAsset = ResourceManager::Load<Texture>(spriteComponent->SpriteFile);
+				if (textureAsset)
+				{
+					Components::Transform absoluteTransform = m_TransformSystem->AbsoluteTransform(entity);
+					glm::quat orientation2D = glm::angleAxis(glm::eulerAngles(absoluteTransform.Orientation).z, glm::vec3(0, 0, -1));
+					glm::mat4 modelMatrix = glm::translate(absoluteTransform.Position)
+						* glm::toMat4(orientation2D)
+						* glm::scale(absoluteTransform.Scale);
+					EnqueueSprite(textureAsset, modelMatrix, spriteComponent->Color);
+				}
+			}
 		}
 
 		m_RendererQueue.Sort();
@@ -187,6 +200,18 @@ public:
 
 			m_RendererQueue.Deferred.Add(job);
 		}
+	}
+
+	// TODO: Get this out of engine.h
+	void EnqueueSprite(Texture* texture, glm::mat4 modelMatrix, glm::vec4 color)
+	{
+		SpriteJob job;
+		job.TextureID = texture->ResourceID;
+		job.Texture = *texture;
+		job.ModelMatrix = modelMatrix;
+		job.Color = color;
+
+		m_RendererQueue.Forward.Add(job);
 	}
 
 private:
