@@ -7,7 +7,7 @@
 
 #include "Core/System.h"
 #include "Core/CTransform.h"
-//#include "Rendering/CSprite.h"
+#include "Rendering/CSprite.h"
 #include "Core/EventBroker.h"
 #include "Game/CBrick.h"
 #include "Core/World.h"
@@ -56,8 +56,8 @@ private:
     int numberOfBricks;
     int tRows = 8;
     int tLines = 8;
-    int tSpaceBetweenBricks = 30;
-    int tSpaceToEdge = 30;
+    int tSpaceBetweenBricks = 2;
+    int tSpaceToEdge = 0;
 };
 
 }

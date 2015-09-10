@@ -39,7 +39,7 @@ public:
 	TransformSystem(World* world, std::shared_ptr<dd::EventBroker> eventBroker)
 		: System(world, eventBroker)
 	{ }
-	//void Update(double dt) override;
+	void Update(double dt) override;
 
 	Components::Transform AbsoluteTransform(EntityID entity);
 	glm::vec3 AbsolutePosition(EntityID entity);

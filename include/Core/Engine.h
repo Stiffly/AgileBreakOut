@@ -35,6 +35,7 @@
 #include "CTemplate.h"
 #include "Transform/TransformSystem.h"
 #include "Game/LevelSystem.h"
+#include "Game/PadSystem.h"
 
 namespace dd
 {
@@ -61,6 +62,8 @@ public:
 		m_World->AddSystem<Systems::TransformSystem>();
 		m_World->SystemFactory.Register<Systems::LevelSystem>([this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LevelSystem>();
+		m_World->SystemFactory.Register<Systems::PadSystem>([this]() { return new Systems::PadSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::PadSystem>();
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Sprite>();
 		m_World->ComponentFactory.Register<Components::Template>();

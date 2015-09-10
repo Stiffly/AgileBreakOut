@@ -34,10 +34,11 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, int spacesBetweenB
 {
     auto brick = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(brick);
-    //std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(brick);
+    std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(brick);
+    sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
     float x = spaceToEdge + line * spacesBetweenBricks;
-    float y = spaceToEdge + line * spacesBetweenBricks;
-    transform->Position = glm::vec3(x, y, 0.f);
+    float y = spaceToEdge + row * spacesBetweenBricks;
+    transform->Position = glm::vec3(x-5, y-5, -10.f);
     //sprite->Color = glm::vec4(1.f, 1.f, 1.f, 1.f);
     return;
 }
