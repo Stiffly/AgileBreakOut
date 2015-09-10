@@ -327,7 +327,8 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 		auto spriteJob = std::dynamic_pointer_cast<SpriteJob>(job);
 		if (spriteJob)
 		{
-			glm::mat4 modelMatrix = glm::scale(glm::vec3(0.5f)) * spriteJob->ModelMatrix;
+			glm::mat4 modelMatrix = spriteJob->ModelMatrix;
+			modelMatrix = modelMatrix * glm::scale(glm::vec3(0.5f));
 			MVP = PV * modelMatrix;
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "M"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
