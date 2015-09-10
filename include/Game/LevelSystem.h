@@ -9,6 +9,9 @@
 #include "Core/CTransform.h"
 //#include "Rendering/CSprite.h"
 #include "Core/EventBroker.h"
+#include "Game/CBrick.h"
+#include "Core/World.h"
+#include "Game/EStageCleared.h"
 #include <fstream>
 #include <iostream>
 #include <intrin.h>
@@ -48,8 +51,6 @@ public:
     void OnEntityRemoved(EntityID entity);
 
     void EndLevel();
-
-
 
 private:
     int numberOfBricks;

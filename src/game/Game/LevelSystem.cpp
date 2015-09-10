@@ -4,14 +4,15 @@
 
 
 #include "PrecompiledHeader.h"
-#include "Game/CBrick.h"
 #include "Game/LevelSystem.h"
-#include "Core/World.h"
-#include "Game/EStageCleared.h"
+
 
 void dd::Systems::LevelSystem::Initialize()
 {
     CreateBasicLevel(tRows, tLines, tSpaceBetweenBricks, tSpaceToEdge);
+
+
+
     return;
 }
 
@@ -67,3 +68,4 @@ void dd::Systems::LevelSystem::EndLevel()
     EventBroker->Publish(e);
     return;
 }
+

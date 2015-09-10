@@ -67,7 +67,7 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Rendering}
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Game}
-        ../../include/Game/CBrick.h ../../include/Game/EStageCleared.h)
+        ../../include/Game/CBrick.h ../../include/Game/EStageCleared.h ../../include/Game/CPad.h Game/PadSystem.cpp ../../include/Game/PadSystem.h)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")

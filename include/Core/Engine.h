@@ -58,28 +58,22 @@ public:
 		m_World->ComponentFactory.Register<Components::Transform>();
 		m_World->SystemFactory.Register<Systems::TransformSystem>([this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::TransformSystem>();
-<<<<<<< HEAD
 		m_World->SystemFactory.Register<Systems::LevelSystem>([this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LevelSystem>();
-=======
->>>>>>> origin/master
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
 		m_World->Initialize();
 
-<<<<<<< HEAD
 //		auto ent = m_World->CreateEntity();
 //		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
 //		transform->Position = glm::vec3(0.f, 0.f, -10.f);
 //		std::shared_ptr<Components::Model> model = m_World->AddComponent<Components::Model>(ent);
 //		model->ModelFile = "Models/Core/UnitSphere.obj";
-=======
 		auto ent = m_World->CreateEntity();
 		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
 		transform->Position = glm::vec3(0.f, 0.f, -10.f);
 		std::shared_ptr<Components::Model> model = m_World->AddComponent<Components::Model>(ent);
 		model->ModelFile = "Models/Core/UnitSphere.obj";
->>>>>>> origin/master
 
 
 		m_LastTime = glfwGetTime();
@@ -99,7 +93,8 @@ public:
 		m_InputManager->Update(dt);
 
 		m_World->Update(dt);
-<<<<<<< HEAD
+
+
 //
 //		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
 //			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
@@ -111,7 +106,6 @@ public:
 		// Render scene
 		//TODO send renderqueue to draw.
 //		m_Renderer->Draw(m_RendererQueue);
-=======
 
 		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
 			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
@@ -123,7 +117,6 @@ public:
 		// Render scene
 		//TODO send renderqueue to draw.
 		m_Renderer->Draw(m_RendererQueue);
->>>>>>> origin/master
 
 		// Swap event queues
 		m_EventBroker->Clear();
