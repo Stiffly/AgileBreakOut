@@ -306,6 +306,7 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 
 			glUniform1f(glGetUniformLocation(shaderProgramHandle, "MaterialShininess"), modelJob->Shininess);
 
+			//TODO: Make sure that a normal/specular is loaded in.
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, modelJob->DiffuseTexture);
 			if (modelJob->NormalTexture != 0) {
@@ -335,7 +336,11 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "V"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, spriteJob->Texture);
+			glBindTexture(GL_TEXTURE_2D, spriteJob->DiffuseTexture);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, spriteJob->NormalTexture);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, spriteJob->SpecularTexture);
 
 			glBindVertexArray(m_ScreenQuad);
 			glDrawArrays(GL_TRIANGLES, 0, 6);

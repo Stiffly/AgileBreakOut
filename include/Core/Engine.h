@@ -33,6 +33,7 @@
 #include "Rendering/CModel.h"
 #include "Rendering/CSprite.h"
 #include "CTemplate.h"
+#include "Rendering/CPointLight.h"
 #include "Transform/TransformSystem.h"
 
 namespace dd
@@ -61,7 +62,29 @@ public:
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Sprite>();
 		m_World->ComponentFactory.Register<Components::Template>();
+		m_World->ComponentFactory.Register<Components::PointLight>();
 		m_World->Initialize();
+
+
+		//TODO: Remove tobias light-test code.
+		{
+			auto t_BrickWall = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_BrickWall);
+			transform->Position = glm::vec3(-2.f, 0.f, -10.f);
+			auto sprite = m_World->AddComponent<Components::Sprite>(t_BrickWall);
+			//TODO: Rename SpriteFile to DiffuseTexture or similar.
+			sprite->SpriteFile = "Textures/Test/Brick_Diffuse.png";
+			sprite->NormalTexture = "Textures/Test/Brick_Normal.png";
+			sprite->SpecularTexture = "Textures/Test/Brick_Specular.png";
+		}
+
+		{
+			auto t_Light = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_Light);
+			transform->Position = glm::vec3(-1.f, 0.f, -9.f);
+			auto plight = m_World->AddComponent<Components::PointLight>(t_Light);
+			plight->Radius = 10.f;
+		}
 
 		{
 			auto ent = m_World->CreateEntity();
@@ -145,19 +168,21 @@ public:
 				}
 			}
 
+			//TODO: Add LightLoadShit
+
 			auto spriteComponent = m_World->GetComponent<Components::Sprite>(entity);
 			if (spriteComponent)
 			{
-				auto textureAsset = ResourceManager::Load<Texture>(spriteComponent->SpriteFile);
-				if (textureAsset)
-				{
-					Components::Transform absoluteTransform = m_TransformSystem->AbsoluteTransform(entity);
-					glm::quat orientation2D = glm::angleAxis(glm::eulerAngles(absoluteTransform.Orientation).z, glm::vec3(0, 0, -1));
-					glm::mat4 modelMatrix = glm::translate(absoluteTransform.Position)
-						* glm::toMat4(orientation2D)
-						* glm::scale(absoluteTransform.Scale);
-					EnqueueSprite(textureAsset, modelMatrix, spriteComponent->Color);
-				}
+				auto texturediff = ResourceManager::Load<Texture>(spriteComponent->SpriteFile);
+				auto texturenorm = ResourceManager::Load<Texture>(spriteComponent->NormalTexture);
+				auto texturespec = ResourceManager::Load<Texture>(spriteComponent->SpecularTexture);
+
+				Components::Transform absoluteTransform = m_TransformSystem->AbsoluteTransform(entity);
+				glm::quat orientation2D = glm::angleAxis(glm::eulerAngles(absoluteTransform.Orientation).z, glm::vec3(0, 0, -1));
+				glm::mat4 modelMatrix = glm::translate(absoluteTransform.Position)
+					* glm::toMat4(orientation2D)
+					* glm::scale(absoluteTransform.Scale);
+				EnqueueSprite(texturediff, texturenorm, texturespec, modelMatrix, spriteComponent->Color);
 			}
 		}
 
@@ -186,15 +211,24 @@ public:
 	}
 
 	// TODO: Get this out of engine.h
-	void EnqueueSprite(Texture* texture, glm::mat4 modelMatrix, glm::vec4 color)
+	void EnqueueSprite(Texture* texture, Texture* normalTexture, Texture* specularTexture, glm::mat4 modelMatrix, glm::vec4 color)
 	{
 		SpriteJob job;
 		job.TextureID = texture->ResourceID;
-		job.Texture = *texture;
+		job.DiffuseTexture = *texture;
+		job.NormalTexture = *normalTexture;
+		job.SpecularTexture = *specularTexture;
 		job.ModelMatrix = modelMatrix;
 		job.Color = color;
 
 		m_RendererQueue.Forward.Add(job);
+	}
+
+	void EnQueuePointLight(glm::vec3* position)
+	{
+		PointLightJob job;
+		job.Position = *position;
+
 	}
 
 private:
