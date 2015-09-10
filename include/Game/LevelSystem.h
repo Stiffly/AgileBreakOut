@@ -9,12 +9,26 @@
 #include "Core/CTransform.h"
 //#include "Rendering/CSprite.h"
 #include "Core/EventBroker.h"
+#include <fstream>
+#include <iostream>
+#include <intrin.h>
 
 namespace dd
 {
 
 namespace Systems
 {
+
+    // Me trying things out.
+class Level
+{
+public:
+    int levelRows;
+    int levelLines;
+    int levelSpaceBetweenBricks;
+    int levelSpaceToEdge;
+    int bricks[];
+};
 
 class LevelSystem : public System
 {
@@ -26,6 +40,8 @@ public:
     void Initialize() override;
 
     void CreateBasicLevel(int, int, int, int);
+    void SaveLevel(int, int, int, int); // Shouldn't be here, but I'm experimenting.
+    void LoadLevel(char[20]);
     void CreateBrick(int, int, int, int);
     void ProcessCollision();
 
@@ -37,7 +53,6 @@ public:
 
 private:
     int numberOfBricks;
-    EntityID bricks[];
     int tRows = 8;
     int tLines = 8;
     int tSpaceBetweenBricks = 30;
