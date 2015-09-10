@@ -84,6 +84,6 @@ void main()
 
 	vec4 diffuseTexel = texture(DiffuseTexture, Input.TextureCoord);
 
-	//FragmentColor = phong(Input.Position, normalize(normal), specularTexel.rgb, specularTexel.a);
-	FragmentColor = diffuseTexel;
+	FragmentColor = phong(Input.Position, normalize(normal), specularTexel.rgb, specularTexel.a);
+	//FragmentColor = diffuseTexel;
 }

@@ -85,7 +85,7 @@ public:
 		{
 			auto t_BrickWall = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_BrickWall);
-			transform->Position = glm::vec3(-2.f, 0.f, -10.f);
+			transform->Position = glm::vec3(0.f, 0.f, -10.f);
 			auto sprite = m_World->AddComponent<Components::Sprite>(t_BrickWall);
 			//TODO: Rename SpriteFile to DiffuseTexture or similar.
 			sprite->SpriteFile = "Textures/Test/Brick_Diffuse.png";
@@ -93,18 +93,10 @@ public:
 			sprite->SpecularTexture = "Textures/Test/Brick_Specular.png";
 		}
 
-		{
-			auto t_Light = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(t_Light);
-			transform->Position = glm::vec3(-1.f, 0.f, -9.f);
-			auto plight = m_World->AddComponent<Components::PointLight>(t_Light);
-			plight->Radius = 10.f;
-		}
-
         {
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.f, 0.f, -10.f);
+            transform->Position = glm::vec3(0.f, 0.f, -9.5f);
 
             std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
             sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
@@ -114,6 +106,9 @@ public:
             std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
             physics->Static = false;
 
+			auto plight = m_World->AddComponent<Components::PointLight>(ent);
+			plight->Radius = 2.f;
+
             m_World->CommitEntity(ent);
         }
 
@@ -121,7 +116,7 @@ public:
         {
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.f, -3.f, -9.f);
+            transform->Position = glm::vec3(0.f, -3.f, -10.f);
             transform->Scale = glm::vec3(2.f, 0.5f, 1.f);
             //transform->Orientation = glm::rotate(transform->Orientation, glm::radians(45.f), glm::vec3(0, 0, -1));
 
@@ -212,12 +207,34 @@ public:
 
 			//TODO: Add LightLoadShit
 
+			auto pointLightComponent = m_World->GetComponent<Components::PointLight>(entity);
+			if (pointLightComponent)
+			{
+				Components::Transform absoluteTransform = m_TransformSystem->AbsoluteTransform(entity);
+				EnqueuePointLight(absoluteTransform.Position,
+								  pointLightComponent->Diffuse,
+								  pointLightComponent->Specular,
+								  pointLightComponent->Radius);
+			}
+
+
 			auto spriteComponent = m_World->GetComponent<Components::Sprite>(entity);
 			if (spriteComponent)
 			{
+
+				std::string normal = spriteComponent->NormalTexture;
+				std::string spec = spriteComponent->SpecularTexture;
+
+				if (normal.empty()) {
+					normal = "Textures/Core/NeutralNormalMap.png";
+				}
+				if (spec.empty()) {
+					spec = "Textures/Core/NeutralSpecularMap.png";
+				}
 				auto texturediff = ResourceManager::Load<Texture>(spriteComponent->SpriteFile);
-				auto texturenorm = ResourceManager::Load<Texture>(spriteComponent->NormalTexture);
-				auto texturespec = ResourceManager::Load<Texture>(spriteComponent->SpecularTexture);
+				auto texturenorm = ResourceManager::Load<Texture>(normal);
+				auto texturespec = ResourceManager::Load<Texture>(spec);
+
 
 				Components::Transform absoluteTransform = m_TransformSystem->AbsoluteTransform(entity);
 				glm::quat orientation2D = glm::angleAxis(glm::eulerAngles(absoluteTransform.Orientation).z, glm::vec3(0, 0, -1));
@@ -263,13 +280,18 @@ public:
 		job.ModelMatrix = modelMatrix;
 		job.Color = color;
 
-		m_RendererQueue.Forward.Add(job);
+		m_RendererQueue.Deferred.Add(job);
 	}
 
-	void EnQueuePointLight(glm::vec3* position)
+	void EnqueuePointLight(glm::vec3 position, glm::vec3 diffuseColor, glm::vec3 specularColor, float radius)
 	{
 		PointLightJob job;
-		job.Position = *position;
+		job.Position = position;
+		job.DiffuseColor = diffuseColor;
+		job.SpecularColor = specularColor;
+		job.Radius = radius;
+
+		m_RendererQueue.Lights.Add(job);
 
 	}
 
