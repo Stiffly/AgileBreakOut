@@ -21,6 +21,25 @@ void dd::Systems::PhysicsSystem::Initialize()
 
 
     m_PhysicsWorld->SetContactListener(m_ContactListener);
+
+    EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, PhysicsSystem::SetImpulse);
+}
+
+bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
+{
+    b2Body* body = m_EntitiesToBodies[event.Entity];
+
+    b2Vec2 impulse;
+    impulse.x = event.Impulse.x;
+    impulse.y = event.Impulse.y;
+
+    b2Vec2 point;
+    point.x = event.Point.x;
+    point.y = event.Point.y;
+
+    body->ApplyLinearImpulse(impulse, point, true);
+
+    return true;
 }
 
 void dd::Systems::PhysicsSystem::Update(double dt)

@@ -11,7 +11,9 @@
 #include "Core/CTransform.h"
 #include "Transform/TransformSystem.h"
 #include "Physics/EContact.h"
+#include "Physics/ESetImpulse.h"
 #include "Physics/CCircleShape.h"
+#include "Core/EventBroker.h"
 
 
 namespace dd
@@ -31,6 +33,9 @@ public:
     : System(world, eventBroker) {}
 
     ~PhysicsSystem();
+
+    EventRelay<PhysicsSystem, Events::SetImpulse> m_SetImpulse;
+    bool SetImpulse(const Events::SetImpulse &event);
 
     void RegisterComponents(ComponentFactory* cf) override;
     void Initialize() override;

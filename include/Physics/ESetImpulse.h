@@ -9,11 +9,11 @@ namespace dd
 namespace Events
 {
 
-struct Contact : Event
+struct SetImpulse : Event
 {
     EntityID Entity;
-    glm::vec2 Direction;
-    float Strength;
+    glm::vec2 Impulse;
+    glm::vec2 Point;
 };
 
 }
