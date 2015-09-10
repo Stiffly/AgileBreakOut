@@ -98,21 +98,19 @@ void dd::Renderer::LoadShaders()
 	/*
 		Forward rendering
 	*/
-
 	m_spForward = ResourceManager::Load<ShaderProgram>("Shaders/Forward/");
 	m_spForward->Link();
 
 	/*
 		Screen draw
 	*/
-
 	m_spScreen = ResourceManager::Load<ShaderProgram>("Shaders/Screen/");
 	m_spScreen->Link();
 }
 
 void dd::Renderer::CreateBuffers()
 {
-	m_UnitQuad = CreateQuad();
+	m_ScreenQuad = CreateQuad();
 	m_UnitSphere = ResourceManager::Load<Model>("Models/Core/UnitSphere.obj");
 
 	glGenRenderbuffers(1, &m_rbDepthBuffer);
@@ -222,7 +220,7 @@ void dd::Renderer::Draw(RenderQueueCollection& rq)
 	m_spScreen->Bind();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_CurrentScreenBuffer);
-	glBindVertexArray(m_UnitQuad);
+	glBindVertexArray(m_ScreenQuad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glfwSwapBuffers(m_Window);
@@ -271,7 +269,7 @@ void dd::Renderer::DrawDeferred(RenderQueue &objects, RenderQueue &lights)
 	glBindTexture(GL_TEXTURE_2D, m_GDiffuse);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_tLighting);
-	glBindVertexArray(m_UnitQuad);
+	glBindVertexArray(m_ScreenQuad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -322,6 +320,27 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 			glBindVertexArray(modelJob->VAO);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, modelJob->ElementBuffer);
 			glDrawElementsBaseVertex(GL_TRIANGLES, modelJob->EndIndex - modelJob->StartIndex + 1, GL_UNSIGNED_INT, 0, modelJob->StartIndex);
+
+			continue;
+		}
+
+		auto spriteJob = std::dynamic_pointer_cast<SpriteJob>(job);
+		if (spriteJob)
+		{
+			glm::mat4 modelMatrix = spriteJob->ModelMatrix;
+			modelMatrix = modelMatrix * glm::scale(glm::vec3(0.5f));
+			MVP = PV * modelMatrix;
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "M"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "V"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, spriteJob->Texture);
+
+			glBindVertexArray(m_ScreenQuad);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+
+			continue;
 		}
 	}
 }
@@ -396,9 +415,9 @@ GLuint dd::Renderer::CreateQuad()
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(4);
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
