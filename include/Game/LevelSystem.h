@@ -42,10 +42,10 @@ public:
 
     void Initialize() override;
 
-    void CreateBasicLevel(int, int, int, int);
-    void SaveLevel(int, int, int, int); // Shouldn't be here, but I'm experimenting.
+    void CreateBasicLevel(int, int, glm::vec2, int);
+    void SaveLevel(int, int, glm::vec2, int); // Shouldn't be here, but I'm experimenting.
     void LoadLevel(char[20]);
-    void CreateBrick(int, int, int, int);
+    void CreateBrick(int, int, glm::vec2, int, int);
     void ProcessCollision();
 
     void OnEntityRemoved(EntityID entity);
@@ -54,9 +54,9 @@ public:
 
 private:
     int numberOfBricks;
-    int tRows = 8;
+    int tRows = 7;
     int tLines = 8;
-    int tSpaceBetweenBricks = 2;
+    glm::vec2 tSpaceBetweenBricks = glm::vec2(2, 0.5);
     int tSpaceToEdge = 0;
 };
 

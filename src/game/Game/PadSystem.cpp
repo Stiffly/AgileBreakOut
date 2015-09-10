@@ -23,8 +23,9 @@ void dd::Systems::PadSystem::Initialize()
     ent = m_World->CreateEntity();
 	transform = m_World->AddComponent<Components::Transform>(ent);
 	transform->Position = glm::vec3(0.f, -5.f, -10.f);
+    transform->Scale = glm::vec3(1.6, 0.4, 0.);
 	sprite = m_World->AddComponent<Components::Sprite>(ent);
-	sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+	sprite->SpriteFile = "Textures/Pad.png";
 
     EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, PadSystem::OnKeyDown);
     EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, PadSystem::OnKeyUp);
