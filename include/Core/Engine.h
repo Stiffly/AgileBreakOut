@@ -35,41 +35,83 @@
 #include "CTemplate.h"
 #include "Transform/TransformSystem.h"
 
+#include "Physics/PhysicsSystem.h"
+#include "Physics/CPhysics.h"
+
+#include "CBoxShape.h"
+
 namespace dd
 {
 
 class Engine
 {
 public:
-	Engine(int argc, char* argv[])
-	{
-		m_EventBroker = std::make_shared<EventBroker>();
+	Engine(int argc, char* argv[]) {
+        m_EventBroker = std::make_shared<EventBroker>();
 
-		m_Renderer = std::make_shared<Renderer>();
-		m_Renderer->SetFullscreen(false);
-		m_Renderer->SetResolution(Rectangle(0, 0, 1920, 1080));
-		m_Renderer->Initialize();
+        m_Renderer = std::make_shared<Renderer>();
+        m_Renderer->SetFullscreen(false);
+        m_Renderer->SetResolution(Rectangle(0, 0, 1920, 1080));
+        m_Renderer->Initialize();
 
-		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
+        m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
 
-		m_World = std::make_shared<World>(m_EventBroker);
+        m_World = std::make_shared<World>(m_EventBroker);
 
-		//TODO: Move this out of engine.h
-		m_World->ComponentFactory.Register<Components::Transform>();
-		m_World->SystemFactory.Register<Systems::TransformSystem>([this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
-		m_World->AddSystem<Systems::TransformSystem>();
-		m_World->ComponentFactory.Register<Components::Model>();
-		m_World->ComponentFactory.Register<Components::Sprite>();
-		m_World->ComponentFactory.Register<Components::Template>();
-		m_World->Initialize();
+        //TODO: Move this out of engine.h
+        m_World->ComponentFactory.Register<Components::Transform>();
+        m_World->SystemFactory.Register<Systems::TransformSystem>(
+                [this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
+        m_World->AddSystem<Systems::TransformSystem>();
+//		m_World->ComponentFactory.Register<Components::Model>();
+//		m_World->ComponentFactory.Register<Components::Template>();
 
-//		{
-//			auto ent = m_World->CreateEntity();
-//			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-//			transform->Position = glm::vec3(0.f, 0.f, -10.f);
-//			auto sprite = m_World->AddComponent<Components::Sprite>(ent);
-//			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
-//		}
+        m_World->ComponentFactory.Register<Components::Sprite>();
+
+        m_World->ComponentFactory.Register<Components::RectangleShape>();
+        m_World->ComponentFactory.Register<Components::Physics>();
+        m_World->SystemFactory.Register<Systems::PhysicsSystem>(
+                [this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
+        m_World->AddSystem<Systems::PhysicsSystem>();
+
+        m_World->ComponentFactory.Register<Components::Model>();
+        m_World->ComponentFactory.Register<Components::Template>();
+        m_World->Initialize();
+
+        {
+            auto ent = m_World->CreateEntity();
+            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+            transform->Position = glm::vec3(0.f, 0.f, -10.f);
+
+            std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
+            sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+            std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(ent);
+
+            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+            physics->Static = false;
+
+            m_World->CommitEntity(ent);
+        }
+
+
+        {
+            auto ent = m_World->CreateEntity();
+            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+            transform->Position = glm::vec3(0.f, -3.f, -9.f);
+            transform->Scale = glm::vec3(2.f, 0.5f, 1.f);
+            //transform->Orientation = glm::rotate(transform->Orientation, glm::radians(45.f), glm::vec3(0, 0, -1));
+
+            std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
+            sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+            std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(ent);
+
+            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+            physics->Static = true;
+
+            m_World->CommitEntity(ent);
+        }
 
 		m_LastTime = glfwGetTime();
 	}
