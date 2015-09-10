@@ -111,6 +111,7 @@ void dd::Renderer::LoadShaders()
 void dd::Renderer::CreateBuffers()
 {
 	m_ScreenQuad = CreateQuad();
+	m_UnitQuad = ResourceManager::Load<Model>("Models/Core/UnitQuad.obj");
 	m_UnitSphere = ResourceManager::Load<Model>("Models/Core/UnitSphere.obj");
 
 	glGenRenderbuffers(1, &m_rbDepthBuffer);
@@ -329,7 +330,6 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 		if (spriteJob)
 		{
 			glm::mat4 modelMatrix = spriteJob->ModelMatrix;
-			modelMatrix = modelMatrix * glm::scale(glm::vec3(0.5f));
 			MVP = PV * modelMatrix;
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "M"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -342,8 +342,9 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_2D, spriteJob->SpecularTexture);
 
-			glBindVertexArray(m_ScreenQuad);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
+			glBindVertexArray(m_UnitQuad->VAO);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_UnitQuad->ElementBuffer);
+			glDrawElementsBaseVertex(GL_TRIANGLES, m_UnitQuad->m_Indices.size(), GL_UNSIGNED_INT, 0, 0);
 
 			continue;
 		}
