@@ -68,6 +68,7 @@ void main()
 	//gl_Position = MVP * boneTransform * vec4(Position, 1.0);
 	gl_Position = MVP * vec4(Position, 1.0);
 
+	//TODO: Make sure that boneTransform works here.
 	Output.Position = (V * M * boneTransform * vec4(Position, 1.0)).xyz;
 	Output.Normal = (inverse(transpose(V * M)) * boneTransform * vec4(Normal, 0.0)).xyz;
 	Output.Tangent = Tangent;

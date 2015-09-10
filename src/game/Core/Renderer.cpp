@@ -98,21 +98,19 @@ void dd::Renderer::LoadShaders()
 	/*
 		Forward rendering
 	*/
-
 	m_spForward = ResourceManager::Load<ShaderProgram>("Shaders/Forward/");
 	m_spForward->Link();
 
 	/*
 		Screen draw
 	*/
-
 	m_spScreen = ResourceManager::Load<ShaderProgram>("Shaders/Screen/");
 	m_spScreen->Link();
 }
 
 void dd::Renderer::CreateBuffers()
 {
-	m_UnitQuad = CreateQuad();
+	m_ScreenQuad = CreateQuad();
 	m_UnitSphere = ResourceManager::Load<Model>("Models/Core/UnitSphere.obj");
 
 	glGenRenderbuffers(1, &m_rbDepthBuffer);
@@ -222,7 +220,7 @@ void dd::Renderer::Draw(RenderQueueCollection& rq)
 	m_spScreen->Bind();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_CurrentScreenBuffer);
-	glBindVertexArray(m_UnitQuad);
+	glBindVertexArray(m_ScreenQuad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glfwSwapBuffers(m_Window);
@@ -271,7 +269,7 @@ void dd::Renderer::DrawDeferred(RenderQueue &objects, RenderQueue &lights)
 	glBindTexture(GL_TEXTURE_2D, m_GDiffuse);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_tLighting);
-	glBindVertexArray(m_UnitQuad);
+	glBindVertexArray(m_ScreenQuad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -330,6 +328,7 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 		if (spriteJob)
 		{
 			glm::mat4 modelMatrix = spriteJob->ModelMatrix;
+			modelMatrix = modelMatrix * glm::scale(glm::vec3(0.5f));
 			MVP = PV * modelMatrix;
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "M"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -338,7 +337,7 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, spriteJob->Texture);
 
-			glBindVertexArray(m_UnitQuad);
+			glBindVertexArray(m_ScreenQuad);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
 			continue;
