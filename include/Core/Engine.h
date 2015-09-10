@@ -40,7 +40,8 @@
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
 
-#include "CBoxShape.h"
+
+#include "Physics/CBoxShape.h"
 
 namespace dd
 {
@@ -89,10 +90,11 @@ public:
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
             transform->Position = glm::vec3(0.f, 0.f, -10.f);
 
+
             std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
             sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
-            std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(ent);
+            std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
 
             std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
             physics->Static = false;
@@ -106,7 +108,7 @@ public:
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
             transform->Position = glm::vec3(0.f, -3.f, -9.f);
             transform->Scale = glm::vec3(2.f, 0.5f, 1.f);
-            //transform->Orientation = glm::rotate(transform->Orientation, glm::radians(45.f), glm::vec3(0, 0, -1));
+            //transform->Orientation = glm::rotate(transform->Orientation, glm::radians(35.f), glm::vec3(0, 0, -1));
 
             std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
             sprite->SpriteFile = "Textures/Core/ErrorTexture.png";

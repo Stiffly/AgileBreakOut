@@ -12,16 +12,17 @@
 
 namespace dd
 {
-    namespace Events
-    {
-        struct Contact : Event
-        {
-            EntityID Entity1;
-            EntityID Entity2;
-            glm::vec2 ContactPoint;
-        };
-    }
+namespace Events
+{
 
+struct Contact : Event
+{
+    EntityID Entity1;
+    EntityID Entity2;
+    glm::vec2 ContactPoint;
+};
+
+}
 }
 
 #endif //Events_ECONTACT_h__

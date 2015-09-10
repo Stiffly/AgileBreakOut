@@ -8,10 +8,10 @@ namespace dd
 namespace Components
 {
 
-    struct RectangleShape : public Component
-    {
+struct RectangleShape : public Component
+{
 
-    };
+};
 
 }
 

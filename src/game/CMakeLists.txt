@@ -56,6 +56,12 @@ file(GLOB SOURCE_FILES_Transform
 )
 source_group(Transform FILES ${SOURCE_FILES_Transform})
 
+file(GLOB SOURCE_FILES_Physics
+        "${INCLUDE_PATH}/Physics/*.h"
+        "Physics/*.cpp"
+)
+source_group(Physics FILES ${SOURCE_FILES_Physics})
+
 file(GLOB SOURCE_FILES_Game
     "${INCLUDE_PATH}/Game/*.h"
     "Game/*.cpp"
@@ -68,8 +74,9 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Input}
     ${SOURCE_FILES_Rendering}
     ${SOURCE_FILES_Transform}
+    ${SOURCE_FILES_Physics}
     ${SOURCE_FILES_Game}
-        Physics/PhysicsSystem.cpp ../../include/Physics/PhysicsSystem.h ../../include/Core/CBoxShape.h ../../include/Physics/CPhysics.h ../../include/Physics/EContact.h)
+)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
