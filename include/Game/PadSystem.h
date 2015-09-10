@@ -11,9 +11,12 @@
 #include "Core/EKeyDown.h"
 #include "Core/EKeyUp.h"
 #include "Input/EBindKey.h"
+//#include "Core/EContact.h"
 #include "Core/CTransform.h"
 #include "Rendering/CSprite.h"
+#include "Game/CBall.h"
 #include "Core/Component.h"
+
 
 namespace dd
 {
@@ -33,12 +36,20 @@ public:
 private:
     dd::EventRelay<PadSystem, dd::Events::KeyDown> m_EKeyDown;
     dd::EventRelay<PadSystem, dd::Events::KeyUp> m_EKeyUp;
-
-    class PadSteeringInputController;
-    std::array<std::shared_ptr<PadSteeringInputController>, 4> m_PadInputControllers;
+    //dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
 
     bool OnKeyDown(const dd::Events::KeyDown &event);
     bool OnKeyUp(const dd::Events::KeyUp &event);
+
+
+    bool OnContact(/*const dd::Events::Contact &event*/);
+
+
+
+
+
+    class PadSteeringInputController;
+    std::array<std::shared_ptr<PadSteeringInputController>, 4> m_PadInputControllers;
 
     EntityID ent;
     std::shared_ptr<Components::Transform> transform;

@@ -111,6 +111,11 @@ bool dd::Systems::PadSystem::OnKeyUp(const dd::Events::KeyUp &event)
     return true;
 }
 
+bool dd::Systems::PadSystem::OnContact(/*const dd::Events::Contact &event,*/)
+{
+
+}
+
 bool dd::Systems::PadSystem::PadSteeringInputController::OnCommand(const Events::InputCommand &event)
 {
     std::string command = event.Command;
