@@ -63,13 +63,13 @@ public:
 		m_World->ComponentFactory.Register<Components::Template>();
 		m_World->Initialize();
 
-//		{
-//			auto ent = m_World->CreateEntity();
-//			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-//			transform->Position = glm::vec3(0.f, 0.f, -10.f);
-//			auto sprite = m_World->AddComponent<Components::Sprite>(ent);
-//			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
-//		}
+		{
+			auto ent = m_World->CreateEntity();
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+			transform->Position = glm::vec3(0.f, 0.f, -10.f);
+			auto sprite = m_World->AddComponent<Components::Sprite>(ent);
+			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+		}
 
 		m_LastTime = glfwGetTime();
 	}
