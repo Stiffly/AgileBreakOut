@@ -1,5 +1,5 @@
 #include "PrecompiledHeader.h"
-#include "Core/Physics/PhysicsSystem.h"
+#include "Physics/PhysicsSystem.h"
 
 
 
@@ -10,19 +10,24 @@ void dd::Systems::PhysicsSystem::RegisterComponents(ComponentFactory* cf)
 
 void dd::Systems::PhysicsSystem::Initialize()
 {
+    m_ContactListener = new ContactListener(this);
+
     m_Gravity = b2Vec2(0.f, -9.82f);
     m_PhysicsWorld = new b2World(m_Gravity);
 
     m_TimeStep = 1.f/60.f;
     m_VelocityIterations = 6;
     m_PositionIterations = 2;
+
+
+    m_PhysicsWorld->SetContactListener(m_ContactListener);
 }
 
 void dd::Systems::PhysicsSystem::Update(double dt)
 {
     m_PhysicsWorld->Step(m_TimeStep, m_VelocityIterations, m_PositionIterations);
 
-    for(auto i : m_Bodies)
+    for(auto i : m_EntitiesToBodies)
     {
         EntityID entity = i.first;
         b2Body* body = i.second;
@@ -101,7 +106,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
     auto boxComponent = m_World->GetComponent<Components::RectangleShape>(entity);
     if(boxComponent){
 
-        pShape.SetAsBox(absoluteTransform.Scale.x/2, absoluteTransform.Scale.y/2);
+        pShape.SetAsBox(absoluteTransform.Scale.x/4, absoluteTransform.Scale.y/4); //TODO: THIS SUCKS DUDE
         }
 
     if(physicsComponent->Static){
@@ -112,14 +117,20 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
         b2FixtureDef fixtureDef;
         fixtureDef.shape = &pShape;
         fixtureDef.density = 1.f;
-        fixtureDef.restitution = 0.2f;
+        fixtureDef.restitution = 1.0f;
         fixtureDef.friction = 0.3f;
         body->CreateFixture(&fixtureDef);
 
     }
 
-    m_Bodies.insert(std::make_pair(entity, body));
+    m_EntitiesToBodies.insert(std::make_pair(entity, body));
+    m_BodiesToEntities.insert(std::make_pair(body, entity));
 }
 
-
-
+dd::Systems::PhysicsSystem::~PhysicsSystem()
+{
+    if (m_ContactListener != nullptr) {
+        delete m_ContactListener;
+        m_ContactListener = nullptr;
+    }
+}
