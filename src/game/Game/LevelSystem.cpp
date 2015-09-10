@@ -11,8 +11,6 @@ void dd::Systems::LevelSystem::Initialize()
 {
     CreateBasicLevel(tRows, tLines, tSpaceBetweenBricks, tSpaceToEdge);
 
-
-
     return;
 }
 
@@ -81,13 +79,12 @@ bool dd::Systems::LevelSystem::OnContact(/*const dd::Events::Contact &event,*/)
     EntityID entityBall;
     EntityID entity1;
     EntityID entity2;
-    EntityID ball;
 
     auto brick = m_World->GetComponent<Components::Brick>(entity1);
+    auto ball = m_World->GetComponent<Components::Ball>(entity2);
     if (brick != NULL)
     {
         entityBrick = entity1;
-        ball = m_World->GetComponent<Components::Ball>(entity2);
         if (ball != NULL)
         {
             entityBall = entity2;

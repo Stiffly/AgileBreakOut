@@ -12,6 +12,7 @@
 //#include "Core/EContact.h"
 #include "Core/EventBroker.h"
 #include "Core/World.h"
+#include "Game/CBall.h"
 #include "Game/EStageCleared.h"
 #include <fstream>
 #include <iostream>
