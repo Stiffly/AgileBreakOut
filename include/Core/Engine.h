@@ -68,7 +68,7 @@ public:
 
         m_World->ComponentFactory.Register<Components::Sprite>();
 
-        m_World->ComponentFactory.Register<Components::BoxShape>();
+        m_World->ComponentFactory.Register<Components::RectangleShape>();
         m_World->ComponentFactory.Register<Components::Physics>();
         m_World->SystemFactory.Register<Systems::PhysicsSystem>(
                 [this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
@@ -86,9 +86,26 @@ public:
             std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
             sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
-            std::shared_ptr<Components::BoxShape> boxShape = m_World->AddComponent<Components::BoxShape>(ent);
-            boxShape->x = 5.f;
-            boxShape->y = 5.f;
+            std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(ent);
+
+            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+            physics->Static = false;
+
+            m_World->CommitEntity(ent);
+        }
+
+
+        {
+            auto ent = m_World->CreateEntity();
+            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+            transform->Position = glm::vec3(0.f, -3.f, -9.f);
+            transform->Scale = glm::vec3(2.f, 0.5f, 1.f);
+            transform->Orientation = glm::rotate(transform->Orientation, glm::radians(45.f), glm::vec3(0, 0, -1));
+
+            std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
+            sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+            std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(ent);
 
             std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
             physics->Static = true;

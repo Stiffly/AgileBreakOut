@@ -1,5 +1,5 @@
-#ifndef DAYDREAM_CBOXSHAPE_H
-#define DAYDREAM_CBOXSHAPE_H
+#ifndef DAYDREAM_CRECTANGLESHAPE_H
+#define DAYDREAM_CRECTANGLESHAPE_H
 
 #include "Core/Component.h"
 
@@ -8,14 +8,13 @@ namespace dd
 namespace Components
 {
 
-    struct BoxShape: public Component
+    struct RectangleShape : public Component
     {
-        float x;
-        float y;
+
     };
 
 }
 
 }
 
-#endif //DAYDREAM_CBOXSHAPE_H
+#endif //DAYDREAM_CRECTANGLESHAPE_H
