@@ -5,7 +5,7 @@
 
 void dd::Systems::PhysicsSystem::RegisterComponents(ComponentFactory* cf)
 {
-
+    cf->Register<Components::CircleShape>();
 }
 
 void dd::Systems::PhysicsSystem::Initialize()
@@ -57,11 +57,10 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 
 void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)
 {
-
     auto physicsComponent = m_World->GetComponent<Components::Physics>(entity);
-    if(physicsComponent)
+    if(physicsComponent) {
         CreateBody(entity);
-
+    }
 }
 
 
@@ -94,34 +93,52 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
 
     bodyDef.angle = glm::degrees(-glm::eulerAngles(absoluteTransform.Orientation).z); //TODO: CHECK IF THIS IS CORRECT
 
-    if(physicsComponent->Static)
+    if (physicsComponent->Static) {
         bodyDef.type = b2_staticBody;
-    else
+    } else {
         bodyDef.type = b2_dynamicBody;
+    }
+
 
     b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
 
-    b2PolygonShape pShape;
+    b2Shape* pShape;
 
     auto boxComponent = m_World->GetComponent<Components::RectangleShape>(entity);
-    if(boxComponent){
+    if (boxComponent) {
+        b2PolygonShape* bShape = new b2PolygonShape();
+        bShape->SetAsBox(absoluteTransform.Scale.x/4, absoluteTransform.Scale.y/4); //TODO: THIS SUCKS DUDE
+        pShape = bShape;
+    } else {
+        auto circleComponent = m_World->GetComponent<Components::CircleShape>(entity);
+        if (circleComponent) {
+            pShape = new b2CircleShape();
+            pShape->m_radius = absoluteTransform.Scale.x;
 
-        pShape.SetAsBox(absoluteTransform.Scale.x/4, absoluteTransform.Scale.y/4); //TODO: THIS SUCKS DUDE
+
+            if (absoluteTransform.Scale.x != absoluteTransform.Scale.y &&  absoluteTransform.Scale.y != absoluteTransform.Scale.z) {
+                LOG_WARNING("Circles has to be of uniform scale.");
+            }
+            pShape->m_radius = absoluteTransform.Scale.x/4;
+
         }
-
-    if(physicsComponent->Static){
-        body->CreateFixture(&pShape, 0); //Density kanske ska vara 0 på statiska kroppar
     }
-    else{
+
+    if(physicsComponent->Static) {
+        body->CreateFixture(pShape, 0); //Density kanske ska vara 0 på statiska kroppar
+    }
+    else {
         //TODO: FIX THIS SHIT INTO COMPONENTS
         b2FixtureDef fixtureDef;
-        fixtureDef.shape = &pShape;
+        fixtureDef.shape = pShape;
         fixtureDef.density = 1.f;
         fixtureDef.restitution = 1.0f;
         fixtureDef.friction = 0.3f;
         body->CreateFixture(&fixtureDef);
 
     }
+
+    delete pShape;
 
     m_EntitiesToBodies.insert(std::make_pair(entity, body));
     m_BodiesToEntities.insert(std::make_pair(body, entity));

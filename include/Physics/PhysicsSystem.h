@@ -5,12 +5,13 @@
 
 #include "Core/System.h"
 #include "Core/World.h"
-#include "Core/CBoxShape.h"
+#include "Physics/CBoxShape.h"
 #include "Physics/CPhysics.h"
 #include <Box2D/Box2D.h>
 #include "Core/CTransform.h"
 #include "Transform/TransformSystem.h"
 #include "Physics/EContact.h"
+#include "Physics/CCircleShape.h"
 
 
 namespace dd
