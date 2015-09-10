@@ -44,17 +44,34 @@ bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
 
 void dd::Systems::PhysicsSystem::Update(double dt)
 {
-    m_PhysicsWorld->Step(m_TimeStep, m_VelocityIterations, m_PositionIterations);
-
-    for(auto i : m_EntitiesToBodies)
-    {
+    for (auto i : m_EntitiesToBodies) {
         EntityID entity = i.first;
         b2Body* body = i.second;
 
         auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
 
 
-        if(m_World->GetEntityParent(entity) == 0) {
+        if (m_World->GetEntityParent(entity) == 0) {
+            b2Vec2 position;
+            position.x = transformComponent->Position.x;
+            position.y = transformComponent->Position.y;
+
+            float angle = glm::degrees(-glm::eulerAngles(transformComponent->Orientation).z);
+
+            body->SetTransform(position, angle);
+        }
+    }
+
+    m_PhysicsWorld->Step(m_TimeStep, m_VelocityIterations, m_PositionIterations);
+
+    for (auto i : m_EntitiesToBodies) {
+        EntityID entity = i.first;
+        b2Body* body = i.second;
+
+        auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
+
+
+        if (m_World->GetEntityParent(entity) == 0) {
             b2Vec2 position = body->GetPosition();
             transformComponent->Position.x = position.x;
             transformComponent->Position.y = position.y;
@@ -64,7 +81,6 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             //TODO: CHECK IF THIS IS CORRECT
             transformComponent->Orientation =  glm::quat(glm::vec3(0, 0, -angle));
         }
-       // auto absoluteTransform = m_World->GetSystem<Systems::TransformSystem>()->
     }
 }
 
@@ -85,7 +101,12 @@ void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)
 
 void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
 {
+    b2Body* body = m_EntitiesToBodies[entity];
 
+    m_EntitiesToBodies.erase(entity);
+    m_BodiesToEntities.erase(body);
+
+    m_PhysicsWorld->DestroyBody(body);
 }
 
 
@@ -110,7 +131,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
     bodyDef.position.Set(absoluteTransform.Position.x, absoluteTransform.Position.y);
 
 
-    bodyDef.angle = glm::degrees(-glm::eulerAngles(absoluteTransform.Orientation).z); //TODO: CHECK IF THIS IS CORRECT
+    bodyDef.angle = glm::degrees(-glm::eulerAngles(absoluteTransform.Orientation).z);
 
     if (physicsComponent->Static) {
         bodyDef.type = b2_staticBody;
@@ -126,7 +147,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
     auto boxComponent = m_World->GetComponent<Components::RectangleShape>(entity);
     if (boxComponent) {
         b2PolygonShape* bShape = new b2PolygonShape();
-        bShape->SetAsBox(absoluteTransform.Scale.x/4, absoluteTransform.Scale.y/4); //TODO: THIS SUCKS DUDE
+        bShape->SetAsBox(absoluteTransform.Scale.x/4, absoluteTransform.Scale.y/4); //TODO: THIS SUCKS DUDE 4?!?!?!?
         pShape = bShape;
     } else {
         auto circleComponent = m_World->GetComponent<Components::CircleShape>(entity);
@@ -138,7 +159,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
             if (absoluteTransform.Scale.x != absoluteTransform.Scale.y &&  absoluteTransform.Scale.y != absoluteTransform.Scale.z) {
                 LOG_WARNING("Circles has to be of uniform scale.");
             }
-            pShape->m_radius = absoluteTransform.Scale.x/4;
+            pShape->m_radius = absoluteTransform.Scale.x/4; //TODO: THIS ALSO SUCKS 4 WTH
 
         }
     }
