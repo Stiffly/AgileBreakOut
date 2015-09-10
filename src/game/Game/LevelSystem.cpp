@@ -44,7 +44,7 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     sprite->SpriteFile =  fileName;
     float x = spaceToEdge + line * spacesBetweenBricks.x;
     float y = spaceToEdge + row * spacesBetweenBricks.y;
-    transform->Scale = glm::vec3(0.8, 0.2, 0.);
+    transform->Scale = glm::vec3(1.6, 0.4, 0.);
     transform->Position = glm::vec3(x - 7, y + 1, -10.f);
     //sprite->Color = glm::vec4(1.f, 1.f, 1.f, 1.f);
     return;

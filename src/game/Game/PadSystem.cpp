@@ -23,7 +23,7 @@ void dd::Systems::PadSystem::Initialize()
     ent = m_World->CreateEntity();
 	transform = m_World->AddComponent<Components::Transform>(ent);
 	transform->Position = glm::vec3(0.f, -5.f, -10.f);
-    transform->Scale = glm::vec3(1.6, 0.4, 0.);
+    transform->Scale = glm::vec3(3.2, 0.8, 0.);
 	sprite = m_World->AddComponent<Components::Sprite>(ent);
 	sprite->SpriteFile = "Textures/Pad.png";
 
