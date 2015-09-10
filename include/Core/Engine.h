@@ -34,6 +34,11 @@
 #include "CTemplate.h"
 #include "Transform/TransformSystem.h"
 
+#include "Physics/PhysicsSystem.h"
+#include "Physics/CPhysics.h"
+
+#include "CBoxShape.h"
+
 namespace dd
 {
 
@@ -42,30 +47,46 @@ class Engine
 public:
 	Engine(int argc, char* argv[])
 	{
-//		m_EventBroker = std::make_shared<EventBroker>();
+		m_EventBroker = std::make_shared<EventBroker>();
 
 		m_Renderer = std::make_shared<BGFXRenderer>();
 		m_Renderer->SetFullscreen(false);
 		m_Renderer->SetResolution(Rectangle(0, 0, 1280, 720));
 		m_Renderer->Initialize();
 
-//		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
-//
-//		m_World = std::make_shared<World>(m_EventBroker);
-//
-//		//TODO: Move this out of engine.h
-//		m_World->ComponentFactory.Register<Components::Transform>();
-//		m_World->SystemFactory.Register<Systems::TransformSystem>([this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
-//		m_World->AddSystem<Systems::TransformSystem>();
-//		m_World->ComponentFactory.Register<Components::Model>();
-//		m_World->ComponentFactory.Register<Components::Template>();
-//		m_World->Initialize();
+		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
 
-//		auto ent = m_World->CreateEntity();
-//		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-//		transform->Position = glm::vec3(0.f, 0.f, -10.f);
-//		std::shared_ptr<Components::Model> model = m_World->AddComponent<Components::Model>(ent);
-//		model->ModelFile = "Models/Core/UnitSphere.obj";
+		m_World = std::make_shared<World>(m_EventBroker);
+
+		//TODO: Move this out of engine.h
+		m_World->ComponentFactory.Register<Components::Transform>();
+		m_World->SystemFactory.Register<Systems::TransformSystem>([this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::TransformSystem>();
+
+		m_World->ComponentFactory.Register<Components::BoxShape>();
+		m_World->ComponentFactory.Register<Components::Physics>();
+		m_World->SystemFactory.Register<Systems::PhysicsSystem>([this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::PhysicsSystem>();
+
+		m_World->ComponentFactory.Register<Components::Model>();
+		m_World->ComponentFactory.Register<Components::Template>();
+		m_World->Initialize();
+
+		auto ent = m_World->CreateEntity();
+		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+		transform->Position = glm::vec3(0.f, 0.f, -10.f);
+		std::shared_ptr<Components::Model> model = m_World->AddComponent<Components::Model>(ent);
+		model->ModelFile = "Models/Core/UnitSphere.obj";
+
+        std::shared_ptr<Components::BoxShape> boxShape = m_World->AddComponent<Components::BoxShape>(ent);
+        boxShape->x = 5.f;
+        boxShape->y = 5.f;
+
+        std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+        physics->Static = true;
+
+        m_World->CommitEntity(ent);
+
 
 
 		m_LastTime = glfwGetTime();
@@ -79,26 +100,26 @@ public:
 		double dt = currentTime - m_LastTime;
 		m_LastTime = currentTime;
 
-//		ResourceManager::Update();
-//
+		ResourceManager::Update();
+
 //		// Update input
-//		m_InputManager->Update(dt);
-//
-//		m_World->Update(dt);
+		m_InputManager->Update(dt);
+
+		m_World->Update(dt);
 //
 //		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
 //			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
 //		}
-//
-//		//TODO Fill up the renderQueue with models (Temp fix)
+
+		//TODO Fill up the renderQueue with models (Temp fix)
 //		TEMPAddToRenderQueue();
-//
-//		// Render scene
-//		//TODO send renderqueue to draw.
+
+		// Render scene
+		//TODO send renderqueue to draw.
 		m_Renderer->Draw(m_RendererQueue);
 
 		// Swap event queues
-//		m_EventBroker->Clear();
+		m_EventBroker->Clear();
 
 		glfwPollEvents();
 	}
@@ -168,7 +189,7 @@ public:
 	}
 
 private:
-	//std::shared_ptr<ResourceManager> m_ResourceManager;
+	std::shared_ptr<ResourceManager> m_ResourceManager;
 	std::shared_ptr<EventBroker> m_EventBroker;
 	std::shared_ptr<BGFXRenderer> m_Renderer;
 	RenderQueueCollection m_RendererQueue;

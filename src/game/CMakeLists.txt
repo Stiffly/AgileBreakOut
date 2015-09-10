@@ -69,7 +69,7 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Rendering}
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Game}
-        Physics/PhysicsSystem.cpp ../../include/Core/Physics/PhysicsSystem.h)
+        Physics/PhysicsSystem.cpp ../../include/Core/Physics/PhysicsSystem.h ../../include/Core/CBoxShape.h ../../include/Core/Physics/CPhysics.h)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
