@@ -8,8 +8,9 @@
 #include "Core/System.h"
 #include "Core/CTransform.h"
 #include "Rendering/CSprite.h"
-#include "Core/EventBroker.h"
 #include "Game/CBrick.h"
+//#include "Core/EContact.h"
+#include "Core/EventBroker.h"
 #include "Core/World.h"
 #include "Game/EStageCleared.h"
 #include <fstream>
@@ -53,6 +54,10 @@ public:
     void EndLevel();
 
 private:
+    //dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
+
+    bool OnContact(/*const dd::Events::Contact &event*/);
+
     int numberOfBricks;
     int tRows = 7;
     int tLines = 8;
