@@ -8,6 +8,7 @@ find_package(assimp REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 find_package(BGFX REQUIRED)
+find_package(liquidfun REQUIRED)
 # GLM
 if(UNIX)
     find_package(X11 REQUIRED)
@@ -23,7 +24,8 @@ include_directories(
     ${assimp_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIRS}
     ${X11_INCLUDE_DIRS}
-	${BGFX_INCLUDE_DIRS}
+    ${BGFX_INCLUDE_DIRS}
+	${liquidfun_INCLUDE_DIRS}
 )
 
 file(GLOB SOURCE_FILES_Core
@@ -67,7 +69,7 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Rendering}
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Game}
-)
+        Physics/PhysicsSystem.cpp ../../include/Physics/PhysicsSystem.h ../../include/Core/CBoxShape.h ../../include/Physics/CPhysics.h ../../include/Physics/EContact.h)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
@@ -84,7 +86,8 @@ target_link_libraries(game
     ${assimp_LIBRARIES}
     ${PNG_LIBRARIES}
     ${X11_LIBRARIES}
-	${BGFX_LIBRARIES}
+    ${BGFX_LIBRARIES}
+	${liquidfun_LIBRARIES}
 )
 
 add_executable(breakout 
@@ -100,5 +103,6 @@ target_link_libraries(breakout
     ${PNG_LIBRARIES}
 	${X11_LIBRARIES}
 	${BGFX_LIBRARIES}
+    ${liquidfun_LIBRARIES}
 )
 
