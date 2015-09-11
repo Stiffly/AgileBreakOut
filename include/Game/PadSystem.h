@@ -13,6 +13,8 @@
 #include "Input/EBindKey.h"
 //#include "Core/EContact.h"
 #include "Core/CTransform.h"
+#include "Physics/CBoxShape.h"
+#include "Physics/CPhysics.h"
 #include "Rendering/CSprite.h"
 #include "Game/CBall.h"
 #include "Core/Component.h"
@@ -33,6 +35,7 @@ public:
 
     void Initialize() override;
     void Update(double dt) override;
+
 private:
     dd::EventRelay<PadSystem, dd::Events::KeyDown> m_EKeyDown;
     dd::EventRelay<PadSystem, dd::Events::KeyUp> m_EKeyUp;
@@ -51,9 +54,8 @@ private:
     class PadSteeringInputController;
     std::array<std::shared_ptr<PadSteeringInputController>, 4> m_PadInputControllers;
 
-    EntityID ent;
-    std::shared_ptr<Components::Transform> transform;
-    std::shared_ptr<Components::Sprite> sprite;
+    EntityID ent = 0;
+    Components::Transform* transform;
     glm::vec3 acceleration = glm::vec3(0.f, 0.f, 0.f);
     bool left = false, right = false;
 };

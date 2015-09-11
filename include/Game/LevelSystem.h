@@ -9,11 +9,13 @@
 #include "Core/CTransform.h"
 #include "Rendering/CSprite.h"
 #include "Game/CBrick.h"
-//#include "Core/EContact.h"
+#include "Physics/EContact.h"
 #include "Core/EventBroker.h"
 #include "Core/World.h"
 #include "Game/CBall.h"
 #include "Game/EStageCleared.h"
+#include "Physics/CBoxShape.h"
+#include "Physics/CPhysics.h"
 #include <fstream>
 #include <iostream>
 #include <intrin.h>
@@ -54,10 +56,14 @@ public:
 
     void EndLevel();
 
-private:
-    //dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
+    void Update(double dt);
 
-    bool OnContact(/*const dd::Events::Contact &event*/);
+private:
+    dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
+
+    bool OnContact(const dd::Events::Contact &event);
+
+    bool m_Initialized = false;
 
     int numberOfBricks;
     int tRows = 7;

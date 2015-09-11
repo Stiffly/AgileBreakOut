@@ -9,9 +9,16 @@
 
 void dd::Systems::LevelSystem::Initialize()
 {
-    CreateBasicLevel(tRows, tLines, tSpaceBetweenBricks, tSpaceToEdge);
+    EVENT_SUBSCRIBE_MEMBER(m_EContact, LevelSystem::OnContact);
 
     return;
+}
+
+void dd::Systems::LevelSystem::Update(double dt) {
+    if (!m_Initialized) {
+        CreateBasicLevel(tRows, tLines, tSpaceBetweenBricks, tSpaceToEdge);
+        m_Initialized = true;
+    }
 }
 
 void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 spacesBetweenBricks, int spaceToEdge)
@@ -38,6 +45,8 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(brick);
     std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(brick);
     std::shared_ptr<Components::Brick> cBrick = m_World->AddComponent<Components::Brick>(brick);
+    std::shared_ptr<Components::RectangleShape> cRec = m_World->AddComponent<Components::RectangleShape>(brick);
+    std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(brick);
     std::string fileName = "Textures/Bricks/";
     fileName.append(std::to_string(num));
     fileName.append(".png");
@@ -47,6 +56,7 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     transform->Scale = glm::vec3(1.6, 0.4, 0.);
     transform->Position = glm::vec3(x - 7, y + 1, -10.f);
     //sprite->Color = glm::vec4(1.f, 1.f, 1.f, 1.f);
+    m_World->CommitEntity(brick);
     return;
 }
 
@@ -70,23 +80,31 @@ void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
     return;
 }
 
-bool dd::Systems::LevelSystem::OnContact(/*const dd::Events::Contact &event,*/)
+bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 {
     /*event.Entity1 - Vi vet inte vilken som.
       event.Entity2 - */
-    std::string event = "I'm just a placeholder :(";
-    EntityID entityBrick;
-    EntityID entityBall;
-    EntityID entity1;
-    EntityID entity2;
-
-    auto brick = m_World->GetComponent<Components::Brick>(entity1);
-    auto ball = m_World->GetComponent<Components::Ball>(entity2);
-    if (brick != NULL)
+    EntityID entityBrick = event.Entity1;
+    auto brick = m_World->GetComponent<Components::Brick>(entityBrick);
+    if (brick == NULL)
     {
+        return false;
+    }
+    EntityID entityBall = event.Entity2;
+    //EntityID entity1 = event.Entity1;
+    //EntityID entity2 = event.Entity2;
+
+    //auto brick = m_World->GetComponent<Components::Brick>(entity1);
+    //auto ball = m_World->GetComponent<Components::Ball>(entity2);
+    //std::cout << brick << std::endl;
+    //std::cout << ball << std::endl;
+    /*if (brick != NULL)
+    {
+        std::cout << "Entity1 is a brick!" << std::endl;
         entityBrick = entity1;
         if (ball != NULL)
         {
+            std::cout << "Entity2 is a ball!" << std::endl;
             entityBall = entity2;
         }
     }
@@ -95,22 +113,25 @@ bool dd::Systems::LevelSystem::OnContact(/*const dd::Events::Contact &event,*/)
         brick = m_World->GetComponent<Components::Brick>(entity2);
         if (brick != NULL)
         {
+            std::cout << "Entity2 is a brick!" << std::endl;
             entityBrick = entity2;
         }
 
         ball = m_World->GetComponent<Components::Ball>(entity1);
         if (ball != NULL)
         {
+            std::cout << "Entity1 is a ball!" << std::endl;
             entityBall = entity1;
         }
     }
 
     if (entityBrick != NULL && entityBall != NULL)
-    {
+    {*/
+        //std::cout << "We're destroying!" << std::endl;
         m_World->RemoveEntity(entityBrick);
 
         return true;
-    }
+    //}
 
     return false;
 }

@@ -20,13 +20,6 @@ void dd::Systems::PadSystem::Initialize()
     l.Command = "left";
     EventBroker->Publish(l);
 
-    ent = m_World->CreateEntity();
-	transform = m_World->AddComponent<Components::Transform>(ent);
-	transform->Position = glm::vec3(0.f, -5.f, -10.f);
-    transform->Scale = glm::vec3(3.2, 0.8, 0.);
-	sprite = m_World->AddComponent<Components::Sprite>(ent);
-	sprite->SpriteFile = "Textures/Pad.png";
-
     EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, PadSystem::OnKeyDown);
     EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, PadSystem::OnKeyUp);
 
@@ -35,6 +28,16 @@ void dd::Systems::PadSystem::Initialize()
 
 void dd::Systems::PadSystem::Update(double dt)
 {
+    if (ent == 0) {
+        for (auto it = m_World->GetEntities()->begin(); it != m_World->GetEntities()->end(); it++) {
+            if (m_World->GetProperty<std::string>(it->first, "Name") == "Pad") {
+                ent = it->first;
+                transform = m_World->GetComponent<Components::Transform>(ent);
+                break;
+            }
+        }
+    }
+
     if (transform->Velocity.x < -400.f)
     {
         transform->Velocity.x = -400.f;

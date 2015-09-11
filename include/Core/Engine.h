@@ -30,18 +30,20 @@
 //TODO: Remove includes that are only here for the temporary draw solution.
 #include "World.h"
 #include "CTransform.h"
+#include "Core/EventBroker.h"
 #include "Rendering/CModel.h"
 #include "Rendering/CSprite.h"
 #include "CTemplate.h"
 #include "Transform/TransformSystem.h"
 #include "Game/LevelSystem.h"
 #include "Game/PadSystem.h"
+#include "Game/CBall.h"
+#include "Game/CBrick.h"
 
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
-
-
 #include "Physics/CBoxShape.h"
+#include "Physics/ESetImpulse.h"
 
 namespace dd
 {
@@ -69,17 +71,21 @@ public:
 //		m_World->ComponentFactory.Register<Components::Model>();
 //		m_World->ComponentFactory.Register<Components::Template>();
 
-		m_World->SystemFactory.Register<Systems::LevelSystem>([this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
-		m_World->AddSystem<Systems::LevelSystem>();
-		m_World->SystemFactory.Register<Systems::PadSystem>([this]() { return new Systems::PadSystem(m_World.get(), m_EventBroker); });
-		m_World->AddSystem<Systems::PadSystem>();
+
         m_World->ComponentFactory.Register<Components::Sprite>();
 
         m_World->ComponentFactory.Register<Components::RectangleShape>();
         m_World->ComponentFactory.Register<Components::Physics>();
+		m_World->ComponentFactory.Register<Components::Ball>();
+		m_World->ComponentFactory.Register<Components::Brick>();
         m_World->SystemFactory.Register<Systems::PhysicsSystem>(
                 [this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
         m_World->AddSystem<Systems::PhysicsSystem>();
+
+		m_World->SystemFactory.Register<Systems::LevelSystem>([this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::LevelSystem>();
+		m_World->SystemFactory.Register<Systems::PadSystem>([this]() { return new Systems::PadSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::PadSystem>();
 
         m_World->ComponentFactory.Register<Components::Model>();
         m_World->ComponentFactory.Register<Components::Template>();
@@ -88,22 +94,78 @@ public:
         {
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.f, 0.f, -10.f);
-
+            transform->Position = glm::vec3(0.5f, 0.f, -10.f);
+			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
 
             std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-            sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+            sprite->SpriteFile = "Textures/Ball.png";
 
             std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
+			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
 
             std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
             physics->Static = false;
 
             m_World->CommitEntity(ent);
+
+			Events::SetImpulse e;
+			e.Entity = ent;
+			e.Impulse = glm::vec2(0.f, -1.f);
+			e.Point = glm::vec2(0.5f, 0.f);
+			m_EventBroker->Publish(e);
         }
 
+		{
+			auto topWall = m_World->CreateEntity();
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
+			transform->Position = glm::vec3(-9.f, 5.f, -9.f);
+			transform->Scale = glm::vec3(10.f, 0.5f, 1.f);
 
-        {
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(topWall);
+
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
+			physics->Static = true;
+
+			m_World->CommitEntity(topWall);
+		}
+		{
+			auto leftWall = m_World->CreateEntity();
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(leftWall);
+			transform->Position = glm::vec3(-7.f, 1.f, -9.f);
+			transform->Scale = glm::vec3(0.5f, 10.f, 1.f);
+
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
+			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(leftWall);
+
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(leftWall);
+			physics->Static = true;
+
+			m_World->CommitEntity(leftWall);
+		}
+		{
+			auto rightWall = m_World->CreateEntity();
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(rightWall);
+			transform->Position = glm::vec3(7.f, 1.f, -9.f);
+			transform->Scale = glm::vec3(0.5f, 10.f, 1.f);
+
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
+			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(rightWall);
+
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(rightWall);
+			physics->Static = true;
+
+			m_World->CommitEntity(rightWall);
+		}
+
+
+        /*{
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
             transform->Position = glm::vec3(0.f, -3.f, -9.f);
@@ -119,7 +181,20 @@ public:
             physics->Static = true;
 
             m_World->CommitEntity(ent);
-        }
+        }*/
+
+		{
+			auto ent = m_World->CreateEntity();
+			m_World->SetProperty(ent, "Name", "Pad");
+			auto ctransform = m_World->AddComponent<Components::Transform>(ent);
+			ctransform->Position = glm::vec3(0.f, -5.f, -10.f);
+			ctransform->Scale = glm::vec3(3.2, 0.8, 0.);
+			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
+			auto physics = m_World->AddComponent<Components::Physics>(ent);
+			auto csprite = m_World->AddComponent<Components::Sprite>(ent);
+			csprite->SpriteFile = "Textures/Pad.png";
+			m_World->CommitEntity(ent);
+		}
 
 		m_LastTime = glfwGetTime();
 	}

@@ -12,7 +12,7 @@ void dd::Systems::PhysicsSystem::Initialize()
 {
     m_ContactListener = new ContactListener(this);
 
-    m_Gravity = b2Vec2(0.f, -9.82f);
+    m_Gravity = b2Vec2(0.f, 0.f);
     m_PhysicsWorld = new b2World(m_Gravity);
 
     m_TimeStep = 1.f/60.f;
