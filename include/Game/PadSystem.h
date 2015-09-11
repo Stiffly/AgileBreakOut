@@ -11,13 +11,15 @@
 #include "Core/EKeyDown.h"
 #include "Core/EKeyUp.h"
 #include "Input/EBindKey.h"
-//#include "Core/EContact.h"
+#include "Physics/EContact.h"
 #include "Core/CTransform.h"
 #include "Physics/CBoxShape.h"
 #include "Physics/CPhysics.h"
 #include "Rendering/CSprite.h"
 #include "Game/CBall.h"
 #include "Core/Component.h"
+#include "Physics/ESetImpulse.h"
+#include "Physics/CCircleShape.h"
 
 
 namespace dd
@@ -39,13 +41,13 @@ public:
 private:
     dd::EventRelay<PadSystem, dd::Events::KeyDown> m_EKeyDown;
     dd::EventRelay<PadSystem, dd::Events::KeyUp> m_EKeyUp;
-    //dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
+    dd::EventRelay<PadSystem, dd::Events::Contact> m_EContact;
 
     bool OnKeyDown(const dd::Events::KeyDown &event);
     bool OnKeyUp(const dd::Events::KeyUp &event);
 
 
-    bool OnContact(/*const dd::Events::Contact &event*/);
+    bool OnContact(const dd::Events::Contact &event);
 
 
 

@@ -6,6 +6,7 @@
 #include "Game/PadSystem.h"
 #include "Core/World.h"
 #include <iostream>
+#include <Game/CPad.h>
 
 
 void dd::Systems::PadSystem::Initialize()
@@ -22,6 +23,7 @@ void dd::Systems::PadSystem::Initialize()
 
     EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, PadSystem::OnKeyDown);
     EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, PadSystem::OnKeyUp);
+    EVENT_SUBSCRIBE_MEMBER(m_EContact, PadSystem::OnContact);
 
     return;
 }
@@ -114,9 +116,50 @@ bool dd::Systems::PadSystem::OnKeyUp(const dd::Events::KeyUp &event)
     return true;
 }
 
-bool dd::Systems::PadSystem::OnContact(/*const dd::Events::Contact &event,*/)
+bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
 {
+    EntityID entityBall = event.Entity2;
+    auto ball = m_World->GetComponent<Components::Ball>(entityBall);
+    if (ball == NULL)
+    {
+        return false;
+    }
+    EntityID entityPad = event.Entity1;
+    auto pad = m_World->GetComponent<Components::Pad>(entityPad);
+    if (pad == NULL)
+    {
+        return false;
+    }
+    auto transformBall = m_World->GetComponent<Components::Transform>(entityBall);
+    auto transformPad = m_World->GetComponent<Components::Transform>(entityPad);
 
+    float movementMultiplier = 2.f;
+
+    float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
+    float movementY = glm::cos((abs(movementX) / (3.2f * movementMultiplier)) * 3.14159265359f / 2) * 2.f;
+
+    std::cout << movementX << " " << movementY << std::endl;
+
+    //Temporary solution. Add a new ball and delete the old one.
+    auto ent = m_World->CreateEntity();
+    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+    transform->Position = glm::vec3(transformBall->Position.x, transformBall->Position.y + 0.1f, -10.f);
+    transform->Scale = glm::vec3(1.f, 1.f, 1.f);
+    std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
+    sprite->SpriteFile = "Textures/Ball.png";
+    std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
+    std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
+    std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+    physics->Static = false;
+
+    m_World->RemoveEntity(entityBall);
+    m_World->CommitEntity(ent);
+
+    Events::SetImpulse e;
+    e.Entity = ent;
+    e.Impulse = glm::vec2(movementX, movementY);
+    e.Point = glm::vec2(event.ContactPoint);
+    EventBroker->Publish(e);
 }
 
 bool dd::Systems::PadSystem::PadSteeringInputController::OnCommand(const Events::InputCommand &event)

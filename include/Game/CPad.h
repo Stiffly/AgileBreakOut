@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2015-09-10.
+// Created by Adniklastrator on 2015-09-10.
 //
 
 #ifndef DAYDREAM_CPAD_H
@@ -17,8 +17,6 @@ namespace Components
 
 struct Pad : Component
 {
-    //std::shared_ptr<dd::EventBroker> eventBroker;
-    //EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, CPad::OnKeyDown);
     int Lives;
     int Points;
 };

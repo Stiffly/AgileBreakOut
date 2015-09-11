@@ -1,9 +1,9 @@
 //
-// Created by Administrator on 2015-09-10.
+// Created by Adniklastrator on 2015-09-10.
 //
 
-#ifndef DAYDREAM_CPAD_H
-#define DAYDREAM_CPAD_H
+#ifndef DAYDREAM_CBALL_H
+#define DAYDREAM_CBALL_H
 
 #include "Core/Component.h"
 
@@ -22,4 +22,4 @@ struct Ball : Component
 
 }
 
-#endif //DAYDREAM_CPAD_H
+#endif //DAYDREAM_CBALL_H

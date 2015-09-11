@@ -16,8 +16,8 @@ void dd::Systems::PhysicsSystem::Initialize()
     m_PhysicsWorld = new b2World(m_Gravity);
 
     m_TimeStep = 1.f/60.f;
-    m_VelocityIterations = 6;
-    m_PositionIterations = 2;
+    m_VelocityIterations = 8;
+    m_PositionIterations = 6;
 
 
     m_PhysicsWorld->SetContactListener(m_ContactListener);
@@ -147,7 +147,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
     auto boxComponent = m_World->GetComponent<Components::RectangleShape>(entity);
     if (boxComponent) {
         b2PolygonShape* bShape = new b2PolygonShape();
-        bShape->SetAsBox(absoluteTransform.Scale.x/4, absoluteTransform.Scale.y/4); //TODO: THIS SUCKS DUDE 4?!?!?!?
+        bShape->SetAsBox(absoluteTransform.Scale.x/2, absoluteTransform.Scale.y/2); //TODO: THIS SUCKS DUDE 4?!?!?!?
         pShape = bShape;
     } else {
         auto circleComponent = m_World->GetComponent<Components::CircleShape>(entity);
@@ -159,7 +159,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
             if (absoluteTransform.Scale.x != absoluteTransform.Scale.y &&  absoluteTransform.Scale.y != absoluteTransform.Scale.z) {
                 LOG_WARNING("Circles has to be of uniform scale.");
             }
-            pShape->m_radius = absoluteTransform.Scale.x/4; //TODO: THIS ALSO SUCKS 4 WTH
+            pShape->m_radius = absoluteTransform.Scale.x/2; //TODO: THIS ALSO SUCKS 4 WTH
 
         }
     }
@@ -172,7 +172,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
         b2FixtureDef fixtureDef;
         fixtureDef.shape = pShape;
         fixtureDef.density = 1.f;
-        fixtureDef.restitution = 0.0f;
+        fixtureDef.restitution = 1.0f;
         fixtureDef.friction = 0.3f;
         body->CreateFixture(&fixtureDef);
 
