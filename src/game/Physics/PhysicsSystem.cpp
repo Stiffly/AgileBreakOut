@@ -56,7 +56,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             position.x = transformComponent->Position.x;
             position.y = transformComponent->Position.y;
 
-            float angle = glm::degrees(-glm::eulerAngles(transformComponent->Orientation).z);
+            float angle = -glm::eulerAngles(transformComponent->Orientation).z;
 
             body->SetTransform(position, angle);
         }
@@ -131,7 +131,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
     bodyDef.position.Set(absoluteTransform.Position.x, absoluteTransform.Position.y);
 
 
-    bodyDef.angle = glm::degrees(-glm::eulerAngles(absoluteTransform.Orientation).z);
+    bodyDef.angle = -glm::eulerAngles(absoluteTransform.Orientation).z;
 
     if (physicsComponent->Static) {
         bodyDef.type = b2_staticBody;
@@ -172,7 +172,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
         b2FixtureDef fixtureDef;
         fixtureDef.shape = pShape;
         fixtureDef.density = 1.f;
-        fixtureDef.restitution = 1.0f;
+        fixtureDef.restitution = 0.0f;
         fixtureDef.friction = 0.3f;
         body->CreateFixture(&fixtureDef);
 
