@@ -93,13 +93,14 @@ public:
 			sprite->SpecularTexture = "Textures/Test/Brick_Specular.png";
 		}
 
+
         {
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
             transform->Position = glm::vec3(0.f, 0.f, -9.5f);
 
-            std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-            sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+            //std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
+            //sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
             std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(ent);
 
