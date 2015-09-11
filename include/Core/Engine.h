@@ -101,7 +101,7 @@ public:
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
             transform->Position = glm::vec3(0.f, -3.f, -9.f);
-            transform->Scale = glm::vec3(2.f, 0.5f, 1.f);
+            transform->Scale = glm::vec3(8.f, 0.5f, 1.f);
             transform->Orientation = glm::rotate(transform->Orientation, glm::radians(25.f), glm::vec3(0, 0, -1));
 
             std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
