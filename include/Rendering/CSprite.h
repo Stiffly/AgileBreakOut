@@ -34,6 +34,8 @@ struct Sprite : Component
 	Sprite() : Color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)) { }
 
 	std::string SpriteFile;
+	std::string NormalTexture;
+	std::string SpecularTexture;
 	glm::vec4 Color;
 };
 

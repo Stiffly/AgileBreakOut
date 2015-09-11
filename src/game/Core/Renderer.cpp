@@ -111,6 +111,7 @@ void dd::Renderer::LoadShaders()
 void dd::Renderer::CreateBuffers()
 {
 	m_ScreenQuad = CreateQuad();
+	m_UnitQuad = ResourceManager::Load<Model>("Models/Core/UnitQuad.obj");
 	m_UnitSphere = ResourceManager::Load<Model>("Models/Core/UnitSphere.obj");
 
 	glGenRenderbuffers(1, &m_rbDepthBuffer);
@@ -264,7 +265,7 @@ void dd::Renderer::DrawDeferred(RenderQueue &objects, RenderQueue &lights)
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 	m_spDeferred3->Bind();
-	glUniform3fv(glGetUniformLocation(*m_spDeferred3, "La"), 1, glm::value_ptr(glm::vec3(0.3f)));
+	glUniform3fv(glGetUniformLocation(*m_spDeferred3, "La"), 1, glm::value_ptr(glm::vec3(0.5f)));
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_GDiffuse);
 	glActiveTexture(GL_TEXTURE1);
@@ -306,6 +307,7 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 
 			glUniform1f(glGetUniformLocation(shaderProgramHandle, "MaterialShininess"), modelJob->Shininess);
 
+			//TODO: Make sure that a normal/specular is loaded in.
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, modelJob->DiffuseTexture);
 			if (modelJob->NormalTexture != 0) {
@@ -328,17 +330,21 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 		if (spriteJob)
 		{
 			glm::mat4 modelMatrix = spriteJob->ModelMatrix;
-			modelMatrix = modelMatrix * glm::scale(glm::vec3(0.5f));
 			MVP = PV * modelMatrix;
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "M"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "V"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, spriteJob->Texture);
+			glBindTexture(GL_TEXTURE_2D, spriteJob->DiffuseTexture);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, spriteJob->NormalTexture);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, spriteJob->SpecularTexture);
 
-			glBindVertexArray(m_ScreenQuad);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
+			glBindVertexArray(m_UnitQuad->VAO);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_UnitQuad->ElementBuffer);
+			glDrawElementsBaseVertex(GL_TRIANGLES, m_UnitQuad->m_Indices.size(), GL_UNSIGNED_INT, 0, 0);
 
 			continue;
 		}
