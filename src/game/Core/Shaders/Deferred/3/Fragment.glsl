@@ -38,6 +38,7 @@ void main()
 
 	//frag_Diffuse = DiffuseTexel * (vec4(La, 0.0) * (vec4(LightingTexel.rgb, 0.0) + vec4(LightingTexel.a, LightingTexel.a, LightingTexel.a, 0.0)));
 	//frag_Diffuse = DiffuseTexel * (vec4(La, 0.0) + LightingTexel);
-	frag_Diffuse = DiffuseTexel;
+	frag_Diffuse = DiffuseTexel * (vec4(1.f, 1.f, 1.f, 0.0) + LightingTexel);
+	//frag_Diffuse = DiffuseTexel;
 	//frag_Diffuse = vec4(LightingTexel.r, LightingTexel.g, LightingTexel.b, 1.0);
 }

@@ -7,11 +7,11 @@ namespace dd
 namespace Components
 {
 
-    struct Physics: public Component
-    {
-        //idk if anything should be here :)
-        bool Static = true;
-    };
+struct Physics: public Component
+{
+    //idk if anything should be here :)
+    bool Static = true;
+};
 
 }
 

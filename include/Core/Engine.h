@@ -30,16 +30,22 @@
 //TODO: Remove includes that are only here for the temporary draw solution.
 #include "World.h"
 #include "CTransform.h"
+#include "Core/EventBroker.h"
 #include "Rendering/CModel.h"
 #include "Rendering/CSprite.h"
 #include "CTemplate.h"
+#include "Rendering/CPointLight.h"
 #include "Transform/TransformSystem.h"
+#include "Game/LevelSystem.h"
+#include "Game/PadSystem.h"
+#include "Game/CBall.h"
+#include "Game/CBrick.h"
+#include "Game/CPad.h"
 
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
-
-
 #include "Physics/CBoxShape.h"
+#include "Physics/ESetImpulse.h"
 
 namespace dd
 {
@@ -67,40 +73,123 @@ public:
 //		m_World->ComponentFactory.Register<Components::Model>();
 //		m_World->ComponentFactory.Register<Components::Template>();
 
+
         m_World->ComponentFactory.Register<Components::Sprite>();
 
         m_World->ComponentFactory.Register<Components::RectangleShape>();
         m_World->ComponentFactory.Register<Components::Physics>();
+		m_World->ComponentFactory.Register<Components::Ball>();
+		m_World->ComponentFactory.Register<Components::Brick>();
+		m_World->ComponentFactory.Register<Components::Pad>();
         m_World->SystemFactory.Register<Systems::PhysicsSystem>(
                 [this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
         m_World->AddSystem<Systems::PhysicsSystem>();
 
+		m_World->SystemFactory.Register<Systems::LevelSystem>([this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::LevelSystem>();
+		m_World->SystemFactory.Register<Systems::PadSystem>([this]() { return new Systems::PadSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::PadSystem>();
+
         m_World->ComponentFactory.Register<Components::Model>();
         m_World->ComponentFactory.Register<Components::Template>();
+		m_World->ComponentFactory.Register<Components::PointLight>();
         m_World->Initialize();
+
+
+		//TODO: Remove tobias light-test code.
+		{
+			auto t_BrickWall = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_BrickWall);
+			transform->Position = glm::vec3(0.f, 0.f, -10.f);
+			auto sprite = m_World->AddComponent<Components::Sprite>(t_BrickWall);
+			//TODO: Rename SpriteFile to DiffuseTexture or similar.
+			sprite->SpriteFile = "Textures/Test/Brick_Diffuse.png";
+			sprite->NormalTexture = "Textures/Test/Brick_Normal.png";
+			sprite->SpecularTexture = "Textures/Test/Brick_Specular.png";
+		}
+
 
         {
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.f, 0.f, -10.f);
-
+            transform->Position = glm::vec3(0.5f, 0.f, -10.f);
+			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
 
             std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-            sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+            sprite->SpriteFile = "Textures/Ball.png";
 
             std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
+			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
 
             std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
             physics->Static = false;
 
+			auto plight = m_World->AddComponent<Components::PointLight>(ent);
+			plight->Radius = 2.f;
+
             m_World->CommitEntity(ent);
+
+			Events::SetImpulse e;
+			e.Entity = ent;
+			e.Impulse = glm::vec2(0.f, -7.f);
+			e.Point = glm::vec2(0.5f, 0.f);
+			m_EventBroker->Publish(e);
         }
 
+		{
+			auto topWall = m_World->CreateEntity();
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
+			transform->Position = glm::vec3(0.f, 5.f, -10.f);
+			transform->Scale = glm::vec3(15.f, 0.5f, 1.f);
 
-        {
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(topWall);
+
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
+			physics->Static = true;
+
+			m_World->CommitEntity(topWall);
+		}
+		{
+			auto leftWall = m_World->CreateEntity();
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(leftWall);
+			transform->Position = glm::vec3(-9.f, 1.f, -10.f);
+			transform->Scale = glm::vec3(0.5f, 10.f, 1.f);
+
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
+			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(leftWall);
+
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(leftWall);
+			physics->Static = true;
+
+			m_World->CommitEntity(leftWall);
+		}
+		{
+			auto rightWall = m_World->CreateEntity();
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(rightWall);
+			transform->Position = glm::vec3(9.f, 1.f, -10.f);
+			transform->Scale = glm::vec3(0.5f, 10.f, 1.f);
+
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
+			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(rightWall);
+
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(rightWall);
+			physics->Static = true;
+
+			m_World->CommitEntity(rightWall);
+		}
+
+
+        /*{
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.f, -2.f, -10.f);
+            transform->Position = glm::vec3(0.f, -3.f, -10.f);
             transform->Scale = glm::vec3(8.f, 0.5f, 1.f);
             transform->Orientation = glm::rotate(transform->Orientation, glm::radians(25.f), glm::vec3(0, 0, -1));
 
@@ -113,27 +202,21 @@ public:
             physics->Static = true;
 
             m_World->CommitEntity(ent);
-        }
-
+        }*/
 
 		{
 			auto ent = m_World->CreateEntity();
-			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-			transform->Position = glm::vec3(-2.f, -1.f, -10.f);
-			transform->Scale = glm::vec3(0.5f, 8.5f, 1.f);
-			//transform->Orientation = glm::rotate(transform->Orientation, glm::radians(25.f), glm::vec3(0, 0, -1));
-
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
-
-			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(ent);
-
-			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-			physics->Static = true;
-
+			m_World->SetProperty(ent, "Name", "Pad");
+			auto ctransform = m_World->AddComponent<Components::Transform>(ent);
+			ctransform->Position = glm::vec3(0.f, -5.f, -10.f);
+			ctransform->Scale = glm::vec3(3.2, 0.8, 0.);
+			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
+			auto physics = m_World->AddComponent<Components::Physics>(ent);
+			auto csprite = m_World->AddComponent<Components::Sprite>(ent);
+			auto pad = m_World->AddComponent<Components::Pad>(ent);
+			csprite->SpriteFile = "Textures/Pad.png";
 			m_World->CommitEntity(ent);
 		}
-
 
 		m_LastTime = glfwGetTime();
 	}
@@ -153,6 +236,19 @@ public:
 
 		m_World->Update(dt);
 
+
+//
+//		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
+//			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
+//		}
+//
+		//TODO Fill up the renderQueue with models (Temp fix)
+//		TEMPAddToRenderQueue();
+
+		// Render scene
+		//TODO send renderqueue to draw.
+//		m_Renderer->Draw(m_RendererQueue);
+
 		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
 			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
 		}
@@ -171,6 +267,7 @@ public:
 	}
 
 	std::shared_ptr<Systems::TransformSystem> m_TransformSystem;
+	std::shared_ptr<Systems::LevelSystem> m_LevelSystem;
 
 	//TODO: Get this out of engine.h
 	void TEMPAddToRenderQueue()
@@ -209,19 +306,43 @@ public:
 				}
 			}
 
+			//TODO: Add LightLoadShit
+
+			auto pointLightComponent = m_World->GetComponent<Components::PointLight>(entity);
+			if (pointLightComponent)
+			{
+				Components::Transform absoluteTransform = m_TransformSystem->AbsoluteTransform(entity);
+				EnqueuePointLight(absoluteTransform.Position,
+								  pointLightComponent->Diffuse,
+								  pointLightComponent->Specular,
+								  pointLightComponent->Radius);
+			}
+
+
 			auto spriteComponent = m_World->GetComponent<Components::Sprite>(entity);
 			if (spriteComponent)
 			{
-				auto textureAsset = ResourceManager::Load<Texture>(spriteComponent->SpriteFile);
-				if (textureAsset)
-				{
-					Components::Transform absoluteTransform = m_TransformSystem->AbsoluteTransform(entity);
-					glm::quat orientation2D = glm::angleAxis(glm::eulerAngles(absoluteTransform.Orientation).z, glm::vec3(0, 0, -1));
-					glm::mat4 modelMatrix = glm::translate(absoluteTransform.Position)
-						* glm::toMat4(orientation2D)
-						* glm::scale(absoluteTransform.Scale);
-					EnqueueSprite(textureAsset, modelMatrix, spriteComponent->Color);
+
+				std::string normal = spriteComponent->NormalTexture;
+				std::string spec = spriteComponent->SpecularTexture;
+
+				if (normal.empty()) {
+					normal = "Textures/Core/NeutralNormalMap.png";
 				}
+				if (spec.empty()) {
+					spec = "Textures/Core/NeutralSpecularMap.png";
+				}
+				auto texturediff = ResourceManager::Load<Texture>(spriteComponent->SpriteFile);
+				auto texturenorm = ResourceManager::Load<Texture>(normal);
+				auto texturespec = ResourceManager::Load<Texture>(spec);
+
+
+				Components::Transform absoluteTransform = m_TransformSystem->AbsoluteTransform(entity);
+				glm::quat orientation2D = glm::angleAxis(glm::eulerAngles(absoluteTransform.Orientation).z, glm::vec3(0, 0, -1));
+				glm::mat4 modelMatrix = glm::translate(absoluteTransform.Position)
+					* glm::toMat4(orientation2D)
+					* glm::scale(absoluteTransform.Scale);
+				EnqueueSprite(texturediff, texturenorm, texturespec, modelMatrix, spriteComponent->Color);
 			}
 		}
 
@@ -250,15 +371,29 @@ public:
 	}
 
 	// TODO: Get this out of engine.h
-	void EnqueueSprite(Texture* texture, glm::mat4 modelMatrix, glm::vec4 color)
+	void EnqueueSprite(Texture* texture, Texture* normalTexture, Texture* specularTexture, glm::mat4 modelMatrix, glm::vec4 color)
 	{
 		SpriteJob job;
 		job.TextureID = texture->ResourceID;
-		job.Texture = *texture;
+		job.DiffuseTexture = *texture;
+		job.NormalTexture = *normalTexture;
+		job.SpecularTexture = *specularTexture;
 		job.ModelMatrix = modelMatrix;
 		job.Color = color;
 
-		m_RendererQueue.Forward.Add(job);
+		m_RendererQueue.Deferred.Add(job);
+	}
+
+	void EnqueuePointLight(glm::vec3 position, glm::vec3 diffuseColor, glm::vec3 specularColor, float radius)
+	{
+		PointLightJob job;
+		job.Position = position;
+		job.DiffuseColor = diffuseColor;
+		job.SpecularColor = specularColor;
+		job.Radius = radius;
+
+		m_RendererQueue.Lights.Add(job);
+
 	}
 
 private:

@@ -89,7 +89,9 @@ struct SpriteJob : RenderJob
 	unsigned int TextureID;
 
 	glm::mat4 ModelMatrix;
-	GLuint Texture;
+	GLuint DiffuseTexture;
+	GLuint NormalTexture;
+	GLuint SpecularTexture;
 	glm::vec4 Color;
 
 	void CalculateHash() override

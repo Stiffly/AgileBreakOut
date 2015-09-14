@@ -12,7 +12,7 @@ void dd::Systems::PhysicsSystem::Initialize()
 {
     m_ContactListener = new ContactListener(this);
 
-    m_Gravity = b2Vec2(0.f, -9.82f);
+    m_Gravity = b2Vec2(0.f, 0.f);
     m_PhysicsWorld = new b2World(m_Gravity);
 
     m_TimeStep = 1.f/60.f;
@@ -188,7 +188,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
         b2FixtureDef fixtureDef;
         fixtureDef.shape = pShape;
         fixtureDef.density = 1.f;
-        fixtureDef.restitution = 0.0f;
+        fixtureDef.restitution = 1.0f;
         fixtureDef.friction = 0.3f;
         body->CreateFixture(&fixtureDef);
 
