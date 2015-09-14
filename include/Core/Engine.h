@@ -115,7 +115,7 @@ public:
             transform->Position = glm::vec3(0.5f, 0.f, -10.f);
 			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
 
-            //std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
+            std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
             sprite->SpriteFile = "Textures/Ball.png";
 
             std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
