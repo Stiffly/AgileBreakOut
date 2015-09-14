@@ -46,7 +46,7 @@ in VertexData
 	vec4 BoneWeights2;
 } Input;
 
-out vec4 FragmentColor;
+out vec4 frag_Diffuse;
 
 vec4 phong(vec3 position, vec3 normal, vec3 specular, float specularExponent)
 {
@@ -84,6 +84,6 @@ void main()
 
 	vec4 diffuseTexel = texture(DiffuseTexture, Input.TextureCoord);
 
-	FragmentColor = phong(Input.Position, normalize(normal), specularTexel.rgb, specularTexel.a);
-	//FragmentColor = diffuseTexel;
+	//frag_Diffuse = phong(Input.Position, normalize(normal), specularTexel.rgb, specularTexel.a);
+	frag_Diffuse = diffuseTexel;
 }
