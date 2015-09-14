@@ -20,6 +20,12 @@
 #include "Transform/TransformSystem.h"
 #include "Core/World.h"
 
+void dd::Systems::TransformSystem::Update(double dt)
+{
+
+	return;
+}
+
 glm::vec3 dd::Systems::TransformSystem::AbsolutePosition(EntityID entity)
 {
 	glm::vec3 absPosition;

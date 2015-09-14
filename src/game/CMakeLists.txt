@@ -8,7 +8,7 @@ find_package(assimp REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 find_package(BGFX REQUIRED)
-
+find_package(liquidfun REQUIRED)
 find_package(OpenAL REQUIRED)
 
 # GLM
@@ -26,8 +26,9 @@ include_directories(
     ${assimp_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIRS}
     ${X11_INCLUDE_DIRS}
-	${BGFX_INCLUDE_DIRS}
+    ${BGFX_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
+	${liquidfun_INCLUDE_DIRS}
 )
 
 file(GLOB SOURCE_FILES_Core
@@ -58,6 +59,12 @@ file(GLOB SOURCE_FILES_Transform
 )
 source_group(Transform FILES ${SOURCE_FILES_Transform})
 
+file(GLOB SOURCE_FILES_Physics
+        "${INCLUDE_PATH}/Physics/*.h"
+        "Physics/*.cpp"
+)
+source_group(Physics FILES ${SOURCE_FILES_Physics})
+
 file(GLOB SOURCE_FILES_Game
     "${INCLUDE_PATH}/Game/*.h"
     "Game/*.cpp"
@@ -70,6 +77,7 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Input}
     ${SOURCE_FILES_Rendering}
     ${SOURCE_FILES_Transform}
+    ${SOURCE_FILES_Physics}
     ${SOURCE_FILES_Game}
 )
 
@@ -87,8 +95,9 @@ target_link_libraries(game
     ${assimp_LIBRARIES}
     ${PNG_LIBRARIES}
     ${X11_LIBRARIES}
-	${BGFX_LIBRARIES}
+    ${BGFX_LIBRARIES}
     ${OPENAL_LIBRARY}
+	${liquidfun_LIBRARIES}
 )
 
 add_executable(breakout 
@@ -105,5 +114,6 @@ target_link_libraries(breakout
 	${X11_LIBRARIES}
 	${BGFX_LIBRARIES}
     ${OPENAL_LIBRARY}
+    ${liquidfun_LIBRARIES}
 )
 

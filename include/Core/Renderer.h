@@ -73,8 +73,9 @@ private:
 	ShaderProgram* m_spForward;
 	ShaderProgram* m_spScreen;
 
-	GLuint m_UnitQuad = 0;
+	GLuint m_ScreenQuad = 0;
 	Model* m_UnitSphere = nullptr;
+	Model* m_UnitQuad = nullptr;
 
 	GLuint m_rbDepthBuffer = 0;
 	GLuint m_fbDeferred1 = 0;

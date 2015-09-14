@@ -24,7 +24,7 @@ dd::Texture::Texture(std::string path)
 	std::unique_ptr<Image> image = std::make_unique<PNG>(path);
 
 	if (image->Width == 0 && image->Height == 0 || image->Format == Image::ImageFormat::Unknown) {
-		image = std::make_unique<PNG>("Textures/ErrorTexture.png");
+		image = std::make_unique<PNG>("Textures/Core/ErrorTexture.png");
 		if (image->Width == 0 && image->Height == 0 || image->Format == Image::ImageFormat::Unknown) {
 			LOG_ERROR("Couldn't even load the error texture. This is a dark day indeed.");
 			return;
