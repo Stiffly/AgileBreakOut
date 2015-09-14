@@ -100,7 +100,7 @@ public:
         {
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.f, -3.f, -9.f);
+            transform->Position = glm::vec3(0.f, -2.f, -10.f);
             transform->Scale = glm::vec3(8.f, 0.5f, 1.f);
             transform->Orientation = glm::rotate(transform->Orientation, glm::radians(25.f), glm::vec3(0, 0, -1));
 
@@ -114,6 +114,26 @@ public:
 
             m_World->CommitEntity(ent);
         }
+
+
+		{
+			auto ent = m_World->CreateEntity();
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+			transform->Position = glm::vec3(-2.f, -1.f, -10.f);
+			transform->Scale = glm::vec3(0.5f, 8.5f, 1.f);
+			//transform->Orientation = glm::rotate(transform->Orientation, glm::radians(25.f), glm::vec3(0, 0, -1));
+
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
+			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(ent);
+
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+			physics->Static = true;
+
+			m_World->CommitEntity(ent);
+		}
+
 
 		m_LastTime = glfwGetTime();
 	}

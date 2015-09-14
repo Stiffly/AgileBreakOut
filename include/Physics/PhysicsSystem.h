@@ -55,6 +55,8 @@ private:
     b2Vec2 m_Gravity;
     b2World* m_PhysicsWorld;
     float m_TimeStep;
+    float m_Accumulator;
+
     int m_VelocityIterations, m_PositionIterations;
 
     std::unordered_map<EntityID, b2Body*> m_EntitiesToBodies;
