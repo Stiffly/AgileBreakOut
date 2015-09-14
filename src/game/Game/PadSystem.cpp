@@ -40,25 +40,25 @@ void dd::Systems::PadSystem::Update(double dt)
         }
     }
 
-    if (transform->Velocity.x < -400.f)
+    if (transform->Velocity.x < -maxSpeed)
     {
-        transform->Velocity.x = -400.f;
+        transform->Velocity.x = -maxSpeed;
     }
-    else if (transform->Velocity.x > 400.f)
+    else if (transform->Velocity.x > maxSpeed)
     {
-        transform->Velocity.x = 400.f;
+        transform->Velocity.x = maxSpeed;
     }
     transform->Position += transform->Velocity * (float)dt;
     transform->Velocity += acceleration * (float)dt;
-    transform->Velocity -= transform->Velocity * (0.9f * (float)dt);
+    transform->Velocity -= transform->Velocity * slowdownModifier * (float)dt;
 
     if (left)
     {
-        acceleration.x = -20.f;
+        acceleration.x = -accelerationSpeed;
     }
     else if (right)
     {
-        acceleration.x = 20.f;
+        acceleration.x = accelerationSpeed;
     }
     else
     {
@@ -133,17 +133,32 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     auto transformBall = m_World->GetComponent<Components::Transform>(entityBall);
     auto transformPad = m_World->GetComponent<Components::Transform>(entityPad);
 
-    float movementMultiplier = 2.f;
+    float movementMultiplier = 4.f;
 
-    float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
-    float movementY = glm::cos((abs(movementX) / (3.2f * movementMultiplier)) * 3.14159265359f / 2) * 2.f;
+    float whatX = transformBall->Position.x - transformPad->Position.x;
+    float movementX;
+    if (whatX > 0)
+    {
+        movementX = movementMultiplier * whatX;
+        std::cout << "Right!" << std::endl;
+    }
+    else
+    {
+        movementX = movementMultiplier * whatX;
+        std::cout << "Left!" << std::endl;
+    }
+
+    //float movementY = 1;
+
+    //float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
+    float movementY = glm::cos((abs(movementX) / ((1.6f) * movementMultiplier)) * 3.14159265359f / 2);
 
     std::cout << movementX << " " << movementY << std::endl;
 
     //Temporary solution. Add a new ball and delete the old one.
     auto ent = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-    transform->Position = glm::vec3(transformBall->Position.x, transformBall->Position.y + 0.1f, -10.f);
+    transform->Position = glm::vec3(transformBall->Position.x, transformBall->Position.y + 0.01f, -10.f);
     transform->Scale = glm::vec3(1.f, 1.f, 1.f);
     std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
     sprite->SpriteFile = "Textures/Ball.png";
@@ -158,7 +173,7 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     Events::SetImpulse e;
     e.Entity = ent;
     e.Impulse = glm::vec2(movementX, movementY);
-    e.Point = glm::vec2(event.ContactPoint);
+    e.Point = glm::vec2(transform->Position.x, transform->Position.y);
     EventBroker->Publish(e);
 }
 
