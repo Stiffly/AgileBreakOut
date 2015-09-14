@@ -5,10 +5,14 @@
 #ifndef DAYDREAM_SOUND_H
 #define DAYDREAM_SOUND_H
 
+#include "../../deps/include/AL/al.h"
+#include "../../deps/include/AL/alc.h"
+
 #include "Core/EKeyDown.h"
 #include "Core/EventBroker.h"
 #include "Core/System.h"
 #include "Core/World.h"
+
 
 namespace dd
 {
@@ -22,13 +26,12 @@ public:
 
     void Init();
 
-
 private:
     dd::EventRelay<Sound, dd::Events::KeyDown> m_EKeyDown;
 
     bool OnKeyDown(const dd::Events::KeyDown &event);
-
     void HelloWorld();
+
 };
 }
 }

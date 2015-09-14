@@ -18,6 +18,18 @@ bool dd::Systems::Sound::OnKeyDown(const dd::Events::KeyDown &event)
 {
     // #define GLFW_KEY_S 83
     if(event.KeyCode == 83){
-        HelloWorld();
+        //HelloWorld();
+
+        //Init openAL------------------
+        ALCdevice* device; alcOpenDevice(NULL);
+        ALCcontext* context;
+        if(device){
+            context = alcCreateContext(device, NULL);
+            alcMakeContextCurrent(context);
+        }
+        else{
+            LOG_ERROR("OpenAL failed to initialize");
+        }
+
     }
 }

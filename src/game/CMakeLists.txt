@@ -8,6 +8,9 @@ find_package(assimp REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 find_package(BGFX REQUIRED)
+
+find_package(OpenAL REQUIRED)
+
 # GLM
 if(UNIX)
     find_package(X11 REQUIRED)
@@ -24,6 +27,7 @@ include_directories(
     ${PNG_INCLUDE_DIRS}
     ${X11_INCLUDE_DIRS}
 	${BGFX_INCLUDE_DIRS}
+    ${OPENAL_INCLUDE_DIR}
 )
 
 file(GLOB SOURCE_FILES_Core
@@ -71,9 +75,8 @@ set(SOURCE_FILES
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+    set(STATIC_LIBRARY_FLAGS  "${STATIC_LIBRARY_FLAGS}")
 endif()
-
-add_definitions(-DBGFX_CONFIG_RENDERER_OPENGL=33)
 
 add_library(game ${SOURCE_FILES})
 target_link_libraries(game
@@ -85,6 +88,7 @@ target_link_libraries(game
     ${PNG_LIBRARIES}
     ${X11_LIBRARIES}
 	${BGFX_LIBRARIES}
+    ${OPENAL_LIBRARY}
 )
 
 add_executable(breakout 
@@ -100,5 +104,6 @@ target_link_libraries(breakout
     ${PNG_LIBRARIES}
 	${X11_LIBRARIES}
 	${BGFX_LIBRARIES}
+    ${OPENAL_LIBRARY}
 )
 
