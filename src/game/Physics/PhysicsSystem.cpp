@@ -16,9 +16,9 @@ void dd::Systems::PhysicsSystem::Initialize()
     m_PhysicsWorld = new b2World(m_Gravity);
 
     m_TimeStep = 1.f/60.f;
-    m_VelocityIterations = 8;
-    m_PositionIterations = 6;
-
+    m_VelocityIterations = 6;
+    m_PositionIterations = 2;
+    m_Accumulator = 0.f;
 
     m_PhysicsWorld->SetContactListener(m_ContactListener);
 
@@ -62,7 +62,23 @@ void dd::Systems::PhysicsSystem::Update(double dt)
         }
     }
 
-    m_PhysicsWorld->Step(m_TimeStep, m_VelocityIterations, m_PositionIterations);
+
+
+
+    m_Accumulator += dt;
+    while(m_Accumulator >= m_TimeStep)
+    {
+        m_PhysicsWorld->Step(m_TimeStep, m_VelocityIterations, m_PositionIterations);
+        m_Accumulator -= dt;
+    }
+
+
+
+
+
+
+
+
 
     for (auto i : m_EntitiesToBodies) {
         EntityID entity = i.first;
