@@ -190,7 +190,7 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     //float movementY = 1;
 
     //float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
-    float movementY = glm::cos((abs(movementX) / ((1.6f) * movementMultiplier)) * 3.14159265359f / 2);
+    float movementY = glm::cos((abs(movementX) / ((1.6f) * movementMultiplier)) * 3.14159265359f / 2) + 1;
 
     //std::cout << movementX << " " << movementY << std::endl;
 
