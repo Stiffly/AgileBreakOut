@@ -97,44 +97,57 @@ public:
 
 
 		//TODO: Remove tobias light-test code.
+
+
+
+//        {
+//            auto ent = m_World->CreateEntity();
+//            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+//            transform->Position = glm::vec3(0.5f, 0.f, -9.9f);
+//			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
+//
+//            std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
+//            sprite->SpriteFile = "Textures/Ball.png";
+//
+//            std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
+//			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
+//
+//            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+//            physics->Static = false;
+//
+//			auto plight = m_World->AddComponent<Components::PointLight>(ent);
+//			plight->Radius = 2.f;
+//
+//            m_World->CommitEntity(ent);
+//
+//			Events::SetImpulse e;
+//			e.Entity = ent;
+//			e.Impulse = glm::vec2(0.f, -7.f);
+//			e.Point = glm::vec2(0.5f, 0.f);
+//			m_EventBroker->Publish(e);
+//        }
+
 		{
 			auto t_BrickWall = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_BrickWall);
 			transform->Position = glm::vec3(0.f, 0.f, -10.f);
 			auto sprite = m_World->AddComponent<Components::Sprite>(t_BrickWall);
 			//TODO: Rename SpriteFile to DiffuseTexture or similar.
-			sprite->SpriteFile = "Textures/Test/Brick_Diffuse.png";
+			sprite->SpriteFile = "Textures/Ball.png";
 			sprite->NormalTexture = "Textures/Test/Brick_Normal.png";
 			sprite->SpecularTexture = "Textures/Test/Brick_Specular.png";
 		}
 
-
-        {
-            auto ent = m_World->CreateEntity();
-            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.5f, 0.f, -10.f);
-			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-
-            std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-            sprite->SpriteFile = "Textures/Ball.png";
-
-            std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
-
-            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-            physics->Static = false;
-
-			auto plight = m_World->AddComponent<Components::PointLight>(ent);
-			plight->Radius = 2.f;
-
-            m_World->CommitEntity(ent);
-
-			Events::SetImpulse e;
-			e.Entity = ent;
-			e.Impulse = glm::vec2(0.f, -7.f);
-			e.Point = glm::vec2(0.5f, 0.f);
-			m_EventBroker->Publish(e);
-        }
+		{
+			auto t_BrickWall = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_BrickWall);
+			transform->Position = glm::vec3(0.4f, 0.f, -9.5f);
+			auto sprite = m_World->AddComponent<Components::Sprite>(t_BrickWall);
+			//TODO: Rename SpriteFile to DiffuseTexture or similar.
+			sprite->SpriteFile = "Textures/Ball.png";
+			sprite->NormalTexture = "Textures/Test/Brick_Normal.png";
+			sprite->SpecularTexture = "Textures/Test/Brick_Specular.png";
+		}
 
 		{
 			auto topWall = m_World->CreateEntity();
@@ -342,7 +355,7 @@ public:
 				glm::mat4 modelMatrix = glm::translate(absoluteTransform.Position)
 					* glm::toMat4(orientation2D)
 					* glm::scale(absoluteTransform.Scale);
-				EnqueueSprite(texturediff, texturenorm, texturespec, modelMatrix, spriteComponent->Color);
+				EnqueueSprite(texturediff, texturenorm, texturespec, modelMatrix, spriteComponent->Color, absoluteTransform.Position.z);
 			}
 		}
 
@@ -365,13 +378,15 @@ public:
 			job.EndIndex = texGroup.EndIndex;
 			job.ModelMatrix = modelMatrix;
 			job.Color = color;
+			//TODO: This Depth is probably wrong.
+			job.Depth = (glm::vec4(1,1,1,0) * modelMatrix).z;
 
 			m_RendererQueue.Deferred.Add(job);
 		}
 	}
 
 	// TODO: Get this out of engine.h
-	void EnqueueSprite(Texture* texture, Texture* normalTexture, Texture* specularTexture, glm::mat4 modelMatrix, glm::vec4 color)
+	void EnqueueSprite(Texture* texture, Texture* normalTexture, Texture* specularTexture, glm::mat4 modelMatrix, glm::vec4 color, float depth)
 	{
 		SpriteJob job;
 		job.TextureID = texture->ResourceID;
@@ -380,8 +395,10 @@ public:
 		job.SpecularTexture = *specularTexture;
 		job.ModelMatrix = modelMatrix;
 		job.Color = color;
+		job.Depth = depth;
 
-		m_RendererQueue.Deferred.Add(job);
+
+		m_RendererQueue.Forward.Add(job);
 	}
 
 	void EnqueuePointLight(glm::vec3 position, glm::vec3 diffuseColor, glm::vec3 specularColor, float radius)
