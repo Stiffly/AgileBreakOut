@@ -73,6 +73,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
         {
             if (life->number + 1 == pastLives) {
                 pastLives--;
+                
                 //m_World->RemoveEntity(entity);
             }
         }
