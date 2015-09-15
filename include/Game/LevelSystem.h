@@ -8,6 +8,7 @@
 #include "Core/System.h"
 #include "Core/CTransform.h"
 #include "Rendering/CSprite.h"
+#include "Rendering/CModel.h"
 #include "Game/CBrick.h"
 #include "Physics/EContact.h"
 #include "Core/EventBroker.h"

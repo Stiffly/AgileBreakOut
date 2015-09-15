@@ -127,7 +127,7 @@ public:
 		{
 			auto t_Light = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_Light);
-			transform->Position = glm::vec3(2.f, 1.5f, -10.f);
+			transform->Position = glm::vec3(2.f, 1.5f, -9.f);
 			auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
 			pl->Radius = 8.f;
 		}
