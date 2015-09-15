@@ -1,5 +1,5 @@
-#ifndef FILENAME_H__
-#define FILENAME_H__
+#ifndef NAMESPACE_FILENAME_H__
+#define NAMESPACE_FILENAME_H__
 
 namespace dd
 {
@@ -62,8 +62,7 @@ private:
 	// Private member function
 	bool privateMemberFunction()
 	{
-		switch (m_PrivateMember1)
-		{
+		switch (m_PrivateMember1) {
 		case 1:
 			m_PrivateMember2 = new ClassName(2);
 			break;
