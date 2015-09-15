@@ -80,6 +80,7 @@ private:
             e.Entity1 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureA()->GetBody()];
             e.Entity2 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureB()->GetBody()];
 
+
             m_PhysicsSystem->EventBroker->Publish(e);
         }
         void EndContact(b2Contact* contact)

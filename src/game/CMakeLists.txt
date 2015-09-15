@@ -75,8 +75,7 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Rendering}
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Physics}
-    ${SOURCE_FILES_Game}
-)
+    ${SOURCE_FILES_Game} ../../include/Game/CLife.h ../../include/Game/ELifeLost.h)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
