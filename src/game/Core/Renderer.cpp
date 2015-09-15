@@ -207,7 +207,9 @@ void dd::Renderer::CreateBuffers()
 
 void dd::Renderer::Draw(RenderQueueCollection& rq)
 {
-	DrawDeferred(rq.Deferred, rq.Lights);
+
+	//DrawDeferred(rq.Deferred, rq.Lights);
+	rq.Forward.Jobs.sort(dd::Renderer::DepthSort);
 	DrawForward(rq.Forward, rq.Lights);
 
 	// Finally: Draw the deferred+forward combined texture to the screen
@@ -276,13 +278,19 @@ void dd::Renderer::DrawDeferred(RenderQueue &objects, RenderQueue &lights)
 
 void dd::Renderer::DrawForward(RenderQueue &objects, RenderQueue &lights)
 {
+
 	// Forward-render semi-transparent objects on top of the current framebuffer
 	glDisable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+	//glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred3);
+	glClearColor(1, 0.9, 0.8f, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	m_spForward->Bind();
 	DrawScene(objects, *m_spForward);
@@ -304,10 +312,13 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "M"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "V"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+			glUniform3fv(glGetUniformLocation(shaderProgramHandle, "LightPosition"), 1, glm::value_ptr(glm::vec3(0.f,0.f,-9.f)));
+			glUniform3fv(glGetUniformLocation(shaderProgramHandle, "LightSpecular"), 1, glm::value_ptr(glm::vec3(1.f)));
+			glUniform3fv(glGetUniformLocation(shaderProgramHandle, "LightDiffuse"), 1, glm::value_ptr(glm::vec3(1.f)));
+			glUniform1f(glGetUniformLocation(shaderProgramHandle, "LightRadius"), 40.0f);
 
 			glUniform1f(glGetUniformLocation(shaderProgramHandle, "MaterialShininess"), modelJob->Shininess);
 
-			//TODO: Make sure that a normal/specular is loaded in.
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, modelJob->DiffuseTexture);
 			if (modelJob->NormalTexture != 0) {

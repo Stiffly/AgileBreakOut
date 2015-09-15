@@ -55,6 +55,8 @@ private:
     b2Vec2 m_Gravity;
     b2World* m_PhysicsWorld;
     float m_TimeStep;
+    float m_Accumulator;
+
     int m_VelocityIterations, m_PositionIterations;
 
     std::unordered_map<EntityID, b2Body*> m_EntitiesToBodies;
@@ -77,6 +79,7 @@ private:
             e.ContactPoint = glm::vec2(contactPoint.x, contactPoint.y);
             e.Entity1 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureA()->GetBody()];
             e.Entity2 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureB()->GetBody()];
+
 
             m_PhysicsSystem->EventBroker->Publish(e);
         }
