@@ -16,6 +16,7 @@
 #include "Physics/CBoxShape.h"
 #include "Physics/CPhysics.h"
 #include "Rendering/CSprite.h"
+#include "Rendering/CModel.h"
 #include "Game/CBall.h"
 #include "Core/Component.h"
 #include "Physics/ESetImpulse.h"

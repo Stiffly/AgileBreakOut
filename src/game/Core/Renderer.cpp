@@ -208,7 +208,7 @@ void dd::Renderer::CreateBuffers()
 void dd::Renderer::Draw(RenderQueueCollection& rq)
 {
 
-	//DrawDeferred(rq.Deferred, rq.Lights);
+	DrawDeferred(rq.Deferred, rq.Lights);
 	rq.Forward.Jobs.sort(dd::Renderer::DepthSort);
 	DrawForward(rq.Forward, rq.Lights);
 
@@ -289,8 +289,8 @@ void dd::Renderer::DrawForward(RenderQueue &objects, RenderQueue &lights)
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred3);
-	glClearColor(1, 0.9, 0.8f, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	glClearColor(1, 0.9, 0.8f, 1);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	m_spForward->Bind();
 	DrawScene(objects, *m_spForward);

@@ -145,8 +145,8 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
     transform->Position = glm::vec3(transformBall->Position.x, transformBall->Position.y + 0.1f, -10.f);
     transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-    std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-    sprite->SpriteFile = "Textures/Ball.png";
+    auto model = m_World->AddComponent<Components::Model>(ent);
+    model->ModelFile = "Models/Test/Ball/Ballopus.obj";
     std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
     std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
     std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
