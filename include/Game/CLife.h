@@ -15,7 +15,7 @@ namespace Components
 
 struct Life : Component {
 
-    int number = 0;
+    int Number = 0;
 
 };
 

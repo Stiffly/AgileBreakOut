@@ -34,14 +34,36 @@ class PadSystem : public System
 {
 public:
     PadSystem(World* world, std::shared_ptr<dd::EventBroker> eventBroker)
-    : System(world, eventBroker)
-    { }
+    : System(world, eventBroker) { }
 
     void Initialize() override;
     void Update(double dt) override;
     void UpdateEntity(double dt, EntityID entity, EntityID parent) override;
 
+    EntityID& Entity() { return m_Entity; }
+    void SetEntity(const EntityID& ent) { m_Entity = ent; }
+    glm::vec3 Acceleration() const { return m_Acceleration; }
+    void SetAcceleration(const glm::vec3& acceleration) { m_Acceleration = acceleration; }
+
+    bool Left() const { return m_Left; }
+    void SetLeft(const bool& left) { m_Left = left; }
+    bool Right() const { return m_Right; }
+    void SetRight(const bool& right) { m_Right = right; }
+    bool ReplaceBall() const { return m_ReplaceBall; }
+    void SetReplaceBall(const bool& replaceBall) { m_ReplaceBall = replaceBall; }
+
+    Components::Transform* Transform() const { return m_Transform; }
+    void SetTransform(const Components::Transform* transform) { m_Transform = transform; }
+    Components::Pad* Pad() const { return m_Pad; }
+    void SetPad(const Components::Pad* pad) { m_Pad = pad; }
+
 private:
+    EntityID m_Entity = 0;
+    glm::vec3 m_Acceleration = glm::vec3(0.f, 0.f, 0.f);
+    bool m_Left = false, m_Right = false, m_ReplaceBall = false;
+    Components::Transform* m_Transform;
+    Components::Pad* m_Pad;
+
     dd::EventRelay<PadSystem, dd::Events::KeyDown> m_EKeyDown;
     dd::EventRelay<PadSystem, dd::Events::KeyUp> m_EKeyUp;
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContact;
@@ -50,22 +72,11 @@ private:
     bool OnKeyDown(const dd::Events::KeyDown &event);
     bool OnKeyUp(const dd::Events::KeyUp &event);
 
-
-
     bool OnContact(const dd::Events::Contact &event);
     bool ResetBall(const dd::Events::ResetBall &event);
 
-    EntityID removeThisObject = NULL;
-
-
     class PadSteeringInputController;
     std::array<std::shared_ptr<PadSteeringInputController>, 4> m_PadInputControllers;
-
-    EntityID ent = 0;
-    Components::Transform* transform;
-    Components::Pad* pad;
-    glm::vec3 acceleration = glm::vec3(0.f, 0.f, 0.f);
-    bool left = false, right = false, replaceBall = false;
 };
 
 class PadSystem::PadSteeringInputController : InputController<PadSystem>

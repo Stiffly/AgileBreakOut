@@ -15,7 +15,7 @@ namespace Events
 
 struct ScoreEvent : Event
 {
-    int score = 0;
+    int Score = 0;
 };
 
 }

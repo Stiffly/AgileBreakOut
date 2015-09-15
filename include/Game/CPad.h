@@ -20,9 +20,9 @@ struct Pad : Component
     int Lives;
     int Points;
 
-    float slowdownModifier = 5.f;
-    float accelerationSpeed = 80.f;
-    float maxSpeed = 40.f;
+    float SlowdownModifier = 5.f;
+    float AccelerationSpeed = 80.f;
+    float MaxSpeed = 40.f;
 };
 
 }

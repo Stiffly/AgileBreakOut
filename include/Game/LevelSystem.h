@@ -65,12 +65,38 @@ public:
 
     void Update(double dt) override;
     void UpdateEntity(double dt, EntityID entity, EntityID parent) override;
-    int lives = 3;
-    int pastLives = 3;
 
-    int score = 0;
+    bool Initialized() const { return m_Initialized; }
+    void SetInitialized(const bool& initialized) { m_Initialized = initialized; }
+    int& Lives() { return m_Lives; }
+    void SetLives(const int& lives) { m_Lives = lives; }
+    int& PastLives() { return m_PastLives; }
+    void SetPastLives(const int& pastLives) { m_PastLives = pastLives; }
+    int& Score() { return m_Score; }
+    void SetScore(const int& score) { m_Score = score; }
+    int& NumberOfBricks() { return m_NumberOfBricks; }
+    void SetNumberOfBricks(const int& numberOfBricks) { m_NumberOfBricks = numberOfBricks; }
+    int& Rows() { return m_Rows; }
+    void SetRows(const int& rows) { m_Rows = rows; }
+    int& Lines() { return m_Lines; }
+    void SetLines(const int& lines) { m_Lines = lines; }
+    int& SpaceToEdge() { return m_SpaceToEdge; }
+    void SetSpaceToEdge(const int& spaceToEdge) { m_SpaceToEdge = spaceToEdge; }
+
+    glm::vec2& SpaceBetweenBricks() { return m_SpaceBetweenBricks; }
+    void SetSpaceBetweenBricks(const glm::vec2& spaceBetweenBricks) { m_SpaceBetweenBricks = spaceBetweenBricks; }
 
 private:
+    bool m_Initialized = false;
+    int m_Lives = 3;
+    int m_PastLives = 3;
+    int m_Score = 0;
+    int m_NumberOfBricks;
+    int m_Rows = 7;
+    int m_Lines = 8;
+    int m_SpaceToEdge = 0;
+    glm::vec2 m_SpaceBetweenBricks = glm::vec2(2, 0.5);
+
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::LifeLost> m_ELifeLost;
     dd::EventRelay<LevelSystem, dd::Events::ScoreEvent> m_EScoreEvent;
@@ -78,16 +104,6 @@ private:
     bool OnContact(const dd::Events::Contact &event);
     bool LifeLost(const dd::Events::LifeLost &event);
     bool ScoreEvent(const dd::Events::ScoreEvent &event);
-
-    bool m_Initialized = false;
-
-    int numberOfBricks;
-    int tRows = 7;
-    int tLines = 8;
-    glm::vec2 tSpaceBetweenBricks = glm::vec2(2, 0.5);
-    int tSpaceToEdge = 0;
-
-    EntityID entityToRemove = NULL;
 };
 
 }
