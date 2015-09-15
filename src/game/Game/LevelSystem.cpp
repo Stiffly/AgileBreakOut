@@ -10,14 +10,75 @@
 void dd::Systems::LevelSystem::Initialize()
 {
     EVENT_SUBSCRIBE_MEMBER(m_EContact, LevelSystem::OnContact);
+    EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, LevelSystem::LifeLost);
+
+    for (int i = 0; i < lives; i++)
+    {
+        CreateLife(i);
+    }
 
     return;
 }
 
-void dd::Systems::LevelSystem::Update(double dt) {
+void dd::Systems::LevelSystem::CreateLife(int number)
+{
+    auto life = m_World->CreateEntity();
+    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(life);
+    transform->Position = glm::vec3(-11.f + number, -8.f, -10.f);
+    transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
+
+    std::shared_ptr<Components::Life> lifeNr = m_World->AddComponent<Components::Life>(life);
+    lifeNr->number = number;
+
+    std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(life);
+    sprite->SpriteFile = "Textures/Ball.png";
+
+    m_World->CommitEntity(life);
+}
+
+void dd::Systems::LevelSystem::Update(double dt)
+{
     if (!m_Initialized) {
         CreateBasicLevel(tRows, tLines, tSpaceBetweenBricks, tSpaceToEdge);
         m_Initialized = true;
+    }
+
+    if (entityToRemove != NULL)
+    {
+        //m_World->RemoveEntity(entityToRemove);
+        entityToRemove = NULL;
+    }
+}
+
+void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
+{
+    auto ball = m_World->GetComponent<Components::Ball>(entity);
+
+    if (ball != NULL)
+    {
+        auto transformBall = m_World->GetComponent<Components::Transform>(entity);
+        if (transformBall->Position.y < -10)
+        {
+            if (lives == pastLives)
+            {
+                Events::LifeLost e;
+                e.entity = entity;
+                EventBroker->Publish(e);
+                return;
+            }
+        }
+    }
+
+    if (lives != pastLives)
+    {
+        auto life = m_World->GetComponent<Components::Life>(entity);
+        if (life != NULL)
+        {
+            if (life->number + 1 == pastLives) {
+                m_World->RemoveEntity(entity);
+                pastLives = lives;
+            }
+        }
     }
 }
 
@@ -55,7 +116,6 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     float y = spaceToEdge + row * spacesBetweenBricks.y;
     transform->Scale = glm::vec3(1.6, 0.4, 0.);
     transform->Position = glm::vec3(x - 7, y + 1, -10.f);
-    //sprite->Color = glm::vec4(1.f, 1.f, 1.f, 1.f);
     m_World->CommitEntity(brick);
     return;
 }
@@ -82,8 +142,6 @@ void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
 
 bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 {
-    /*event.Entity1 - Vi vet inte vilken som.
-      event.Entity2 - */
     EntityID entityBrick = event.Entity1;
     auto brick = m_World->GetComponent<Components::Brick>(entityBrick);
     if (brick == NULL)
@@ -91,49 +149,17 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         return false;
     }
     EntityID entityBall = event.Entity2;
-    //EntityID entity1 = event.Entity1;
-    //EntityID entity2 = event.Entity2;
 
-    //auto brick = m_World->GetComponent<Components::Brick>(entity1);
-    //auto ball = m_World->GetComponent<Components::Ball>(entity2);
-    //std::cout << brick << std::endl;
-    //std::cout << ball << std::endl;
-    /*if (brick != NULL)
-    {
-        std::cout << "Entity1 is a brick!" << std::endl;
-        entityBrick = entity1;
-        if (ball != NULL)
-        {
-            std::cout << "Entity2 is a ball!" << std::endl;
-            entityBall = entity2;
-        }
-    }
-    else
-    {
-        brick = m_World->GetComponent<Components::Brick>(entity2);
-        if (brick != NULL)
-        {
-            std::cout << "Entity2 is a brick!" << std::endl;
-            entityBrick = entity2;
-        }
+    m_World->RemoveEntity(entityBrick);
 
-        ball = m_World->GetComponent<Components::Ball>(entity1);
-        if (ball != NULL)
-        {
-            std::cout << "Entity1 is a ball!" << std::endl;
-            entityBall = entity1;
-        }
-    }
+    return true;
+}
 
-    if (entityBrick != NULL && entityBall != NULL)
-    {*/
-        //std::cout << "We're destroying!" << std::endl;
-        m_World->RemoveEntity(entityBrick);
+bool dd::Systems::LevelSystem::LifeLost(const dd::Events::LifeLost &event)
+{
+    lives--;
 
-        return true;
-    //}
-
-    return false;
+    return true;
 }
 
 void dd::Systems::LevelSystem::EndLevel()
