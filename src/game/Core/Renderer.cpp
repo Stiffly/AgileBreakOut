@@ -209,7 +209,6 @@ void dd::Renderer::Draw(RenderQueueCollection& rq)
 {
 
 	//DrawDeferred(rq.Deferred, rq.Lights);
-
 	rq.Forward.Jobs.sort(dd::Renderer::DepthSort);
 	DrawForward(rq.Forward, rq.Lights);
 
@@ -313,6 +312,10 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "M"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "V"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+			glUniform3fv(glGetUniformLocation(shaderProgramHandle, "LightPosition"), 1, glm::value_ptr(glm::vec3(0.f,0.f,-9.f)));
+			glUniform3fv(glGetUniformLocation(shaderProgramHandle, "LightSpecular"), 1, glm::value_ptr(glm::vec3(1.f)));
+			glUniform3fv(glGetUniformLocation(shaderProgramHandle, "LightDiffuse"), 1, glm::value_ptr(glm::vec3(1.f)));
+			glUniform1f(glGetUniformLocation(shaderProgramHandle, "LightRadius"), 40.0f);
 
 			glUniform1f(glGetUniformLocation(shaderProgramHandle, "MaterialShininess"), modelJob->Shininess);
 

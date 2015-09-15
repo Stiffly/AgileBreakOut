@@ -355,7 +355,7 @@ public:
 				glm::mat4 modelMatrix = glm::translate(absoluteTransform.Position)
 					* glm::toMat4(orientation2D)
 					* glm::scale(absoluteTransform.Scale);
-				EnqueueSprite(texturediff, texturenorm, texturespec, modelMatrix, spriteComponent->Color);
+				EnqueueSprite(texturediff, texturenorm, texturespec, modelMatrix, spriteComponent->Color, absoluteTransform.Position.z);
 			}
 		}
 
@@ -386,7 +386,7 @@ public:
 	}
 
 	// TODO: Get this out of engine.h
-	void EnqueueSprite(Texture* texture, Texture* normalTexture, Texture* specularTexture, glm::mat4 modelMatrix, glm::vec4 color)
+	void EnqueueSprite(Texture* texture, Texture* normalTexture, Texture* specularTexture, glm::mat4 modelMatrix, glm::vec4 color, float depth)
 	{
 		SpriteJob job;
 		job.TextureID = texture->ResourceID;
@@ -395,7 +395,7 @@ public:
 		job.SpecularTexture = *specularTexture;
 		job.ModelMatrix = modelMatrix;
 		job.Color = color;
-		job.Depth = (glm::vec4(1,1,1,0) * modelMatrix).z;
+		job.Depth = depth;
 
 
 		m_RendererQueue.Forward.Add(job);

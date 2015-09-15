@@ -83,7 +83,8 @@ void main()
 	vec4 specularTexel = texture(SpecularMap, Input.TextureCoord);
 
 	vec4 diffuseTexel = texture(DiffuseTexture, Input.TextureCoord);
-
-	//frag_Diffuse = phong(Input.Position, normalize(normal), specularTexel.rgb, specularTexel.a);
+	vec4 La = vec4(0.3, 0.3, 0.3, 1.0);
+	vec4 light = phong(Input.Position, normalize(normal), specularTexel.rgb, specularTexel.a);
+	//frag_Diffuse = light;
 	frag_Diffuse = diffuseTexel;
 }
