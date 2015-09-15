@@ -65,16 +65,6 @@ private:
     void CreateBody(EntityID entity);
 
 
-    struct Impulse
-    {
-        b2Body* Body;
-        b2Vec2 Impulse;
-        b2Vec2 Point;
-    };
-    std::list<Impulse> m_Impulses;
-
-
-
     class ContactListener : public b2ContactListener
     {
     public:

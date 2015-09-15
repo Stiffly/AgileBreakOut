@@ -37,13 +37,7 @@ bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
     point.x = event.Point.x;
     point.y = event.Point.y;
 
-
-    Impulse i;
-    i.Body = body;
-    i.Impulse = impulse;
-    i.Point = point;
-
-    m_Impulses.push_back(i);
+    body->ApplyLinearImpulse(impulse, point, true);
 
     return true;
 }
@@ -57,7 +51,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
         auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
 
 
-        if (m_World->GetEntityParent(entity) == 0) { //TODO: Make this work with childs too
+        if (m_World->GetEntityParent(entity) == 0) {
             b2Vec2 position;
             position.x = transformComponent->Position.x;
             position.y = transformComponent->Position.y;
@@ -65,15 +59,10 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             float angle = -glm::eulerAngles(transformComponent->Orientation).z;
 
             body->SetTransform(position, angle);
-
-            body->SetLinearVelocity(b2Vec2(transformComponent->Velocity.x, transformComponent->Velocity.y));
         }
     }
 
-    for (auto i : m_Impulses) {
-        i.Body->ApplyLinearImpulse(i.Impulse, i.Point, true);
-    }
-    m_Impulses.clear();
+
 
 
     m_Accumulator += dt;
@@ -105,13 +94,8 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
             float angle = body->GetAngle();
 
-
+            //TODO: CHECK IF THIS IS CORRECT
             transformComponent->Orientation =  glm::quat(glm::vec3(0, 0, -angle));
-
-            b2Vec2 velocity = body->GetLinearVelocity();
-
-            transformComponent->Velocity.x = velocity.x;
-            transformComponent->Velocity.y = velocity.y;
         }
     }
 }
