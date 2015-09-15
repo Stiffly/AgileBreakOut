@@ -24,8 +24,39 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, PadSystem::OnKeyDown);
     EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, PadSystem::OnKeyUp);
     EVENT_SUBSCRIBE_MEMBER(m_EContact, PadSystem::OnContact);
+    EVENT_SUBSCRIBE_MEMBER(m_EBall, PadSystem::BallFellOffStage);
 
     return;
+}
+
+void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
+{
+    auto ball = m_World->GetComponent<Components::Ball>(entity);
+    if (replaceBall == true)
+    {
+        replaceBall = false;
+
+        //Temporary. Create new ball.
+        auto ent = m_World->CreateEntity();
+        std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+        transform->Position = glm::vec3(0.5f, 0.f, -10.f);;
+        transform->Scale = glm::vec3(1.f, 1.f, 1.f);
+        std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
+        sprite->SpriteFile = "Textures/Ball.png";
+        std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
+        std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
+        std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+        physics->Static = false;
+
+        m_World->RemoveEntity(entity);
+        m_World->CommitEntity(ent);
+
+        Events::SetImpulse e;
+        e.Entity = ent;
+        e.Impulse = glm::vec2(0.f, -7.f);
+        e.Point = glm::vec2(transform->Position.x, transform->Position.y);
+        EventBroker->Publish(e);
+    }
 }
 
 void dd::Systems::PadSystem::Update(double dt)
@@ -85,11 +116,15 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
         //acceleration.x = -0.01f;
         left = true;
     }
-    else if (val = 262)
+    else if (val == 262)
     {
         //std::cout << "Right!" << std::endl;
         //acceleration.x = 0.01f;
         right = true;
+    }
+    else if (val == 82)
+    {
+        replaceBall = true;
     }
     return true;
 }
@@ -109,7 +144,7 @@ bool dd::Systems::PadSystem::OnKeyUp(const dd::Events::KeyUp &event)
     {
         left = false;
     }
-    else if (val = 262)
+    else if (val == 262)
     {
         right = false;
     }
@@ -140,12 +175,12 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     if (whatX > 0)
     {
         movementX = movementMultiplier * whatX;
-        std::cout << "Right!" << std::endl;
+        //std::cout << "Right!" << std::endl;
     }
     else
     {
         movementX = movementMultiplier * whatX;
-        std::cout << "Left!" << std::endl;
+        //std::cout << "Left!" << std::endl;
     }
 
     //float movementY = 1;
@@ -153,7 +188,7 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     //float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
     float movementY = glm::cos((abs(movementX) / ((1.6f) * movementMultiplier)) * 3.14159265359f / 2);
 
-    std::cout << movementX << " " << movementY << std::endl;
+    //std::cout << movementX << " " << movementY << std::endl;
 
     //Temporary solution. Add a new ball and delete the old one.
     auto ent = m_World->CreateEntity();
@@ -175,6 +210,12 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     e.Impulse = glm::vec2(movementX, movementY);
     e.Point = glm::vec2(transform->Position.x, transform->Position.y);
     EventBroker->Publish(e);
+}
+
+bool dd::Systems::PadSystem::BallFellOffStage(const dd::Events::BallFellOffStage &event)
+{
+    replaceBall = true;
+    return true;
 }
 
 bool dd::Systems::PadSystem::PadSteeringInputController::OnCommand(const Events::InputCommand &event)
