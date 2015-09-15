@@ -1,17 +1,31 @@
-//
-// Created by Adam on 2015-09-09.
-//
+/*
+	This file is part of Daydream Engine.
+	Copyright 2014 Adam Byléhn, Tobias Dahl, Simon Holmberg, Viktor Ljung
+
+	Daydream Engine is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Daydream Engine is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Lesser General Public License for more details.
+
+	You should have received a copy of the GNU Lesser General Public License
+	along with Daydream Engine.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifndef DAYDREAM_SOUND_H
 #define DAYDREAM_SOUND_H
 
-#include <fstream>
 
 #include "AL/al.h"
 #include "AL/alc.h"
 #include "Core/System.h"
 #include "Core/World.h"
 #include "Core/EKeyDown.h"
+#include "Core/EPlaySound.h"
 #include "Core/EventBroker.h"
 
 namespace dd
@@ -30,15 +44,19 @@ public:
     //void OnComponentCreated(std::string type, std::shared_ptr<Component> component) override;
     //void OnComponentRemoved(std::string type, Component* component) override;
     //void PlaySound(Components::SoundEmitter* emitter, std::string path); // Use if you want to play a temporary .wav file not from component
-    //void PlaySound(std::shared_ptr<Components::SoundEmitter> emitter); // Use if you want to play .wav file from component // imon no hate plx T.T
+    //void PlaySound(std::shared_ptr<Components::SoundEmitter> emitter); // Use if you want to play .wav file from component
     //void StopSound(std::shared_ptr<Components::SoundEmitter> emitter);
 
 
 
 
 private:
+    //Events
     dd::EventRelay<Sound, dd::Events::KeyDown> m_EKeyDown;
     bool OnKeyDown(const dd::Events::KeyDown &event);
+
+    //dd::EventRelay<Sound, dd::Events::PlaySound> m_EPlaySound;
+    //bool PlayASound(const dd::Events::PlaySound &event);
 
     ALuint LoadFile(std::string fileName);
     ALuint CreateSource();

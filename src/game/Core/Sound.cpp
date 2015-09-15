@@ -1,12 +1,27 @@
-//
-// Created by Adam on 2015-09-09.
-//
+/*
+	This file is part of Daydream Engine.
+	Copyright 2014 Adam Byléhn, Tobias Dahl, Simon Holmberg, Viktor Ljung
+
+	Daydream Engine is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Daydream Engine is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Lesser General Public License for more details.
+
+	You should have received a copy of the GNU Lesser General Public License
+	along with Daydream Engine.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "PrecompiledHeader.h"
 #include "Core/Sound.h"
 
 dd::Systems::Sound::~Sound()
 {
-    alDeleteSources(1, m_Source);
+    //alDeleteSources(1, m_Source);
 }
 
 void dd::Systems::Sound::Initialize()
@@ -19,7 +34,7 @@ void dd::Systems::Sound::Initialize()
         alcMakeContextCurrent(context);
     }
     else {
-        LOG_ERROR("OMG OPEN AL FAIL");
+        LOG_ERROR("OpenAL failed to initialize.");
     }
 
     alGetError();
@@ -28,6 +43,7 @@ void dd::Systems::Sound::Initialize()
 
     //Subscribe to events
     EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, &Sound::OnKeyDown);
+    //EVENT_SUBSCRIBE_MEMBER(m_EPlaySound, &Sound::PlayASound);
 }
 
 void dd::Systems::Sound::Update(double dt)
@@ -38,9 +54,19 @@ void dd::Systems::Sound::Update(double dt)
     alSourcefv(m_Source, AL_POSITION, pos);
 }
 
+/*bool dd::Systems::Sound::PlayASound(const dd::Events::PlaySound &event)
+{
+
+}*/
+
 bool dd::Systems::Sound::OnKeyDown(const dd::Events::KeyDown &event)
 {
     // #define GLFW_KEY_S 83
+    /*if (event.KeyCode == 83) {
+        Events::PlaySound e;
+        e.path = "Sounds/screwed.wav";
+        EventBroker->Publish(e);
+    }*/
     if (event.KeyCode == 83) {
         m_Source = CreateSource();
         ALuint buffer = LoadFile("Sounds/screwed.wav");
