@@ -24,7 +24,7 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, PadSystem::OnKeyDown);
     EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, PadSystem::OnKeyUp);
     EVENT_SUBSCRIBE_MEMBER(m_EContact, PadSystem::OnContact);
-    EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, PadSystem::LifeLost);
+    EVENT_SUBSCRIBE_MEMBER(m_EResetBall, PadSystem::ResetBall);
 
     return;
 }
@@ -70,30 +70,31 @@ void dd::Systems::PadSystem::Update(double dt)
             if (m_World->GetProperty<std::string>(it->first, "Name") == "Pad") {
                 ent = it->first;
                 transform = m_World->GetComponent<Components::Transform>(ent);
+                pad = m_World->GetComponent<Components::Pad>(ent);
                 break;
             }
         }
     }
 
-    if (transform->Velocity.x < -maxSpeed)
+    if (transform->Velocity.x < -pad->maxSpeed)
     {
-        transform->Velocity.x = -maxSpeed;
+        transform->Velocity.x = -pad->maxSpeed;
     }
-    else if (transform->Velocity.x > maxSpeed)
+    else if (transform->Velocity.x > pad->maxSpeed)
     {
-        transform->Velocity.x = maxSpeed;
+        transform->Velocity.x = pad->maxSpeed;
     }
     transform->Position += transform->Velocity * (float)dt;
     transform->Velocity += acceleration * (float)dt;
-    transform->Velocity -= transform->Velocity * slowdownModifier * (float)dt;
+    transform->Velocity -= transform->Velocity * pad->slowdownModifier * (float)dt;
 
     if (left)
     {
-        acceleration.x = -accelerationSpeed;
+        acceleration.x = -pad->accelerationSpeed;
     }
     else if (right)
     {
-        acceleration.x = accelerationSpeed;
+        acceleration.x = pad->accelerationSpeed;
     }
     else
     {
@@ -106,27 +107,27 @@ void dd::Systems::PadSystem::Update(double dt)
 bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
 {
     int val = event.KeyCode;
-    if (val == 265)
+    if (val == GLFW_KEY_UP)
     {
         //std::cout << "Up!" << std::endl;
     }
-    else if (val == 264)
+    else if (val == GLFW_KEY_DOWN)
     {
         //std::cout << "Down!" << std::endl;
     }
-    else if (val == 263)
+    else if (val == GLFW_KEY_LEFT)
     {
         //std::cout << "Left!" << std::endl;
         //acceleration.x = -0.01f;
         left = true;
     }
-    else if (val == 262)
+    else if (val == GLFW_KEY_RIGHT)
     {
         //std::cout << "Right!" << std::endl;
         //acceleration.x = 0.01f;
         right = true;
     }
-    else if (val == 82)
+    else if (val == GLFW_KEY_R)
     {
         replaceBall = true;
     }
@@ -136,19 +137,19 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
 bool dd::Systems::PadSystem::OnKeyUp(const dd::Events::KeyUp &event)
 {
     int val = event.KeyCode;
-    if (val == 265)
+    if (val == GLFW_KEY_UP)
     {
 
     }
-    else if (val == 264)
+    else if (val == GLFW_KEY_DOWN)
     {
 
     }
-    else if (val == 263)
+    else if (val == GLFW_KEY_LEFT)
     {
         left = false;
     }
-    else if (val == 262)
+    else if (val == GLFW_KEY_RIGHT)
     {
         right = false;
     }
@@ -216,7 +217,7 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     EventBroker->Publish(e);
 }
 
-bool dd::Systems::PadSystem::LifeLost(const dd::Events::LifeLost &event)
+bool dd::Systems::PadSystem::ResetBall(const dd::Events::ResetBall &event)
 {
     replaceBall = true;
     return true;

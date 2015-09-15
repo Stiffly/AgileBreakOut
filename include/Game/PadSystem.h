@@ -20,9 +20,8 @@
 #include "Physics/ESetImpulse.h"
 #include "Rendering/CSprite.h"
 #include "Game/CBall.h"
-#include "Game/ELifeLost.h"
-
-
+#include "Game/EResetBall.h"
+#include "CPad.h"
 
 
 namespace dd
@@ -46,21 +45,17 @@ private:
     dd::EventRelay<PadSystem, dd::Events::KeyDown> m_EKeyDown;
     dd::EventRelay<PadSystem, dd::Events::KeyUp> m_EKeyUp;
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContact;
-    dd::EventRelay<PadSystem, dd::Events::LifeLost> m_ELifeLost;
+    dd::EventRelay<PadSystem, dd::Events::ResetBall> m_EResetBall;
 
     bool OnKeyDown(const dd::Events::KeyDown &event);
     bool OnKeyUp(const dd::Events::KeyUp &event);
 
 
+
     bool OnContact(const dd::Events::Contact &event);
-    bool LifeLost(const dd::Events::LifeLost &event);
+    bool ResetBall(const dd::Events::ResetBall &event);
 
     EntityID removeThisObject = NULL;
-
-    float slowdownModifier = 5.f;
-    float accelerationSpeed = 80.f;
-    float maxSpeed = 40.f;
-
 
 
     class PadSteeringInputController;
@@ -68,6 +63,7 @@ private:
 
     EntityID ent = 0;
     Components::Transform* transform;
+    Components::Pad* pad;
     glm::vec3 acceleration = glm::vec3(0.f, 0.f, 0.f);
     bool left = false, right = false, replaceBall = false;
 };

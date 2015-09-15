@@ -11,6 +11,7 @@ void dd::Systems::LevelSystem::Initialize()
 {
     EVENT_SUBSCRIBE_MEMBER(m_EContact, LevelSystem::OnContact);
     EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, LevelSystem::LifeLost);
+    EVENT_SUBSCRIBE_MEMBER(m_EScoreEvent, LevelSystem::ScoreEvent);
 
     for (int i = 0; i < lives; i++)
     {
@@ -42,12 +43,6 @@ void dd::Systems::LevelSystem::Update(double dt)
         CreateBasicLevel(tRows, tLines, tSpaceBetweenBricks, tSpaceToEdge);
         m_Initialized = true;
     }
-
-    if (entityToRemove != NULL)
-    {
-        //m_World->RemoveEntity(entityToRemove);
-        entityToRemove = NULL;
-    }
 }
 
 void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
@@ -62,8 +57,10 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
             if (lives == pastLives)
             {
                 Events::LifeLost e;
-                e.entity = entity;
+                e.Entity = entity;
                 EventBroker->Publish(e);
+                Events::ResetBall be;
+                EventBroker->Publish(be);
                 return;
             }
         }
@@ -116,6 +113,7 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     float y = spaceToEdge + row * spacesBetweenBricks.y;
     transform->Scale = glm::vec3(1.6, 0.4, 0.);
     transform->Position = glm::vec3(x - 7, y + 1, -10.f);
+    cBrick->Score = 10 * num;
     m_World->CommitEntity(brick);
     return;
 }
@@ -128,7 +126,7 @@ void dd::Systems::LevelSystem::ProcessCollision()
 
 void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
 {
-    auto brick = m_World->GetComponent<Components::Brick>(entity);
+    /*auto brick = m_World->GetComponent<Components::Brick>(entity);
     if (brick != NULL)
     {
         numberOfBricks--;
@@ -136,7 +134,7 @@ void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
         {
             EndLevel();
         }
-    }
+    }*/
     return;
 }
 
@@ -152,12 +150,35 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 
     m_World->RemoveEntity(entityBrick);
 
+    numberOfBricks--;
+    if (numberOfBricks == 0)
+    {
+        Events::ScoreEvent es;
+        es.score = 500;
+        EventBroker->Publish(es);
+        Events::ResetBall e;
+        EventBroker->Publish(e);
+        CreateBasicLevel(tRows, tLines, tSpaceBetweenBricks, tSpaceToEdge);
+    }
+    Events::ScoreEvent es;
+    es.score = brick->Score;
+    EventBroker->Publish(es);
+
+    std::cout << "Score: " << score << std::endl;
+
     return true;
 }
 
 bool dd::Systems::LevelSystem::LifeLost(const dd::Events::LifeLost &event)
 {
     lives--;
+
+    return true;
+}
+
+bool dd::Systems::LevelSystem::ScoreEvent(const dd::Events::ScoreEvent &event)
+{
+    score += event.score;
 
     return true;
 }
