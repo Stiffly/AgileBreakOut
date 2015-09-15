@@ -114,7 +114,7 @@ public:
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
             transform->Position = glm::vec3(0.5f, 0.f, -10.f);
 			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-			transform->Velocity = glm::vec3(0.0f, 0.f, 0.f);
+			transform->Velocity = glm::vec3(0.0f, -5.f, 0.f);
 
             std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
             sprite->SpriteFile = "Textures/Ball.png";
@@ -130,11 +130,7 @@ public:
 
             m_World->CommitEntity(ent);
 
-			Events::SetImpulse e;
-			e.Entity = ent;
-			e.Impulse = glm::vec2(0.f, -7.f);
-			e.Point = glm::vec2(0.5f, 0.f);
-			m_EventBroker->Publish(e);
+
         }
 
 		{
@@ -213,6 +209,7 @@ public:
 			ctransform->Scale = glm::vec3(3.2, 0.8, 0.);
 			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
 			auto physics = m_World->AddComponent<Components::Physics>(ent);
+			physics->Static = false;
 			auto csprite = m_World->AddComponent<Components::Sprite>(ent);
 			auto pad = m_World->AddComponent<Components::Pad>(ent);
 			csprite->SpriteFile = "Textures/Pad.png";

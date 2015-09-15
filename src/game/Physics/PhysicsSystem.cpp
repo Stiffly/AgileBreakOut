@@ -66,7 +66,10 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
             body->SetTransform(position, angle);
 
+
             body->SetLinearVelocity(b2Vec2(transformComponent->Velocity.x, transformComponent->Velocity.y));
+
+
         }
     }
 
@@ -84,18 +87,12 @@ void dd::Systems::PhysicsSystem::Update(double dt)
     }
 
 
-
-
-
-
-
-
-
     for (auto i : m_EntitiesToBodies) {
         EntityID entity = i.first;
         b2Body* body = i.second;
 
         auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
+
 
 
         if (m_World->GetEntityParent(entity) == 0) {
@@ -109,9 +106,9 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             transformComponent->Orientation =  glm::quat(glm::vec3(0, 0, -angle));
 
             b2Vec2 velocity = body->GetLinearVelocity();
-
             transformComponent->Velocity.x = velocity.x;
             transformComponent->Velocity.y = velocity.y;
+
         }
     }
 }
@@ -169,6 +166,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
         bodyDef.type = b2_staticBody;
     } else {
         bodyDef.type = b2_dynamicBody;
+
     }
 
 
@@ -205,7 +203,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
         fixtureDef.shape = pShape;
         fixtureDef.density = 1.f;
         fixtureDef.restitution = 1.0f;
-        fixtureDef.friction = 0.3f;
+        fixtureDef.friction = 0.0f;
         body->CreateFixture(&fixtureDef);
 
     }

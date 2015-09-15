@@ -49,8 +49,11 @@ void dd::Systems::PadSystem::Update(double dt)
         transform->Velocity.x = 400.f;
     }
     transform->Position += transform->Velocity * (float)dt;
-    transform->Velocity += acceleration * (float)dt;
+    transform->Velocity += acceleration  * (float)dt;
     transform->Velocity -= transform->Velocity * (0.9f * (float)dt);
+    transform->Position.y = -5.f;
+    //transform->Orientation = glm::quat();
+    std::cout << transform->Velocity.x << ", " << transform->Velocity.y << std::endl;
 
     if (left)
     {
@@ -135,31 +138,18 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
 
     float movementMultiplier = 2.f;
 
-    float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
-    float movementY = glm::cos((abs(movementX) / (3.2f * movementMultiplier)) * 3.14159265359f / 2) * 2.f;
+    //float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
+    //float movementY = glm::cos((abs(movementX) / (3.2f * movementMultiplier)) * 3.14159265359f / 2) * 2.f;
 
-    std::cout << movementX << " " << movementY << std::endl;
+   // std::cout << movementX << " " << movementY << std::endl;
 
-    //Temporary solution. Add a new ball and delete the old one.
-    auto ent = m_World->CreateEntity();
-    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-    transform->Position = glm::vec3(transformBall->Position.x, transformBall->Position.y + 0.1f, -10.f);
-    transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-    std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-    sprite->SpriteFile = "Textures/Ball.png";
-    std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-    std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
-    std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-    physics->Static = false;
+    float len = glm::length<float>(transformBall->Velocity);
 
-    m_World->RemoveEntity(entityBall);
-    m_World->CommitEntity(ent);
+    transformBall->Velocity += glm::vec3(transformPad->Velocity.x, 0, 0);
+    transformBall->Velocity = glm::normalize(transformBall->Velocity) * len;
 
-    Events::SetImpulse e;
-    e.Entity = ent;
-    e.Impulse = glm::vec2(movementX, movementY);
-    e.Point = glm::vec2(event.ContactPoint);
-    EventBroker->Publish(e);
+
+    //transform->Velocity = glm::vec3(movementX, movementY, 0.f);
 }
 
 bool dd::Systems::PadSystem::PadSteeringInputController::OnCommand(const Events::InputCommand &event)

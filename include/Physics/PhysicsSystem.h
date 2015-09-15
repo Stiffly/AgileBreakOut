@@ -95,9 +95,12 @@ private:
         void EndContact(b2Contact* contact)
         { /* handle end event */ }
         void PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
-        { /* handle pre-solve event */ }
+        { /* handle pre-solve event */}
         void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)
-        { /* handle post-solve event */ }
+        { /* handle post-solve event */
+            contact->GetFixtureA()->GetBody()->SetAngularVelocity(0.f);
+            contact->GetFixtureB()->GetBody()->SetAngularVelocity(0.f);
+        }
 
     private:
         PhysicsSystem* m_PhysicsSystem;
