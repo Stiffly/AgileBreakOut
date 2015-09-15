@@ -10,7 +10,7 @@
 void dd::Systems::LevelSystem::Initialize()
 {
     EVENT_SUBSCRIBE_MEMBER(m_EContact, LevelSystem::OnContact);
-    EVENT_SUBSCRIBE_MEMBER(m_EBall, LevelSystem::BallFellOffStage);
+    EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, LevelSystem::LifeLost);
 
     for (int i = 0; i < lives; i++)
     {
@@ -61,7 +61,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
         {
             if (lives == pastLives)
             {
-                Events::BallFellOffStage e;
+                Events::LifeLost e;
                 e.entity = entity;
                 EventBroker->Publish(e);
                 return;
@@ -116,7 +116,6 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     float y = spaceToEdge + row * spacesBetweenBricks.y;
     transform->Scale = glm::vec3(1.6, 0.4, 0.);
     transform->Position = glm::vec3(x - 7, y + 1, -10.f);
-    //sprite->Color = glm::vec4(1.f, 1.f, 1.f, 1.f);
     m_World->CommitEntity(brick);
     return;
 }
@@ -143,8 +142,6 @@ void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
 
 bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 {
-    /*event.Entity1 - Vi vet inte vilken som.
-      event.Entity2 - */
     EntityID entityBrick = event.Entity1;
     auto brick = m_World->GetComponent<Components::Brick>(entityBrick);
     if (brick == NULL)
@@ -152,83 +149,14 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         return false;
     }
     EntityID entityBall = event.Entity2;
-    //EntityID entity1 = event.Entity1;
-    //EntityID entity2 = event.Entity2;
 
-    //auto brick = m_World->GetComponent<Components::Brick>(entity1);
-    //auto ball = m_World->GetComponent<Components::Ball>(entity2);
-    //std::cout << brick << std::endl;
-    //std::cout << ball << std::endl;
-    /*if (brick != NULL)
-    {
-        std::cout << "Entity1 is a brick!" << std::endl;
-        entityBrick = entity1;
-        if (ball != NULL)
-        {
-            std::cout << "Entity2 is a ball!" << std::endl;
-            entityBall = entity2;
-        }
-    }
-    else
-    {
-        brick = m_World->GetComponent<Components::Brick>(entity2);
-        if (brick != NULL)
-        {
-            std::cout << "Entity2 is a brick!" << std::endl;
-            entityBrick = entity2;
-        }
+    m_World->RemoveEntity(entityBrick);
 
-        ball = m_World->GetComponent<Components::Ball>(entity1);
-        if (ball != NULL)
-        {
-            std::cout << "Entity1 is a ball!" << std::endl;
-            entityBall = entity1;
-        }
-    }
-
-    if (entityBrick != NULL && entityBall != NULL)
-    {*/
-        m_World->RemoveEntity(entityBrick);
-
-        return true;
-    //}
-
-    return false;
+    return true;
 }
 
-bool dd::Systems::LevelSystem::BallFellOffStage(const dd::Events::BallFellOffStage &event)
+bool dd::Systems::LevelSystem::LifeLost(const dd::Events::LifeLost &event)
 {
-    std::cout << "Did you get here?" << std::endl;
-    /*EntityID entity = event.entity;
-
-    //Temporary. Create new ball.
-    auto ent = m_World->CreateEntity();
-    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-    transform->Position = glm::vec3(0.5f, 0.f, -10.f);;
-    transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-    std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-    sprite->SpriteFile = "Textures/Ball.png";
-    std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-    std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
-    std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-    physics->Static = false;
-
-    std::cout << "How about here?" << std::endl;
-*/
-    //m_World->RemoveEntity(event.entity);
-    //entityToRemove = event.entity;
-/*    m_World->CommitEntity(ent);
-
-    std::cout << "Or here?" << std::endl;
-
-    Events::SetImpulse e;
-    e.Entity = ent;
-    e.Impulse = glm::vec2(0.f, -7.f);
-    e.Point = glm::vec2(transform->Position.x, transform->Position.y);
-    EventBroker->Publish(e);
-
-    std::cout << "Maybe even here?" << std::endl;
-*/
     lives--;
 
     return true;

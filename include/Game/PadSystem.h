@@ -20,7 +20,7 @@
 #include "Physics/ESetImpulse.h"
 #include "Rendering/CSprite.h"
 #include "Game/CBall.h"
-#include "Game/EBallFellOffStage.h"
+#include "Game/ELifeLost.h"
 
 
 
@@ -46,14 +46,14 @@ private:
     dd::EventRelay<PadSystem, dd::Events::KeyDown> m_EKeyDown;
     dd::EventRelay<PadSystem, dd::Events::KeyUp> m_EKeyUp;
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContact;
-    dd::EventRelay<PadSystem, dd::Events::BallFellOffStage> m_EBall;
+    dd::EventRelay<PadSystem, dd::Events::LifeLost> m_ELifeLost;
 
     bool OnKeyDown(const dd::Events::KeyDown &event);
     bool OnKeyUp(const dd::Events::KeyUp &event);
 
 
     bool OnContact(const dd::Events::Contact &event);
-    bool BallFellOffStage(const dd::Events::BallFellOffStage &event);
+    bool LifeLost(const dd::Events::LifeLost &event);
 
     EntityID removeThisObject = NULL;
 

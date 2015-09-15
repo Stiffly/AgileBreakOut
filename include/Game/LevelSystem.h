@@ -14,7 +14,7 @@
 #include "Game/CBall.h"
 #include "Game/CLife.h"
 #include "Game/EStageCleared.h"
-#include "Game/EBallFellOffStage.h"
+#include "Game/ELifeLost.h"
 #include "Physics/CBoxShape.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
@@ -68,10 +68,10 @@ public:
 
 private:
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
-    dd::EventRelay<LevelSystem, dd::Events::BallFellOffStage> m_EBall;
+    dd::EventRelay<LevelSystem, dd::Events::LifeLost> m_ELifeLost;
 
     bool OnContact(const dd::Events::Contact &event);
-    bool BallFellOffStage(const dd::Events::BallFellOffStage &event);
+    bool LifeLost(const dd::Events::LifeLost &event);
 
     bool m_Initialized = false;
 

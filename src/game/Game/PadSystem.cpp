@@ -24,7 +24,7 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, PadSystem::OnKeyDown);
     EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, PadSystem::OnKeyUp);
     EVENT_SUBSCRIBE_MEMBER(m_EContact, PadSystem::OnContact);
-    EVENT_SUBSCRIBE_MEMBER(m_EBall, PadSystem::BallFellOffStage);
+    EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, PadSystem::LifeLost);
 
     return;
 }
@@ -216,7 +216,7 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     EventBroker->Publish(e);
 }
 
-bool dd::Systems::PadSystem::BallFellOffStage(const dd::Events::BallFellOffStage &event)
+bool dd::Systems::PadSystem::LifeLost(const dd::Events::LifeLost &event)
 {
     replaceBall = true;
     return true;
