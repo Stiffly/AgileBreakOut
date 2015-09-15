@@ -81,6 +81,7 @@ public:
 		m_World->ComponentFactory.Register<Components::Ball>();
 		m_World->ComponentFactory.Register<Components::Brick>();
 		m_World->ComponentFactory.Register<Components::Pad>();
+		m_World->ComponentFactory.Register<Components::Life>();
         m_World->SystemFactory.Register<Systems::PhysicsSystem>(
                 [this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
         m_World->AddSystem<Systems::PhysicsSystem>();
@@ -97,7 +98,7 @@ public:
 
 
 		//TODO: Remove tobias light-test code.
-		{
+		/*{
 			auto t_BrickWall = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_BrickWall);
 			transform->Position = glm::vec3(0.f, 0.f, -10.f);
@@ -106,7 +107,7 @@ public:
 			sprite->SpriteFile = "Textures/Test/Brick_Diffuse.png";
 			sprite->NormalTexture = "Textures/Test/Brick_Normal.png";
 			sprite->SpecularTexture = "Textures/Test/Brick_Specular.png";
-		}
+		}*/
 
 
         {

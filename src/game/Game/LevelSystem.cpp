@@ -22,7 +22,7 @@ void dd::Systems::LevelSystem::Initialize()
 
 void dd::Systems::LevelSystem::CreateLife(int number)
 {
-    /*auto life = m_World->CreateEntity();
+    auto life = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(life);
     transform->Position = glm::vec3(-11.f + number, -8.f, -10.f);
     transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
@@ -33,7 +33,7 @@ void dd::Systems::LevelSystem::CreateLife(int number)
     std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(life);
     sprite->SpriteFile = "Textures/Ball.png";
 
-    m_World->CommitEntity(life);*/
+    m_World->CommitEntity(life);
 }
 
 void dd::Systems::LevelSystem::Update(double dt)
@@ -59,10 +59,13 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
         auto transformBall = m_World->GetComponent<Components::Transform>(entity);
         if (transformBall->Position.y < -10)
         {
-            Events::BallFellOffStage e;
-            e.entity = entity;
-            EventBroker->Publish(e);
-            return;
+            if (lives == pastLives)
+            {
+                Events::BallFellOffStage e;
+                e.entity = entity;
+                EventBroker->Publish(e);
+                return;
+            }
         }
     }
 
@@ -72,9 +75,8 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
         if (life != NULL)
         {
             if (life->number + 1 == pastLives) {
-                pastLives--;
-                
-                //m_World->RemoveEntity(entity);
+                m_World->RemoveEntity(entity);
+                pastLives = lives;
             }
         }
     }
@@ -196,8 +198,8 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 
 bool dd::Systems::LevelSystem::BallFellOffStage(const dd::Events::BallFellOffStage &event)
 {
-    /*std::cout << "Did you get here?" << std::endl;
-    EntityID entity = event.entity;
+    std::cout << "Did you get here?" << std::endl;
+    /*EntityID entity = event.entity;
 
     //Temporary. Create new ball.
     auto ent = m_World->CreateEntity();
