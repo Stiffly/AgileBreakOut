@@ -5,13 +5,14 @@
 #ifndef DAYDREAM_SOUND_H
 #define DAYDREAM_SOUND_H
 
+#include <fstream>
+
 #include "AL/al.h"
 #include "AL/alc.h"
 #include "Core/System.h"
 #include "Core/World.h"
 #include "Core/EKeyDown.h"
 #include "Core/EventBroker.h"
-
 
 namespace dd
 {
@@ -21,7 +22,8 @@ class Sound : public System {
 public:
     Sound(World *world, std::shared_ptr<dd::EventBroker> eventBroker)
             : System(world, eventBroker) { }
-
+    ~Sound();
+    void Initialize() override;
 
     //void UpdateEntity(double dt, EntityID entity, EntityID parent) override;
     void Update(double dt) override;
@@ -32,30 +34,30 @@ public:
     //void StopSound(std::shared_ptr<Components::SoundEmitter> emitter);
 
 
-    void Initialize() override;
+
 
 private:
     dd::EventRelay<Sound, dd::Events::KeyDown> m_EKeyDown;
+    bool OnKeyDown(const dd::Events::KeyDown &event);
 
     ALuint LoadFile(std::string fileName);
     ALuint CreateSource();
 
     //File-info
-    char m_type[4];
-    unsigned long m_size, m_chunkSize;
-    short m_formatType, m_channels;
-    unsigned long m_sampleRate, m_avgBytesPerSec;
-    short m_bytesPerSample, m_bitsPerSample;
-    unsigned long m_dataSize;
+    char m_Type[4];
+    unsigned long m_Size, m_ChunkSize;
+    short m_FormatType, m_Channels;
+    unsigned long m_SampleRate, m_AvgBytesPerSec;
+    short m_BytesPerSample, m_BitsPerSample;
+    unsigned long m_DataSize;
 
 
-    std::map<Component*, ALuint> m_Sources;
+    //std::map<Component*, ALuint> m_Sources;
     std::map<std::string, ALuint> m_BufferCache;
 
-    bool OnKeyDown(const dd::Events::KeyDown &event);
 
     //Temp
-    ALuint m_source;
+    ALuint m_Source;
 
 };
 }

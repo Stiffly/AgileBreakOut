@@ -75,9 +75,9 @@ public:
         m_World->AddSystem<Systems::TransformSystem>();
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
-		
-		m_World->AddSystem<Systems::Sound>();
+
 		m_World->SystemFactory.Register<Systems::Sound>([this]() { return new Systems::Sound(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::Sound>();
 
 
         m_World->ComponentFactory.Register<Components::Sprite>();
