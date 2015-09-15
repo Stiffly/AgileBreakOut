@@ -70,9 +70,6 @@ public:
         m_World->SystemFactory.Register<Systems::TransformSystem>(
                 [this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
         m_World->AddSystem<Systems::TransformSystem>();
-//		m_World->ComponentFactory.Register<Components::Model>();
-//		m_World->ComponentFactory.Register<Components::Template>();
-
 
         m_World->ComponentFactory.Register<Components::Sprite>();
 
@@ -130,9 +127,9 @@ public:
 		{
 			auto t_Light = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_Light);
-			transform->Position = glm::vec3(0.f, 0.f, -9.f);
+			transform->Position = glm::vec3(2.f, 1.5f, -10.f);
 			auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
-			pl->Radius = 10.f;
+			pl->Radius = 8.f;
 		}
 
 		//Halfpipe background test model.
@@ -150,10 +147,11 @@ public:
 			auto t_Brick = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_Brick);
 			transform->Position = glm::vec3(0.f, 0.f, -12.f);
+			transform->Orientation = glm::rotate(glm::quat(), 0.5f, glm::vec3(0,-1,-1));
 			auto model = m_World->AddComponent<Components::Model>(t_Brick);
 			model->ModelFile = "Models/Test/Brick/Brick.obj";
-		}
 
+		}
 
 		{
 			auto topWall = m_World->CreateEntity();

@@ -7,6 +7,7 @@
 #include "Core/World.h"
 #include <iostream>
 #include <Game/CPad.h>
+#include <Rendering/CPointLight.h>
 
 
 void dd::Systems::PadSystem::Initialize()
@@ -147,6 +148,7 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     transform->Scale = glm::vec3(1.f, 1.f, 1.f);
     auto model = m_World->AddComponent<Components::Model>(ent);
     model->ModelFile = "Models/Test/Ball/Ballopus.obj";
+    //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
     std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
     std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
     std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
