@@ -98,34 +98,32 @@ public:
 
 		//TODO: Remove tobias light-test code.
 
+        {
+            auto ent = m_World->CreateEntity();
+            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+            transform->Position = glm::vec3(0.5f, 0.f, -9.9f);
+			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
 
+            std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
+            sprite->SpriteFile = "Textures/Ball.png";
 
-//        {
-//            auto ent = m_World->CreateEntity();
-//            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-//            transform->Position = glm::vec3(0.5f, 0.f, -9.9f);
-//			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-//
-//            std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-//            sprite->SpriteFile = "Textures/Ball.png";
-//
-//            std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-//			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
-//
-//            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-//            physics->Static = false;
-//
-//			auto plight = m_World->AddComponent<Components::PointLight>(ent);
-//			plight->Radius = 2.f;
-//
-//            m_World->CommitEntity(ent);
-//
-//			Events::SetImpulse e;
-//			e.Entity = ent;
-//			e.Impulse = glm::vec2(0.f, -7.f);
-//			e.Point = glm::vec2(0.5f, 0.f);
-//			m_EventBroker->Publish(e);
-//        }
+            std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
+			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
+
+            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+            physics->Static = false;
+
+			auto plight = m_World->AddComponent<Components::PointLight>(ent);
+			plight->Radius = 2.f;
+
+            m_World->CommitEntity(ent);
+
+			Events::SetImpulse e;
+			e.Entity = ent;
+			e.Impulse = glm::vec2(0.f, -7.f);
+			e.Point = glm::vec2(0.5f, 0.f);
+			m_EventBroker->Publish(e);
+        }
 
 		{
 			auto t_BrickWall = m_World->CreateEntity();
