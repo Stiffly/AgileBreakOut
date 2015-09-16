@@ -16,6 +16,9 @@
 	along with Daydream Engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <Game/CBall.h>
+#include <Game/CBrick.h>
+#include <Game/CPad.h>
 #include "PrecompiledHeader.h"
 #include "Core/Sound.h"
 
@@ -42,8 +45,9 @@ void dd::Systems::Sound::Initialize()
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 
     //Subscribe to events
+    EVENT_SUBSCRIBE_MEMBER(m_EContact, &Sound::OnContact);
     EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, &Sound::OnKeyDown);
-    //EVENT_SUBSCRIBE_MEMBER(m_EPlaySound, &Sound::PlayASound);
+    EVENT_SUBSCRIBE_MEMBER(m_EPlaySFX, &Sound::OnPlaySFX);
 }
 
 void dd::Systems::Sound::Update(double dt)
@@ -54,25 +58,67 @@ void dd::Systems::Sound::Update(double dt)
     alSourcefv(m_Source, AL_POSITION, pos);
 }
 
-/*bool dd::Systems::Sound::PlayASound(const dd::Events::PlaySound &event)
+bool dd::Systems::Sound::OnPlaySFX(const dd::Events::PlaySFX &event)
 {
+    m_Source = CreateSource();
+    ALuint buffer = LoadFile(event.path);
 
-}*/
+    alSourcei(m_Source, AL_BUFFER, buffer);
+    alSourcePlay(m_Source);
+}
 
 bool dd::Systems::Sound::OnKeyDown(const dd::Events::KeyDown &event)
 {
     // #define GLFW_KEY_S 83
     /*if (event.KeyCode == 83) {
-        Events::PlaySound e;
-        e.path = "Sounds/screwed.wav";
-        EventBroker->Publish(e);
+
     }*/
     if (event.KeyCode == 83) {
-        m_Source = CreateSource();
-        ALuint buffer = LoadFile("Sounds/screwed.wav");
 
-        alSourcei(m_Source, AL_BUFFER, buffer);
-        alSourcePlay(m_Source);
+    }
+}
+
+bool dd::Systems::Sound::OnContact(const dd::Events::Contact &event)
+{
+    int localBallEntID = 0;
+    //Make sure a ball is colliding
+    auto ball = m_World->GetComponent<Components::Ball>(event.Entity1);
+    if (ball == NULL) {
+        ball = m_World->GetComponent<Components::Ball>(event.Entity2);
+        if (ball == NULL) {
+            return false;
+        }
+        else {
+            localBallEntID = 2;
+        }
+    }
+    else {
+        localBallEntID = 1;
+    }
+
+    //Determine which event.Entity is not t
+    EntityID collObject;
+    if (localBallEntID == 1) {
+        collObject = event.Entity2;
+    }
+    else if (localBallEntID == 2) {
+        collObject = event.Entity1;
+    }
+
+    /*auto collisionBrick = m_World->GetComponent<Components::Brick>(collObject);
+    if (collisionBrick != NULL) {
+        dd::Events::PlaySFX e;
+        e.path = "Sounds/Brick/brickBreak.wav";
+        EventBroker->Publish(e);
+        return true;
+    }*/
+
+    auto collisionPad = m_World->GetComponent<Components::Pad>(collObject);
+    if (collisionPad != NULL) {
+        dd::Events::PlaySFX e;
+        e.path = "Sounds/Metal/impact.wav";
+        EventBroker->Publish(e);
+        return true;
     }
 }
 

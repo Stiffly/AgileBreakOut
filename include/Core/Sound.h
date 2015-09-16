@@ -25,7 +25,8 @@
 #include "Core/System.h"
 #include "Core/World.h"
 #include "Core/EKeyDown.h"
-#include "Core/EPlaySound.h"
+#include "Core/EPlaySFX.h"
+#include "Physics/EContact.h"
 #include "Core/EventBroker.h"
 
 namespace dd
@@ -53,10 +54,12 @@ public:
 private:
     //Events
     dd::EventRelay<Sound, dd::Events::KeyDown> m_EKeyDown;
-    bool OnKeyDown(const dd::Events::KeyDown &event);
+    dd::EventRelay<Sound, dd::Events::PlaySFX> m_EPlaySFX;
+    dd::EventRelay<Sound, dd::Events::Contact> m_EContact;
 
-    //dd::EventRelay<Sound, dd::Events::PlaySound> m_EPlaySound;
-    //bool PlayASound(const dd::Events::PlaySound &event);
+    bool OnKeyDown(const dd::Events::KeyDown &event);
+    bool OnPlaySFX(const dd::Events::PlaySFX &event);
+    bool OnContact(const dd::Events::Contact &event);
 
     ALuint LoadFile(std::string fileName);
     ALuint CreateSource();
