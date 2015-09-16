@@ -42,6 +42,8 @@
 #include "Game/CBrick.h"
 #include "Game/CPad.h"
 
+#include "GUI/Frame.h"
+
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CBoxShape.h"
@@ -95,6 +97,13 @@ public:
         m_World->ComponentFactory.Register<Components::Template>();
 		m_World->ComponentFactory.Register<Components::PointLight>();
         m_World->Initialize();
+
+		//This is frame coding which might be stupid!
+		m_FrameStack = new dd::Frame(m_EventBroker, m_ResourceManager);
+		m_FrameStack->Width = 1920;
+		m_FrameStack->Height = 1080;
+
+
 
 
 		//TODO: Remove tobias light-test code.
@@ -421,6 +430,8 @@ private:
 	RenderQueueCollection m_RendererQueue;
 	std::shared_ptr<InputManager> m_InputManager;
 	std::shared_ptr<World> m_World;
+	dd::Frame* m_FrameStack;
+
 
 	double m_LastTime;
 };
