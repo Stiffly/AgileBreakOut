@@ -7,20 +7,23 @@
 
 #include "Core/InputController.h"
 #include "Core/System.h"
+#include "Core/Component.h"
+#include "Core/CTransform.h"
 #include "Core/EventBroker.h"
 #include "Core/EKeyDown.h"
 #include "Core/EKeyUp.h"
 #include "Input/EBindKey.h"
 #include "Physics/EContact.h"
-#include "Core/CTransform.h"
 #include "Physics/CBoxShape.h"
 #include "Physics/CPhysics.h"
+#include "Physics/CCircleShape.h"
+#include "Physics/ESetImpulse.h"
 #include "Rendering/CSprite.h"
 #include "Rendering/CModel.h"
 #include "Game/CBall.h"
-#include "Core/Component.h"
-#include "Physics/ESetImpulse.h"
-#include "Physics/CCircleShape.h"
+#include "Game/ELifeLost.h"
+
+
 
 
 namespace dd
@@ -38,19 +41,26 @@ public:
 
     void Initialize() override;
     void Update(double dt) override;
+    void UpdateEntity(double dt, EntityID entity, EntityID parent) override;
 
 private:
     dd::EventRelay<PadSystem, dd::Events::KeyDown> m_EKeyDown;
     dd::EventRelay<PadSystem, dd::Events::KeyUp> m_EKeyUp;
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContact;
+    dd::EventRelay<PadSystem, dd::Events::LifeLost> m_ELifeLost;
 
     bool OnKeyDown(const dd::Events::KeyDown &event);
     bool OnKeyUp(const dd::Events::KeyUp &event);
 
 
     bool OnContact(const dd::Events::Contact &event);
+    bool LifeLost(const dd::Events::LifeLost &event);
 
+    EntityID removeThisObject = NULL;
 
+    float slowdownModifier = 5.f;
+    float accelerationSpeed = 80.f;
+    float maxSpeed = 40.f;
 
 
 
@@ -60,7 +70,7 @@ private:
     EntityID ent = 0;
     Components::Transform* transform;
     glm::vec3 acceleration = glm::vec3(0.f, 0.f, 0.f);
-    bool left = false, right = false;
+    bool left = false, right = false, replaceBall = false;
 };
 
 class PadSystem::PadSteeringInputController : InputController<PadSystem>

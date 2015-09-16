@@ -78,6 +78,7 @@ public:
 		m_World->ComponentFactory.Register<Components::Ball>();
 		m_World->ComponentFactory.Register<Components::Brick>();
 		m_World->ComponentFactory.Register<Components::Pad>();
+		m_World->ComponentFactory.Register<Components::Life>();
         m_World->SystemFactory.Register<Systems::PhysicsSystem>(
                 [this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
         m_World->AddSystem<Systems::PhysicsSystem>();
@@ -94,6 +95,8 @@ public:
 
 
 		//TODO: Remove tobias light-test code.
+		/*{
+		}*/
 
 		//OctoBall
         {
@@ -156,8 +159,8 @@ public:
 		{
 			auto topWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
-			transform->Position = glm::vec3(0.f, 5.f, -10.f);
-			transform->Scale = glm::vec3(15.f, 0.5f, 1.f);
+			transform->Position = glm::vec3(0.f, 6.f, -10.f);
+			transform->Scale = glm::vec3(18.f, 0.5f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";

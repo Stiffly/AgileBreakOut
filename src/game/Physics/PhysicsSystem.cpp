@@ -49,6 +49,8 @@ void dd::Systems::PhysicsSystem::Update(double dt)
         b2Body* body = i.second;
 
         auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
+        if (! transformComponent)
+            continue;
 
 
         if (m_World->GetEntityParent(entity) == 0) {
@@ -85,7 +87,8 @@ void dd::Systems::PhysicsSystem::Update(double dt)
         b2Body* body = i.second;
 
         auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
-
+        if (! transformComponent)
+            continue;
 
         if (m_World->GetEntityParent(entity) == 0) {
             b2Vec2 position = body->GetPosition();
@@ -119,10 +122,13 @@ void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
 {
     b2Body* body = m_EntitiesToBodies[entity];
 
-    m_EntitiesToBodies.erase(entity);
-    m_BodiesToEntities.erase(body);
+    if (body != nullptr) {
+        m_EntitiesToBodies.erase(entity);
+        m_BodiesToEntities.erase(body);
 
-    m_PhysicsWorld->DestroyBody(body);
+        m_PhysicsWorld->DestroyBody(body);
+    }
+
 }
 
 
