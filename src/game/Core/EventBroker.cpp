@@ -40,6 +40,7 @@ void dd::EventBroker::Unsubscribe(BaseEventRelay &relay) // ?
 	{
 		if (it->second == &relay)
 		{
+			relay.m_Broker = nullptr;
 			eventRelays.erase(it);
 			break;
 		}

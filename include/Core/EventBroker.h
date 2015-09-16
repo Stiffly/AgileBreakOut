@@ -121,8 +121,6 @@ public:
 	int Process(std::string contextTypeName);
 	void Clear();
 	void Unsubscribe(BaseEventRelay &relay);
-	template <typename ContextType>
-	void UnsubscribeAll();
 
 private:
 	typedef std::string ContextTypeName_t; // typeid(ContextType).name()
@@ -154,13 +152,6 @@ int EventBroker::Process()
 {
 	const std::string contextTypeName = typeid(ContextType).name();
 	return Process(contextTypeName);
-}
-
-template <typename ContextType>
-void EventBroker::UnsubscribeAll()
-{
-	const std::string contextTypeName = typeid(ContextType).name();
-	m_ContextRelays.erase(contextTypeName);
 }
 
 }
