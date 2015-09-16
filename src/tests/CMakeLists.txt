@@ -12,6 +12,7 @@ set(SOURCE_FILES
     FileWatcherTest.cpp
     EventTest.cpp
     ComponentCopyTest.cpp
+    EntityCloneTest.cpp
 )
 
 if(CMAKE_COMPILER_IS_GNUCXX)
