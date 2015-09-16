@@ -24,14 +24,17 @@ void dd::Systems::LevelSystem::CreateLife(int number)
 {
     auto life = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(life);
-    transform->Position = glm::vec3(-11.f + number, -8.f, -10.f);
-    transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
+    transform->Position = glm::vec3(-4.f + number * 0.5f, -2.f, -5.f);
+    transform->Scale = glm::vec3(0.25f, 0.25f, 0.25f);
 
     std::shared_ptr<Components::Life> lifeNr = m_World->AddComponent<Components::Life>(life);
     lifeNr->Number = number;
 
-    std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(life);
-    sprite->SpriteFile = "Textures/Ball.png";
+    auto model = m_World->AddComponent<Components::Model>(life);
+    model->ModelFile = "Models/Test/Ball/Ballopus.obj";
+
+    /*std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(life);
+    sprite->SpriteFile = "Textures/Ball.png";*/
 
     m_World->CommitEntity(life);
 }
