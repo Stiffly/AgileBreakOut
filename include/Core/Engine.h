@@ -303,7 +303,7 @@ public:
 					glm::mat4 modelMatrix = glm::translate(glm::mat4(), absoluteTransform.Position)
 						* glm::toMat4(absoluteTransform.Orientation)
 						* glm::scale(absoluteTransform.Scale);
-					EnqueueModel(modelAsset, modelMatrix, modelComponent->Transparent, modelComponent->Color);
+					EnqueueModel(modelAsset, modelMatrix, modelComponent->Transparent, modelComponent->Color, modelComponent->ModelFile);
 				}
 			}
 
@@ -351,7 +351,7 @@ public:
 	}
 
 	//TODO: Get this out of engine.h
-	void EnqueueModel(Model* model, glm::mat4 modelMatrix, float transparent, glm::vec4 color)
+	void EnqueueModel(Model* model, glm::mat4 modelMatrix, float transparent, glm::vec4 color, std::string fileName)
 	{
 		for (auto texGroup : model->TextureGroups)
 		{
@@ -366,6 +366,7 @@ public:
 			job.EndIndex = texGroup.EndIndex;
 			job.ModelMatrix = modelMatrix;
 			job.Color = color;
+			job.fileName = fileName;
 
 			m_RendererQueue.Deferred.Add(job);
 		}

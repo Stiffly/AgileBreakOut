@@ -116,7 +116,7 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     model->ModelFile = "Models/Test/Brick/Brick.obj";
     float x = spaceToEdge + line * spacesBetweenBricks.x;
     float y = spaceToEdge + row * spacesBetweenBricks.y;
-    transform->Scale = glm::vec3(1.6, 0.2, 0.5);
+    transform->Scale = glm::vec3(1.6, 0.35, 0.5);
     transform->Position = glm::vec3(x - 7, y + 1, -10.f);
     m_World->CommitEntity(brick);
     return;

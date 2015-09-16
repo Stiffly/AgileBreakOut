@@ -52,6 +52,8 @@ struct ModelJob : RenderJob
 	unsigned int ShaderID;
 	unsigned int TextureID;
 
+	std::string fileName;
+
 	glm::mat4 ModelMatrix;
 	GLuint DiffuseTexture;
 	GLuint NormalTexture;
