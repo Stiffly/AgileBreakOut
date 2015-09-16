@@ -199,7 +199,7 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     auto ent = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
     transform->Position = glm::vec3(transformBall->Position.x, transformBall->Position.y + 0.01f, -10.f);
-    transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
+    transform->Scale = glm::vec3(1.f, 2.f, 1.f);
     auto model = m_World->AddComponent<Components::Model>(ent);
     model->ModelFile = "Models/Test/Ball/Ballopus.obj";
     //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
