@@ -10,6 +10,7 @@ include_directories(
 set(SOURCE_FILES
     main.cpp
     FileWatcherTest.cpp
+    EventTest.cpp
     ComponentCopyTest.cpp
 )
 
