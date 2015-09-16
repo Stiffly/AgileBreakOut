@@ -113,6 +113,8 @@ void dd::Renderer::CreateBuffers()
 	m_ScreenQuad = CreateQuad();
 	m_UnitQuad = ResourceManager::Load<Model>("Models/Core/UnitQuad.obj");
 	m_UnitSphere = ResourceManager::Load<Model>("Models/Core/UnitSphere.obj");
+	m_StandardNormal = ResourceManager::Load<Texture>("Textures/Core/NeutralNormalMap.png");
+	m_StandardSpecular = ResourceManager::Load<Texture>("Textures/Core/NeutralSpecularMap.png");
 
 	glGenRenderbuffers(1, &m_rbDepthBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_rbDepthBuffer);
@@ -208,7 +210,7 @@ void dd::Renderer::CreateBuffers()
 void dd::Renderer::Draw(RenderQueueCollection& rq)
 {
 
-	//DrawDeferred(rq.Deferred, rq.Lights);
+	DrawDeferred(rq.Deferred, rq.Lights);
 	rq.Forward.Jobs.sort(dd::Renderer::DepthSort);
 	DrawForward(rq.Forward, rq.Lights);
 
@@ -289,8 +291,8 @@ void dd::Renderer::DrawForward(RenderQueue &objects, RenderQueue &lights)
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred3);
-	glClearColor(1, 0.9, 0.8f, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	glClearColor(1, 0.9, 0.8f, 1);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	m_spForward->Bind();
 	DrawScene(objects, *m_spForward);
@@ -321,14 +323,23 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, modelJob->DiffuseTexture);
-			if (modelJob->NormalTexture != 0) {
+			if (modelJob->NormalTexture != 0 && false) {
 				glActiveTexture(GL_TEXTURE1);
 				glBindTexture(GL_TEXTURE_2D, modelJob->NormalTexture);
+			} else {
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, *m_StandardNormal);
 			}
-			if (modelJob->SpecularTexture != 0) {
+
+			if (modelJob->SpecularTexture != 0 && false) {
 				glActiveTexture(GL_TEXTURE2);
 				glBindTexture(GL_TEXTURE_2D, modelJob->SpecularTexture);
 			}
+			else {
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, *m_StandardSpecular);
+			}
+
 
 			glBindVertexArray(modelJob->VAO);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, modelJob->ElementBuffer);

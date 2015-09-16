@@ -93,17 +93,19 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
 {
     auto brick = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(brick);
-    std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(brick);
+    //std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(brick);
+    auto model = m_World->AddComponent<Components::Model>(brick);
     std::shared_ptr<Components::Brick> cBrick = m_World->AddComponent<Components::Brick>(brick);
     std::shared_ptr<Components::RectangleShape> cRec = m_World->AddComponent<Components::RectangleShape>(brick);
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(brick);
     std::string fileName = "Textures/Bricks/";
     fileName.append(std::to_string(num));
     fileName.append(".png");
-    sprite->SpriteFile =  fileName;
+    //sprite->SpriteFile =  fileName;
+    model->ModelFile = "Models/Test/Brick/Brick.obj";
     float x = spaceToEdge + line * spacesBetweenBricks.x;
     float y = spaceToEdge + row * spacesBetweenBricks.y;
-    transform->Scale = glm::vec3(1.6, 0.4, 0.);
+    transform->Scale = glm::vec3(1.6, 0.35, 0.5);
     transform->Position = glm::vec3(x - 7, y + 1, -10.f);
     cBrick->Score = 10 * num;
     m_World->CommitEntity(brick);

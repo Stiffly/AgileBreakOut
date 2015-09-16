@@ -19,6 +19,7 @@
 #include "Physics/CCircleShape.h"
 #include "Physics/ESetImpulse.h"
 #include "Rendering/CSprite.h"
+#include "Rendering/CModel.h"
 #include "Game/CBall.h"
 #include "Game/EResetBall.h"
 #include "CPad.h"

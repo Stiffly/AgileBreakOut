@@ -1,0 +1,14 @@
+# Blender MTL File: 'Brick.blend'
+# Material Count: 1
+
+newmtl Brick
+Ns 17.647059
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.154050 0.039202
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd Brick_d.png
+map_Bump Brick_n.png
+map_Ks Brick_s.png
