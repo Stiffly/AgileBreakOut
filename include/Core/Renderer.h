@@ -76,6 +76,8 @@ private:
 	GLuint m_ScreenQuad = 0;
 	Model* m_UnitSphere = nullptr;
 	Model* m_UnitQuad = nullptr;
+	Texture* m_StandardNormal;
+	Texture* m_StandardSpecular;
 
 	GLuint m_rbDepthBuffer = 0;
 	GLuint m_fbDeferred1 = 0;
@@ -92,6 +94,8 @@ private:
 	void LoadShaders();
 	void CreateBuffers();
 	GLuint CreateQuad();
+
+	static bool DepthSort(const std::shared_ptr<RenderJob> &i, const std::shared_ptr<RenderJob> &j) { return (i->Depth < j->Depth); }
 
 	void DrawDeferred(RenderQueue &objects, RenderQueue &lights);
 	void DrawForward(RenderQueue &objects, RenderQueue &lights);

@@ -7,19 +7,22 @@
 
 #include "Core/InputController.h"
 #include "Core/System.h"
+#include "Core/Component.h"
+#include "Core/CTransform.h"
 #include "Core/EventBroker.h"
 #include "Core/EKeyDown.h"
 #include "Core/EKeyUp.h"
 #include "Input/EBindKey.h"
 #include "Physics/EContact.h"
-#include "Core/CTransform.h"
 #include "Physics/CBoxShape.h"
 #include "Physics/CPhysics.h"
-#include "Rendering/CSprite.h"
-#include "Game/CBall.h"
-#include "Core/Component.h"
-#include "Physics/ESetImpulse.h"
 #include "Physics/CCircleShape.h"
+#include "Physics/ESetImpulse.h"
+#include "Rendering/CSprite.h"
+#include "Rendering/CModel.h"
+#include "Game/CBall.h"
+#include "Game/EResetBall.h"
+#include "CPad.h"
 
 
 namespace dd
@@ -32,34 +35,49 @@ class PadSystem : public System
 {
 public:
     PadSystem(World* world, std::shared_ptr<dd::EventBroker> eventBroker)
-    : System(world, eventBroker)
-    { }
+    : System(world, eventBroker) { }
 
     void Initialize() override;
     void Update(double dt) override;
+    void UpdateEntity(double dt, EntityID entity, EntityID parent) override;
+
+    EntityID& Entity() { return m_Entity; }
+    void SetEntity(const EntityID& ent) { m_Entity = ent; }
+    glm::vec3 Acceleration() const { return m_Acceleration; }
+    void SetAcceleration(const glm::vec3& acceleration) { m_Acceleration = acceleration; }
+
+    bool Left() const { return m_Left; }
+    void SetLeft(const bool& left) { m_Left = left; }
+    bool Right() const { return m_Right; }
+    void SetRight(const bool& right) { m_Right = right; }
+    bool ReplaceBall() const { return m_ReplaceBall; }
+    void SetReplaceBall(const bool& replaceBall) { m_ReplaceBall = replaceBall; }
+
+    Components::Transform* Transform() const { return m_Transform; }
+    void SetTransform(const Components::Transform* transform) { m_Transform = transform; }
+    Components::Pad* Pad() const { return m_Pad; }
+    void SetPad(const Components::Pad* pad) { m_Pad = pad; }
 
 private:
+    EntityID m_Entity = 0;
+    glm::vec3 m_Acceleration = glm::vec3(0.f, 0.f, 0.f);
+    bool m_Left = false, m_Right = false, m_ReplaceBall = false;
+    Components::Transform* m_Transform;
+    Components::Pad* m_Pad;
+
     dd::EventRelay<PadSystem, dd::Events::KeyDown> m_EKeyDown;
     dd::EventRelay<PadSystem, dd::Events::KeyUp> m_EKeyUp;
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContact;
+    dd::EventRelay<PadSystem, dd::Events::ResetBall> m_EResetBall;
 
     bool OnKeyDown(const dd::Events::KeyDown &event);
     bool OnKeyUp(const dd::Events::KeyUp &event);
 
-
     bool OnContact(const dd::Events::Contact &event);
-
-
-
-
+    bool ResetBall(const dd::Events::ResetBall &event);
 
     class PadSteeringInputController;
     std::array<std::shared_ptr<PadSteeringInputController>, 4> m_PadInputControllers;
-
-    EntityID ent = 0;
-    Components::Transform* transform;
-    glm::vec3 acceleration = glm::vec3(0.f, 0.f, 0.f);
-    bool left = false, right = false;
 };
 
 class PadSystem::PadSteeringInputController : InputController<PadSystem>

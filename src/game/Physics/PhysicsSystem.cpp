@@ -55,7 +55,13 @@ void dd::Systems::PhysicsSystem::Update(double dt)
         b2Body* body = i.second;
 
         auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
+        if (! transformComponent)
+            continue;
 
+        if (body == nullptr) {
+            //LOG_ERROR("This body should not exist");
+            continue;
+        }
 
         if (m_World->GetEntityParent(entity) == 0) { //TODO: Make this work with childs too
             b2Vec2 position;
@@ -65,7 +71,6 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             float angle = -glm::eulerAngles(transformComponent->Orientation).z;
 
             body->SetTransform(position, angle);
-
 
             body->SetLinearVelocity(b2Vec2(transformComponent->Velocity.x, transformComponent->Velocity.y));
 
@@ -91,8 +96,14 @@ void dd::Systems::PhysicsSystem::Update(double dt)
         EntityID entity = i.first;
         b2Body* body = i.second;
 
-        auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
+        if (body == nullptr) {
+            //LOG_ERROR("This body should not exist");
+            continue;
+        }
 
+        auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
+        if (! transformComponent)
+            continue;
         if (m_World->GetEntityParent(entity) == 0) {
             b2Vec2 position = body->GetPosition();
             transformComponent->Position.x = position.x;
@@ -103,7 +114,6 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
             transformComponent->Orientation =  glm::quat(glm::vec3(0, 0, -angle));
 
-            //TODO: Fix this back for real bodies
             b2Vec2 velocity = body->GetLinearVelocity();
             transformComponent->Velocity.x = velocity.x;
             transformComponent->Velocity.y = velocity.y;
@@ -131,10 +141,13 @@ void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
 {
     b2Body* body = m_EntitiesToBodies[entity];
 
-    m_EntitiesToBodies.erase(entity);
-    m_BodiesToEntities.erase(body);
+    if (body != nullptr) {
+        m_EntitiesToBodies.erase(entity);
+        m_BodiesToEntities.erase(body);
 
-    m_PhysicsWorld->DestroyBody(body);
+        m_PhysicsWorld->DestroyBody(body);
+    }
+
 }
 
 

@@ -15,7 +15,7 @@ namespace Components
 
 struct Ball : Component
 {
-
+    int Number = 0;
 };
 
 }
