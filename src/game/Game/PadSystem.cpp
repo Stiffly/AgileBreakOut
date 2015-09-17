@@ -51,9 +51,8 @@ void dd::Systems::PadSystem::Update(double dt)
     transform->Position += transform->Velocity * (float)dt;
     transform->Velocity += acceleration  * (float)dt;
     transform->Velocity -= transform->Velocity * (0.9f * (float)dt);
-    transform->Position.y = -5.f;
-    //transform->Orientation = glm::quat();
-    std::cout << transform->Velocity.x << ", " << transform->Velocity.y << std::endl;
+
+
 
     if (left)
     {
@@ -121,6 +120,7 @@ bool dd::Systems::PadSystem::OnKeyUp(const dd::Events::KeyUp &event)
 
 bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
 {
+    /*
     EntityID entityBall = event.Entity2;
     auto ball = m_World->GetComponent<Components::Ball>(entityBall);
     if (ball == NULL)
@@ -150,6 +150,7 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
 
 
     //transform->Velocity = glm::vec3(movementX, movementY, 0.f);
+     */
 }
 
 bool dd::Systems::PadSystem::PadSteeringInputController::OnCommand(const Events::InputCommand &event)

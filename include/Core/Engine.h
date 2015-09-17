@@ -41,11 +41,13 @@
 #include "Game/CBall.h"
 #include "Game/CBrick.h"
 #include "Game/CPad.h"
+#include "Game/BallSystem.h"
 
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CBoxShape.h"
 #include "Physics/ESetImpulse.h"
+
 
 namespace dd
 {
@@ -89,6 +91,8 @@ public:
 		m_World->AddSystem<Systems::LevelSystem>();
 		m_World->SystemFactory.Register<Systems::PadSystem>([this]() { return new Systems::PadSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::PadSystem>();
+		m_World->SystemFactory.Register<Systems::BallSystem>([this]() { return new Systems::BallSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::BallSystem>();
 
         m_World->ComponentFactory.Register<Components::Model>();
         m_World->ComponentFactory.Register<Components::Template>();
@@ -114,7 +118,7 @@ public:
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
             transform->Position = glm::vec3(0.5f, 0.f, -10.f);
 			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-			transform->Velocity = glm::vec3(0.0f, -5.f, 0.f);
+			transform->Velocity = glm::vec3(1.0f, -5.f, 0.f);
 
             std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
             sprite->SpriteFile = "Textures/Ball.png";

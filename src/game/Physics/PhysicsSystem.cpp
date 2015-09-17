@@ -93,8 +93,6 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
         auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
 
-
-
         if (m_World->GetEntityParent(entity) == 0) {
             b2Vec2 position = body->GetPosition();
             transformComponent->Position.x = position.x;
