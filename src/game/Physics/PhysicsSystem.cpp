@@ -70,6 +70,9 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             float angle = -glm::eulerAngles(transformComponent->Orientation).z;
 
             body->SetTransform(position, angle);
+
+
+
         }
     }
 
@@ -92,7 +95,6 @@ void dd::Systems::PhysicsSystem::Update(double dt)
         auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
         if (! transformComponent)
             continue;
-
         if (m_World->GetEntityParent(entity) == 0) {
             b2Vec2 position = body->GetPosition();
             transformComponent->Position.x = position.x;
@@ -102,6 +104,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
             //TODO: CHECK IF THIS IS CORRECT
             transformComponent->Orientation =  glm::quat(glm::vec3(0, 0, -angle));
+
         }
     }
 }
@@ -166,6 +169,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
         bodyDef.type = b2_staticBody;
     } else {
         bodyDef.type = b2_dynamicBody;
+
     }
 
 
@@ -202,7 +206,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
         fixtureDef.shape = pShape;
         fixtureDef.density = 1.f;
         fixtureDef.restitution = 1.0f;
-        fixtureDef.friction = 0.3f;
+        fixtureDef.friction = 0.0f;
         body->CreateFixture(&fixtureDef);
 
     }

@@ -14,6 +14,7 @@
 #include "Physics/ESetImpulse.h"
 #include "Physics/CCircleShape.h"
 #include "Core/EventBroker.h"
+#include "Game/CPad.h"
 #include "Physics/CWaterVolume.h"
 
 
@@ -23,7 +24,6 @@ namespace dd
 namespace Systems
 {
 
-//KOLLA http://box2d.org/manual.pdf p52 Pre-Solve Event
 
 class PhysicsSystem : public System
 {
@@ -83,22 +83,41 @@ private:
 
         void BeginContact(b2Contact* contact)
         {
-            b2Vec2 contactPoint = contact->GetManifold()->localPoint;
+            b2WorldManifold worldManifold;
+
+            contact->GetWorldManifold(&worldManifold);
 
             Events::Contact e;
-            e.ContactPoint = glm::vec2(contactPoint.x, contactPoint.y);
             e.Entity1 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureA()->GetBody()];
             e.Entity2 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureB()->GetBody()];
-
+            e.Normal = glm::normalize(glm::vec2(worldManifold.normal.x, worldManifold.normal.y));
 
             m_PhysicsSystem->EventBroker->Publish(e);
+
+            LOG_INFO("Entity1 = %i, Entity2 = %i\n", e.Entity1, e.Entity2);
         }
         void EndContact(b2Contact* contact)
-        { /* handle end event */ }
+        {
+
+        }
         void PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
-        { /* handle pre-solve event */ }
+        {
+            EntityID entityA = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureA()->GetBody()];
+            EntityID entityB = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureA()->GetBody()];
+
+            auto physicsComponentA = m_PhysicsSystem->m_World->GetComponent<Components::Physics>(entityA);
+            auto physicsComponentB = m_PhysicsSystem->m_World->GetComponent<Components::Physics>(entityB);
+
+            if (physicsComponentA != nullptr || physicsComponentB != nullptr) {
+                // Turn of collisions
+                contact->SetEnabled(false);
+            }
+
+        }
         void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)
-        { /* handle post-solve event */ }
+        {
+
+        }
 
     private:
         PhysicsSystem* m_PhysicsSystem;

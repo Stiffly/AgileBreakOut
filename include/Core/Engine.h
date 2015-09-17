@@ -41,12 +41,14 @@
 #include "Game/CBall.h"
 #include "Game/CBrick.h"
 #include "Game/CPad.h"
+#include "Game/BallSystem.h"
 
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CRectangleShape.h"
 #include "Physics/ESetImpulse.h"
 #include "Physics/CWaterVolume.h"
+
 
 namespace dd
 {
@@ -88,6 +90,8 @@ public:
 		m_World->AddSystem<Systems::LevelSystem>();
 		m_World->SystemFactory.Register<Systems::PadSystem>([this]() { return new Systems::PadSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::PadSystem>();
+		m_World->SystemFactory.Register<Systems::BallSystem>([this]() { return new Systems::BallSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::BallSystem>();
 
         m_World->ComponentFactory.Register<Components::Model>();
         m_World->ComponentFactory.Register<Components::Template>();
@@ -106,6 +110,7 @@ public:
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
             transform->Position = glm::vec3(0.5f, 0.f, -9.9f);
 			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
+			transform->Velocity = glm::vec3(1.0f, -5.f, 0.f);
 
             auto model = m_World->AddComponent<Components::Model>(ent);
 			model->ModelFile = "Models/Test/Ball/Ballopus.obj";
@@ -121,11 +126,7 @@ public:
 
             m_World->CommitEntity(ent);
 
-			Events::SetImpulse e;
-			e.Entity = ent;
-			e.Impulse = glm::vec2(0.f, -7.f);
-			e.Point = glm::vec2(0.5f, 0.f);
-			m_EventBroker->Publish(e);
+
         }
 
 		//PointLightTest
@@ -215,6 +216,7 @@ public:
 			ctransform->Scale = glm::vec3(3.2, 0.8, 0.);
 			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
 			auto physics = m_World->AddComponent<Components::Physics>(ent);
+			physics->Static = false;
 			auto csprite = m_World->AddComponent<Components::Sprite>(ent);
 			auto pad = m_World->AddComponent<Components::Pad>(ent);
 			csprite->SpriteFile = "Textures/Pad.png";
