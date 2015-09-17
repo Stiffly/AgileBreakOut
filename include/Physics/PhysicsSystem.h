@@ -5,7 +5,7 @@
 
 #include "Core/System.h"
 #include "Core/World.h"
-#include "Physics/CBoxShape.h"
+#include "CRectangleShape.h"
 #include "Physics/CPhysics.h"
 #include <Box2D/Box2D.h>
 #include "Core/CTransform.h"
@@ -14,6 +14,7 @@
 #include "Physics/ESetImpulse.h"
 #include "Physics/CCircleShape.h"
 #include "Core/EventBroker.h"
+#include "Physics/CWaterVolume.h"
 
 
 namespace dd
@@ -63,6 +64,15 @@ private:
     std::unordered_map<b2Body*, EntityID> m_BodiesToEntities;
 
     void CreateBody(EntityID entity);
+
+    const b2ParticleSystemDef m_ParticleSystemDef;
+    b2ParticleSystem *m_ParticleSystem;
+
+
+    void InitializeWater();
+    void SyncWater(); //TODO: Probably remove this
+    void CreateParticleGroup(EntityID entity);
+
 
 
     class ContactListener : public b2ContactListener

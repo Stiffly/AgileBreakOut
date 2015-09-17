@@ -25,6 +25,11 @@ void dd::Systems::PhysicsSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, PhysicsSystem::SetImpulse);
 }
 
+void dd::Systems::PhysicsSystem::InitializeWater()
+{
+    m_ParticleSystem = m_PhysicsWorld->CreateParticleSystem(&m_ParticleSystemDef);
+}
+
 bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
 {
     b2Body* body = m_EntitiesToBodies[event.Entity];
@@ -57,7 +62,6 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             continue;
         }
 
-
         if (m_World->GetEntityParent(entity) == 0) {
             b2Vec2 position;
             position.x = transformComponent->Position.x;
@@ -69,23 +73,12 @@ void dd::Systems::PhysicsSystem::Update(double dt)
         }
     }
 
-
-
-
     m_Accumulator += dt;
     while(m_Accumulator >= m_TimeStep)
     {
         m_PhysicsWorld->Step(m_TimeStep, m_VelocityIterations, m_PositionIterations);
         m_Accumulator -= dt;
     }
-
-
-
-
-
-
-
-
 
     for (auto i : m_EntitiesToBodies) {
         EntityID entity = i.first;
@@ -118,12 +111,16 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 
 }
 
-
 void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)
 {
     auto physicsComponent = m_World->GetComponent<Components::Physics>(entity);
-    if(physicsComponent) {
+    auto waterComponent = m_World->GetComponent<Components::WaterVolume>(entity);
+
+    if (physicsComponent) {
         CreateBody(entity);
+    }
+    if (waterComponent) {
+        CreateParticleGroup(entity);
     }
 }
 
@@ -214,6 +211,25 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
 
     m_EntitiesToBodies.insert(std::make_pair(entity, body));
     m_BodiesToEntities.insert(std::make_pair(body, entity));
+}
+
+void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
+{
+    //TODO: Lägg alla pd i en lista
+    auto transform = m_World->GetComponent<Components::Transform>(e);
+    if (!transform) {
+        LOG_ERROR("No Transform component in CreateParticleGroup");
+        return;
+    }
+    LOG_INFO("------ CREATING PARTICLE GROUP");
+
+    b2ParticleGroupDef pd;
+    b2PolygonShape shape;
+    shape.SetAsBox(transform->Scale.x, transform->Scale.y);
+    pd.shape = &shape;
+    pd.flags = b2_elasticParticle;
+    pd.angle = -0.5f;
+    pd.angularVelocity = 2.0f;
 }
 
 dd::Systems::PhysicsSystem::~PhysicsSystem()

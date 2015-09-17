@@ -18,7 +18,7 @@
 #include "Game/ELifeLost.h"
 #include "Game/EResetBall.h"
 #include "Game/EScoreEvent.h"
-#include "Physics/CBoxShape.h"
+#include "Physics/CRectangleShape.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/ESetImpulse.h"

@@ -44,8 +44,9 @@
 
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
-#include "Physics/CBoxShape.h"
+#include "Physics/CRectangleShape.h"
 #include "Physics/ESetImpulse.h"
+#include "Physics/CWaterVolume.h"
 
 namespace dd
 {
@@ -91,6 +92,7 @@ public:
         m_World->ComponentFactory.Register<Components::Model>();
         m_World->ComponentFactory.Register<Components::Template>();
 		m_World->ComponentFactory.Register<Components::PointLight>();
+		m_World->ComponentFactory.Register<Components::WaterVolume>();
         m_World->Initialize();
 
 
@@ -145,15 +147,15 @@ public:
 			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
 		}
 
-		//Brick test model
+		//Water test
 		{
-			auto t_Brick = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(t_Brick);
-			transform->Position = glm::vec3(0.f, 0.f, -12.f);
-			transform->Orientation = glm::rotate(glm::quat(), 0.5f, glm::vec3(0,-1,-1));
-			auto model = m_World->AddComponent<Components::Model>(t_Brick);
-			model->ModelFile = "Models/Test/Brick/Brick.obj";
-
+			auto t_waterBody = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
+			transform->Position = glm::vec3(0.f, 0.f, -10.f);
+			auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
+			auto sprite = m_World->AddComponent<Components::Sprite>(t_waterBody);
+			sprite->SpriteFile = "Textures/Test/Brick_Diffuse.png";
+			auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
 		}
 
 		{

@@ -14,7 +14,7 @@
 #include "Core/EKeyUp.h"
 #include "Input/EBindKey.h"
 #include "Physics/EContact.h"
-#include "Physics/CBoxShape.h"
+#include "Physics/CRectangleShape.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/ESetImpulse.h"
