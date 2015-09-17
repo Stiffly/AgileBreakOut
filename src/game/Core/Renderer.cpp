@@ -474,3 +474,8 @@ void dd::Renderer::DebugKeys()
 	}
 }
 
+void dd::Renderer::DrawFrame(RenderQueuePair &rq)
+{
+
+}
+

@@ -39,8 +39,8 @@ public:
 	void SetFullscreen(bool fullscreen) { m_Fullscreen = fullscreen; }
 	bool VSYNC() const { return m_VSYNC; }
 	void SetVSYNC(bool vsync) { m_VSYNC = vsync; }
-	//void SetViewport(const Rectangle& viewport) { m_Viewport = viewport; }
-	//void SetScissor(const Rectangle& scissor) { m_Scissor = scissor; }
+	void SetViewport(const Rectangle& viewport) { m_Viewport = viewport; }
+	void SetScissor(const Rectangle& scissor) { m_Scissor = scissor; }
 	const dd::Camera* Camera() const { return m_Camera; }
 	void SetCamera(const dd::Camera* camera)
 	{
@@ -53,13 +53,14 @@ public:
 
 	void Initialize();
 	void Draw(RenderQueueCollection& rq);
+	void DrawFrame(RenderQueuePair& rq);
 
 private:
 	Rectangle m_Resolution = Rectangle(1280, 720);
 	bool m_Fullscreen = false;
 	bool m_VSYNC = false;
-	//Rectangle m_Viewport;
-	//Rectangle m_Scissor;
+	Rectangle m_Viewport;
+	Rectangle m_Scissor;
 	std::unique_ptr<dd::Camera> m_DefaultCamera = nullptr;
 
 	const dd::Camera* m_Camera = nullptr;
