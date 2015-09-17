@@ -52,6 +52,11 @@ void dd::Systems::PhysicsSystem::Update(double dt)
         if (! transformComponent)
             continue;
 
+        if (body == nullptr) {
+            //LOG_ERROR("This body should not exist");
+            continue;
+        }
+
 
         if (m_World->GetEntityParent(entity) == 0) {
             b2Vec2 position;
@@ -85,6 +90,11 @@ void dd::Systems::PhysicsSystem::Update(double dt)
     for (auto i : m_EntitiesToBodies) {
         EntityID entity = i.first;
         b2Body* body = i.second;
+
+        if (body == nullptr) {
+            //LOG_ERROR("This body should not exist");
+            continue;
+        }
 
         auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
         if (! transformComponent)

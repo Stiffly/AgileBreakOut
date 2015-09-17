@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2015-09-15.
+// Created by Adniklastrator on 2015-09-15.
 //
 
 #ifndef DAYDREAM_CLIFE_H
@@ -15,7 +15,7 @@ namespace Components
 
 struct Life : Component {
 
-    int number = 0;
+    int Number = 0;
 
 };
 

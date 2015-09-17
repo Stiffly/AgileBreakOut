@@ -79,7 +79,6 @@ public:
 		m_World->SystemFactory.Register<Systems::Sound>([this]() { return new Systems::Sound(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::Sound>();
 
-
         m_World->ComponentFactory.Register<Components::Sprite>();
 
         m_World->ComponentFactory.Register<Components::RectangleShape>();
@@ -107,14 +106,15 @@ public:
 		/*{
 		}*/
 
+		//OctoBall
         {
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
             transform->Position = glm::vec3(0.5f, 0.f, -9.9f);
 			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
 
-            std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-            sprite->SpriteFile = "Textures/Ball.png";
+            auto model = m_World->AddComponent<Components::Model>(ent);
+			model->ModelFile = "Models/Test/Ball/Ballopus.obj";
 
             std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
 			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
@@ -134,26 +134,34 @@ public:
 			m_EventBroker->Publish(e);
         }
 
+		//PointLightTest
 		{
-			auto t_BrickWall = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(t_BrickWall);
-			transform->Position = glm::vec3(0.f, 0.f, -10.f);
-			auto sprite = m_World->AddComponent<Components::Sprite>(t_BrickWall);
-			//TODO: Rename SpriteFile to DiffuseTexture or similar.
-			sprite->SpriteFile = "Textures/Ball.png";
-			sprite->NormalTexture = "Textures/Test/Brick_Normal.png";
-			sprite->SpecularTexture = "Textures/Test/Brick_Specular.png";
+			auto t_Light = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_Light);
+			transform->Position = glm::vec3(2.f, 1.5f, -9.f);
+			auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
+			pl->Radius = 8.f;
 		}
 
+		//Halfpipe background test model.
 		{
-			auto t_BrickWall = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(t_BrickWall);
-			transform->Position = glm::vec3(0.4f, 0.f, -9.5f);
-			auto sprite = m_World->AddComponent<Components::Sprite>(t_BrickWall);
-			//TODO: Rename SpriteFile to DiffuseTexture or similar.
-			sprite->SpriteFile = "Textures/Ball.png";
-			sprite->NormalTexture = "Textures/Test/Brick_Normal.png";
-			sprite->SpecularTexture = "Textures/Test/Brick_Specular.png";
+			auto t_halfPipe = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
+			transform->Position = glm::vec3(0.f, 0.f, -15.f);
+			transform->Scale = glm::vec3(15.f);
+			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
+			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
+		}
+
+		//Brick test model
+		{
+			auto t_Brick = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_Brick);
+			transform->Position = glm::vec3(0.f, 0.f, -12.f);
+			transform->Orientation = glm::rotate(glm::quat(), 0.5f, glm::vec3(0,-1,-1));
+			auto model = m_World->AddComponent<Components::Model>(t_Brick);
+			model->ModelFile = "Models/Test/Brick/Brick.obj";
+
 		}
 
 		{
@@ -204,25 +212,6 @@ public:
 
 			m_World->CommitEntity(rightWall);
 		}
-
-
-        /*{
-            auto ent = m_World->CreateEntity();
-            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.f, -3.f, -10.f);
-            transform->Scale = glm::vec3(8.f, 0.5f, 1.f);
-            transform->Orientation = glm::rotate(transform->Orientation, glm::radians(25.f), glm::vec3(0, 0, -1));
-
-            std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-            sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
-
-            std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(ent);
-
-            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-            physics->Static = true;
-
-            m_World->CommitEntity(ent);
-        }*/
 
 		{
 			auto ent = m_World->CreateEntity();
@@ -322,7 +311,7 @@ public:
 					glm::mat4 modelMatrix = glm::translate(glm::mat4(), absoluteTransform.Position)
 						* glm::toMat4(absoluteTransform.Orientation)
 						* glm::scale(absoluteTransform.Scale);
-					EnqueueModel(modelAsset, modelMatrix, modelComponent->Transparent, modelComponent->Color);
+					EnqueueModel(modelAsset, modelMatrix, modelComponent->Transparent, modelComponent->Color, modelComponent->ModelFile);
 				}
 			}
 
@@ -370,7 +359,7 @@ public:
 	}
 
 	//TODO: Get this out of engine.h
-	void EnqueueModel(Model* model, glm::mat4 modelMatrix, float transparent, glm::vec4 color)
+	void EnqueueModel(Model* model, glm::mat4 modelMatrix, float transparent, glm::vec4 color, std::string fileName)
 	{
 		for (auto texGroup : model->TextureGroups)
 		{
@@ -385,8 +374,7 @@ public:
 			job.EndIndex = texGroup.EndIndex;
 			job.ModelMatrix = modelMatrix;
 			job.Color = color;
-			//TODO: This Depth is probably wrong.
-			job.Depth = (glm::vec4(1,1,1,0) * modelMatrix).z;
+			job.fileName = fileName;
 
 			m_RendererQueue.Deferred.Add(job);
 		}
