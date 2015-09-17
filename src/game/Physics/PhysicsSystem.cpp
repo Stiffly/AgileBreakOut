@@ -103,6 +103,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
             transformComponent->Orientation =  glm::quat(glm::vec3(0, 0, -angle));
 
+            //TODO: Fix this back for real bodies
             b2Vec2 velocity = body->GetLinearVelocity();
             transformComponent->Velocity.x = velocity.x;
             transformComponent->Velocity.y = velocity.y;

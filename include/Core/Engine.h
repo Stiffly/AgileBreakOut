@@ -116,9 +116,9 @@ public:
         {
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.5f, 0.f, -10.f);
+            transform->Position = glm::vec3(-0.5f, 0.f, -10.f);
 			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-			transform->Velocity = glm::vec3(1.0f, -5.f, 0.f);
+			transform->Velocity = glm::vec3(-1.0f, -5.f, 0.f);
 
             std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
             sprite->SpriteFile = "Textures/Ball.png";
@@ -141,7 +141,7 @@ public:
 			auto topWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
 			transform->Position = glm::vec3(0.f, 5.f, -10.f);
-			transform->Scale = glm::vec3(15.f, 0.5f, 1.f);
+			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
@@ -157,7 +157,7 @@ public:
 			auto leftWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(leftWall);
 			transform->Position = glm::vec3(-9.f, 1.f, -10.f);
-			transform->Scale = glm::vec3(0.5f, 10.f, 1.f);
+			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
@@ -173,7 +173,7 @@ public:
 			auto rightWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(rightWall);
 			transform->Position = glm::vec3(9.f, 1.f, -10.f);
-			transform->Scale = glm::vec3(0.5f, 10.f, 1.f);
+			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
