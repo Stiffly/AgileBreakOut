@@ -43,6 +43,7 @@
 #include "Game/CPad.h"
 
 #include "GUI/Frame.h"
+#include "GUI/GameFrame.h"
 
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
@@ -103,7 +104,7 @@ public:
 		m_FrameStack->Width = 1920;
 		m_FrameStack->Height = 1080;
 
-
+		new dd::GameFrame(m_FrameStack, "GameFrame");
 
 
 		//TODO: Remove tobias light-test code.
@@ -159,14 +160,15 @@ public:
 			sprite->SpecularTexture = "Textures/Test/Brick_Specular.png";
 		}
 
+		// Top Wall
 		{
 			auto topWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
 			transform->Position = glm::vec3(0.f, 6.f, -10.f);
 			transform->Scale = glm::vec3(18.f, 0.5f, 1.f);
 
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
 			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(topWall);
 
@@ -175,14 +177,15 @@ public:
 
 			m_World->CommitEntity(topWall);
 		}
+		// Left Wall
 		{
 			auto leftWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(leftWall);
 			transform->Position = glm::vec3(-9.f, 1.f, -10.f);
 			transform->Scale = glm::vec3(0.5f, 10.f, 1.f);
 
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
+			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
 			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(leftWall);
 
@@ -191,14 +194,15 @@ public:
 
 			m_World->CommitEntity(leftWall);
 		}
+		// Right Wall.
 		{
 			auto rightWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(rightWall);
 			transform->Position = glm::vec3(9.f, 1.f, -10.f);
 			transform->Scale = glm::vec3(0.5f, 10.f, 1.f);
 
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
+			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
 			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(rightWall);
 

@@ -49,7 +49,7 @@ public:
     Texture *Texture() const { return m_Texture; }
 
     void SetTexture(std::string resourceName) {
-        m_Texture = ResourceManager->Load<::Texture>("Texture", resourceName);
+        m_Texture = ResourceManager->Load<dd::Texture>("Texture", resourceName);
     }
 
     void FadeToTexture(std::string resourceName, double duration) {
@@ -75,8 +75,8 @@ public:
     void SetColor(glm::vec4 val) { m_Color = val; }
 
 protected:
-    Texture *m_Texture;
-    Texture *m_FadeTexture;
+    dd::Texture *m_Texture;
+    dd::Texture *m_FadeTexture;
     glm::vec4 m_Color;
     float m_FadeDuration;
     float m_CurrentFade;

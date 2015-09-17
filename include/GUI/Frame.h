@@ -11,7 +11,7 @@ namespace dd
 #include <memory>
 #include <map>
 
-#include "Util/Rectangle.h"
+#include "Core/Util/Rectangle.h"
 #include "Core/EventBroker.h"
 #include "Core/EKeyDown.h"
 #include "Core/EKeyUp.h"

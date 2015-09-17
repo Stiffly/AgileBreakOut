@@ -8,13 +8,13 @@
 #include "GUI/Frame.h"
 #include "GUI/MainMenuFrame.h"
 //#include "GUI/WorldFrame.h"
-//#include "GUI/Viewport.h"
+#include "GUI/Viewport.h"
 #include "GUI/TextureFrame.h"
 //#include "GUI/PlayerHUD.h"
 
 //#include "GameWorld.h"
 #include "Game/EGameStart.h"
-//#include "Events/GameOver.h"
+#include "Game/EGameOver.h"
 //#include "Events/Dead.h"
 
 namespace dd
@@ -27,8 +27,8 @@ namespace dd
                 : Frame(parent, name)
                 , m_GameOver(false)
         {
-            EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &GUI::GameFrame::OnGameStart);
-            EVENT_SUBSCRIBE_MEMBER(m_EGameOver, &GUI::GameFrame::OnGameOver);
+            EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &dd::GameFrame::OnGameStart);
+            EVENT_SUBSCRIBE_MEMBER(m_EGameOver, &dd::GameFrame::OnGameOver);
 
             //m_World = std::make_shared<GameWorld>(EventBroker, ResourceManager);
             /*m_WorldFrame = new WorldFrame(this, "GameWorldFrame", m_World);
@@ -46,8 +46,8 @@ namespace dd
                 m_FreeCamViewport = new Viewport(m_WorldFrame, "ViewportFreeCam", m_World);
                 m_FreeCamViewport->Hide();
             }*/
-            m_WorldFrame->Hide();
-            m_World->Initialize();
+            //m_WorldFrame->Hide();
+            //m_World->Initialize();
 
             m_MainMenuFrame = new MainMenuFrame(this, "MainMenu");
         }
@@ -56,11 +56,11 @@ namespace dd
         EventRelay<Frame, dd::Events::GameStart> m_EGameStart;
         bool OnGameStart(const dd::Events::GameStart &event)
         {
-            m_WorldFrame->Show();
+            //m_WorldFrame->Show();
 
             return true;
         }
-        /*EventRelay<Frame, Events::GameOver> m_EGameOver;
+        EventRelay<Frame, Events::GameOver> m_EGameOver;
         bool OnGameOver(const Events::GameOver &event)
         {
             m_GameOver = true;
@@ -68,15 +68,15 @@ namespace dd
             return true;
         }
 
-        std::shared_ptr<GameWorld> m_World;
+        //std::shared_ptr<GameWorld> m_World;
 
         MainMenuFrame* m_MainMenuFrame;
-        WorldFrame* m_WorldFrame;
-        Viewport* vp1;
-        Viewport* vp2;
-        Viewport* m_FreeCamViewport;
+        //WorldFrame* m_WorldFrame;
+        //Viewport* vp1;
+        //Viewport* vp2;
+        //Viewport* m_FreeCamViewport;
 
-        bool m_GameOver;*/
+        bool m_GameOver;
 
         bool OnKeyUp(const dd::Events::KeyUp &event) override
         {

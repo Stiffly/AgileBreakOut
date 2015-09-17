@@ -15,70 +15,66 @@
 #include "Core/RenderQueue.h"
 #include "Core/Camera.h"
 
-namespace GUI
+namespace dd
 {
 
-    class Viewport : public Frame
-    {
-    public:
-        Viewport(Frame* parent, std::string name, std::shared_ptr<World> world)
-                : Frame(parent, name)
-                , m_World(world)
-        { }
+class Viewport : public Frame
+{
+public:
+    Viewport(Frame *parent, std::string name, std::shared_ptr<dd::World> world)
+            : Frame(parent, name), m_World(world) { }
 
-        EntityID CameraEntity() const { return m_CameraEntity; }
-        void SetCameraEntity(EntityID cameraEntity)
-        {
-            m_CameraEntity = cameraEntity;
-            auto transformComponent = m_World->GetComponent<Components::Transform>(cameraEntity);
-            if (!transformComponent)
-                return;
-            auto cameraComponent = m_World->GetComponent<Components::Camera>(cameraEntity);
-            if (!cameraComponent)
-                return;
+    EntityID CameraEntity() const { return m_CameraEntity; }
 
-            m_Camera = std::make_shared<Camera>(cameraComponent->FOV, cameraComponent->NearClip, cameraComponent->FarClip);
-        }
+    void SetCameraEntity(EntityID cameraEntity) {
+        m_CameraEntity = cameraEntity;
+        auto transformComponent = m_World->GetComponent<dd::Components::Transform>(cameraEntity);
+        if (!transformComponent)
+            return;
+        auto cameraComponent = m_World->GetComponent<dd::Components::Camera>(cameraEntity);
+        if (!cameraComponent)
+            return;
+
+        m_FrameCamera = std::make_shared<dd::Camera>(cameraComponent->FOV, cameraComponent->NearClip, cameraComponent->FarClip);
+    }
 
 
-        void Update(double dt) override
-        {
-            if (!m_TransformSystem)
-                m_TransformSystem = m_World->GetSystem<Systems::TransformSystem>();
+    void Update(double dt) override {
+        if (!m_TransformSystem)
+            m_TransformSystem = m_World->GetSystem<dd::Systems::TransformSystem>();
 
-            auto transformComponent = m_World->GetComponent<Components::Transform>(m_CameraEntity);
-            if (!transformComponent)
-                return;
+        auto transformComponent = m_World->GetComponent<dd::Components::Transform>(m_CameraEntity);
+        if (!transformComponent)
+            return;
 
-            auto cameraComponent = m_World->GetComponent<Components::Camera>(m_CameraEntity);
-            if (!cameraComponent)
-                return;
+        auto cameraComponent = m_World->GetComponent<dd::Components::Camera>(m_CameraEntity);
+        if (!cameraComponent)
+            return;
 
-            Components::Transform absoluteTransform = m_TransformSystem->AbsoluteTransform(m_CameraEntity);
+        dd::Components::Transform absoluteTransform = m_TransformSystem->AbsoluteTransform(m_CameraEntity);
 
-            m_Camera->SetFOV(cameraComponent->FOV);
-            m_Camera->SetNearClip(cameraComponent->NearClip);
-            m_Camera->SetFarClip(cameraComponent->FarClip);
-            m_Camera->SetPosition(absoluteTransform.Position);
-            m_Camera->SetOrientation(absoluteTransform.Orientation);
-        }
+        m_FrameCamera->SetFOV(cameraComponent->FOV);
+        m_FrameCamera->SetNearClip(cameraComponent->NearClip);
+        m_FrameCamera->SetFarClip(cameraComponent->FarClip);
+        m_FrameCamera->SetPosition(absoluteTransform.Position);
+        m_FrameCamera->SetOrientation(absoluteTransform.Orientation);
+    }
 
-        void Draw(std::shared_ptr<Renderer> renderer) override
-        {
-            if (!m_Camera)
-                return;
+    void Draw(std::shared_ptr<dd::Renderer> renderer) override {
+        if (!m_FrameCamera)
+            return;
 
-            renderer->SetCamera(m_Camera);
-            renderer->SetViewport(AbsoluteRectangle());
-            renderer->DrawWorld(m_Parent->RenderQueue);
-        }
+        renderer->SetCamera(m_FrameCamera);
+        renderer->SetViewport(AbsoluteRectangle());
+        renderer->DrawWorld(m_Parent->RenderQueue);
+    }
 
-    private:
-        std::shared_ptr<World> m_World;
-        std::shared_ptr<Systems::TransformSystem> m_TransformSystem;
-        std::shared_ptr<Camera> m_Camera;
-        EntityID m_CameraEntity;
-    };
+private:
+    std::shared_ptr<dd::World> m_World;
+    std::shared_ptr<dd::Systems::TransformSystem> m_TransformSystem;
+    std::shared_ptr<dd::Camera> m_FrameCamera;
+    EntityID m_CameraEntity;
+};
 
 }
 

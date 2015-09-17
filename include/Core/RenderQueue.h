@@ -88,6 +88,10 @@ struct SpriteJob : RenderJob
 	unsigned int ShaderID;
 	unsigned int TextureID;
 
+	//Niklas is trying to get Frames to work.
+	GLuint Texture;
+	//Niklas is trying to get Frames to work./end
+
 	glm::mat4 ModelMatrix;
 	GLuint DiffuseTexture;
 	GLuint NormalTexture;
@@ -164,6 +168,23 @@ struct RenderQueueCollection
 		Deferred.Sort();
 		Forward.Sort();
 		Lights.Sort();
+	}
+};
+
+struct RenderQueuePair
+
+{
+	RenderQueue Deferred;
+	RenderQueue Forward;
+
+	void Clear() {
+		Deferred.Clear();
+		Forward.Clear();
+	}
+
+	void Sort() {
+		Deferred.Sort();
+		Forward.Sort();
 	}
 };
 
