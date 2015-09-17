@@ -78,7 +78,21 @@ bool dd::Systems::SoundSystem::OnKeyDown(const dd::Events::KeyDown &event)
 
 bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
 {
-    int localBallEntID = 0;
+    auto collisionSound = m_World->GetComponent<Components::CollisionSound>(event.Entity1);
+    if (collisionSound == NULL) {
+        collisionSound = m_World->GetComponent<Components::CollisionSound>(event.Entity2);
+        if (collisionSound == NULL) {
+            return false;
+        }
+    }
+
+    dd::Events::PlaySFX e;
+    e.path = collisionSound->filePath;
+    EventBroker->Publish(e);
+    return true;
+
+
+    /*int localBallEntID = 0;
     //Make sure a ball is colliding
     auto ball = m_World->GetComponent<Components::Ball>(event.Entity1);
     if (ball == NULL) {
@@ -117,7 +131,7 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
         e.path = "Sounds/Metal/impact.wav";
         EventBroker->Publish(e);
         return true;
-    }
+    }*/
 }
 
 ALuint dd::Systems::SoundSystem::CreateSource()

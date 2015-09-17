@@ -28,9 +28,11 @@
 #include "Sound/EPlaySFX.h"
 #include "Physics/EContact.h"
 #include "Core/EventBroker.h"
-#include <Game/CBall.h>
-#include <Game/CBrick.h>
-#include <Game/CPad.h>
+#include "Game/CBall.h"
+#include "Game/CBrick.h"
+#include "Game/CPad.h"
+#include "Sound/CCollisionSound.h"
+
 
 namespace dd
 {

@@ -18,6 +18,7 @@
 
 #include <string>
 #include <sstream>
+#include <Sound/CCollisionSound.h>
 
 #include "ResourceManager.h"
 #include "OBJ.h"
@@ -37,6 +38,7 @@
 #include "Rendering/CPointLight.h"
 #include "Transform/TransformSystem.h"
 #include "Sound/SoundSystem.h"
+#include "Sound/CCollisionSound.h"
 #include "Game/LevelSystem.h"
 #include "Game/PadSystem.h"
 #include "Game/CBall.h"
@@ -76,6 +78,7 @@ public:
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
 
+		m_World->ComponentFactory.Register<Components::CollisionSound>();
 		m_World->SystemFactory.Register<Systems::SoundSystem>([this]() { return new Systems::SoundSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::SoundSystem>();
 
