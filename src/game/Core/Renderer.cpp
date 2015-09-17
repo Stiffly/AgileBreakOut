@@ -323,7 +323,7 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, modelJob->DiffuseTexture);
-			if (modelJob->NormalTexture != 0 && false) {
+			if (modelJob->NormalTexture != 0) {
 				glActiveTexture(GL_TEXTURE1);
 				glBindTexture(GL_TEXTURE_2D, modelJob->NormalTexture);
 			} else {
@@ -331,11 +331,10 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 				glBindTexture(GL_TEXTURE_2D, *m_StandardNormal);
 			}
 
-			if (modelJob->SpecularTexture != 0 && false) {
+			if (modelJob->SpecularTexture != 0) {
 				glActiveTexture(GL_TEXTURE2);
 				glBindTexture(GL_TEXTURE_2D, modelJob->SpecularTexture);
-			}
-			else {
+			} else {
 				glActiveTexture(GL_TEXTURE2);
 				glBindTexture(GL_TEXTURE_2D, *m_StandardSpecular);
 			}
