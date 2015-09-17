@@ -16,18 +16,16 @@
 	along with Daydream Engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <Game/CBall.h>
-#include <Game/CBrick.h>
-#include <Game/CPad.h>
-#include "PrecompiledHeader.h"
-#include "Core/Sound.h"
 
-dd::Systems::Sound::~Sound()
+#include "PrecompiledHeader.h"
+#include "Sound/SoundSystem.h"
+
+dd::Systems::SoundSystem::~SoundSystem()
 {
     //alDeleteSources(1, m_Source);
 }
 
-void dd::Systems::Sound::Initialize()
+void dd::Systems::SoundSystem::Initialize()
 {   //initialize OpenAL
     ALCdevice* device = alcOpenDevice(NULL);
     ALCcontext* context;
@@ -45,12 +43,12 @@ void dd::Systems::Sound::Initialize()
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 
     //Subscribe to events
-    EVENT_SUBSCRIBE_MEMBER(m_EContact, &Sound::OnContact);
-    EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, &Sound::OnKeyDown);
-    EVENT_SUBSCRIBE_MEMBER(m_EPlaySFX, &Sound::OnPlaySFX);
+    EVENT_SUBSCRIBE_MEMBER(m_EContact, &SoundSystem::OnContact);
+    EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, &SoundSystem::OnKeyDown);
+    EVENT_SUBSCRIBE_MEMBER(m_EPlaySFX, &SoundSystem::OnPlaySFX);
 }
 
-void dd::Systems::Sound::Update(double dt)
+void dd::Systems::SoundSystem::Update(double dt)
 {
     const ALfloat pos[3] = {0, 0, 0};
     alListenerfv(AL_POSITION, pos);
@@ -58,7 +56,7 @@ void dd::Systems::Sound::Update(double dt)
     alSourcefv(m_Source, AL_POSITION, pos);
 }
 
-bool dd::Systems::Sound::OnPlaySFX(const dd::Events::PlaySFX &event)
+bool dd::Systems::SoundSystem::OnPlaySFX(const dd::Events::PlaySFX &event)
 {
     m_Source = CreateSource();
     ALuint buffer = LoadFile(event.path);
@@ -67,7 +65,7 @@ bool dd::Systems::Sound::OnPlaySFX(const dd::Events::PlaySFX &event)
     alSourcePlay(m_Source);
 }
 
-bool dd::Systems::Sound::OnKeyDown(const dd::Events::KeyDown &event)
+bool dd::Systems::SoundSystem::OnKeyDown(const dd::Events::KeyDown &event)
 {
     // #define GLFW_KEY_S 83
     /*if (event.KeyCode == 83) {
@@ -78,7 +76,7 @@ bool dd::Systems::Sound::OnKeyDown(const dd::Events::KeyDown &event)
     }
 }
 
-bool dd::Systems::Sound::OnContact(const dd::Events::Contact &event)
+bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
 {
     int localBallEntID = 0;
     //Make sure a ball is colliding
@@ -105,13 +103,13 @@ bool dd::Systems::Sound::OnContact(const dd::Events::Contact &event)
         collObject = event.Entity1;
     }
 
-    /*auto collisionBrick = m_World->GetComponent<Components::Brick>(collObject);
+    auto collisionBrick = m_World->GetComponent<Components::Brick>(collObject);
     if (collisionBrick != NULL) {
         dd::Events::PlaySFX e;
         e.path = "Sounds/Brick/brickBreak.wav";
         EventBroker->Publish(e);
         return true;
-    }*/
+    }
 
     auto collisionPad = m_World->GetComponent<Components::Pad>(collObject);
     if (collisionPad != NULL) {
@@ -122,7 +120,7 @@ bool dd::Systems::Sound::OnContact(const dd::Events::Contact &event)
     }
 }
 
-ALuint dd::Systems::Sound::CreateSource()
+ALuint dd::Systems::SoundSystem::CreateSource()
 {
     ALuint source;
     alGenSources((ALuint)1, &source);
@@ -130,7 +128,7 @@ ALuint dd::Systems::Sound::CreateSource()
     return source;
 }
 
-ALuint dd::Systems::Sound::LoadFile(std::string path)
+ALuint dd::Systems::SoundSystem::LoadFile(std::string path)
 {
     if (m_BufferCache.find(path) != m_BufferCache.end()) {
         return m_BufferCache[path];

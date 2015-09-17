@@ -71,6 +71,12 @@ file(GLOB SOURCE_FILES_Game
 )
 source_group(Game FILES ${SOURCE_FILES_Game})
 
+file(GLOB SOURCE_FILES_Sound
+    "${INCLUDE_PATH}/Sound/*.h"
+    "Sound/*.cpp"
+)
+source_group(Sound FILES ${SOURCE_FILES_Sound})
+
 set(SOURCE_FILES
     ${SOURCE_FILES_Core}
     ${SOURCE_FILES_Core_Util}
@@ -78,7 +84,8 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Rendering}
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Physics}
-    ${SOURCE_FILES_Game})
+    ${SOURCE_FILES_Game}
+    ${SOURCE_FILES_Sound})
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")

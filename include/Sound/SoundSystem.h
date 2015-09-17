@@ -25,19 +25,22 @@
 #include "Core/System.h"
 #include "Core/World.h"
 #include "Core/EKeyDown.h"
-#include "Core/EPlaySFX.h"
+#include "Sound/EPlaySFX.h"
 #include "Physics/EContact.h"
 #include "Core/EventBroker.h"
+#include <Game/CBall.h>
+#include <Game/CBrick.h>
+#include <Game/CPad.h>
 
 namespace dd
 {
 namespace Systems
 {
-class Sound : public System {
+class SoundSystem : public System {
 public:
-    Sound(World *world, std::shared_ptr<dd::EventBroker> eventBroker)
+    SoundSystem(World *world, std::shared_ptr<dd::EventBroker> eventBroker)
             : System(world, eventBroker) { }
-    ~Sound();
+    ~SoundSystem();
     void Initialize() override;
 
     //void UpdateEntity(double dt, EntityID entity, EntityID parent) override;
@@ -53,9 +56,9 @@ public:
 
 private:
     //Events
-    dd::EventRelay<Sound, dd::Events::KeyDown> m_EKeyDown;
-    dd::EventRelay<Sound, dd::Events::PlaySFX> m_EPlaySFX;
-    dd::EventRelay<Sound, dd::Events::Contact> m_EContact;
+    dd::EventRelay<SoundSystem, dd::Events::KeyDown> m_EKeyDown;
+    dd::EventRelay<SoundSystem, dd::Events::PlaySFX> m_EPlaySFX;
+    dd::EventRelay<SoundSystem, dd::Events::Contact> m_EContact;
 
     bool OnKeyDown(const dd::Events::KeyDown &event);
     bool OnPlaySFX(const dd::Events::PlaySFX &event);

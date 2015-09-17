@@ -36,7 +36,7 @@
 #include "CTemplate.h"
 #include "Rendering/CPointLight.h"
 #include "Transform/TransformSystem.h"
-#include "Core/Sound.h"
+#include "Sound/SoundSystem.h"
 #include "Game/LevelSystem.h"
 #include "Game/PadSystem.h"
 #include "Game/CBall.h"
@@ -76,8 +76,8 @@ public:
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
 
-		m_World->SystemFactory.Register<Systems::Sound>([this]() { return new Systems::Sound(m_World.get(), m_EventBroker); });
-		m_World->AddSystem<Systems::Sound>();
+		m_World->SystemFactory.Register<Systems::SoundSystem>([this]() { return new Systems::SoundSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::SoundSystem>();
 
         m_World->ComponentFactory.Register<Components::Sprite>();
 
@@ -416,8 +416,6 @@ private:
 	std::shared_ptr<InputManager> m_InputManager;
 	std::shared_ptr<World> m_World;
 
-    //TODO: Delete this please
-    std::shared_ptr<dd::Systems::Sound> m_Sound;
 
 	double m_LastTime;
 };
