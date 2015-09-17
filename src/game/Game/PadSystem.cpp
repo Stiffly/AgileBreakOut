@@ -7,6 +7,7 @@
 #include "Core/World.h"
 #include <iostream>
 #include <Game/CPad.h>
+#include <Rendering/CPointLight.h>
 
 
 void dd::Systems::PadSystem::Initialize()
@@ -40,12 +41,24 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
             transformEntity->Position = glm::vec3(20, 20, -10);
 
             //Temporary. Create new ball.
-            auto ent = m_World->CreateEntity();
+            /*auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.5f, 0.f, -10.f);;
+            transform->Position = glm::vec3(0.5f, 0.f, -10.f);
             transform->Scale = glm::vec3(1.f, 1.f, 1.f);
             std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
             sprite->SpriteFile = "Textures/Ball.png";
+            std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
+            std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
+            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+            physics->Static = false;*/
+
+            auto ent = m_World->CreateEntity();
+            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+            transform->Position = glm::vec3(0.5f, 0.f, -10.f);
+            transform->Scale = glm::vec3(1.f, 1.f, 1.f);
+            auto model = m_World->AddComponent<Components::Model>(ent);
+            model->ModelFile = "Models/Test/Ball/Ballopus.obj";
+            //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
             std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
             std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
             std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
@@ -182,8 +195,9 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
     transform->Position = glm::vec3(transformBall->Position.x, transformBall->Position.y + 0.01f, -10.f);
     transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-    std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-    sprite->SpriteFile = "Textures/Ball.png";
+    auto model = m_World->AddComponent<Components::Model>(ent);
+    model->ModelFile = "Models/Test/Ball/Ballopus.obj";
+    //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
     std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
     std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
     std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
