@@ -83,25 +83,3 @@ void dd::ResourceManager::Update()
 {
 	m_FileWatcher.Check();
 }
-
-//Niklas is trying to get frames to work.
-dd::Resource* dd::ResourceManager::CreateResource(std::string resourceType, std::string resourceName)
-{
-	auto facIt = m_FactoryFunctions.find(resourceType);
-	if (facIt == m_FactoryFunctions.end())
-	{
-		LOG_ERROR("Failed to load resource \"%s\" of type \"%s\": Type not registered", resourceName.c_str(), resourceType.c_str());
-		return nullptr;
-	}
-
-	// Call the factory function
-	Resource* resource = facIt->second(resourceName);
-	// Store IDs
-	resource->TypeID = GetTypeID(resourceType);
-	resource->ResourceID = GetNewResourceID(resource->TypeID);
-	// Cache
-	m_ResourceCache[std::make_pair(resourceType, resourceName)] = resource;
-
-	return resource;
-}
-//Niklas is trying to get frames to work./end

@@ -42,9 +42,6 @@
 #include "Game/CBrick.h"
 #include "Game/CPad.h"
 
-#include "GUI/Frame.h"
-#include "GUI/GameFrame.h"
-
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CBoxShape.h"

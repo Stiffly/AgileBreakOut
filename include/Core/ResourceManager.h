@@ -108,11 +108,6 @@ public:
 		@param resourceName Fully qualified name of the resource to fetch.
 	*/
 
-	//Niklas is trying to get frames to work.
-	template <typename T>
-	T* Load(std::string resourceType, std::string resourceName);
-	//Niklas is trying to get frames to work./end
-
 	template <typename T>
 	static T* Fetch(std::string resourceName);
 
@@ -167,25 +162,6 @@ T* ResourceManager::Load(std::string resourceName, Resource* parent /* = nullptr
 
 	return CreateResource<T>(resourceName, parent);
 }
-
-//Niklas is trying to get frames to work.
-template <typename T>
-T* ResourceManager::Load(std::string resourceType, std::string resourceName)
-{
-	auto it = m_ResourceCache.find(std::make_pair(resourceType, resourceName));
-	if (it != m_ResourceCache.end())
-		return static_cast<T *>(it->second);
-	if (m_Preloading) {
-		LOG_INFO("Preloading resource \"%s\"", resourceName.c_str());
-	}
-	else {
-		LOG_WARNING("Hot-loading resource \"%s\"", resourceName.c_str());
-	}
-	return static_cast<T *>(CreateResource(resourceType, resourceName));
-}
-
-
-	//Niklas is trying to get frames to work./end
 
 template <typename T>
 T* ResourceManager::Fetch(std::string resourceName)

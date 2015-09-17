@@ -88,10 +88,6 @@ struct SpriteJob : RenderJob
 	unsigned int ShaderID;
 	unsigned int TextureID;
 
-	//Niklas is trying to get Frames to work.
-	GLuint Texture;
-	//Niklas is trying to get Frames to work./end
-
 	glm::mat4 ModelMatrix;
 	GLuint DiffuseTexture;
 	GLuint NormalTexture;

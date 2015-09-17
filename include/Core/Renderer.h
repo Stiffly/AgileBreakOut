@@ -51,32 +51,6 @@ public:
 		}
 	}
 
-
-
-	//Niklas is trying to implement Frames.
-	std::shared_ptr<dd::Camera> GetCamera() const { return m_FrameCamera; }
-	void SetCamera(const std::shared_ptr<dd::Camera> camera)
-	{
-		m_FrameCamera = camera;
-	}
-
-	void DrawFrame(RenderQueuePair &rq);
-	void DrawWorld(RenderQueuePair &rq);
-
-	void SetViewport(const Rectangle &viewport)
-	{
-		m_Viewport = viewport;
-	}
-
-	void SetScissor(const Rectangle &scissor)
-	{
-		m_Scissor = scissor;
-	}
-
-	int Width() const { return m_Width; }
-	int Height() const { return m_Height; }
-	//Niklas is trying to implement Frames.
-
 	void Initialize();
 	void Draw(RenderQueueCollection& rq);
 
@@ -89,14 +63,6 @@ private:
 	std::unique_ptr<dd::Camera> m_DefaultCamera = nullptr;
 
 	const dd::Camera* m_Camera = nullptr;
-
-	//Niklas is trying to implement Frames.
-	std::shared_ptr<dd::Camera> m_FrameCamera;
-	Rectangle m_Viewport;
-	Rectangle m_Scissor;
-	ShaderProgram m_ForwardRendering;
-	int m_Width = 1980, m_Height = 1080;
-	//Niklas is trying to implement Frames./end
 
 	int m_GLVersion[2];
 	std::string m_GLVendor;
