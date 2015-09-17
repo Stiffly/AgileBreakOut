@@ -22,12 +22,11 @@ void dd::Systems::PadSystem::Initialize()
     l.Command = "left";
     EventBroker->Publish(l);
 
-    EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, PadSystem::OnKeyDown);
-    EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, PadSystem::OnKeyUp);
-    EVENT_SUBSCRIBE_MEMBER(m_EContact, PadSystem::OnContact);
-    EVENT_SUBSCRIBE_MEMBER(m_EResetBall, PadSystem::ResetBall);
-
-    return;
+    EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, &PadSystem::OnKeyDown);
+    EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, &PadSystem::OnKeyUp);
+    EVENT_SUBSCRIBE_MEMBER(m_EContact, &PadSystem::OnContact);
+    EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &PadSystem::OnResetBall);
+    EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &PadSystem::OnMultiBall);
 }
 
 void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
@@ -40,32 +39,10 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
             auto transformEntity = m_World->GetComponent<Components::Transform>(entity);
             transformEntity->Position = glm::vec3(20, 20, -10);
 
-            //Temporary. Create new ball.
-            /*auto ent = m_World->CreateEntity();
-            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.5f, 0.f, -10.f);
-            transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-            std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-            sprite->SpriteFile = "Textures/Ball.png";
-            std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-            std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
-            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-            physics->Static = false;*/
-
-            auto ent = m_World->CreateEntity();
-            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.5f, 0.f, -10.f);
-            transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-            auto model = m_World->AddComponent<Components::Model>(ent);
-            model->ModelFile = "Models/Test/Ball/Ballopus.obj";
-            //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
-            std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-            std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
-            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-            physics->Static = false;
-
             m_World->RemoveEntity(entity);
-            m_World->CommitEntity(ent);
+
+            auto ent = CreateBall();
+            auto transform = m_World->GetComponent<Components::Transform>(ent);
 
             Events::SetImpulse e;
             e.Entity = ent;
@@ -105,11 +82,9 @@ void dd::Systems::PadSystem::Update(double dt)
 
     if (Left()) {
         acceleration.x = -pad->AccelerationSpeed;
-    }
-    else if (Right()) {
+    } else if (Right()) {
         acceleration.x = pad->AccelerationSpeed;
-    }
-    else {
+    } else {
         acceleration.x = 0.f;
     }
 
@@ -117,7 +92,33 @@ void dd::Systems::PadSystem::Update(double dt)
     SetPad(pad);
     SetAcceleration(acceleration);
 
+    if (MultiBall() == true) {
+        SetMultiBall(false);
+
+        Events::MultiBall e;
+        EventBroker->Publish(e);
+    }
+
     return;
+}
+
+EntityID dd::Systems::PadSystem::CreateBall()
+{
+    auto ent = m_World->CreateEntity();
+    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+    transform->Position = glm::vec3(0.5f, 0.f, -10.f);
+    transform->Scale = glm::vec3(1.f, 1.f, 1.f);
+    auto model = m_World->AddComponent<Components::Model>(ent);
+    model->ModelFile = "Models/Test/Ball/Ballopus.obj";
+    //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
+    std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
+    std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
+    std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+    physics->Static = false;
+
+    m_World->CommitEntity(ent);
+
+    return ent;
 }
 
 bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
@@ -137,6 +138,8 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
         SetRight(true);
     } else if (val == GLFW_KEY_R) {
         SetReplaceBall(true);
+    } else if (val == GLFW_KEY_M) {
+        SetMultiBall(true);
     }
     return true;
 }
@@ -191,20 +194,12 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     //std::cout << movementX << " " << movementY << std::endl;
 
     //Temporary solution. Add a new ball and delete the old one.
-    auto ent = m_World->CreateEntity();
-    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+    auto ent = CreateBall();
+    auto transform = m_World->GetComponent<Components::Transform>(ent);
+
     transform->Position = glm::vec3(transformBall->Position.x, transformBall->Position.y + 0.01f, -10.f);
-    transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-    auto model = m_World->AddComponent<Components::Model>(ent);
-    model->ModelFile = "Models/Test/Ball/Ballopus.obj";
-    //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
-    std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-    std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
-    std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-    physics->Static = false;
 
     m_World->RemoveEntity(entityBall);
-    m_World->CommitEntity(ent);
 
     Events::SetImpulse e;
     e.Entity = ent;
@@ -213,9 +208,33 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     EventBroker->Publish(e);
 }
 
-bool dd::Systems::PadSystem::ResetBall(const dd::Events::ResetBall &event)
+bool dd::Systems::PadSystem::OnResetBall(const dd::Events::ResetBall &event)
 {
     SetReplaceBall(true);
+    return true;
+}
+
+bool dd::Systems::PadSystem::OnMultiBall(const dd::Events::MultiBall &event)
+{
+    auto ent1 = CreateBall();
+    auto ent2 = CreateBall();
+    auto transform1 = m_World->GetComponent<Components::Transform>(ent1);
+    auto transform2 = m_World->GetComponent<Components::Transform>(ent2);
+    transform1->Position = glm::vec3(3, -6, -10);
+    transform2->Position = glm::vec3(6, -6, -10);
+
+    Events::SetImpulse e1;
+    e1.Entity = ent1;
+    e1.Impulse = glm::vec2(6, 6);
+    e1.Point = glm::vec2(transform1->Position.x, transform1->Position.y);
+    EventBroker->Publish(e1);
+
+    Events::SetImpulse e2;
+    e2.Entity = ent2;
+    e2.Impulse = glm::vec2(-6, 6);
+    e2.Point = glm::vec2(transform2->Position.x, transform2->Position.y);
+    EventBroker->Publish(e2);
+
     return true;
 }
 

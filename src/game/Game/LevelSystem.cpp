@@ -12,6 +12,7 @@ void dd::Systems::LevelSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EContact, LevelSystem::OnContact);
     EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, LevelSystem::LifeLost);
     EVENT_SUBSCRIBE_MEMBER(m_EScoreEvent, LevelSystem::ScoreEvent);
+    EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, LevelSystem::MultiBall);
 
     for (int i = 0; i < Lives(); i++) {
         CreateLife(i);
@@ -174,6 +175,11 @@ bool dd::Systems::LevelSystem::ScoreEvent(const dd::Events::ScoreEvent &event)
     SetScore(Score() += event.Score);
 
     return true;
+}
+
+bool dd::Systems::LevelSystem::MultiBall(const dd::Events::MultiBall &event)
+{
+
 }
 
 void dd::Systems::LevelSystem::EndLevel()

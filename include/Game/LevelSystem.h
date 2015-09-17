@@ -18,6 +18,7 @@
 #include "Game/ELifeLost.h"
 #include "Game/EResetBall.h"
 #include "Game/EScoreEvent.h"
+#include "Game/EMultiBall.h"
 #include "Physics/CBoxShape.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
@@ -101,10 +102,12 @@ private:
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::LifeLost> m_ELifeLost;
     dd::EventRelay<LevelSystem, dd::Events::ScoreEvent> m_EScoreEvent;
+    dd::EventRelay<LevelSystem, dd::Events::MultiBall> m_EMultiBall;
 
     bool OnContact(const dd::Events::Contact &event);
     bool LifeLost(const dd::Events::LifeLost &event);
     bool ScoreEvent(const dd::Events::ScoreEvent &event);
+    bool MultiBall(const dd::Events::MultiBall &event);
 };
 
 }
