@@ -93,13 +93,6 @@ public:
 		m_World->ComponentFactory.Register<Components::PointLight>();
         m_World->Initialize();
 
-		//This is frame coding which might be stupid!
-		m_FrameStack = new dd::Frame(m_EventBroker, m_ResourceManager);
-		m_FrameStack->Width = 1920;
-		m_FrameStack->Height = 1080;
-
-		new dd::GameFrame(m_FrameStack, "GameFrame");
-
 
 		//TODO: Remove tobias light-test code.
 		/*{
@@ -417,7 +410,6 @@ private:
 	RenderQueueCollection m_RendererQueue;
 	std::shared_ptr<InputManager> m_InputManager;
 	std::shared_ptr<World> m_World;
-	dd::Frame* m_FrameStack;
 
 
 	double m_LastTime;
