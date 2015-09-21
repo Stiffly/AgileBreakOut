@@ -3,7 +3,8 @@
 
 dd::Systems::SoundSystem::~SoundSystem()
 {
-    //alDeleteSources(1, m_Source);
+    alSourcei(m_Source, AL_BUFFER, 0);
+    alDeleteSources(1, &m_Source);
 }
 
 void dd::Systems::SoundSystem::Initialize()
@@ -39,10 +40,8 @@ void dd::Systems::SoundSystem::Update(double dt)
 bool dd::Systems::SoundSystem::OnPlaySFX(const dd::Events::PlaySFX &event)
 {
     m_Source = CreateSource();
-    //ALuint buffer = LoadFile(event.path); //change to resourcemanager load
     Sound *sound = ResourceManager::Load<Sound>(event.path);
     ALuint buffer = sound->Buffer();
-
     alSourcei(m_Source, AL_BUFFER, buffer);
     alSourcePlay(m_Source);
 }
@@ -72,9 +71,4 @@ ALuint dd::Systems::SoundSystem::CreateSource()
     alGenSources((ALuint)1, &source);
 
     return source;
-}
-
-ALuint dd::Systems::SoundSystem::LoadFile(std::string path)
-{
-   /*Moved code*/
 }
