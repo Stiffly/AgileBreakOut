@@ -16,7 +16,7 @@ namespace Events
 
 struct MultiBall : Event
 {
-
+    Components::Transform* padTransform;
 };
 
 }

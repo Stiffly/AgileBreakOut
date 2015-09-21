@@ -96,6 +96,7 @@ void dd::Systems::PadSystem::Update(double dt)
         SetMultiBall(false);
 
         Events::MultiBall e;
+        e.padTransform = transform;
         EventBroker->Publish(e);
     }
 
@@ -220,8 +221,9 @@ bool dd::Systems::PadSystem::OnMultiBall(const dd::Events::MultiBall &event)
     auto ent2 = CreateBall();
     auto transform1 = m_World->GetComponent<Components::Transform>(ent1);
     auto transform2 = m_World->GetComponent<Components::Transform>(ent2);
-    transform1->Position = glm::vec3(3, -6, -10);
-    transform2->Position = glm::vec3(6, -6, -10);
+    auto padTransform = event.padTransform;
+    transform1->Position = glm::vec3(padTransform->Position.x - 4, -6, -10);
+    transform2->Position = glm::vec3(padTransform->Position.x + 4, -6, -10);
 
     Events::SetImpulse e1;
     e1.Entity = ent1;
