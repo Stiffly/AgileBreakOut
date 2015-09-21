@@ -14,8 +14,11 @@
 #include "Physics/ESetImpulse.h"
 #include "Physics/CCircleShape.h"
 #include "Core/EventBroker.h"
-#include "Game/CPad.h"
+<<<<<<< HEAD
 #include "Physics/CWaterVolume.h"
+=======
+#include "Game/CPad.h"
+>>>>>>> origin/physics
 
 
 namespace dd
@@ -67,7 +70,6 @@ private:
 
     const b2ParticleSystemDef m_ParticleSystemDef;
     b2ParticleSystem *m_ParticleSystem;
-    b2ParticleGroup* t_watergroup;
 
 
     void InitializeWater();
@@ -92,6 +94,7 @@ private:
             e.Entity1 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureA()->GetBody()];
             e.Entity2 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureB()->GetBody()];
             e.Normal = glm::normalize(glm::vec2(worldManifold.normal.x, worldManifold.normal.y));
+
 
             m_PhysicsSystem->EventBroker->Publish(e);
 

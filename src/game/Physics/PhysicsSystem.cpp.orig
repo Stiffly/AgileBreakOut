@@ -22,8 +22,6 @@ void dd::Systems::PhysicsSystem::Initialize()
 
     m_PhysicsWorld->SetContactListener(m_ContactListener);
 
-    InitializeWater();
-
     EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, PhysicsSystem::SetImpulse);
 }
 
@@ -72,9 +70,14 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             float angle = -glm::eulerAngles(transformComponent->Orientation).z;
 
             body->SetTransform(position, angle);
+<<<<<<< HEAD
+=======
 
 
+            body->SetLinearVelocity(b2Vec2(transformComponent->Velocity.x, transformComponent->Velocity.y));
 
+
+>>>>>>> origin/physics
         }
     }
 
@@ -85,6 +88,10 @@ void dd::Systems::PhysicsSystem::Update(double dt)
         m_Accumulator -= dt;
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/physics
     for (auto i : m_EntitiesToBodies) {
         EntityID entity = i.first;
         b2Body* body = i.second;
@@ -94,9 +101,13 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             continue;
         }
 
+<<<<<<< HEAD
         auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
         if (! transformComponent)
             continue;
+
+=======
+>>>>>>> origin/physics
         if (m_World->GetEntityParent(entity) == 0) {
             b2Vec2 position = body->GetPosition();
             transformComponent->Position.x = position.x;
@@ -106,7 +117,14 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
             //TODO: CHECK IF THIS IS CORRECT
             transformComponent->Orientation =  glm::quat(glm::vec3(0, 0, -angle));
+<<<<<<< HEAD
+=======
 
+            b2Vec2 velocity = body->GetLinearVelocity();
+            transformComponent->Velocity.x = velocity.x;
+            transformComponent->Velocity.y = velocity.y;
+
+>>>>>>> origin/physics
         }
     }
 }
@@ -227,23 +245,15 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
         LOG_ERROR("No Transform component in CreateParticleGroup");
         return;
     }
+    LOG_INFO("------ CREATING PARTICLE GROUP");
 
     b2ParticleGroupDef pd;
     b2PolygonShape shape;
-
     shape.SetAsBox(transform->Scale.x, transform->Scale.y);
     pd.shape = &shape;
     pd.flags = b2_elasticParticle;
     pd.angle = -0.5f;
     pd.angularVelocity = 2.0f;
-    pd.position.Set(transform->Position.x, transform->Position.y);
-    //pd.particleCount = 10;
-    //TODO: PUT IN LIST
-    t_watergroup = m_ParticleSystem->CreateParticleGroup(pd);
-    LOG_INFO("ParticleCount: %i", t_watergroup->GetParticleCount());
-
-
-
 }
 
 dd::Systems::PhysicsSystem::~PhysicsSystem()
