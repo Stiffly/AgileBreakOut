@@ -24,6 +24,7 @@
 #include "Physics/CCircleShape.h"
 #include "Physics/ESetImpulse.h"
 #include "Physics/EContact.h"
+#include "Sound/CCollisionSound.h"
 #include <fstream>
 #include <iostream>
 #include <intrin.h>

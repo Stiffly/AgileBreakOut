@@ -18,6 +18,7 @@
 
 #include <string>
 #include <sstream>
+#include <Sound/CCollisionSound.h>
 
 #include "ResourceManager.h"
 #include "OBJ.h"
@@ -36,6 +37,8 @@
 #include "CTemplate.h"
 #include "Rendering/CPointLight.h"
 #include "Transform/TransformSystem.h"
+#include "Sound/SoundSystem.h"
+#include "Sound/CCollisionSound.h"
 #include "Game/LevelSystem.h"
 #include "Game/PadSystem.h"
 #include "Game/CBall.h"
@@ -63,13 +66,21 @@ public:
 
         m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
 
-        m_World = std::make_shared<World>(m_EventBroker);
+		m_World = std::make_shared<World>(m_EventBroker);
+
+
 
         //TODO: Move this out of engine.h
         m_World->ComponentFactory.Register<Components::Transform>();
         m_World->SystemFactory.Register<Systems::TransformSystem>(
                 [this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
         m_World->AddSystem<Systems::TransformSystem>();
+		m_World->ComponentFactory.Register<Components::Model>();
+		m_World->ComponentFactory.Register<Components::Template>();
+
+		m_World->ComponentFactory.Register<Components::CollisionSound>();
+		m_World->SystemFactory.Register<Systems::SoundSystem>([this]() { return new Systems::SoundSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::SoundSystem>();
 
         m_World->ComponentFactory.Register<Components::Sprite>();
 
@@ -407,6 +418,7 @@ private:
 	RenderQueueCollection m_RendererQueue;
 	std::shared_ptr<InputManager> m_InputManager;
 	std::shared_ptr<World> m_World;
+
 
 	double m_LastTime;
 };
