@@ -40,9 +40,9 @@ private:
     bool OnContact(const dd::Events::Contact &event);
     ALuint CreateSource();
 
-    //std::map<Component*, ALuint> m_Sources;
+    std::map<Component*, ALuint> m_Sources;
 
-
+    //std::list<ALuint>
     //Temp
     ALuint m_Source;
 

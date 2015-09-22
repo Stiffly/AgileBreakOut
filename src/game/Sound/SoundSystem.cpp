@@ -21,8 +21,16 @@ void dd::Systems::SoundSystem::Initialize()
     }
 
     alGetError();
+
+    //Create source
+    m_Source = CreateSource();
+
     alSpeedOfSound(340.29f); // Speed of sound m/s
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
+
+    const ALfloat pos[3] = {0, 0, 0};
+    alListenerfv(AL_POSITION, pos);
+    alSourcefv(m_Source, AL_POSITION, pos);
 
     //Subscribe to events
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &SoundSystem::OnContact);
@@ -31,15 +39,12 @@ void dd::Systems::SoundSystem::Initialize()
 
 void dd::Systems::SoundSystem::Update(double dt)
 {
-    const ALfloat pos[3] = {0, 0, 0};
-    alListenerfv(AL_POSITION, pos);
 
-    alSourcefv(m_Source, AL_POSITION, pos);
 }
 
 bool dd::Systems::SoundSystem::OnPlaySFX(const dd::Events::PlaySFX &event)
 {
-    m_Source = CreateSource();
+    //m_Source = CreateSource();
     Sound *sound = ResourceManager::Load<Sound>(event.path);
     ALuint buffer = sound->Buffer();
     alSourcei(m_Source, AL_BUFFER, buffer);
