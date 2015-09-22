@@ -9,6 +9,8 @@ find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 find_package(BGFX REQUIRED)
 find_package(liquidfun REQUIRED)
+# Because FindOpenAL is retarded
+set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/deps/include/AL")
 find_package(OpenAL REQUIRED)
 
 # GLM

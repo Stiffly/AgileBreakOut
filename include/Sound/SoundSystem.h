@@ -27,14 +27,7 @@ public:
             : System(world, eventBroker) { }
     ~SoundSystem();
     void Initialize() override;
-
-    //void UpdateEntity(double dt, EntityID entity, EntityID parent) override;
     void Update(double dt) override;
-    //void OnComponentCreated(std::string type, std::shared_ptr<Component> component) override;
-    //void OnComponentRemoved(std::string type, Component* component) override;
-    //void PlaySound(Components::SoundEmitter* emitter, std::string path); // Use if you want to play a temporary .wav file not from component
-    //void PlaySound(std::shared_ptr<Components::SoundEmitter> emitter); // Use if you want to play .wav file from component
-    //void StopSound(std::shared_ptr<Components::SoundEmitter> emitter);
 
 
 
@@ -45,13 +38,11 @@ private:
     dd::EventRelay<SoundSystem, dd::Events::Contact> m_EContact;
     bool OnPlaySFX(const dd::Events::PlaySFX &event);
     bool OnContact(const dd::Events::Contact &event);
-
-    ALuint LoadFile(std::string fileName);
     ALuint CreateSource();
 
-    //std::map<Component*, ALuint> m_Sources;
+    std::map<Component*, ALuint> m_Sources;
 
-
+    //std::list<ALuint>
     //Temp
     ALuint m_Source;
 

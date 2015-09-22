@@ -7,8 +7,6 @@ dd::Sound::Sound(std::string path)
 
 ALuint dd::Sound::LoadFile(std::string path)
 {
-
-    LOG_ERROR("Detta meddelande ska du bara få 1 gång! -----------------------------");
     if (m_BufferCache.find(path) != m_BufferCache.end()) {
         return m_BufferCache[path];
     }
