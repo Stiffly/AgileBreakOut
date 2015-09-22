@@ -16,6 +16,7 @@
 #include "Core/EventBroker.h"
 #include "Game/CPad.h"
 #include "Physics/CWaterVolume.h"
+#include "Rendering/CSprite.h"
 
 
 namespace dd
@@ -65,16 +66,15 @@ private:
 
     void CreateBody(EntityID entity);
 
-    const b2ParticleSystemDef m_ParticleSystemDef;
     b2ParticleSystem *m_ParticleSystem;
     b2ParticleGroup* t_watergroup;
 
+    std::unordered_map<EntityID, const b2ParticleHandle*> m_EntitiesToParticleHandle;
+    std::unordered_map<const b2ParticleHandle*, EntityID> m_ParticleHandleToEntities;
 
     void InitializeWater();
     void SyncWater(); //TODO: Probably remove this
     void CreateParticleGroup(EntityID entity);
-
-
 
     class ContactListener : public b2ContactListener
     {

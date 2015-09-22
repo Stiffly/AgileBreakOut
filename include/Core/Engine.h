@@ -148,12 +148,51 @@ public:
 		{
 			auto t_waterBody = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
-			transform->Position = glm::vec3(1.5f, 1.5f, -10.f);
+			transform->Position = glm::vec3(0.f, -1.f, -10.f);
+			transform->Scale = glm::vec3(2.f, 3.f, 1.f);
 			auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
-			auto sprite = m_World->AddComponent<Components::Sprite>(t_waterBody);
-			sprite->SpriteFile = "Textures/Test/Brick_Diffuse.png";
 			auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
 			m_World->CommitEntity(t_waterBody);
+		}
+
+		//BottomBox
+		{
+			auto topWall = m_World->CreateEntity();
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
+			transform->Position = glm::vec3(0.f, -3.f, -10.f);
+			transform->Scale = glm::vec3(3.f, 0.5f, 1.f);
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(topWall);
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
+			physics->Static = true;
+			m_World->CommitEntity(topWall);
+		}
+		//SideBox
+		{
+			auto topWall = m_World->CreateEntity();
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
+			transform->Position = glm::vec3(1.5f, -1.5f, -10.f);
+			transform->Scale = glm::vec3(0.5f, 3.f, 1.f);
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(topWall);
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
+			physics->Static = true;
+			m_World->CommitEntity(topWall);
+		}
+		//OtherSideBox
+		{
+			auto topWall = m_World->CreateEntity();
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
+			transform->Position = glm::vec3(-1.5f, -1.5f, -10.f);
+			transform->Scale = glm::vec3(0.5f, 3.0f, 1.f);
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(topWall);
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
+			physics->Static = true;
+			m_World->CommitEntity(topWall);
 		}
 
 		{
