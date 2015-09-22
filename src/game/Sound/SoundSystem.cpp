@@ -49,12 +49,28 @@ void dd::Systems::SoundSystem::Initialize()
     dd::Events::PlayBGM e2;
     e2.path = "Sounds/BGM/water-flowing.wav";
     e2.SupportBGM = true;
-    e2.volume = 0.1;
+    e2.volume = 0.3;
     EventBroker->Publish(e2);
 }
 
 void dd::Systems::SoundSystem::Update(double dt)
 {
+    //LOG_INFO("Sources : %i", m_SourcesToBuffers.size());
+
+    std::vector<ALuint> deleteList;
+    for (auto item : m_SourcesToBuffers) {
+        ALint sourceState;
+        alGetSourcei(item.first, AL_SOURCE_STATE, &sourceState);
+        if (sourceState == AL_STOPPED) {
+            deleteList.push_back(item.first);
+        }
+    }
+
+    for (int i = 0; i < deleteList.size(); i++) {
+        alDeleteSources(1, &deleteList[i]);
+        //alDeleteBuffers(1, &m_SourcesToBuffers[deleteList[i]]);
+        m_SourcesToBuffers.erase(deleteList[i]);
+    }
 
 }
 
