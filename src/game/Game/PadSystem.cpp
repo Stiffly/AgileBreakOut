@@ -25,6 +25,7 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, &PadSystem::OnKeyDown);
     EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, &PadSystem::OnKeyUp);
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &PadSystem::OnContact);
+    EVENT_SUBSCRIBE_MEMBER(m_EContactPowerUp, &PadSystem::OnContactPowerUp);
     EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &PadSystem::OnResetBall);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &PadSystem::OnMultiBall);
 }
@@ -209,6 +210,46 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     EventBroker->Publish(e);
 }
 
+bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
+{
+    EntityID entityPower;
+    EntityID entityPad;
+    auto powerUp = m_World->GetComponent<Components::PowerUp>(event.Entity1);
+    auto pad = m_World->GetComponent<Components::Pad>(event.Entity2);
+    if (powerUp != NULL) {
+        entityPower = event.Entity1;
+    } else {
+        powerUp = m_World->GetComponent<Components::PowerUp>(event.Entity2);
+        if (powerUp != NULL) {
+            entityPower = event.Entity2;
+        }
+    }
+    if (pad != NULL) {
+        entityPad = event.Entity2;
+    } else {
+        pad = m_World->GetComponent<Components::Pad>(event.Entity1);
+        if (pad != NULL) {
+            entityPad = event.Entity1;
+        }
+    }
+
+    if (entityPower == NULL || entityPad == NULL) {
+        return false;
+    }
+
+    pad = m_World->GetComponent<Components::Pad>(entityPad);
+    if (pad == NULL) {
+        return false;
+    }
+
+    m_World->RemoveEntity(entityPower);
+    Events::MultiBall e;
+    auto transform = m_World->GetComponent<Components::Transform>(entityPad);
+    e.padTransform = transform;
+    EventBroker->Publish(e);
+    return true;
+}
+
 bool dd::Systems::PadSystem::OnResetBall(const dd::Events::ResetBall &event)
 {
     SetReplaceBall(true);
@@ -222,8 +263,8 @@ bool dd::Systems::PadSystem::OnMultiBall(const dd::Events::MultiBall &event)
     auto transform1 = m_World->GetComponent<Components::Transform>(ent1);
     auto transform2 = m_World->GetComponent<Components::Transform>(ent2);
     auto padTransform = event.padTransform;
-    transform1->Position = glm::vec3(padTransform->Position.x - 4, -6, -10);
-    transform2->Position = glm::vec3(padTransform->Position.x + 4, -6, -10);
+    transform1->Position = glm::vec3(padTransform->Position.x - 4, -5, -10);
+    transform2->Position = glm::vec3(padTransform->Position.x + 4, -5, -10);
 
     Events::SetImpulse e1;
     e1.Entity = ent1;

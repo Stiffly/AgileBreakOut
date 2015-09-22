@@ -42,8 +42,9 @@
 #include "Game/LevelSystem.h"
 #include "Game/PadSystem.h"
 #include "Game/CBall.h"
-#include "Game/CBrick.h"
 #include "Game/CPad.h"
+#include "Game/CBrick.h"
+#include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
@@ -90,6 +91,10 @@ public:
 		m_World->ComponentFactory.Register<Components::Brick>();
 		m_World->ComponentFactory.Register<Components::Pad>();
 		m_World->ComponentFactory.Register<Components::Life>();
+
+		m_World->ComponentFactory.Register<Components::PowerUp>();
+		m_World->ComponentFactory.Register<Components::PowerUpBrick>();
+
         m_World->SystemFactory.Register<Systems::PhysicsSystem>(
                 [this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
         m_World->AddSystem<Systems::PhysicsSystem>();

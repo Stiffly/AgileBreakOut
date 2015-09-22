@@ -21,8 +21,9 @@
 #include "Rendering/CSprite.h"
 #include "Rendering/CModel.h"
 #include "Game/CBall.h"
-#include "Game/EResetBall.h"
 #include "Game/CPad.h"
+#include "Game/CPowerUp.h"
+#include "Game/EResetBall.h"
 #include "Game/EMultiBall.h"
 
 
@@ -73,6 +74,7 @@ private:
     dd::EventRelay<PadSystem, dd::Events::KeyDown> m_EKeyDown;
     dd::EventRelay<PadSystem, dd::Events::KeyUp> m_EKeyUp;
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContact;
+    dd::EventRelay<PadSystem, dd::Events::Contact> m_EContactPowerUp;
     dd::EventRelay<PadSystem, dd::Events::ResetBall> m_EResetBall;
     dd::EventRelay<PadSystem, dd::Events::MultiBall> m_EMultiBall;
 
@@ -80,6 +82,7 @@ private:
     bool OnKeyUp(const dd::Events::KeyUp &event);
 
     bool OnContact(const dd::Events::Contact &event);
+    bool OnContactPowerUp(const dd::Events::Contact &event);
     bool OnResetBall(const dd::Events::ResetBall &event);
     bool OnMultiBall(const dd::Events::MultiBall &event);
 
