@@ -101,6 +101,7 @@ private:
 	void DrawForward(RenderQueue &objects, RenderQueue &lights);
 	void DrawScene(RenderQueue &objects, ShaderProgram &program);
 	void DrawLightSpheres(RenderQueue &lights);
+	void DrawGUI(RenderQueue& rq);
 	void DebugKeys();
 };
 

@@ -52,6 +52,8 @@
 #include "Physics/CBoxShape.h"
 #include "Physics/ESetImpulse.h"
 
+#include "GUI/Frame.h"
+#include "GUI/TextureFrame.h"
 
 namespace dd
 {
@@ -67,6 +69,16 @@ public:
         //m_Renderer->SetResolution(Rectangle(0, 0, 1920, 1080));
         m_Renderer->SetResolution(Rectangle(0, 0, 675, 1080));
 		m_Renderer->Initialize();
+
+		m_FrameStack = new GUI::Frame(m_EventBroker.get());
+		m_FrameStack->Width = 1920;
+		m_FrameStack->Height = 1080;
+		{
+			auto button = new GUI::TextureFrame(m_FrameStack, "SuperButt");
+			button->SetTexture("Textures/Test/TestBrick_Diffuse.png");
+			button->Width = 100;
+			button->Height = 25;
+		}
 
         m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
 
@@ -250,13 +262,6 @@ public:
 //		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
 //			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
 //		}
-//
-		//TODO Fill up the renderQueue with models (Temp fix)
-//		TEMPAddToRenderQueue();
-
-		// Render scene
-		//TODO send renderqueue to draw.
-//		m_Renderer->Draw(m_RendererQueue);
 
 		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
 			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
@@ -264,6 +269,7 @@ public:
 
 		//TODO Fill up the renderQueue with models (Temp fix)
 		TEMPAddToRenderQueue();
+		m_FrameStack->DrawLayered(m_RendererQueue);
 
 		// Render scene
 		//TODO send renderqueue to draw.
@@ -374,7 +380,6 @@ public:
 			job.EndIndex = texGroup.EndIndex;
 			job.ModelMatrix = modelMatrix;
 			job.Color = color;
-			job.fileName = fileName;
 
 			m_RendererQueue.Deferred.Add(job);
 		}
@@ -409,8 +414,8 @@ public:
 	}
 
 private:
-	std::shared_ptr<ResourceManager> m_ResourceManager;
 	std::shared_ptr<EventBroker> m_EventBroker;
+	GUI::Frame* m_FrameStack = nullptr;
 	std::shared_ptr<Renderer> m_Renderer;
 	RenderQueueCollection m_RendererQueue;
 	std::shared_ptr<InputManager> m_InputManager;

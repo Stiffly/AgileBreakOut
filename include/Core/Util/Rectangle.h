@@ -66,7 +66,8 @@ struct Rectangle
 		Height = bottom - Y;
 	}
 
-	Rectangle& operator+=(const Rectangle &rhs)	{
+	Rectangle& operator+=(const Rectangle &rhs)
+	{
 		SetLeft(std::min(Left(), rhs.Left()));
 		SetRight(std::max(Right(), rhs.Right()));
 		SetTop(std::min(Top(), rhs.Top()));
