@@ -8,6 +8,7 @@
 #include "Core/World.h"
 #include "Sound.h"
 #include "Sound/EPlaySFX.h"
+#include "Sound/EPlayBGM.h"
 #include "Physics/EContact.h"
 #include "Core/EventBroker.h"
 #include "Game/CBall.h"
@@ -36,15 +37,19 @@ private:
     //Events
     dd::EventRelay<SoundSystem, dd::Events::PlaySFX> m_EPlaySFX;
     dd::EventRelay<SoundSystem, dd::Events::Contact> m_EContact;
+    dd::EventRelay<SoundSystem, dd::Events::PlayBGM> m_EPlayBGM;
     bool OnPlaySFX(const dd::Events::PlaySFX &event);
     bool OnContact(const dd::Events::Contact &event);
+    bool OnPlayBGM(const dd::Events::PlayBGM &event);
+
     ALuint CreateSource();
 
-    std::map<Component*, ALuint> m_Sources;
+    std::map<ALuint, ALuint> m_SourcesToBuffers;
 
-    //std::list<ALuint>
+    ALCdevice* m_Device;
+
     //Temp
-    ALuint m_Source;
+    ALuint m_Source, m_BGMSource, m_BGMSupportSource;
 
 };
 }
