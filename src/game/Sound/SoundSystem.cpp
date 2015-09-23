@@ -100,7 +100,7 @@ bool dd::Systems::SoundSystem::OnPlaySound(const dd::Events::PlaySound &event)
 
 
     //Play
-    alSourcePlay(source);
+    //alSourcePlay(source);
     return true;
 }
 

@@ -59,27 +59,42 @@ void dd::World::Update(double dt)
 		const std::string &type = pair.first;
 		auto system = pair.second;
 
-		LOG_INFO("System: %s", type.c_str());
+		std::map<std::string, TimeMeasure>::iterator it = m_typeToTimeMap.find(type.c_str());
+		if (it == m_typeToTimeMap.end()) {
+			//Does not contain item
+			TimeMeasure t;
+			t.EventTime = 0;
+			t.SystemTime = 0;
+			t.RSystemTime = 0;
+			m_typeToTimeMap[type.c_str()] = t;
+		}
 
 		double start = glfwGetTime();
 		EventBroker->Process(type);
 		double stop = glfwGetTime();
 		double t1 = stop - start;
-		LOG_INFO("Events: %f", t1);
+		m_typeToTimeMap[type.c_str()].EventTime += t1;
 
 		start = glfwGetTime();
 		system->Update(dt);
 		stop = glfwGetTime();
 		double t2 = stop - start;
-		LOG_INFO("Systems: %f", t2);
+		m_typeToTimeMap[type.c_str()].SystemTime += t2;
 
 		start = glfwGetTime();
 		RecursiveUpdate(system, dt, 0);
 		stop = glfwGetTime();
 		double t3 = stop - start;
-		LOG_INFO("Recursive Systems: %f", t3);
+		m_typeToTimeMap[type.c_str()].RSystemTime += t3;
 	}
 
+	for (auto item : m_typeToTimeMap)
+	{
+		LOG_INFO("Type %s", item.first.c_str());
+		LOG_INFO("Events: %f", item.second.EventTime);
+		LOG_INFO("Systems: %f", item.second.SystemTime);
+		LOG_INFO("Recursive Systems: %f", item.second.RSystemTime);
+	}
 	ProcessEntityRemovals();
 }
 

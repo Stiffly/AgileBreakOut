@@ -248,6 +248,15 @@ protected:
 	EntityID GenerateEntityID();
 
 	void RecycleEntityID(EntityID id);
+
+private:
+	//Benchmarking
+	struct TimeMeasure	{
+		double EventTime;
+		double SystemTime;
+		double RSystemTime;
+	};
+	std::map<std::string, TimeMeasure> m_typeToTimeMap;
 };
 
 template <class T>
