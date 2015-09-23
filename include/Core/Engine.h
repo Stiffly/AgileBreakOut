@@ -347,8 +347,6 @@ public:
 				}
 			}
 
-			//TODO: Add LightLoadShit
-
 			auto pointLightComponent = m_World->GetComponent<Components::PointLight>(entity);
 			if (pointLightComponent)
 			{
@@ -357,6 +355,19 @@ public:
 								  pointLightComponent->Diffuse,
 								  pointLightComponent->Specular,
 								  pointLightComponent->Radius);
+			}
+
+			auto parent = m_World->GetEntityParent(entity);
+			if(parent != 0) {
+				auto waterParticleComponent = m_World->GetComponent<Components::WaterVolume>(parent);
+				if (waterParticleComponent) {
+					//TODO: Remove hardcoded color.
+					//TODO: Do i even need modelMatrix?
+					Components::Transform absoluteTransform = m_TransformSystem->AbsoluteTransform(entity);
+					glm::mat4 modelMatrix = glm::translate(absoluteTransform.Position)
+											* glm::scale(absoluteTransform.Scale);
+					EnqueueWaterParticles(absoluteTransform.Position, glm::vec4(1.f, 1.f, 1.f, 1.f), modelMatrix);
+				}
 			}
 
 
@@ -440,13 +451,14 @@ public:
 
 	}
 
-	void EnqueueWaterParticles(glm::vec3 position, glm::vec4 color)
+	void EnqueueWaterParticles(glm::vec3 position, glm::vec4 color, glm::mat4 modelMatrix)
 	{
 		WaterParticleJob job;
 		job.Position = position;
 		job.Color = color;
+		job.ModelMatrix = modelMatrix;
 
-		m_RendererQueue.Deferred.Add(job);
+		m_RendererQueue.Water.Add(job);
 	}
 
 private:

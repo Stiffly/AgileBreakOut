@@ -79,6 +79,7 @@ private:
 	Model* m_UnitQuad = nullptr;
 	Texture* m_StandardNormal;
 	Texture* m_StandardSpecular;
+	Texture* t_m_WhiteSphereTexture;
 
 	GLuint m_rbDepthBuffer = 0;
 	GLuint m_fbDeferred1 = 0;
@@ -90,21 +91,23 @@ private:
 	GLuint m_tLighting = 0;
 	GLuint m_fbDeferred3 = 0;
 	GLuint m_tFinal = 0;
-	//Water "Diffuse" texture
-	GLuint t_m_GWater = 0;
+	//Water GTexture
+	GLuint t_m_Gwater = 0;
 	//Water blur texture
 	GLuint t_m_tWater;
 	//WAterpass Framebuffer
 	GLuint t_m_fbWater;
 
+
 	GLuint m_CurrentScreenBuffer = 0;
 	void LoadShaders();
 	void CreateBuffers();
 	GLuint CreateQuad();
+	GLuint CreateWaterParticleVAO(RenderQueue &particles);
 
 	static bool DepthSort(const std::shared_ptr<RenderJob> &i, const std::shared_ptr<RenderJob> &j) { return (i->Depth < j->Depth); }
 
-	void DrawDeferred(RenderQueue &objects, RenderQueue &lights);
+	void DrawDeferred(RenderQueue &objects, RenderQueue &lights, RenderQueue &waterParticles);
 	void DrawForward(RenderQueue &objects, RenderQueue &lights);
 	void DrawScene(RenderQueue &objects, ShaderProgram &program);
 	void DrawLightSpheres(RenderQueue &lights);

@@ -264,13 +264,13 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
         {
             auto t_waterparticle = m_World->CreateEntity(e);
             auto transformChild = m_World->AddComponent<Components::Transform>(t_waterparticle);
-            auto sprite = m_World->AddComponent<Components::Sprite>(t_waterparticle);
+            //auto sprite = m_World->AddComponent<Components::Sprite>(t_waterparticle);
 
 
 
             transformChild->Position = glm::vec3(t_ParticlePositions[i].x - transform->Position.x, t_ParticlePositions[i].y - transform->Position.y, -9.5f);
             transformChild->Scale = glm::vec3(m_ParticleSystem->GetRadius())/transform->Scale;
-            sprite->SpriteFile = "Textures/Ball.png";
+            //sprite->SpriteFile = "Textures/Ball.png";
             m_World->CommitEntity(t_waterparticle);
 
             m_EntitiesToParticleHandle.insert(std::make_pair(t_waterparticle, m_ParticleSystem->GetParticleHandleFromIndex(i)));
