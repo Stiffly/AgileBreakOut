@@ -14,6 +14,7 @@ class Sound : public Resource
     friend class ResourceManager;
 public:
     ALuint Buffer() { return m_Buffer; };
+    std::string Path() { return m_Path; };
 private:
     Sound(std::string path);
 
@@ -28,6 +29,7 @@ private:
     ALuint LoadFile(std::string path);
 
     ALuint m_Buffer;
+    std::string m_Path;
 };
 
 

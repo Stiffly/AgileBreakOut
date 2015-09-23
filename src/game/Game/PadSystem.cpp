@@ -37,19 +37,11 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
         if (ReplaceBall() == true) {
             SetReplaceBall(false);
 
-            auto transformEntity = m_World->GetComponent<Components::Transform>(entity);
-            transformEntity->Position = glm::vec3(0, 20, -10);
-
-            m_World->RemoveEntity(entity);
-
+            auto transform = m_World->GetComponent<Components::Transform>(entity);
+            transform->Position = glm::vec3(0.0f, 0.f, -10.f);
+            transform->Velocity = glm::vec3(0.0f, -ball->Speed, 0.f);
             auto ent = CreateBall();
             auto transform = m_World->GetComponent<Components::Transform>(ent);
-
-            Events::SetImpulse e;
-            e.Entity = ent;
-            e.Impulse = glm::vec2(0.f, -1.f);
-            e.Point = glm::vec2(transform->Position.x, transform->Position.y);
-            EventBroker->Publish(e);
         }
     }
 }
@@ -78,7 +70,7 @@ void dd::Systems::PadSystem::Update(double dt)
         transform->Velocity.x = pad->MaxSpeed;
     }
     transform->Position += transform->Velocity * (float)dt;
-    transform->Velocity += acceleration * (float)dt;
+    transform->Velocity += acceleration  * (float)dt;
     transform->Velocity -= transform->Velocity * pad->SlowdownModifier * (float)dt;
 
     if (Left()) {
@@ -163,6 +155,7 @@ bool dd::Systems::PadSystem::OnKeyUp(const dd::Events::KeyUp &event)
 
 bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
 {
+    /*
     EntityID entityBall = event.Entity2;
     auto ball = m_World->GetComponent<Components::Ball>(entityBall);
     if (ball == NULL) {
@@ -178,8 +171,8 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
 
     float movementMultiplier = 0.5f;
 
-    float whatX = transformBall->Position.x - transformPad->Position.x;
-    float movementX;
+    //float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
+    //float movementY = glm::cos((abs(movementX) / (3.2f * movementMultiplier)) * 3.14159265359f / 2) * 2.f;
     if (whatX > 0) {
         movementX = movementMultiplier * whatX;
         //std::cout << "Right!" << std::endl;
@@ -188,26 +181,22 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
         //std::cout << "Left!" << std::endl;
     }
 
-    //float movementY = 1;
+   // std::cout << movementX << " " << movementY << std::endl;
 
     //float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
     float movementY = glm::cos((abs(movementX) / ((1.6f) * movementMultiplier)) * 3.14159265359f / 2)+ 0.2;
 
     //std::cout << movementX << " " << movementY << std::endl;
 
-    //Temporary solution. Add a new ball and delete the old one.
-    auto ent = CreateBall();
-    auto transform = m_World->GetComponent<Components::Transform>(ent);
+    float len = glm::length<float>(transformBall->Velocity);
 
-    transform->Position = glm::vec3(transformBall->Position.x, transformBall->Position.y + 0.01f, -10.f);
 
-    m_World->RemoveEntity(entityBall);
+    transformBall->Velocity += glm::vec3(transformPad->Velocity.x, 0, 0);
+    transformBall->Velocity = glm::normalize(transformBall->Velocity) * len;
 
-    Events::SetImpulse e;
-    e.Entity = ent;
-    e.Impulse = glm::vec2(movementX, movementY);
-    e.Point = glm::vec2(transform->Position.x, transform->Position.y);
-    EventBroker->Publish(e);
+
+    //transform->Velocity = glm::vec3(movementX, movementY, 0.f);
+     */
 }
 
 bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
