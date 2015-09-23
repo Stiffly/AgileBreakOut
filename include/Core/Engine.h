@@ -157,17 +157,6 @@ public:
 			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
 		}
 
-		//Brick test model
-		{
-			auto t_Brick = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(t_Brick);
-			transform->Position = glm::vec3(0.f, 0.f, -12.f);
-			transform->Orientation = glm::rotate(glm::quat(), 0.5f, glm::vec3(0,-1,-1));
-			auto model = m_World->AddComponent<Components::Model>(t_Brick);
-			model->ModelFile = "Models/Test/Brick/Brick.obj";
-
-		}
-
 		{
 			auto topWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
