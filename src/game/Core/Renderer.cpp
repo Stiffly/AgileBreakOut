@@ -149,6 +149,15 @@ void dd::Renderer::CreateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	//WaterTest
+	glGenTextures(1, &t_m_GWater);
+	glBindTexture(GL_TEXTURE_2D, t_m_GWater);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 
 	// Create first pass framebuffer
 	glGenFramebuffers(1, &m_fbDeferred1);
@@ -158,8 +167,10 @@ void dd::Renderer::CreateBuffers()
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_GPosition, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_GNormal, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_GSpecular, 0);
-	GLenum firstPassDrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-	glDrawBuffers(4, firstPassDrawBuffers);
+	//WaterTest
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, t_m_GWater, 0);
+	GLenum firstPassDrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+	glDrawBuffers(5, firstPassDrawBuffers);
 	if (GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		LOG_ERROR("m_fbDeferred1 incomplete: 0x%x\n", fbStatus);
 		exit(EXIT_FAILURE);
@@ -179,6 +190,26 @@ void dd::Renderer::CreateBuffers()
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred2);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tLighting, 0);
 	GLenum secondPassDrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, secondPassDrawBuffers);
+	if (GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		LOG_ERROR("m_fbDeferred2 incomplete: 0x%x\n", fbStatus);
+		exit(EXIT_FAILURE);
+	}
+
+	//Blur the water
+	glGenTextures(1, &t_m_tWater);
+	glBindTexture(GL_TEXTURE_2D, t_m_tWater);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	//Blur water pass
+	glGenFramebuffers(1, &t_m_fbWater);
+	glBindFramebuffer(GL_FRAMEBUFFER, t_m_fbWater);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t_m_tWater, 0);
+	GLenum waterPassDrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, secondPassDrawBuffers);
 	if (GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		LOG_ERROR("m_fbDeferred2 incomplete: 0x%x\n", fbStatus);

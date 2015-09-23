@@ -440,6 +440,15 @@ public:
 
 	}
 
+	void EnqueueWaterParticles(glm::vec3 position, glm::vec4 color)
+	{
+		WaterParticleJob job;
+		job.Position = position;
+		job.Color = color;
+
+		m_RendererQueue.Deferred.Add(job);
+	}
+
 private:
 	std::shared_ptr<ResourceManager> m_ResourceManager;
 	std::shared_ptr<EventBroker> m_EventBroker;

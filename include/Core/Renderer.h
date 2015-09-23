@@ -72,6 +72,7 @@ private:
 	ShaderProgram* m_spDeferred3;
 	ShaderProgram* m_spForward;
 	ShaderProgram* m_spScreen;
+	ShaderProgram* t_m_spWater;
 
 	GLuint m_ScreenQuad = 0;
 	Model* m_UnitSphere = nullptr;
@@ -89,6 +90,12 @@ private:
 	GLuint m_tLighting = 0;
 	GLuint m_fbDeferred3 = 0;
 	GLuint m_tFinal = 0;
+	//Water "Diffuse" texture
+	GLuint t_m_GWater = 0;
+	//Water blur texture
+	GLuint t_m_tWater;
+	//WAterpass Framebuffer
+	GLuint t_m_fbWater;
 
 	GLuint m_CurrentScreenBuffer = 0;
 	void LoadShaders();
@@ -101,6 +108,7 @@ private:
 	void DrawForward(RenderQueue &objects, RenderQueue &lights);
 	void DrawScene(RenderQueue &objects, ShaderProgram &program);
 	void DrawLightSpheres(RenderQueue &lights);
+	void DrawWater(RenderQueue &objects);
 	void DebugKeys();
 };
 
