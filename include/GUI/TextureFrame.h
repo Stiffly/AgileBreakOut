@@ -48,6 +48,9 @@ public:
 	void SetTexture(std::string resourceName)
 	{
 		m_Texture = ResourceManager::Load<dd::Texture>(resourceName);
+		if (m_Texture == nullptr) {
+			m_Texture = ResourceManager::Load<dd::Texture>("Textures/Core/ErrorTexture.png");
+		}
 	}
 
 	void FadeToTexture(std::string resourceName, double duration)
