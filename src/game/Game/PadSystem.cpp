@@ -37,42 +37,9 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
         if (ReplaceBall() == true) {
             SetReplaceBall(false);
 
-            auto transformEntity = m_World->GetComponent<Components::Transform>(entity);
-            transformEntity->Position = glm::vec3(20, 20, -10);
-
-            //Temporary. Create new ball.
-            /*auto ent = m_World->CreateEntity();
-            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.5f, 0.f, -10.f);
-            transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-            std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-            sprite->SpriteFile = "Textures/Ball.png";
-            std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-            std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
-            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-            physics->Static = false;*/
-
-            auto ent = m_World->CreateEntity();
-            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.5f, 0.f, -10.f);
-            transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-            auto model = m_World->AddComponent<Components::Model>(ent);
-            model->ModelFile = "Models/Test/Ball/Ballopus.obj";
-            //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
-            std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-            std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
-            cball->Speed = 10.f;
-            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-            physics->Static = false;
-
-            m_World->RemoveEntity(entity);
-            m_World->CommitEntity(ent);
-
-            Events::SetImpulse e;
-            e.Entity = ent;
-            e.Impulse = glm::vec2(0.f, -7.f);
-            e.Point = glm::vec2(transform->Position.x, transform->Position.y);
-            EventBroker->Publish(e);
+            auto transform = m_World->GetComponent<Components::Transform>(entity);
+            transform->Position = glm::vec3(0.0f, 0.f, -10.f);
+            transform->Velocity = glm::vec3(0.0f, -ball->Speed, 0.f);
         }
     }
 }

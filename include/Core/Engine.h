@@ -117,7 +117,7 @@ public:
         {
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(-0.5f, 0.f, -10.f);
+            transform->Position = glm::vec3(-0.f, 0.f, -10.f);
 			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
 			transform->Velocity = glm::vec3(0.0f, -10.f, 0.f);
 
