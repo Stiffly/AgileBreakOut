@@ -53,7 +53,7 @@
 #include "Physics/ESetImpulse.h"
 
 #include "GUI/Frame.h"
-#include "GUI/TextureFrame.h"
+#include "GUI/Button.h"
 
 namespace dd
 {
@@ -74,10 +74,22 @@ public:
 		m_FrameStack->Width = 1920;
 		m_FrameStack->Height = 1080;
 		{
-			auto button = new GUI::TextureFrame(m_FrameStack, "SuperButt");
-			button->SetTexture("Textures/Test/TestBrick_Diffuse.png");
+			auto button = new GUI::Button(m_FrameStack, "SuperButt");
+			button->TextureReleased = "Textures/Test/TestBrick_Specular.png";
+			button->TexturePressed = "Textures/Test/TestBrick_Normal.png";
+			button->TextureHover = "Textures/Test/TestBrick_Diffuse.png";
+			button->X = 50;
+			button->Y = 75;
 			button->Width = 100;
 			button->Height = 25;
+		}
+		{
+			auto button = new GUI::TextureFrame(m_FrameStack, "BALLZ");
+			button->SetTexture("Textures/Ball.png");
+			button->X = 50;
+			button->Y = 75;
+			button->Width = 100;
+			button->Height = 100;
 		}
 
         m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
@@ -250,13 +262,16 @@ public:
 		double dt = currentTime - m_LastTime;
 		m_LastTime = currentTime;
 
-		ResourceManager::Update();
-
 		// Update input
 		m_InputManager->Update(dt);
+		// Swap event queues to get fresh input data in the read queue
+		m_EventBroker->Swap();
+
+		ResourceManager::Update();
 
 		m_World->Update(dt);
-
+		m_EventBroker->Process<GUI::Frame>();
+		m_FrameStack->UpdateLayered(dt);
 
 //
 //		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {

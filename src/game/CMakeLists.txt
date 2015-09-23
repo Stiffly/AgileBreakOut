@@ -85,7 +85,7 @@ source_group(Sound FILES ${SOURCE_FILES_Sound})
 #)
 set(SOURCE_FILES_GUI
     "${INCLUDE_PATH}/GUI/Frame.h"
-)
+        ../../include/GUI/Button.h)
 source_group(GUI FILES ${SOURCE_FILES_GUI})
 
 set(SOURCE_FILES

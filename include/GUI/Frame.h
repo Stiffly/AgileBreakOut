@@ -36,15 +36,16 @@ public:
 	// Set up a base frame with an event broker
 	Frame(dd::EventBroker* eventBroker)
 		: EventBroker(eventBroker)
-		, Rectangle()
-	{ Initialize(); }
+		, Rectangle() { }
 
 	// Create a frame as a child
 	Frame(Frame* parent, std::string name)
 		: m_Name(name)
 	{
 		SetParent(parent);
-		Initialize();
+		EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, &Frame::OnKeyDown);
+		EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, &Frame::OnKeyUp);
+		EVENT_SUBSCRIBE_MEMBER(m_EInputCommand, &Frame::OnCommand);
 	}
 
 	~Frame()
@@ -221,24 +222,13 @@ protected:
 	std::map<int, Children_t> m_Children; // layer -> Children_t
 
 	virtual bool OnKeyDown(const Events::KeyDown& event) { return false; }
-
 	virtual bool OnKeyUp(const Events::KeyUp& event) { return false; }
-
-	//virtual bool OnMouseDown(const Events::KeyDown &event) { }
-	//virtual bool OnMouseUp(const Events::KeyDown &event) { }
 	virtual bool OnCommand(const Events::InputCommand& event) { return false; }
 
 private:
 	EventRelay<Frame, Events::KeyDown> m_EKeyDown;
 	EventRelay<Frame, Events::KeyUp> m_EKeyUp;
 	EventRelay<Frame, Events::InputCommand> m_EInputCommand;
-
-	void Initialize()
-	{
-		EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, &Frame::OnKeyDown);
-		EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, &Frame::OnKeyUp);
-		EVENT_SUBSCRIBE_MEMBER(m_EInputCommand, &Frame::OnCommand);
-	}
 };
 
 }
