@@ -248,7 +248,6 @@ protected:
 	EntityID GenerateEntityID();
 
 	void RecycleEntityID(EntityID id);
-
 };
 
 template <class T>

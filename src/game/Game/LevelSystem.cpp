@@ -111,6 +111,11 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     transform->Scale = glm::vec3(1.6, 0.35, 0.5);
     transform->Position = glm::vec3(x - 7, y + 1, -10.f);
     cBrick->Score = 10 * num;
+
+    //sound
+    auto collisionSound = m_World->AddComponent<Components::CollisionSound>(brick);
+    collisionSound->filePath = "Sounds/Brick/shortbrickbreak.wav";
+
     m_World->CommitEntity(brick);
     return;
 }

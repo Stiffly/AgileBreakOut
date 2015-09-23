@@ -9,6 +9,10 @@ find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 find_package(BGFX REQUIRED)
 find_package(liquidfun REQUIRED)
+# Because FindOpenAL is retarded
+set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/deps/include/AL")
+find_package(OpenAL REQUIRED)
+
 # GLM
 if(UNIX)
     find_package(X11 REQUIRED)
@@ -25,6 +29,7 @@ include_directories(
     ${PNG_INCLUDE_DIRS}
     ${X11_INCLUDE_DIRS}
     ${BGFX_INCLUDE_DIRS}
+    ${OPENAL_INCLUDE_DIR}
 	${liquidfun_INCLUDE_DIRS}
 )
 
@@ -68,6 +73,12 @@ file(GLOB SOURCE_FILES_Game
 )
 source_group(Game FILES ${SOURCE_FILES_Game})
 
+file(GLOB SOURCE_FILES_Sound
+    "${INCLUDE_PATH}/Sound/*.h"
+    "Sound/*.cpp"
+)
+source_group(Sound FILES ${SOURCE_FILES_Sound})
+
 set(SOURCE_FILES
     ${SOURCE_FILES_Core}
     ${SOURCE_FILES_Core_Util}
@@ -75,13 +86,13 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Rendering}
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Physics}
-    ${SOURCE_FILES_Game})
+    ${SOURCE_FILES_Game}
+    ${SOURCE_FILES_Sound})
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+    set(STATIC_LIBRARY_FLAGS  "${STATIC_LIBRARY_FLAGS}")
 endif()
-
-add_definitions(-DBGFX_CONFIG_RENDERER_OPENGL=33)
 
 add_library(game ${SOURCE_FILES})
 target_link_libraries(game
@@ -93,6 +104,7 @@ target_link_libraries(game
     ${PNG_LIBRARIES}
     ${X11_LIBRARIES}
     ${BGFX_LIBRARIES}
+    ${OPENAL_LIBRARY}
 	${liquidfun_LIBRARIES}
 )
 
@@ -109,6 +121,7 @@ target_link_libraries(breakout
     ${PNG_LIBRARIES}
 	${X11_LIBRARIES}
 	${BGFX_LIBRARIES}
+    ${OPENAL_LIBRARY}
     ${liquidfun_LIBRARIES}
 )
 
