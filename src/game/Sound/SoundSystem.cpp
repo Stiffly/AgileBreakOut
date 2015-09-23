@@ -38,19 +38,21 @@ void dd::Systems::SoundSystem::Initialize()
     //Subscribe to events
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &SoundSystem::OnContact);
     EVENT_SUBSCRIBE_MEMBER(m_EPlaySFX, &SoundSystem::OnPlaySFX);
-    EVENT_SUBSCRIBE_MEMBER(m_EPlayBGM, &SoundSystem::OnPlayBGM);
 
     //Todo: Move this
-    dd::Events::PlayBGM e;
-    e.path = "Sounds/BGM/soft-guitar.wav";
-    e.SupportBGM = false;
-    EventBroker->Publish(e);
-
-    dd::Events::PlayBGM e2;
-    e2.path = "Sounds/BGM/water-flowing.wav";
-    e2.SupportBGM = true;
-    e2.volume = 0.3;
-    EventBroker->Publish(e2);
+    {
+        dd::Events::PlaySFX e;
+        e.path = "Sounds/BGM/soft-guitar.wav";
+        e.loop = true;
+        EventBroker->Publish(e);
+    }
+    {
+        dd::Events::PlaySFX e;
+        e.path = "Sounds/BGM/water-flowing.wav";
+        e.volume = 0.3f;
+        e.loop = true;
+        EventBroker->Publish(e);
+    }
 }
 
 void dd::Systems::SoundSystem::Update(double dt)
@@ -74,31 +76,28 @@ void dd::Systems::SoundSystem::Update(double dt)
 
 }
 
-bool dd::Systems::SoundSystem::OnPlayBGM(const dd::Events::PlayBGM &event)
-{
-    Sound *sound = ResourceManager::Load<Sound>(event.path);
-    ALuint buffer = sound->Buffer();
-    ALuint source = CreateSource();
-
-    alSourcei(source, AL_BUFFER, buffer);
-    alSourcei(source, AL_LOOPING, AL_TRUE);
-    alSourcef(source, AL_GAIN, event.volume);
-    alSourcePlay(source);
-
-    m_SourcesToBuffers[source] = buffer;
-}
-
 bool dd::Systems::SoundSystem::OnPlaySFX(const dd::Events::PlaySFX &event)
 {
+    //Loading and binding sound buffer to source
     Sound *sound = ResourceManager::Load<Sound>(event.path);
     ALuint buffer = sound->Buffer();
     ALuint source = CreateSource();
-
-    alSourcei(source, AL_BUFFER, buffer);
-    alSourcei(source, AL_LOOPING, AL_FALSE);
-    alSourcePlay(source);
-
     m_SourcesToBuffers[source] = buffer;
+    alSourcei(source, AL_BUFFER, buffer);
+
+    //Sound settings
+    alSourcef(source, AL_GAIN, event.volume);
+    if (event.loop) {
+        alSourcei(source, AL_LOOPING, AL_TRUE);
+    }
+    else if (!event.loop)
+    {
+        alSourcei(source, AL_LOOPING, AL_FALSE);
+    }
+
+
+    //Play
+    alSourcePlay(source);
 }
 
 bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)

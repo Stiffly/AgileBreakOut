@@ -30,6 +30,8 @@ namespace Events
 struct PlaySFX : Event
 {
 	std::string path;
+	float volume = 1.f;
+	bool loop = false;
 };
 
 }
