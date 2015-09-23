@@ -6,10 +6,11 @@
 #include "AL/alc.h"
 #include "Core/System.h"
 #include "Core/World.h"
-#include "Sound.h"
-#include "Sound/EPlaySFX.h"
-#include "Physics/EContact.h"
 #include "Core/EventBroker.h"
+#include "Sound.h"
+#include "Sound/EPlaySound.h"
+#include "Sound/EStopSound.h"
+#include "Physics/EContact.h"
 #include "Game/CBall.h"
 #include "Game/CBrick.h"
 #include "Game/CPad.h"
@@ -34,19 +35,20 @@ public:
 
 private:
     //Events
-    dd::EventRelay<SoundSystem, dd::Events::PlaySFX> m_EPlaySFX;
+    dd::EventRelay<SoundSystem, dd::Events::PlaySound> m_EPlaySFX;
     dd::EventRelay<SoundSystem, dd::Events::Contact> m_EContact;
-    bool OnPlaySFX(const dd::Events::PlaySFX &event);
+    dd::EventRelay<SoundSystem, dd::Events::StopSound> m_EStopSound;
+    bool OnPlaySound(const dd::Events::PlaySound &event);
     bool OnContact(const dd::Events::Contact &event);
+    bool OnStopSound(const dd::Events::StopSound &event);
 
     ALuint CreateSource();
 
-    std::map<ALuint, ALuint> m_SourcesToBuffers;
+    std::map<ALuint, Sound*> m_SourcesToBuffers;
 
     ALCdevice* m_Device;
 
     //Temp
-    ALuint m_Source, m_BGMSource, m_BGMSupportSource;
 
 };
 }

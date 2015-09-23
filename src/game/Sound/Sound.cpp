@@ -3,6 +3,7 @@
 dd::Sound::Sound(std::string path)
 {
     m_Buffer = LoadFile(path);
+    m_Path = path;
 }
 
 ALuint dd::Sound::LoadFile(std::string path)

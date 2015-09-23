@@ -3,13 +3,12 @@
 
 dd::Systems::SoundSystem::~SoundSystem()
 {
-    alSourcei(m_Source, AL_BUFFER, 0);
-    alDeleteSources(1, &m_Source);
     alcCloseDevice(m_Device);
 }
 
 void dd::Systems::SoundSystem::Initialize()
-{   //initialize OpenAL
+{
+    //initialize OpenAL
     m_Device = alcOpenDevice(NULL);
     ALCcontext* context;
 
@@ -23,31 +22,23 @@ void dd::Systems::SoundSystem::Initialize()
 
     alGetError();
 
-    //Create sources
-    m_Source = CreateSource();
-    m_BGMSource = CreateSource();
-    m_BGMSupportSource = CreateSource();
-
-    alSpeedOfSound(340.29f); // Speed of sound m/s
-    alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-
     const ALfloat pos[3] = {0, 0, 0};
     alListenerfv(AL_POSITION, pos);
-    alSourcefv(m_Source, AL_POSITION, pos);
 
     //Subscribe to events
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &SoundSystem::OnContact);
-    EVENT_SUBSCRIBE_MEMBER(m_EPlaySFX, &SoundSystem::OnPlaySFX);
+    EVENT_SUBSCRIBE_MEMBER(m_EPlaySFX, &SoundSystem::OnPlaySound);
+    EVENT_SUBSCRIBE_MEMBER(m_EStopSound, &SoundSystem::OnStopSound);
 
     //Todo: Move this
     {
-        dd::Events::PlaySFX e;
+        dd::Events::PlaySound e;
         e.path = "Sounds/BGM/soft-guitar.wav";
         e.loop = true;
         EventBroker->Publish(e);
     }
     {
-        dd::Events::PlaySFX e;
+        dd::Events::PlaySound e;
         e.path = "Sounds/BGM/water-flowing.wav";
         e.volume = 0.3f;
         e.loop = true;
@@ -76,13 +67,24 @@ void dd::Systems::SoundSystem::Update(double dt)
 
 }
 
-bool dd::Systems::SoundSystem::OnPlaySFX(const dd::Events::PlaySFX &event)
+ALuint dd::Systems::SoundSystem::CreateSource()
+{
+    ALuint source;
+    alGenSources((ALuint)1, &source);
+
+    return source;
+}
+
+bool dd::Systems::SoundSystem::OnPlaySound(const dd::Events::PlaySound &event)
 {
     //Loading and binding sound buffer to source
     Sound *sound = ResourceManager::Load<Sound>(event.path);
-    ALuint buffer = sound->Buffer();
+    if (sound == nullptr) {
+       return false;
+    }
     ALuint source = CreateSource();
-    m_SourcesToBuffers[source] = buffer;
+    m_SourcesToBuffers[source] = sound;
+    ALuint buffer = sound->Buffer();
     alSourcei(source, AL_BUFFER, buffer);
 
     //Sound settings
@@ -98,6 +100,18 @@ bool dd::Systems::SoundSystem::OnPlaySFX(const dd::Events::PlaySFX &event)
 
     //Play
     alSourcePlay(source);
+    return true;
+}
+
+bool dd::Systems::SoundSystem::OnStopSound(const dd::Events::StopSound &event)
+{
+    for (auto item : m_SourcesToBuffers) {
+        if (item.second->Path() == event.path) {
+            alSourceStop(item.first);
+            return true;
+        }
+    }
+    return false;
 }
 
 bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
@@ -112,17 +126,16 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
         }
     }
 
+    {
+        dd::Events::StopSound e;
+        e.path = "Sounds/BGM/soft-guitar.wav";
+        EventBroker->Publish(e);
+    }
     //Send play-sound event
-    dd::Events::PlaySFX e;
+    dd::Events::PlaySound e;
     e.path = collisionSound->filePath;
     EventBroker->Publish(e);
     return true;
 }
 
-ALuint dd::Systems::SoundSystem::CreateSource()
-{
-    ALuint source;
-    alGenSources((ALuint)1, &source);
 
-    return source;
-}
