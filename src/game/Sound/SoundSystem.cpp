@@ -89,6 +89,7 @@ bool dd::Systems::SoundSystem::OnPlaySound(const dd::Events::PlaySound &event)
 
     //Sound settings
     alSourcef(source, AL_GAIN, event.volume);
+    alSourcef(source, AL_PITCH, event.pitch);
     if (event.loop) {
         alSourcei(source, AL_LOOPING, AL_TRUE);
     }
