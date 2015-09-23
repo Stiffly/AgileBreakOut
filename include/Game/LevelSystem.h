@@ -106,10 +106,10 @@ private:
     int m_PowerUps = 0;
     int m_Score = 0;
     int m_NumberOfBricks;
-    int m_Rows = 7;
-    int m_Lines = 8;
+    int m_Rows = 6;
+    int m_Lines = 7;
     int m_SpaceToEdge = 0;
-    glm::vec2 m_SpaceBetweenBricks = glm::vec2(2, 0.5);
+    glm::vec2 m_SpaceBetweenBricks = glm::vec2(1, 0.25);
 
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::LifeLost> m_ELifeLost;

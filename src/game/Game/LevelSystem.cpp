@@ -26,8 +26,8 @@ void dd::Systems::LevelSystem::CreateLife(int number)
 {
     auto life = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(life);
-    transform->Position = glm::vec3(-4.f + number * 0.5f, -2.f, -5.f);
-    transform->Scale = glm::vec3(0.25f, 0.25f, 0.25f);
+    transform->Position = glm::vec3(-1.5f + number * 0.5f, -2.f, -5.f);
+    transform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
 
     std::shared_ptr<Components::Life> lifeNr = m_World->AddComponent<Components::Life>(life);
     lifeNr->Number = number;
@@ -62,7 +62,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 
     if (ball != NULL) {
         auto transformBall = m_World->GetComponent<Components::Transform>(entity);
-        if (transformBall->Position.y < -10 || glm::abs(transformBall->Position.x) > 10) {
+        if (transformBall->Position.y < -10 || glm::abs(transformBall->Position.x) > 5) {
             if (MultiBalls() != 0) {
                 SetMultiBalls(MultiBalls() - 1);
                 m_World->RemoveEntity(entity);
@@ -144,8 +144,8 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     }
     float x = spaceToEdge + line * spacesBetweenBricks.x;
     float y = spaceToEdge + row * spacesBetweenBricks.y;
-    transform->Scale = glm::vec3(1.6, 0.35, 0.5);
-    transform->Position = glm::vec3(x - 7, y + 1, -10.f);
+    transform->Scale = glm::vec3(0.8, 0.2, 0.2);
+    transform->Position = glm::vec3(x - 3, y + 3, -10.f);
     cBrick->Score = 10 * num;
 
     //sound
@@ -259,7 +259,7 @@ bool dd::Systems::LevelSystem::OnCreatePowerUp(const dd::Events::CreatePowerUp &
     cPhys->Static = false;
 
     transform->Position = event.Position;
-    transform->Scale = glm::vec3(0.25, 0.25, 0.25);
+    transform->Scale = glm::vec3(0.2, 0.2, 0.2);
 
     model->ModelFile = "Models/Test/Ball/Ballopus.obj";
 
@@ -267,7 +267,7 @@ bool dd::Systems::LevelSystem::OnCreatePowerUp(const dd::Events::CreatePowerUp &
 
     Events::SetImpulse e;
     e.Entity = powerUp;
-    e.Impulse = glm::vec2(0, -0.25);
+    e.Impulse = glm::vec2(0, -0.05);
     e.Point = glm::vec2(transform->Position.x, transform->Position.y);
     EventBroker->Publish(e);
     return true;

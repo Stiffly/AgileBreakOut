@@ -47,7 +47,7 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 
             Events::SetImpulse e;
             e.Entity = ent;
-            e.Impulse = glm::vec2(0.f, -7.f);
+            e.Impulse = glm::vec2(0.f, -1.f);
             e.Point = glm::vec2(transform->Position.x, transform->Position.y);
             EventBroker->Publish(e);
         }
@@ -109,7 +109,7 @@ EntityID dd::Systems::PadSystem::CreateBall()
     auto ent = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
     transform->Position = glm::vec3(0.5f, 0.f, -10.f);
-    transform->Scale = glm::vec3(1.f, 1.f, 1.f);
+    transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
     auto model = m_World->AddComponent<Components::Model>(ent);
     model->ModelFile = "Models/Test/Ball/Ballopus.obj";
     //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
@@ -176,7 +176,7 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     auto transformBall = m_World->GetComponent<Components::Transform>(entityBall);
     auto transformPad = m_World->GetComponent<Components::Transform>(entityPad);
 
-    float movementMultiplier = 4.f;
+    float movementMultiplier = 0.5f;
 
     float whatX = transformBall->Position.x - transformPad->Position.x;
     float movementX;
@@ -191,7 +191,7 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
     //float movementY = 1;
 
     //float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
-    float movementY = glm::cos((abs(movementX) / ((1.6f) * movementMultiplier)) * 3.14159265359f / 2) + 1;
+    float movementY = glm::cos((abs(movementX) / ((1.6f) * movementMultiplier)) * 3.14159265359f / 2)+ 0.2;
 
     //std::cout << movementX << " " << movementY << std::endl;
 
@@ -263,25 +263,25 @@ bool dd::Systems::PadSystem::OnMultiBall(const dd::Events::MultiBall &event)
     auto transform1 = m_World->GetComponent<Components::Transform>(ent1);
     auto transform2 = m_World->GetComponent<Components::Transform>(ent2);
     auto padTransform = event.padTransform;
-    float x1 = padTransform->Position.x - 6, x2 = padTransform->Position.x + 6;
-    if (x1 < -7) {
-        x1 = 7;
+    float x1 = padTransform->Position.x - 3, x2 = padTransform->Position.x + 3;
+    if (x1 < -3.5) {
+        x1 = 3.5;
     }
-    if (x2 > 7) {
-        x2 = -7;
+    if (x2 > 3.5) {
+        x2 = -3.5;
     }
     transform1->Position = glm::vec3(x1, -5, -10);
     transform2->Position = glm::vec3(x2, -5, -10);
 
     Events::SetImpulse e1;
     e1.Entity = ent1;
-    e1.Impulse = glm::vec2(6, 6);
+    e1.Impulse = glm::vec2(2, 2);
     e1.Point = glm::vec2(transform1->Position.x, transform1->Position.y);
     EventBroker->Publish(e1);
 
     Events::SetImpulse e2;
     e2.Entity = ent2;
-    e2.Impulse = glm::vec2(-6, 6);
+    e2.Impulse = glm::vec2(-2, 2);
     e2.Point = glm::vec2(transform2->Position.x, transform2->Position.y);
     EventBroker->Publish(e2);
 

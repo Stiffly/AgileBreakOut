@@ -62,8 +62,9 @@ public:
 
         m_Renderer = std::make_shared<Renderer>();
         m_Renderer->SetFullscreen(false);
-        m_Renderer->SetResolution(Rectangle(0, 0, 1920, 1080));
-        m_Renderer->Initialize();
+        //m_Renderer->SetResolution(Rectangle(0, 0, 1920, 1080));
+        m_Renderer->SetResolution(Rectangle(0, 0, 675, 1080));
+		m_Renderer->Initialize();
 
         m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
 
@@ -119,7 +120,7 @@ public:
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
             transform->Position = glm::vec3(0.5f, 0.f, -9.9f);
-			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
+			transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
 
             auto model = m_World->AddComponent<Components::Model>(ent);
 			model->ModelFile = "Models/Test/Ball/Ballopus.obj";
@@ -137,7 +138,7 @@ public:
 
 			Events::SetImpulse e;
 			e.Entity = ent;
-			e.Impulse = glm::vec2(0.f, -7.f);
+			e.Impulse = glm::vec2(0.f, -2.f);
 			e.Point = glm::vec2(0.5f, 0.f);
 			m_EventBroker->Publish(e);
         }
@@ -155,27 +156,27 @@ public:
 		{
 			auto t_halfPipe = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
-			transform->Position = glm::vec3(0.f, 0.f, -15.f);
-			transform->Scale = glm::vec3(15.f);
+			transform->Position = glm::vec3(0.f, 0.f, -13.f);
+			transform->Scale = glm::vec3(5.f);
 			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
 			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
 		}
 
 		//Brick test model
 		{
-			auto t_Brick = m_World->CreateEntity();
+			/*auto t_Brick = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_Brick);
 			transform->Position = glm::vec3(0.f, 0.f, -12.f);
 			transform->Orientation = glm::rotate(glm::quat(), 0.5f, glm::vec3(0,-1,-1));
 			auto model = m_World->AddComponent<Components::Model>(t_Brick);
-			model->ModelFile = "Models/Test/Brick/Brick.obj";
+			model->ModelFile = "Models/Test/Brick/Brick.obj";*/
 
 		}
 
 		{
 			auto topWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
-			transform->Position = glm::vec3(0.f, 6.f, -10.f);
+			transform->Position = glm::vec3(0.f, 5.5f, -10.f);
 			transform->Scale = glm::vec3(18.f, 0.5f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
@@ -191,7 +192,7 @@ public:
 		{
 			auto leftWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(leftWall);
-			transform->Position = glm::vec3(-9.f, 1.f, -10.f);
+			transform->Position = glm::vec3(-4.f, 1.f, -10.f);
 			transform->Scale = glm::vec3(0.5f, 10.f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
@@ -207,7 +208,7 @@ public:
 		{
 			auto rightWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(rightWall);
-			transform->Position = glm::vec3(9.f, 1.f, -10.f);
+			transform->Position = glm::vec3(4.f, 1.f, -10.f);
 			transform->Scale = glm::vec3(0.5f, 10.f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
@@ -226,7 +227,7 @@ public:
 			m_World->SetProperty(ent, "Name", "Pad");
 			auto ctransform = m_World->AddComponent<Components::Transform>(ent);
 			ctransform->Position = glm::vec3(0.f, -5.f, -10.f);
-			ctransform->Scale = glm::vec3(3.2, 0.8, 0.);
+			ctransform->Scale = glm::vec3(1.6, 0.4, 0.);
 			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
 			auto physics = m_World->AddComponent<Components::Physics>(ent);
 			auto csprite = m_World->AddComponent<Components::Sprite>(ent);
