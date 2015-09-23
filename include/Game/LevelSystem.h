@@ -22,6 +22,7 @@
 #include "Game/EMultiBall.h"
 #include "Game/EGameOver.h"
 #include "Game/ECreatePowerUp.h"
+#include "Game/EPowerUpTaken.h"
 #include "Game/Bricks/CPowerUpBrick.h"
 #include "Physics/CBoxShape.h"
 #include "Physics/CPhysics.h"
@@ -60,11 +61,11 @@ public:
 
     void Initialize() override;
 
-    void CreateBasicLevel(int, int, glm::vec2, int);
+    void CreateBasicLevel(int, int, glm::vec2, float);
     void CreateLife(int);
     void SaveLevel(int, int, glm::vec2, int); // Shouldn't be here, but I'm experimenting.
     void LoadLevel(char[20]);
-    void CreateBrick(int, int, glm::vec2, int, int);
+    void CreateBrick(int, int, glm::vec2, float, int);
     void ProcessCollision();
 
     void OnEntityRemoved(EntityID entity);
@@ -92,8 +93,8 @@ public:
     void SetRows(const int& rows) { m_Rows = rows; }
     int& Lines() { return m_Lines; }
     void SetLines(const int& lines) { m_Lines = lines; }
-    int& SpaceToEdge() { return m_SpaceToEdge; }
-    void SetSpaceToEdge(const int& spaceToEdge) { m_SpaceToEdge = spaceToEdge; }
+    float& SpaceToEdge() { return m_SpaceToEdge; }
+    void SetSpaceToEdge(const float& spaceToEdge) { m_SpaceToEdge = spaceToEdge; }
 
     glm::vec2& SpaceBetweenBricks() { return m_SpaceBetweenBricks; }
     void SetSpaceBetweenBricks(const glm::vec2& spaceBetweenBricks) { m_SpaceBetweenBricks = spaceBetweenBricks; }
@@ -108,20 +109,22 @@ private:
     int m_NumberOfBricks;
     int m_Rows = 6;
     int m_Lines = 7;
-    int m_SpaceToEdge = 0;
-    glm::vec2 m_SpaceBetweenBricks = glm::vec2(1, 0.25);
+    float m_SpaceToEdge = 0.25f;
+    glm::vec2 m_SpaceBetweenBricks = glm::vec2(1, 0.5);
 
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::LifeLost> m_ELifeLost;
     dd::EventRelay<LevelSystem, dd::Events::ScoreEvent> m_EScoreEvent;
     dd::EventRelay<LevelSystem, dd::Events::MultiBall> m_EMultiBall;
     dd::EventRelay<LevelSystem, dd::Events::CreatePowerUp> m_ECreatePowerUp;
+    dd::EventRelay<LevelSystem, dd::Events::PowerUpTaken> m_EPowerUpTaken;
 
     bool OnContact(const dd::Events::Contact &event);
     bool OnLifeLost(const dd::Events::LifeLost &event);
     bool OnScoreEvent(const dd::Events::ScoreEvent &event);
     bool OnMultiBall(const dd::Events::MultiBall &event);
     bool OnCreatePowerUp(const dd::Events::CreatePowerUp &event);
+    bool OnPowerUpTaken(const dd::Events::PowerUpTaken &event);
 };
 
 }

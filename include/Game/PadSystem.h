@@ -25,6 +25,7 @@
 #include "Game/CPowerUp.h"
 #include "Game/EResetBall.h"
 #include "Game/EMultiBall.h"
+#include "Game/EPowerUpTaken.h"
 
 
 namespace dd

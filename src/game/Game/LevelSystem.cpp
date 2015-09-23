@@ -14,6 +14,7 @@ void dd::Systems::LevelSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EScoreEvent, LevelSystem::OnScoreEvent);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, LevelSystem::OnMultiBall);
     EVENT_SUBSCRIBE_MEMBER(m_ECreatePowerUp, LevelSystem::OnCreatePowerUp);
+    EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, LevelSystem::OnPowerUpTaken);
 
     for (int i = 0; i < Lives(); i++) {
         CreateLife(i);
@@ -26,7 +27,7 @@ void dd::Systems::LevelSystem::CreateLife(int number)
 {
     auto life = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(life);
-    transform->Position = glm::vec3(-1.5f + number * 0.5f, -2.f, -5.f);
+    transform->Position = glm::vec3(-1.5f + number * 0.15f, -2.f, -5.f);
     transform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
 
     std::shared_ptr<Components::Life> lifeNr = m_World->AddComponent<Components::Life>(life);
@@ -35,8 +36,6 @@ void dd::Systems::LevelSystem::CreateLife(int number)
     auto model = m_World->AddComponent<Components::Model>(life);
     model->ModelFile = "Models/Test/Ball/Ballopus.obj";
 
-    /*std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(life);
-    sprite->SpriteFile = "Textures/Ball.png";*/
 
     m_World->CommitEntity(life);
 }
@@ -62,7 +61,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 
     if (ball != NULL) {
         auto transformBall = m_World->GetComponent<Components::Transform>(entity);
-        if (transformBall->Position.y < -10 || glm::abs(transformBall->Position.x) > 5) {
+        if (transformBall->Position.y < -10) {
             if (MultiBalls() != 0) {
                 SetMultiBalls(MultiBalls() - 1);
                 m_World->RemoveEntity(entity);
@@ -73,6 +72,16 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
                 Events::ResetBall be;
                 EventBroker->Publish(be);
                 return;
+            }
+        } else if (transformBall->Position.x > 3.2) {
+            if (transformBall->Velocity.x > 0) {
+                glm::vec2 reflectedVelocity = glm::reflect(glm::vec2(transformBall->Velocity.x, transformBall->Velocity.y), glm::vec2(1, 0));
+                transformBall->Velocity = glm::vec3(reflectedVelocity, 0.f);
+            }
+        } else if (transformBall->Position.x < -3.2) {
+            if (transformBall->Velocity.x < 0) {
+                glm::vec2 reflectedVelocity = glm::reflect(glm::vec2(transformBall->Velocity.x, transformBall->Velocity.y), glm::vec2(-1, 0));
+                transformBall->Velocity = glm::vec3(reflectedVelocity, 0.f);
             }
         }
     }
@@ -109,7 +118,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     }
 }
 
-void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 spacesBetweenBricks, int spaceToEdge)
+void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 spacesBetweenBricks, float spaceToEdge)
 {
     int num = 0;
     SetNumberOfBricks(rows * lines);
@@ -125,7 +134,7 @@ void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 s
     return;
 }
 
-void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBetweenBricks, int spaceToEdge, int num)
+void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBetweenBricks, float spaceToEdge, int num)
 {
     auto brick = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(brick);
@@ -142,10 +151,10 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     if ((line == 1 && row == 4) || (line == 3 && row == 2) || (line == 6 && row == 6)) {
         std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
     }
-    float x = spaceToEdge + line * spacesBetweenBricks.x;
-    float y = spaceToEdge + row * spacesBetweenBricks.y;
+    float x = line * spacesBetweenBricks.x;
+    float y = row * spacesBetweenBricks.y;
     transform->Scale = glm::vec3(0.8, 0.2, 0.2);
-    transform->Position = glm::vec3(x - 3, y + 3, -10.f);
+    transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y , -10.f);
     cBrick->Score = 10 * num;
 
     //sound
@@ -270,6 +279,12 @@ bool dd::Systems::LevelSystem::OnCreatePowerUp(const dd::Events::CreatePowerUp &
     e.Impulse = glm::vec2(0, -0.05);
     e.Point = glm::vec2(transform->Position.x, transform->Position.y);
     EventBroker->Publish(e);
+    return true;
+}
+
+bool dd::Systems::LevelSystem::OnPowerUpTaken(const dd::Events::PowerUpTaken &event)
+{
+    SetPowerUps(PowerUps() - 1);
     return true;
 }
 

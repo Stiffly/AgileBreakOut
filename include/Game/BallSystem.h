@@ -3,10 +3,11 @@
 
 #include "Core/System.h"
 #include "Core/World.h"
+#include "Core/EventBroker.h"
 #include "Core/CTransform.h"
 #include "Physics/EContact.h"
-#include "Core/EventBroker.h"
 #include "Game/CBall.h"
+#include "Game/CPowerUp.h"
 
 namespace dd {
 

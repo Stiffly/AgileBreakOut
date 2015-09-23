@@ -45,11 +45,21 @@ void dd::Systems::BallSystem::OnEntityRemoved(EntityID entity)
 
 bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 {
+    Components::PowerUp* power1 = m_World->GetComponent<Components::PowerUp>(event.Entity1);
+    Components::PowerUp* power2 = m_World->GetComponent<Components::PowerUp>(event.Entity2);
 
+    if (power1 != nullptr || power2 != nullptr) {
+        return false;
+    }
 
     Components::Ball* ballComponent1 = m_World->GetComponent<Components::Ball>(event.Entity1);
     Components::Ball* ballComponent2 = m_World->GetComponent<Components::Ball>(event.Entity2);
-   Components::Ball* ballComponent;
+    Components::Ball* ballComponent;
+
+    if (ballComponent1 != nullptr && ballComponent2 != nullptr) {
+        return false;
+    }
+
     //Which is the ball?
     EntityID ballEntity, otherEntitiy;
 
@@ -76,7 +86,7 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         float x = ballTransform->Position.x - padTransform->Position.x;
 
         float movementMultiplier = 5.0f;
-        float y = glm::cos((abs(x) / ((1.6f) * movementMultiplier)) * glm::pi<float>() / 2.f) + 1.f;
+        float y = glm::cos((abs(x) / (1.6f)) * glm::pi<float>() / 2.f) + 1.f;
 
         ballTransform->Velocity = glm::normalize(glm::vec3(x, y ,0.f)) * ballComponent->Speed;
     }
@@ -84,10 +94,6 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         glm::vec2 reflectedVelocity = glm::reflect(ballVelocity, event.Normal);
         ballTransform->Velocity = glm::vec3(reflectedVelocity, 0.f);
     }
-
-
-
-
 
     return true;
 }

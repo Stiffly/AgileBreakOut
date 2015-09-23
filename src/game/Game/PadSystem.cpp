@@ -40,8 +40,6 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
             auto transform = m_World->GetComponent<Components::Transform>(entity);
             transform->Position = glm::vec3(0.0f, 0.f, -10.f);
             transform->Velocity = glm::vec3(0.0f, -ball->Speed, 0.f);
-            auto ent = CreateBall();
-            auto transform = m_World->GetComponent<Components::Transform>(ent);
         }
     }
 }
@@ -109,6 +107,8 @@ EntityID dd::Systems::PadSystem::CreateBall()
     std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
     std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
     physics->Static = false;
+
+    cball->Speed = 10;
 
     m_World->CommitEntity(ent);
 
@@ -232,6 +232,10 @@ bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
     }
 
     m_World->RemoveEntity(entityPower);
+    Events::PowerUpTaken ep;
+    ep.Name = "Something";
+    EventBroker->Publish(ep);
+
     Events::MultiBall e;
     auto transform = m_World->GetComponent<Components::Transform>(entityPad);
     e.padTransform = transform;
@@ -262,17 +266,8 @@ bool dd::Systems::PadSystem::OnMultiBall(const dd::Events::MultiBall &event)
     transform1->Position = glm::vec3(x1, -5, -10);
     transform2->Position = glm::vec3(x2, -5, -10);
 
-    Events::SetImpulse e1;
-    e1.Entity = ent1;
-    e1.Impulse = glm::vec2(2, 2);
-    e1.Point = glm::vec2(transform1->Position.x, transform1->Position.y);
-    EventBroker->Publish(e1);
-
-    Events::SetImpulse e2;
-    e2.Entity = ent2;
-    e2.Impulse = glm::vec2(-2, 2);
-    e2.Point = glm::vec2(transform2->Position.x, transform2->Position.y);
-    EventBroker->Publish(e2);
+    transform1->Velocity = glm::vec3(5, 5, 0);
+    transform2->Velocity = glm::vec3(-5, 5, 0);
 
     return true;
 }
