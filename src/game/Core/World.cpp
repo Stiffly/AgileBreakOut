@@ -58,13 +58,26 @@ void dd::World::Update(double dt)
 	{
 		const std::string &type = pair.first;
 		auto system = pair.second;
+
 		LOG_INFO("System: %s", type.c_str());
-		double timeStamp = glfwGetTime();
+
+		double start = glfwGetTime();
 		EventBroker->Process(type);
-		double t1 = glfwGetTime() - timeStamp;
-		LOG_INFO("Events: %d", t1);
+		double stop = glfwGetTime();
+		double t1 = stop - start;
+		LOG_INFO("Events: %f", t1);
+
+		start = glfwGetTime();
 		system->Update(dt);
+		stop = glfwGetTime();
+		double t2 = stop - start;
+		LOG_INFO("Systems: %f", t2);
+
+		start = glfwGetTime();
 		RecursiveUpdate(system, dt, 0);
+		stop = glfwGetTime();
+		double t3 = stop - start;
+		LOG_INFO("Recursive Systems: %f", t3);
 	}
 
 	ProcessEntityRemovals();
