@@ -58,7 +58,11 @@ void dd::World::Update(double dt)
 	{
 		const std::string &type = pair.first;
 		auto system = pair.second;
+		LOG_INFO("System: %s", type.c_str());
+		double timeStamp = glfwGetTime();
 		EventBroker->Process(type);
+		double t1 = glfwGetTime() - timeStamp;
+		LOG_INFO("Events: %d", t1);
 		system->Update(dt);
 		RecursiveUpdate(system, dt, 0);
 	}
