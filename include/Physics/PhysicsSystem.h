@@ -94,8 +94,6 @@ private:
             e.SignificantNormal = glm::normalize((glm::abs(e.Normal.x) > glm::abs(e.Normal.y)) ? glm::vec2(e.Normal.x, 0) : glm::vec2(0, e.Normal.y));
 
             m_PhysicsSystem->EventBroker->Publish(e);
-
-            LOG_INFO("Entity1 = %i, Entity2 = %i\n Normal: %f, %f", e.Entity1, e.Entity2, e.SignificantNormal.x, e.SignificantNormal.y);
         }
         void EndContact(b2Contact* contact)
         {

@@ -108,14 +108,14 @@ public:
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
             transform->Position = glm::vec3(-0.5f, 0.f, -10.f);
 			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
-			transform->Velocity = glm::vec3(-1.0f, -5.f, 0.f);
+			transform->Velocity = glm::vec3(0.0f, -10.f, 0.f);
 
             auto model = m_World->AddComponent<Components::Model>(ent);
 			model->ModelFile = "Models/Test/Ball/Ballopus.obj";
 
             std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
 			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
-
+			ball->Speed = 10.f;
             std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
             physics->Static = false;
 

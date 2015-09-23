@@ -61,6 +61,7 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
             //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
             std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
             std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
+            cball->Speed = 10.f;
             std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
             physics->Static = false;
 
