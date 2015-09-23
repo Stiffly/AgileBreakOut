@@ -38,7 +38,7 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
             SetReplaceBall(false);
 
             auto transformEntity = m_World->GetComponent<Components::Transform>(entity);
-            transformEntity->Position = glm::vec3(20, 20, -10);
+            transformEntity->Position = glm::vec3(0, 20, -10);
 
             m_World->RemoveEntity(entity);
 
@@ -263,8 +263,15 @@ bool dd::Systems::PadSystem::OnMultiBall(const dd::Events::MultiBall &event)
     auto transform1 = m_World->GetComponent<Components::Transform>(ent1);
     auto transform2 = m_World->GetComponent<Components::Transform>(ent2);
     auto padTransform = event.padTransform;
-    transform1->Position = glm::vec3(padTransform->Position.x - 4, -5, -10);
-    transform2->Position = glm::vec3(padTransform->Position.x + 4, -5, -10);
+    float x1 = padTransform->Position.x - 6, x2 = padTransform->Position.x + 6;
+    if (x1 < -7) {
+        x1 = 7;
+    }
+    if (x2 > 7) {
+        x2 = -7;
+    }
+    transform1->Position = glm::vec3(x1, -5, -10);
+    transform2->Position = glm::vec3(x2, -5, -10);
 
     Events::SetImpulse e1;
     e1.Entity = ent1;

@@ -82,6 +82,8 @@ public:
     void SetPastLives(const int& pastLives) { m_PastLives = pastLives; }
     int& MultiBalls() { return m_MultiBalls; }
     void SetMultiBalls(const int& multiBalls) { m_MultiBalls = multiBalls; }
+    int& PowerUps() { return m_PowerUps; }
+    void SetPowerUps(const int& powerUps) { m_PowerUps = powerUps; }
     int& Score() { return m_Score; }
     void SetScore(const int& score) { m_Score = score; }
     int& NumberOfBricks() { return m_NumberOfBricks; }
@@ -101,6 +103,7 @@ private:
     int m_Lives = 3;
     int m_PastLives = 3;
     int m_MultiBalls = 0;
+    int m_PowerUps = 0;
     int m_Score = 0;
     int m_NumberOfBricks;
     int m_Rows = 7;
