@@ -276,7 +276,7 @@ public:
 		m_Renderer->Draw(m_RendererQueue);
 
 		// Swap event queues
-		m_EventBroker->Clear();
+		m_EventBroker->Swap();
 
 		glfwPollEvents();
 	}
