@@ -50,12 +50,12 @@ void dd::Systems::SoundSystem::Initialize()
         e.isAmbient = true;
         EventBroker->Publish(e);
     }
-    /*{
+    {
         dd::Events::MasterVolume e;
         e.isAmbient = true;
-        e.gain = 0.001f;
+        e.gain = 1.f;
         EventBroker->Publish(e);
-    }*/
+    }
 }
 
 void dd::Systems::SoundSystem::Update(double dt)
@@ -151,13 +151,22 @@ bool dd::Systems::SoundSystem::OnStopSound(const dd::Events::StopSound &event)
 
 bool dd::Systems::SoundSystem::OnMasterVolume(const dd::Events::MasterVolume &event)
 {
+    //TODO: Make the volume depend on the value given when stored.
+    //TODO: .. now it ONLY uses the master volume
     if (event.isAmbient) {
         m_BGMMasterVolume = event.gain;
+        for (auto item : m_BGMSourcesToBuffers)
+        {
+            alSourcef(item.first, AL_GAIN, event.gain);
+        }
     }
     else if (!event.isAmbient) {
         m_SFXMasterVolume = event.gain;
+        for (auto item : m_SFXSourcesToBuffers)
+        {
+            alSourcef(item.first, AL_GAIN, event.gain);
+        }
     }
-    m_World->GetEntities();
 }
 
 //On contact: play the sound given in the CCOllisionSound.
