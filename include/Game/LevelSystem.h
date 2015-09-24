@@ -75,6 +75,8 @@ public:
     void Update(double dt) override;
     void UpdateEntity(double dt, EntityID entity, EntityID parent) override;
 
+    bool Restarting() const { return m_Restarting; }
+    void SetRestarting(const bool& restarting) { m_Restarting = restarting; }
     bool Initialized() const { return m_Initialized; }
     void SetInitialized(const bool& initialized) { m_Initialized = initialized; }
     int& Lives() { return m_Lives; }
@@ -98,8 +100,13 @@ public:
 
     glm::vec2& SpaceBetweenBricks() { return m_SpaceBetweenBricks; }
     void SetSpaceBetweenBricks(const glm::vec2& spaceBetweenBricks) { m_SpaceBetweenBricks = spaceBetweenBricks; }
+    float& EdgeX() { return m_EdgeX; }
+    void SetEdgeX(const float& edgeX) { m_EdgeX = edgeX; }
+    float& EdgeY() { return m_EdgeY; }
+    void SetEdgeY(const float& edgeY) { m_EdgeY = edgeY; }
 
 private:
+    bool m_Restarting = false;
     bool m_Initialized = false;
     int m_Lives = 3;
     int m_PastLives = 3;
@@ -110,7 +117,9 @@ private:
     int m_Rows = 6;
     int m_Lines = 7;
     float m_SpaceToEdge = 0.25f;
-    glm::vec2 m_SpaceBetweenBricks = glm::vec2(1, 0.5);
+    glm::vec2 m_SpaceBetweenBricks = glm::vec2(1, 0.4);
+    float m_EdgeX = 3.2f;
+    float m_EdgeY = 5.2f;
 
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::LifeLost> m_ELifeLost;
@@ -118,6 +127,7 @@ private:
     dd::EventRelay<LevelSystem, dd::Events::MultiBall> m_EMultiBall;
     dd::EventRelay<LevelSystem, dd::Events::CreatePowerUp> m_ECreatePowerUp;
     dd::EventRelay<LevelSystem, dd::Events::PowerUpTaken> m_EPowerUpTaken;
+    dd::EventRelay<LevelSystem, dd::Events::StageCleared> m_EStageCleared;
 
     bool OnContact(const dd::Events::Contact &event);
     bool OnLifeLost(const dd::Events::LifeLost &event);
@@ -125,6 +135,7 @@ private:
     bool OnMultiBall(const dd::Events::MultiBall &event);
     bool OnCreatePowerUp(const dd::Events::CreatePowerUp &event);
     bool OnPowerUpTaken(const dd::Events::PowerUpTaken &event);
+    bool OnStageCleared(const dd::Events::StageCleared &event);
 };
 
 }

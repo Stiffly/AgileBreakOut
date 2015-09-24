@@ -26,6 +26,7 @@
 #include "Game/EResetBall.h"
 #include "Game/EMultiBall.h"
 #include "Game/EPowerUpTaken.h"
+#include "Game/EStageCleared.h"
 
 
 namespace dd
@@ -78,6 +79,7 @@ private:
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContactPowerUp;
     dd::EventRelay<PadSystem, dd::Events::ResetBall> m_EResetBall;
     dd::EventRelay<PadSystem, dd::Events::MultiBall> m_EMultiBall;
+    dd::EventRelay<PadSystem, dd::Events::StageCleared> m_EStageCleared;
 
     bool OnKeyDown(const dd::Events::KeyDown &event);
     bool OnKeyUp(const dd::Events::KeyUp &event);
@@ -86,6 +88,7 @@ private:
     bool OnContactPowerUp(const dd::Events::Contact &event);
     bool OnResetBall(const dd::Events::ResetBall &event);
     bool OnMultiBall(const dd::Events::MultiBall &event);
+    bool OnStageCleared(const dd::Events::StageCleared &event);
 
     class PadSteeringInputController;
     std::array<std::shared_ptr<PadSteeringInputController>, 4> m_PadInputControllers;

@@ -28,17 +28,18 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EContactPowerUp, &PadSystem::OnContactPowerUp);
     EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &PadSystem::OnResetBall);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &PadSystem::OnMultiBall);
+    EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PadSystem::OnStageCleared);
 }
 
 void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
     auto ball = m_World->GetComponent<Components::Ball>(entity);
-    if (ball != NULL) {
+    if (ball != nullptr) {
         if (ReplaceBall() == true) {
             SetReplaceBall(false);
 
             auto transform = m_World->GetComponent<Components::Transform>(entity);
-            transform->Position = glm::vec3(0.0f, 0.f, -10.f);
+            transform->Position = glm::vec3(0.0f, 0.26f, -10.f);
             transform->Velocity = glm::vec3(0.0f, -ball->Speed, 0.f);
         }
     }
@@ -98,7 +99,7 @@ EntityID dd::Systems::PadSystem::CreateBall()
 {
     auto ent = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-    transform->Position = glm::vec3(0.5f, 0.f, -10.f);
+    transform->Position = glm::vec3(0.5f, 0.26f, -10.f);
     transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
     auto model = m_World->AddComponent<Components::Model>(ent);
     model->ModelFile = "Models/Test/Ball/Ballopus.obj";
@@ -134,6 +135,8 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
         SetReplaceBall(true);
     } else if (val == GLFW_KEY_M) {
         SetMultiBall(true);
+    } else if (val == GLFW_KEY_D) {
+        return false;
     }
     return true;
 }
@@ -205,19 +208,19 @@ bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
     EntityID entityPad;
     auto powerUp = m_World->GetComponent<Components::PowerUp>(event.Entity1);
     auto pad = m_World->GetComponent<Components::Pad>(event.Entity2);
-    if (powerUp != NULL) {
+    if (powerUp != nullptr) {
         entityPower = event.Entity1;
     } else {
         powerUp = m_World->GetComponent<Components::PowerUp>(event.Entity2);
-        if (powerUp != NULL) {
+        if (powerUp != nullptr) {
             entityPower = event.Entity2;
         }
     }
-    if (pad != NULL) {
+    if (pad != nullptr) {
         entityPad = event.Entity2;
     } else {
         pad = m_World->GetComponent<Components::Pad>(event.Entity1);
-        if (pad != NULL) {
+        if (pad != nullptr) {
             entityPad = event.Entity1;
         }
     }
@@ -227,10 +230,13 @@ bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
     }
 
     pad = m_World->GetComponent<Components::Pad>(entityPad);
-    if (pad == NULL) {
+    if (pad == nullptr) {
         return false;
     }
 
+    m_World->RemoveComponent<Components::PowerUp>(entityPower);
+    m_World->RemoveComponent<Components::CircleShape>(entityPower);
+    m_World->RemoveComponent<Components::Physics>(entityPower);
     m_World->RemoveEntity(entityPower);
     Events::PowerUpTaken ep;
     ep.Name = "Something";
@@ -255,20 +261,28 @@ bool dd::Systems::PadSystem::OnMultiBall(const dd::Events::MultiBall &event)
     auto ent2 = CreateBall();
     auto transform1 = m_World->GetComponent<Components::Transform>(ent1);
     auto transform2 = m_World->GetComponent<Components::Transform>(ent2);
+    auto ball1 = m_World->GetComponent<Components::Ball>(ent1);
+    auto ball2 = m_World->GetComponent<Components::Ball>(ent2);
     auto padTransform = event.padTransform;
-    float x1 = padTransform->Position.x - 3, x2 = padTransform->Position.x + 3;
-    if (x1 < -3.5) {
-        x1 = 3.5;
+    float x1 = padTransform->Position.x - 2, x2 = padTransform->Position.x + 2;
+    if (x1 < -3.1) {
+        x1 = 3;
     }
-    if (x2 > 3.5) {
-        x2 = -3.5;
+    if (x2 > 3.1) {
+        x2 = -3;
     }
-    transform1->Position = glm::vec3(x1, -5, -10);
-    transform2->Position = glm::vec3(x2, -5, -10);
+    transform1->Position = glm::vec3(x1, -5.5, -10);
+    transform2->Position = glm::vec3(x2, -5.5, -10);
 
-    transform1->Velocity = glm::vec3(5, 5, 0);
-    transform2->Velocity = glm::vec3(-5, 5, 0);
+    transform1->Velocity = glm::normalize(glm::vec3(5, 5 ,0.f)) * ball1->Speed;
+    transform2->Velocity = glm::normalize(glm::vec3(-5, 5 ,0.f)) * ball2->Speed;
 
+    return true;
+}
+
+bool dd::Systems::PadSystem::OnStageCleared(const dd::Events::StageCleared &event)
+{
+    auto entity = CreateBall();
     return true;
 }
 

@@ -123,7 +123,7 @@ public:
         {
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(-0.f, 0.f, -10.f);
+            transform->Position = glm::vec3(-0.f, 0.26f, -10.f);
 			transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
 			transform->Velocity = glm::vec3(0.0f, -10.f, 0.f);
 
@@ -166,7 +166,7 @@ public:
 		{
 			auto topWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
-			transform->Position = glm::vec3(0.f, 5.5f, -10.f);
+			transform->Position = glm::vec3(0.f, 6.f, -10.f);
 			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
