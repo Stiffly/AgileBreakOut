@@ -47,7 +47,13 @@ bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
     point.x = event.Point.x;
     point.y = event.Point.y;
 
-    body->ApplyLinearImpulse(impulse, point, true);
+
+    Impulse i;
+    i.Body = body;
+    i.Impulse = impulse;
+    i.Point = point;
+
+    m_Impulses.push_back(i);
 
     return true;
 }
@@ -67,7 +73,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             continue;
         }
 
-        if (m_World->GetEntityParent(entity) == 0) {
+        if (m_World->GetEntityParent(entity) == 0) { //TODO: Make this work with childs too
             b2Vec2 position;
             position.x = transformComponent->Position.x;
             position.y = transformComponent->Position.y;
@@ -79,6 +85,10 @@ void dd::Systems::PhysicsSystem::Update(double dt)
         }
     }
 
+    for (auto i : m_Impulses) {
+        i.Body->ApplyLinearImpulse(i.Impulse, i.Point, true);
+    }
+    m_Impulses.clear();
     m_Accumulator += dt;
     while(m_Accumulator >= m_TimeStep)
     {
@@ -106,7 +116,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
             float angle = body->GetAngle();
 
-            //TODO: CHECK IF THIS IS CORRECT
+
             transformComponent->Orientation =  glm::quat(glm::vec3(0, 0, -angle));
 
         }

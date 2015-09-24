@@ -5,6 +5,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${PROJECT_SOURCE_DIR}/deps/include")
 
+
 if(MINGW)
     set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${PROJECT_SOURCE_DIR}/deps/lib/mingw/x64")
 elseif(MSVC)
@@ -21,7 +22,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     endif()
 endif()
 
-set(BUILD_SHARED_LIBS OFF)
+set(BUILD_SHARED_LIBS FALSE)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 #set(GLEW_INCLUDE_DIR ${daydream_SOURCE_DIR}/libs/glew-1.11.0/include)

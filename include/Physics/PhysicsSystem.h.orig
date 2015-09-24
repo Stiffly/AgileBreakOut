@@ -14,11 +14,9 @@
 #include "Physics/ESetImpulse.h"
 #include "Physics/CCircleShape.h"
 #include "Core/EventBroker.h"
-<<<<<<< HEAD
-#include "Physics/CWaterVolume.h"
-=======
 #include "Game/CPad.h"
->>>>>>> origin/physics
+#include "Physics/CWaterVolume.h"
+#include "Rendering/CSprite.h"
 
 
 namespace dd
@@ -68,13 +66,23 @@ private:
 
     void CreateBody(EntityID entity);
 
-    const b2ParticleSystemDef m_ParticleSystemDef;
     b2ParticleSystem *m_ParticleSystem;
+    b2ParticleGroup* t_watergroup;
 
+    std::unordered_map<EntityID, const b2ParticleHandle*> m_EntitiesToParticleHandle;
+    std::unordered_map<const b2ParticleHandle*, EntityID> m_ParticleHandleToEntities;
 
     void InitializeWater();
     void SyncWater(); //TODO: Probably remove this
     void CreateParticleGroup(EntityID entity);
+
+    struct Impulse
+    {
+        b2Body* Body;
+        b2Vec2 Impulse;
+        b2Vec2 Point;
+    };
+    std::list<Impulse> m_Impulses;
 
 
 
@@ -93,12 +101,14 @@ private:
             Events::Contact e;
             e.Entity1 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureA()->GetBody()];
             e.Entity2 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureB()->GetBody()];
+<<<<<<< HEAD
             e.Normal = glm::normalize(glm::vec2(worldManifold.normal.x, worldManifold.normal.y));
-
+=======
+            e.Normal = glm::normalize(glm::vec2(contact->GetManifold()->localNormal.x, contact->GetManifold()->localNormal.y));
+            e.SignificantNormal = glm::normalize((glm::abs(e.Normal.x) > glm::abs(e.Normal.y)) ? glm::vec2(e.Normal.x, 0) : glm::vec2(0, e.Normal.y));
+>>>>>>> 72413dc0a93bd3a2f6ab9fa7e19bbc3b846232db
 
             m_PhysicsSystem->EventBroker->Publish(e);
-
-            LOG_INFO("Entity1 = %i, Entity2 = %i\n", e.Entity1, e.Entity2);
         }
         void EndContact(b2Contact* contact)
         {

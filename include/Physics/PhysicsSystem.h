@@ -76,6 +76,16 @@ private:
     void SyncWater(); //TODO: Probably remove this
     void CreateParticleGroup(EntityID entity);
 
+    struct Impulse
+    {
+        b2Body* Body;
+        b2Vec2 Impulse;
+        b2Vec2 Point;
+    };
+    std::list<Impulse> m_Impulses;
+
+
+
     class ContactListener : public b2ContactListener
     {
     public:
@@ -91,11 +101,10 @@ private:
             Events::Contact e;
             e.Entity1 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureA()->GetBody()];
             e.Entity2 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureB()->GetBody()];
-            e.Normal = glm::normalize(glm::vec2(worldManifold.normal.x, worldManifold.normal.y));
+            e.Normal = glm::normalize(glm::vec2(contact->GetManifold()->localNormal.x, contact->GetManifold()->localNormal.y));
+            e.SignificantNormal = glm::normalize((glm::abs(e.Normal.x) > glm::abs(e.Normal.y)) ? glm::vec2(e.Normal.x, 0) : glm::vec2(0, e.Normal.y));
 
             m_PhysicsSystem->EventBroker->Publish(e);
-
-            LOG_INFO("Entity1 = %i, Entity2 = %i\n", e.Entity1, e.Entity2);
         }
         void EndContact(b2Contact* contact)
         {
