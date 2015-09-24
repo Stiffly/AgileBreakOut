@@ -87,14 +87,7 @@ void dd::World::Update(double dt)
 		double t3 = stop - start;
 		m_typeToTimeMap[type.c_str()].RSystemTime += t3;
 	}
-
-	for (auto item : m_typeToTimeMap)
-	{
-		LOG_INFO("Type %s", item.first.c_str());
-		LOG_INFO("Events: %f", item.second.EventTime);
-		LOG_INFO("Systems: %f", item.second.SystemTime);
-		LOG_INFO("Recursive Systems: %f", item.second.RSystemTime);
-	}
+	EventBroker->Process<World>();
 	ProcessEntityRemovals();
 }
 
@@ -193,6 +186,8 @@ void dd::World::Initialize()
 		system->RegisterResourceTypes(ResourceManager);
 		system->Initialize();
 	}
+
+	EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, &World::OnKeyDown);
 }
 
 int dd::World::CommitEntity(EntityID entity)
@@ -263,4 +258,42 @@ void dd::World::SetEntityParent(EntityID entity, EntityID newParent)
 	m_EntityChildren[currentParent].remove(entity);
 	m_EntityParents[entity] = newParent;
 	m_EntityChildren[newParent].push_back(entity);
+}
+
+bool dd::World::OnKeyDown(const dd::Events::KeyDown &event)
+{
+	if (event.KeyCode == 78)
+	{
+		double eventTot = 0;
+		double updateTot = 0;
+		double rUpdateTot = 0;
+		double total = 0;
+
+		for (auto item : m_typeToTimeMap)
+		{
+			eventTot += item.second.EventTime;
+			updateTot += item.second.SystemTime;
+			rUpdateTot += item.second.RSystemTime;
+		}
+		total = eventTot + updateTot + rUpdateTot;
+
+		std::ofstream outFile;
+		outFile.open("../tools/system-metrics.txt");
+		outFile.clear();
+		outFile << "----------------------- Time measurements -----------------------\n";
+		for (auto item : m_typeToTimeMap)
+		{
+			outFile << "Type: " << item.first.c_str() << std::endl;
+			outFile << "Events: " << item.second.EventTime << " s. " << item.second.EventTime / eventTot  * 100 << " % of total event time.\n";
+			outFile << "Update: " << item.second.SystemTime << " s. " << item.second.SystemTime / updateTot  * 100 << " % of total update time.\n";
+			outFile << "Recursive Update: " << item.second.RSystemTime << " s. " << item.second.RSystemTime / rUpdateTot  * 100 << " % of total recursive update time.\n";
+			double totalComplexity = (item.second.EventTime + item.second.SystemTime + item.second.RSystemTime) / total * 100;
+			outFile << "Total: " << totalComplexity << "% total system time." << std::endl << std::endl;
+		}
+		outFile  << "-----------------------------------------------------------------";
+		outFile.close();
+		return true;
+
+	}
+	//return false;
 }

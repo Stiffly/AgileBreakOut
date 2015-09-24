@@ -37,6 +37,8 @@
 #include "EComponentCreated.h"
 #include "ResourceManager.h"
 
+#include "EKeyDown.h"
+
 namespace dd
 {
 
@@ -51,6 +53,10 @@ public:
 		: EventBroker(eventBroker)
 		, m_LastEntityID(0) { }
 	~World() { }
+
+	dd::EventRelay<World, dd::Events::KeyDown> m_EKeyDown;
+	bool OnKeyDown(const dd::Events::KeyDown &event);
+
 
 	/** Initialize the world.
 

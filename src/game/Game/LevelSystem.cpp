@@ -162,7 +162,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
     es.Score = brick->Score;
     EventBroker->Publish(es);
 
-    std::cout << "Score: " << Score() << std::endl;
+    //std::cout << "Score: " << Score() << std::endl;
 
     return true;
 }
