@@ -104,6 +104,8 @@ public:
     void SetEdgeX(const float& edgeX) { m_EdgeX = edgeX; }
     float& EdgeY() { return m_EdgeY; }
     void SetEdgeY(const float& edgeY) { m_EdgeY = edgeY; }
+    float& NotResettingTheStage() { return m_NotResettingTheStage; }
+    void SetNotResettingTheStage(const float& notResettingTheStage) { m_NotResettingTheStage = notResettingTheStage; }
 
 private:
     bool m_Restarting = false;
@@ -120,6 +122,7 @@ private:
     glm::vec2 m_SpaceBetweenBricks = glm::vec2(1, 0.4);
     float m_EdgeX = 3.2f;
     float m_EdgeY = 5.2f;
+    float m_NotResettingTheStage = 5.f;
 
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::LifeLost> m_ELifeLost;
