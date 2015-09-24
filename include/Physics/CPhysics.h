@@ -11,6 +11,7 @@ struct Physics: public Component
 {
     //idk if anything should be here :)
     bool Static = true;
+    float GravityScale = 0.f;
 };
 
 }

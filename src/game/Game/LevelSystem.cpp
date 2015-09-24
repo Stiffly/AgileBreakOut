@@ -72,10 +72,10 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
         if (transformBall->Position.y < -EdgeY() - 4) {
             if (MultiBalls() != 0) {
                 SetMultiBalls(MultiBalls() - 1);
-                m_World->RemoveComponent<Components::Ball>(entity);
-                m_World->RemoveComponent<Components::Transform>(entity);
-                m_World->RemoveComponent<Components::CircleShape>(entity);
-                m_World->RemoveComponent<Components::Physics>(entity);
+//                m_World->RemoveComponent<Components::Ball>(entity);
+//                m_World->RemoveComponent<Components::Transform>(entity);
+//                m_World->RemoveComponent<Components::CircleShape>(entity);
+//                m_World->RemoveComponent<Components::Physics>(entity);
                 m_World->RemoveEntity(entity);
             } else if (Lives() == PastLives()) {
                 Events::ResetBall be;
@@ -107,8 +107,8 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
         auto life = m_World->GetComponent<Components::Life>(entity);
         if (life != nullptr) {
             if (life->Number + 1 == PastLives()) {
-                m_World->RemoveComponent<Components::Life>(entity);
-                m_World->RemoveComponent<Components::Transform>(entity);
+//                m_World->RemoveComponent<Components::Life>(entity);
+//                m_World->RemoveComponent<Components::Transform>(entity);
                 m_World->RemoveEntity(entity);
                 SetPastLives(Lives());
             }
@@ -170,11 +170,12 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
 {
     auto brick = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(brick);
-    //std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(brick);
     auto model = m_World->AddComponent<Components::Model>(brick);
     std::shared_ptr<Components::Brick> cBrick = m_World->AddComponent<Components::Brick>(brick);
     std::shared_ptr<Components::RectangleShape> cRec = m_World->AddComponent<Components::RectangleShape>(brick);
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(brick);
+    cPhys->Static = false;
+    cPhys->GravityScale = 0.f;
     std::string fileName = "Textures/Bricks/";
     fileName.append(std::to_string(num));
     fileName.append(".png");
@@ -261,11 +262,14 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
     if (ball != nullptr && Restarting() == false) {
         auto ballTransform = m_World->GetComponent<Components::Transform>(entityBall);
 
-        m_World->RemoveComponent<Components::Brick>(entityBrick);
-        m_World->RemoveComponent<Components::Transform>(entityBrick);
-        m_World->RemoveComponent<Components::RectangleShape>(entityBrick);
-        m_World->RemoveComponent<Components::Physics>(entityBrick);
-        m_World->RemoveEntity(entityBrick);
+//        m_World->RemoveComponent<Components::Brick>(entityBrick);
+//        m_World->RemoveComponent<Components::Transform>(entityBrick);
+//        m_World->RemoveComponent<Components::RectangleShape>(entityBrick);
+//        m_World->RemoveComponent<Components::Physics>(entityBrick);
+//        m_World->RemoveEntity(entityBrick);
+
+        auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
+        physicsComponent->GravityScale = 1.f;
 
         SetNumberOfBricks(NumberOfBricks() - 1);
         if (NumberOfBricks() <= 0) {

@@ -12,7 +12,7 @@ void dd::Systems::PhysicsSystem::Initialize()
 {
     m_ContactListener = new ContactListener(this);
 
-    m_Gravity = b2Vec2(0.f, 0.f);
+    m_Gravity = b2Vec2(0.f, -9.82f);
     m_PhysicsWorld = new b2World(m_Gravity);
 
     m_TimeStep = 1.f/60.f;
@@ -50,74 +50,84 @@ bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
 
 void dd::Systems::PhysicsSystem::Update(double dt)
 {
-    for (auto i : m_EntitiesToBodies) {
-        EntityID entity = i.first;
-        b2Body* body = i.second;
-
-        auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
-        if (! transformComponent)
-            continue;
-
-        if (body == nullptr) {
-            //LOG_ERROR("This body should not exist");
-            continue;
-        }
-
-        if (m_World->GetEntityParent(entity) == 0) { //TODO: Make this work with childs too
-            b2Vec2 position;
-            position.x = transformComponent->Position.x;
-            position.y = transformComponent->Position.y;
-
-            float angle = -glm::eulerAngles(transformComponent->Orientation).z;
-
-            body->SetTransform(position, angle);
-
-            body->SetLinearVelocity(b2Vec2(transformComponent->Velocity.x, transformComponent->Velocity.y));
-
-
-        }
-    }
-
-    for (auto i : m_Impulses) {
-        i.Body->ApplyLinearImpulse(i.Impulse, i.Point, true);
-    }
-    m_Impulses.clear();
-
 
     m_Accumulator += dt;
     while(m_Accumulator >= m_TimeStep)
     {
-        m_PhysicsWorld->Step(m_TimeStep, m_VelocityIterations, m_PositionIterations);
-        m_Accumulator -= dt;
-    }
+
+        for (auto i : m_EntitiesToBodies) {
+            EntityID entity = i.first;
+            b2Body* body = i.second;
+
+            auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
+            if (! transformComponent) {
+                continue;
+                LOG_ERROR("RigidBody with no TransformComponent");
+            }
+            auto physicsComponent = m_World->GetComponent<Components::Physics>(entity);
+            if (! physicsComponent) {
+                continue;
+                LOG_ERROR("RigidBody with no PhysicsComponent");
+            }
 
 
-    for (auto i : m_EntitiesToBodies) {
-        EntityID entity = i.first;
-        b2Body* body = i.second;
+            if (body == nullptr) {
+                LOG_ERROR("This body should not exist");
+                continue;
+            }
 
-        if (body == nullptr) {
-            //LOG_ERROR("This body should not exist");
-            continue;
+            if (m_World->GetEntityParent(entity) == 0) { //TODO: Make this work with childs too
+                b2Vec2 position;
+                position.x = transformComponent->Position.x;
+                position.y = transformComponent->Position.y;
+                float angle = -glm::eulerAngles(transformComponent->Orientation).z;
+                body->SetTransform(position, angle);
+                body->SetLinearVelocity(b2Vec2(transformComponent->Velocity.x, transformComponent->Velocity.y));
+
+                body->SetGravityScale(physicsComponent->GravityScale);
+            }
         }
 
-        auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
-        if (! transformComponent)
-            continue;
-        if (m_World->GetEntityParent(entity) == 0) {
-            b2Vec2 position = body->GetPosition();
-            transformComponent->Position.x = position.x;
-            transformComponent->Position.y = position.y;
-
-            float angle = body->GetAngle();
+        for (auto i : m_Impulses) {
+            i.Body->ApplyLinearImpulse(i.Impulse, i.Point, true);
+        }
+        m_Impulses.clear();
 
 
-            transformComponent->Orientation =  glm::quat(glm::vec3(0, 0, -angle));
 
-            b2Vec2 velocity = body->GetLinearVelocity();
-            transformComponent->Velocity.x = velocity.x;
-            transformComponent->Velocity.y = velocity.y;
 
+        m_PhysicsWorld->Step(m_TimeStep, m_VelocityIterations, m_PositionIterations);
+        m_Accumulator -= dt;
+
+
+
+        for (auto i : m_EntitiesToBodies) {
+            EntityID entity = i.first;
+            b2Body* body = i.second;
+
+            if (body == nullptr) {
+                //LOG_ERROR("This body should not exist");
+                continue;
+            }
+
+            auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
+            if (! transformComponent)
+                continue;
+            if (m_World->GetEntityParent(entity) == 0) {
+                b2Vec2 position = body->GetPosition();
+                transformComponent->Position.x = position.x;
+                transformComponent->Position.y = position.y;
+
+                float angle = body->GetAngle();
+
+
+                transformComponent->Orientation =  glm::quat(glm::vec3(0, 0, -angle));
+
+                b2Vec2 velocity = body->GetLinearVelocity();
+                transformComponent->Velocity.x = velocity.x;
+                transformComponent->Velocity.y = velocity.y;
+
+            }
         }
     }
 }
@@ -222,6 +232,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
 
     delete pShape;
 
+    body->SetGravityScale(physicsComponent->GravityScale);
     m_EntitiesToBodies.insert(std::make_pair(entity, body));
     m_BodiesToEntities.insert(std::make_pair(body, entity));
 }
