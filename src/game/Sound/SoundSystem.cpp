@@ -128,9 +128,9 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
     }
 
     {
-        dd::Events::StopSound e;
-        e.path = "Sounds/BGM/soft-guitar.wav";
-        EventBroker->Publish(e);
+        //dd::Events::StopSound e;
+        //e.path = "Sounds/BGM/soft-guitar.wav";
+        //EventBroker->Publish(e);
     }
     //Send play-sound event
     dd::Events::PlaySound e;
