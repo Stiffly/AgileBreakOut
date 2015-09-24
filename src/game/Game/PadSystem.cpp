@@ -109,7 +109,7 @@ EntityID dd::Systems::PadSystem::CreateBall()
     std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
     physics->Static = false;
 
-    cball->Speed = 10;
+    cball->Speed = 5.f;
 
     m_World->CommitEntity(ent);
 
