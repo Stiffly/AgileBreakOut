@@ -28,7 +28,11 @@ public:
 	}
 
 	float Percentage() const { return m_Percentage; }
-	void SetPercentage(const float percentage) { m_Percentage = percentage; }
+	void SetPercentage(const float percentage)
+	{
+		m_Percentage = percentage;
+		m_SliderButton->X = percentage * (Width - m_SliderButton->Width);
+	}
 
 	void SetTextureHover(std::string resourceName)
 	{
@@ -43,7 +47,7 @@ public:
 		m_SliderButton->SetTexturePressed(resourceName);
 	}
 
-	void CenterSlider()
+	void AlignVertically()
 	{
 		m_SliderButton->Y = (Height / 2) - (m_SliderButton->Height / 2);
 	}
