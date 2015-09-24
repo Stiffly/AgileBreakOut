@@ -132,7 +132,7 @@ public:
 
             std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
 			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
-			ball->Speed = 10.f;
+			ball->Speed = 5.f;
             std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
             physics->Static = false;
 
@@ -217,13 +217,13 @@ public:
 			m_World->SetProperty(ent, "Name", "Pad");
 			auto ctransform = m_World->AddComponent<Components::Transform>(ent);
 			ctransform->Position = glm::vec3(0.f, -5.f, -10.f);
-			ctransform->Scale = glm::vec3(1.6, 0.4, 0.);
+			ctransform->Scale = glm::vec3(1.0f, 1.0f, 1.f);
 			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
 			auto physics = m_World->AddComponent<Components::Physics>(ent);
 			physics->Static = false;
-			auto csprite = m_World->AddComponent<Components::Sprite>(ent);
+			auto cModel = m_World->AddComponent<Components::Model>(ent);
+			cModel->ModelFile = "Models/Submarine.obj";
 			auto pad = m_World->AddComponent<Components::Pad>(ent);
-			csprite->SpriteFile = "Textures/Pad.png";
 			m_World->CommitEntity(ent);
 		}
 
