@@ -50,6 +50,8 @@
 #include "Physics/CBoxShape.h"
 #include "Physics/ESetImpulse.h"
 
+#include "Core/EKeyDown.h"
+
 namespace dd
 {
 
@@ -230,6 +232,9 @@ public:
 			m_World->CommitEntity(ent);
 		}
 
+		//EVENT_SUBSCRIBE_MEMBER(m_EStopSound, &SoundSystem::OnStopSound);
+		m_EKeyDown = decltype(m_EKeyDown)(std::bind(&Engine::OnKeyDown, this, std::placeholders::_1));
+		m_EventBroker->Subscribe(m_EKeyDown);
 		m_LastTime = glfwGetTime();
 	}
 
@@ -241,12 +246,24 @@ public:
 		double dt = currentTime - m_LastTime;
 		m_LastTime = currentTime;
 
+		double start = glfwGetTime();
 		ResourceManager::Update();
+		double stop = glfwGetTime();
+		double time = stop - start;
+		tm.resourceManagerT += time;
 
 		// Update input
+		start = glfwGetTime();
 		m_InputManager->Update(dt);
+		stop = glfwGetTime();
+		time = stop - start;
+		tm.inputManagerT += time;
 
+		start = glfwGetTime();
 		m_World->Update(dt);
+		stop = glfwGetTime();
+		time = stop - start;
+		tm.worldT += time;
 
 
 //
@@ -266,11 +283,21 @@ public:
 		}
 
 		//TODO Fill up the renderQueue with models (Temp fix)
+		start = glfwGetTime();
 		TEMPAddToRenderQueue();
+		stop = glfwGetTime();
+		time = stop - start;
+		tm.addToRenderQueueT += time;
 
 		// Render scene
 		//TODO send renderqueue to draw.
+		start = glfwGetTime();
 		m_Renderer->Draw(m_RendererQueue);
+		stop = glfwGetTime();
+		time = stop - start;
+		tm.rendererT += time;
+
+		m_EventBroker->Process<Engine>();
 
 		// Swap event queues
 		m_EventBroker->Clear();
@@ -418,6 +445,52 @@ private:
 	RenderQueueCollection m_RendererQueue;
 	std::shared_ptr<InputManager> m_InputManager;
 	std::shared_ptr<World> m_World;
+
+	struct TickMetric
+	{
+		double resourceManagerT = 0;
+		double inputManagerT = 0;
+		double worldT = 0;
+		double addToRenderQueueT = 0;
+		double rendererT = 0;
+		double Total()
+		{
+			return resourceManagerT
+				   + inputManagerT
+				   + worldT
+				   + addToRenderQueueT
+				   + rendererT;
+		};
+	};
+	TickMetric tm;
+
+	dd::EventRelay<Engine, dd::Events::KeyDown> m_EKeyDown;
+	bool OnKeyDown(const dd::Events::KeyDown &event)
+	{
+		if (event.KeyCode == 78)
+		{
+			double total = tm.Total();
+
+			std::ofstream outFile;
+			outFile.open("../tools/engine-metrics.txt");
+			outFile.clear();
+			outFile << "----------------------- Time measurements -----------------------\n";
+			outFile << "Type: ResourceManager->Update()" << std::endl;
+			outFile << "Total: " << tm.resourceManagerT / total * 100 << " %" << std::endl << std::endl;
+			outFile << "Type: InputManager->Update()" << std::endl;
+			outFile << "Total: " << tm.inputManagerT / total * 100 << " %" << std::endl << std::endl;
+			outFile << "Type: World->Update()" << std::endl;
+			outFile << "Total: " << tm.worldT / total * 100 << " %" << std::endl << std::endl;
+			outFile << "Type: AddToRenderQueue()" << std::endl;
+			outFile << "Total: " << tm.addToRenderQueueT / total * 100 << " %" << std::endl << std::endl;
+			outFile << "Type: Renderer->Draw()" << std::endl;
+			outFile << "Total: " << tm.rendererT / total * 100 << " %" << std::endl << std::endl;
+			outFile  << "-----------------------------------------------------------------";
+			outFile.close();
+			return true;
+		}
+	};
+
 
 
 	double m_LastTime;
