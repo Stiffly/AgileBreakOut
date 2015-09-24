@@ -172,14 +172,12 @@ struct RenderQueueCollection
 	RenderQueue Deferred;
 	RenderQueue Forward;
 	RenderQueue Lights;
-	RenderQueue Water;
 
 	void Clear()
 	{
 		Deferred.Clear();
 		Forward.Clear();
 		Lights.Clear();
-		Water.Clear();
 	}
 
 	void Sort()
@@ -187,8 +185,6 @@ struct RenderQueueCollection
 		Deferred.Sort();
 		Forward.Sort();
 		Lights.Sort();
-		//TODO: Is water sort needed?
-		Water.Sort();
 	}
 };
 

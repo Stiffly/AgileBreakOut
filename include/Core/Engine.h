@@ -134,14 +134,26 @@ public:
 		}
 
 		//Halfpipe background test model.
+//		{
+//			auto t_halfPipe = m_World->CreateEntity();
+//			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
+//			transform->Position = glm::vec3(0.f, 0.f, -15.f);
+//			transform->Scale = glm::vec3(15.f);
+//			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
+//			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
+//			model->Color = glm::vec4(1.f, 1.f, 1.f, 0.3f);
+//			m_World->CommitEntity(t_halfPipe);
+//		}
+
+		//Background
 		{
-			auto t_halfPipe = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
+			auto background = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(background);
 			transform->Position = glm::vec3(0.f, 0.f, -15.f);
-			transform->Scale = glm::vec3(15.f);
-			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
-			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
-			m_World->CommitEntity(t_halfPipe);
+			transform->Scale = glm::vec3(2681.f/100.f, 1080.f/100.f, 1.f);
+			auto sprite = m_World->AddComponent<Components::Sprite>(background);
+			sprite->SpriteFile = "Textures/Background.png";
+			m_World->CommitEntity(background);
 		}
 
 		//Water test
@@ -159,7 +171,7 @@ public:
 		{
 			auto topWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
-			transform->Position = glm::vec3(0.f, -3.f, -10.f);
+			transform->Position = glm::vec3(0.f, -3.f, -9.9f);
 			transform->Scale = glm::vec3(3.f, 0.5f, 1.f);
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
@@ -172,7 +184,7 @@ public:
 		{
 			auto topWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
-			transform->Position = glm::vec3(1.5f, -1.5f, -10.f);
+			transform->Position = glm::vec3(1.5f, -1.5f, -9.9f);
 			transform->Scale = glm::vec3(0.5f, 3.f, 1.f);
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
@@ -185,7 +197,7 @@ public:
 		{
 			auto topWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
-			transform->Position = glm::vec3(-1.5f, -1.5f, -10.f);
+			transform->Position = glm::vec3(-1.5f, -1.5f, -9.9f);
 			transform->Scale = glm::vec3(0.5f, 3.0f, 1.f);
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
@@ -366,7 +378,7 @@ public:
 					Components::Transform absoluteTransform = m_TransformSystem->AbsoluteTransform(entity);
 					glm::mat4 modelMatrix = glm::translate(absoluteTransform.Position)
 											* glm::scale(absoluteTransform.Scale);
-					EnqueueWaterParticles(absoluteTransform.Position, glm::vec4(1.f, 1.f, 1.f, 1.f), modelMatrix);
+					EnqueueWaterParticles(absoluteTransform.Position, glm::vec4(1.f, 1.f, 1.f, 1.f), modelMatrix, absoluteTransform.Position.z);
 				}
 			}
 
@@ -451,14 +463,15 @@ public:
 
 	}
 
-	void EnqueueWaterParticles(glm::vec3 position, glm::vec4 color, glm::mat4 modelMatrix)
+	void EnqueueWaterParticles(glm::vec3 position, glm::vec4 color, glm::mat4 modelMatrix, float depth)
 	{
 		WaterParticleJob job;
 		job.Position = position;
 		job.Color = color;
 		job.ModelMatrix = modelMatrix;
+		job.Depth = depth;
 
-		m_RendererQueue.Water.Add(job);
+		m_RendererQueue.Forward.Add(job);
 	}
 
 private:

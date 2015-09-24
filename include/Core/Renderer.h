@@ -112,7 +112,7 @@ private:
 
 	static bool DepthSort(const std::shared_ptr<RenderJob> &i, const std::shared_ptr<RenderJob> &j) { return (i->Depth < j->Depth); }
 
-	void DrawDeferred(RenderQueue &objects, RenderQueue &lights, RenderQueue &waterParticles);
+	void DrawDeferred(RenderQueue &objects, RenderQueue &lights);
 	void DrawForward(RenderQueue &objects, RenderQueue &lights);
 	void DrawScene(RenderQueue &objects, ShaderProgram &program);
 	void DrawLightSpheres(RenderQueue &lights);

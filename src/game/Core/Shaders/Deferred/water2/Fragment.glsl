@@ -65,6 +65,6 @@ void main()
     float avgColor = frag_Diffuse.r + frag_Diffuse.g + frag_Diffuse.b;
     avgColor = avgColor/3;
     if ( avgColor*dir.y > Threshhold ){
-    		frag_Diffuse = vec4(0.0, 0.6, 1.0, 1.0);
+    		frag_Diffuse = vec4(0.0, 0.3, 1.0, 1.0);
     }
 }
