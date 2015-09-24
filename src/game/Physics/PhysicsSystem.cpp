@@ -30,7 +30,7 @@ void dd::Systems::PhysicsSystem::Initialize()
 void dd::Systems::PhysicsSystem::InitializeWater()
 {
     b2ParticleSystemDef m_ParticleSystemDef;
-    m_ParticleSystemDef.radius = 0.1f;
+    m_ParticleSystemDef.radius = 0.13f;
 
     m_ParticleSystem = m_PhysicsWorld->CreateParticleSystem(&m_ParticleSystemDef);
 }
@@ -265,7 +265,6 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
     shape.SetAsBox(transform->Scale.x/2.f, transform->Scale.y/2.f);
     pd.shape = &shape;
     pd.flags = b2_tensileParticle;
-    pd.linearVelocity = b2Vec2(0, 5.f);
     pd.position.Set(transform->Position.x, transform->Position.y);
     //TODO: PUT IN LIST
     t_watergroup = m_ParticleSystem->CreateParticleGroup(pd);
@@ -275,8 +274,6 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
             auto t_waterparticle = m_World->CreateEntity(e);
             auto transformChild = m_World->AddComponent<Components::Transform>(t_waterparticle);
             //auto sprite = m_World->AddComponent<Components::Sprite>(t_waterparticle);
-
-
 
             transformChild->Position = glm::vec3(t_ParticlePositions[i].x - transform->Position.x, t_ParticlePositions[i].y - transform->Position.y, -9.5f);
             transformChild->Scale = glm::vec3(m_ParticleSystem->GetRadius())/transform->Scale;

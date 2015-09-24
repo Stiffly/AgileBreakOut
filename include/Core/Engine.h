@@ -133,10 +133,10 @@ public:
 			model->ModelFile = "Models/Test/Ball/Ballopus.obj";
           	std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
 			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
+			ball->Speed = 5.f;
+            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+            physics->Static = false;
 
-          	std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-			physics->Static = false;
-			ball->Speed = 10.f;
 			auto plight = m_World->AddComponent<Components::PointLight>(ent);
 			plight->Radius = 2.f;
 
@@ -169,8 +169,8 @@ public:
 		{
 			auto background = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(background);
-			transform->Position = glm::vec3(0.f, 0.f, -20.f);
-			transform->Scale = glm::vec3(2681.f / 100.f, 1080.f / 100.f, 1.f);
+			transform->Position = glm::vec3(0.f, 0.f, -30.f);
+			transform->Scale = glm::vec3(2681.f / 50.f, 1080.f / 50.f, 1.f);
 			auto sprite = m_World->AddComponent<Components::Sprite>(background);
 			sprite->SpriteFile = "Textures/Background.png";
 			m_World->CommitEntity(background);
@@ -180,18 +180,19 @@ public:
 		{
 			auto t_waterBody = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
-			transform->Position = glm::vec3(0.f, -1.f, -10.f);
-			transform->Scale = glm::vec3(2.f, 3.f, 1.f);
+			transform->Position = glm::vec3(0.f, -4.5f, -10.f);
+			transform->Scale = glm::vec3(7.f, 1.5f, 1.f);
 			auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
 			auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
 			m_World->CommitEntity(t_waterBody);
 		}
+		//TODO: Why does the ball not collide with these bricks?
 		//BottomBox
 		{
 			auto topWall = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(topWall);
-			transform->Position = glm::vec3(0.f, -3.f, -9.9f);
-			transform->Scale = glm::vec3(3.f, 0.5f, 1.f);
+			transform->Position = glm::vec3(0.f, -6.f, -9.9f);
+			transform->Scale = glm::vec3(10.f, 0.5f, 1.f);
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
@@ -201,33 +202,33 @@ public:
 			m_World->CommitEntity(topWall);
 		}
 		//SideBox
-		{
-			auto topWall = m_World->CreateEntity();
-			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
-			transform->Position = glm::vec3(1.5f, -1.5f, -9.9f);
-			transform->Scale = glm::vec3(0.5f, 3.f, 1.f);
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
-			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
-					topWall);
-			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
-			physics->Static = true;
-			m_World->CommitEntity(topWall);
-		}
-		//OtherSideBox
-		{
-			auto topWall = m_World->CreateEntity();
-			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
-			transform->Position = glm::vec3(-1.5f, -1.5f, -9.9f);
-			transform->Scale = glm::vec3(0.5f, 3.0f, 1.f);
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
-			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
-					topWall);
-			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
-			physics->Static = true;
-			m_World->CommitEntity(topWall);
-		}
+//		{
+//			auto topWall = m_World->CreateEntity();
+//			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
+//			transform->Position = glm::vec3(3.f, -3.0f, -9.9f);
+//			transform->Scale = glm::vec3(0.5f, 3.f, 1.f);
+//			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+//			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+//			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
+//					topWall);
+//			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
+//			physics->Static = true;
+//			m_World->CommitEntity(topWall);
+//		}
+//		//OtherSideBox
+//		{
+//			auto topWall = m_World->CreateEntity();
+//			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
+//			transform->Position = glm::vec3(-4.f, -3.0f, -9.9f);
+//			transform->Scale = glm::vec3(0.5f, 3.0f, 1.f);
+//			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+//			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+//			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
+//					topWall);
+//			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
+//			physics->Static = true;
+//			m_World->CommitEntity(topWall);
+//		}
 
 		{
 			auto topWall = m_World->CreateEntity();
@@ -291,13 +292,13 @@ public:
 			m_World->SetProperty(ent, "Name", "Pad");
 			auto ctransform = m_World->AddComponent<Components::Transform>(ent);
 			ctransform->Position = glm::vec3(0.f, -5.f, -10.f);
-			ctransform->Scale = glm::vec3(1.6, 0.4, 0.);
+			ctransform->Scale = glm::vec3(1.0f, 1.0f, 1.f);
 			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
 			auto physics = m_World->AddComponent<Components::Physics>(ent);
 			physics->Static = false;
-			auto csprite = m_World->AddComponent<Components::Sprite>(ent);
+			auto cModel = m_World->AddComponent<Components::Model>(ent);
+			cModel->ModelFile = "Models/Submarine.obj";
 			auto pad = m_World->AddComponent<Components::Pad>(ent);
-			csprite->SpriteFile = "Textures/Pad.png";
 			m_World->CommitEntity(ent);
 		}
 

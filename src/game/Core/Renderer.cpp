@@ -226,8 +226,8 @@ void dd::Renderer::CreateBuffers()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	//Fill waterBlur pass
 	glGenFramebuffers(1, &t_m_fbWaterBlur);
@@ -247,8 +247,8 @@ void dd::Renderer::CreateBuffers()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	//Fill waterBlur pass2
 	glGenFramebuffers(1, &t_m_fbWaterBlur2);
@@ -267,8 +267,8 @@ void dd::Renderer::CreateBuffers()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	// Create third pass framebuffer
 	glGenFramebuffers(1, &m_fbDeferred3);
@@ -537,10 +537,11 @@ void dd::Renderer::DrawWater(RenderQueue &rq)
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	t_m_spWater2->Bind();
+	float radius = 3.f;
 
 	glUniform2fv(glGetUniformLocation(shaderProgramHandle, "dir"), 1, glm::value_ptr(glm::vec2(1.0f, 0.0f)));
 	glUniform1f(glGetUniformLocation(shaderProgramHandle, "res"), m_Resolution.Width);
-	glUniform1f(glGetUniformLocation(shaderProgramHandle, "radius"), 3.0f);
+	glUniform1f(glGetUniformLocation(shaderProgramHandle, "radius"), radius);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, t_m_Gwater);
@@ -560,7 +561,7 @@ void dd::Renderer::DrawWater(RenderQueue &rq)
 
 	glUniform2fv(glGetUniformLocation(shaderProgramHandle, "dir"), 1, glm::value_ptr(glm::vec2(0.0f, 1.0f)));
 	glUniform1f(glGetUniformLocation(shaderProgramHandle, "res"), m_Resolution.Height);
-	glUniform1f(glGetUniformLocation(shaderProgramHandle, "radius"), 3.0f);
+	glUniform1f(glGetUniformLocation(shaderProgramHandle, "radius"), radius);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, t_m_BWater);
@@ -665,6 +666,9 @@ void dd::Renderer::DebugKeys()
 		m_CurrentScreenBuffer = m_tLighting;
 	}
 	if (glfwGetKey(m_Window, GLFW_KEY_F7)) {
-	m_CurrentScreenBuffer  = t_m_BWater;
+		m_CurrentScreenBuffer  = t_m_Gwater;
+	}
+	if (glfwGetKey(m_Window, GLFW_KEY_F8)) {
+		m_CurrentScreenBuffer  = t_m_BWater;
 	}
 }
