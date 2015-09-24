@@ -282,7 +282,7 @@ bool dd::Systems::PadSystem::OnMultiBall(const dd::Events::MultiBall &event)
 
 bool dd::Systems::PadSystem::OnStageCleared(const dd::Events::StageCleared &event)
 {
-    auto entity = CreateBall();
+    //auto entity = CreateBall();
     return true;
 }
 
