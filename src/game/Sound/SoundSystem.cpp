@@ -50,19 +50,20 @@ void dd::Systems::SoundSystem::Initialize()
         e.isAmbient = true;
         EventBroker->Publish(e);
     }
-    {
+    /*{
         dd::Events::MasterVolume e;
         e.isAmbient = true;
         e.gain = 0.001f;
         EventBroker->Publish(e);
-    }
+    }*/
 }
 
 void dd::Systems::SoundSystem::Update(double dt)
 {
     //Clean up none-active sources
+    //Only used for SFX's. BGM's are handled on stop sound.
     std::vector<ALuint> deleteList;
-    for (auto item : m_SourcesToBuffers) {
+    for (auto item : m_SFXSourcesToBuffers) {
         ALint sourceState;
         alGetSourcei(item.first, AL_SOURCE_STATE, &sourceState);
         if (sourceState == AL_STOPPED) {
@@ -73,7 +74,7 @@ void dd::Systems::SoundSystem::Update(double dt)
     for (int i = 0; i < deleteList.size(); i++) {
         alDeleteSources(1, &deleteList[i]);
         //alDeleteBuffers(1, &m_SourcesToBuffers[deleteList[i]]);
-        m_SourcesToBuffers.erase(deleteList[i]);
+        m_SFXSourcesToBuffers.erase(deleteList[i]);
     }
 }
 
@@ -93,7 +94,6 @@ bool dd::Systems::SoundSystem::OnPlaySound(const dd::Events::PlaySound &event)
        return false;
     }
     ALuint source = CreateSource();
-    m_SourcesToBuffers[source] = sound;
     ALuint buffer = sound->Buffer();
     alSourcei(source, AL_BUFFER, buffer);
 
@@ -102,9 +102,12 @@ bool dd::Systems::SoundSystem::OnPlaySound(const dd::Events::PlaySound &event)
     if (event.isAmbient) {
         alSourcei(source, AL_LOOPING, AL_TRUE);
         relativeVolume = m_BGMMasterVolume;
+        m_BGMSourcesToBuffers[source] = sound;
+
     }
     else if (!event.isAmbient)
     {
+        m_SFXSourcesToBuffers[source] = sound;
         alSourcei(source, AL_LOOPING, AL_FALSE);
         relativeVolume = m_SFXMasterVolume;
     }
@@ -120,12 +123,29 @@ bool dd::Systems::SoundSystem::OnPlaySound(const dd::Events::PlaySound &event)
 
 bool dd::Systems::SoundSystem::OnStopSound(const dd::Events::StopSound &event)
 {
-    for (auto item : m_SourcesToBuffers) {
+
+    //TODO: Delete sources for bgms
+    ALuint itemToDelete;
+    for (auto item : m_BGMSourcesToBuffers)
+    {
+        if (item.second->Path() == event.path) {
+            itemToDelete = item.first;
+            break;
+        }
+    }
+    alSourceStop(itemToDelete);
+    alDeleteSources(1, &itemToDelete);
+    m_BGMSourcesToBuffers.erase(itemToDelete);
+
+    //Should not because SFX's should be very short.
+    for (auto item : m_SFXSourcesToBuffers)
+    {
         if (item.second->Path() == event.path) {
             alSourceStop(item.first);
             return true;
         }
     }
+
     return false;
 }
 
@@ -151,6 +171,12 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
             //None of the entities had a collisionSound component.
             return false;
         }
+    }
+
+    {
+        dd::Events::StopSound e;
+        e.path = "Sounds/BGM/water-flowing.wav";
+        EventBroker->Publish(e);
     }
 
     //Send play-sound event

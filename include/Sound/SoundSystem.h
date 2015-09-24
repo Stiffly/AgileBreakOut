@@ -47,7 +47,8 @@ private:
 
     ALuint CreateSource();
 
-    std::map<ALuint, Sound*> m_SourcesToBuffers;
+    std::map<ALuint, Sound*> m_BGMSourcesToBuffers;
+    std::map<ALuint, Sound*> m_SFXSourcesToBuffers;
 
     ALCdevice* m_Device;
 
