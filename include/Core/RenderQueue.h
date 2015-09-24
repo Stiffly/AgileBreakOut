@@ -115,6 +115,18 @@ struct PointLightJob : RenderJob
 	}
 };
 
+struct WaterParticleJob : RenderJob
+{
+	glm::vec3 Position;
+	glm::vec4 Color;
+	glm::mat4 ModelMatrix;
+
+	void CalculateHash() override
+	{
+		Hash = 0;
+	}
+};
+
 class RenderQueue
 {
 public:
@@ -123,6 +135,7 @@ public:
 	{
 		job.CalculateHash();
 		Jobs.push_front(std::shared_ptr<T>(new T(job)));
+		m_Size++;
 	}
 
 	void Sort()
@@ -133,7 +146,10 @@ public:
 	void Clear()
 	{
 		Jobs.clear();
+		m_Size = 0;
 	}
+
+	int Size() const { return m_Size; }
 
 	std::forward_list<std::shared_ptr<RenderJob>>::const_iterator begin()
 	{
@@ -146,6 +162,9 @@ public:
 	}
 
 	std::forward_list<std::shared_ptr<RenderJob>> Jobs;
+
+private:
+	int m_Size = 0;
 };
 
 struct RenderQueueCollection
