@@ -22,34 +22,45 @@ void dd::Systems::SoundSystem::Initialize()
 
     alGetError();
 
+    //Probably unnecessary. vec3(0) probably default.
     const ALfloat pos[3] = {0, 0, 0};
-    alListenerfv(AL_POSITION, pos);
+    //alListenerfv(AL_POSITION, pos);
+
+    m_SFXMasterVolume = 1.f;
+    m_BGMMasterVolume = 1.f;
 
     //Subscribe to events
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &SoundSystem::OnContact);
     EVENT_SUBSCRIBE_MEMBER(m_EPlaySFX, &SoundSystem::OnPlaySound);
     EVENT_SUBSCRIBE_MEMBER(m_EStopSound, &SoundSystem::OnStopSound);
+    EVENT_SUBSCRIBE_MEMBER(m_EMasterVolume, &SoundSystem::OnMasterVolume);
+
 
     //Todo: Move this
     {
         dd::Events::PlaySound e;
-        e.path = "Sounds/BGM/soft-guitar.wav";
-        e.loop = true;
+        e.path = "Sounds/BGM/under-the-sea-instrumental.wav";
+        e.isAmbient = true;
         EventBroker->Publish(e);
     }
     {
         dd::Events::PlaySound e;
         e.path = "Sounds/BGM/water-flowing.wav";
         e.volume = 0.3f;
-        e.loop = true;
+        e.isAmbient = true;
+        EventBroker->Publish(e);
+    }
+    {
+        dd::Events::MasterVolume e;
+        e.isAmbient = true;
+        e.gain = 0.001f;
         EventBroker->Publish(e);
     }
 }
 
 void dd::Systems::SoundSystem::Update(double dt)
 {
-    //LOG_INFO("Sources : %i", m_SourcesToBuffers.size());
-
+    //Clean up none-active sources
     std::vector<ALuint> deleteList;
     for (auto item : m_SourcesToBuffers) {
         ALint sourceState;
@@ -64,7 +75,6 @@ void dd::Systems::SoundSystem::Update(double dt)
         //alDeleteBuffers(1, &m_SourcesToBuffers[deleteList[i]]);
         m_SourcesToBuffers.erase(deleteList[i]);
     }
-
 }
 
 ALuint dd::Systems::SoundSystem::CreateSource()
@@ -88,15 +98,19 @@ bool dd::Systems::SoundSystem::OnPlaySound(const dd::Events::PlaySound &event)
     alSourcei(source, AL_BUFFER, buffer);
 
     //Sound settings
-    alSourcef(source, AL_GAIN, event.volume);
-    alSourcef(source, AL_PITCH, event.pitch);
-    if (event.loop) {
+    float relativeVolume = 1.f;
+    if (event.isAmbient) {
         alSourcei(source, AL_LOOPING, AL_TRUE);
+        relativeVolume = m_BGMMasterVolume;
     }
-    else if (!event.loop)
+    else if (!event.isAmbient)
     {
         alSourcei(source, AL_LOOPING, AL_FALSE);
+        relativeVolume = m_SFXMasterVolume;
     }
+
+    alSourcef(source, AL_GAIN, (event.volume * relativeVolume));
+    alSourcef(source, AL_PITCH, event.pitch);
 
 
     //Play
@@ -115,6 +129,18 @@ bool dd::Systems::SoundSystem::OnStopSound(const dd::Events::StopSound &event)
     return false;
 }
 
+bool dd::Systems::SoundSystem::OnMasterVolume(const dd::Events::MasterVolume &event)
+{
+    if (event.isAmbient) {
+        m_BGMMasterVolume = event.gain;
+    }
+    else if (!event.isAmbient) {
+        m_SFXMasterVolume = event.gain;
+    }
+    m_World->GetEntities();
+}
+
+//On contact: play the sound given in the CCOllisionSound.
 bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
 {
     //Check which entity has the collisionSound component.
@@ -127,16 +153,12 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
         }
     }
 
-    {
-        //dd::Events::StopSound e;
-        //e.path = "Sounds/BGM/soft-guitar.wav";
-        //EventBroker->Publish(e);
-    }
     //Send play-sound event
     dd::Events::PlaySound e;
     e.path = collisionSound->filePath;
+    e.isAmbient = false;
     EventBroker->Publish(e);
-    return true;
+    //return true;
 }
 
 
