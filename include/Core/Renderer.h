@@ -73,6 +73,7 @@ private:
 	ShaderProgram* m_spForward;
 	ShaderProgram* m_spScreen;
 	ShaderProgram* t_m_spWater;
+	ShaderProgram* t_m_spWater2;
 
 	GLuint m_ScreenQuad = 0;
 	Model* m_UnitSphere = nullptr;
@@ -94,9 +95,13 @@ private:
 	//Water GTexture
 	GLuint t_m_Gwater = 0;
 	//Water blur texture
-	GLuint t_m_tWater;
+	GLuint t_m_BWater;
+	GLuint t_m_BWater2;
 	//WAterpass Framebuffer
 	GLuint t_m_fbWater;
+	//Waterpass Framebuffer
+	GLuint t_m_fbWaterBlur;
+	GLuint t_m_fbWaterBlur2;
 
 
 	GLuint m_CurrentScreenBuffer = 0;

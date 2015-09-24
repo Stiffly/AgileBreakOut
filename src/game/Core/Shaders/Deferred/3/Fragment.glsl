@@ -22,6 +22,7 @@ uniform vec3 La;
 
 layout (binding=0) uniform sampler2D DiffuseTexture;
 layout (binding=1) uniform sampler2D LightingTexture;
+layout (binding=2) uniform sampler2D WaterTexture;
 
 in VertexData
 {
@@ -35,11 +36,12 @@ void main()
 {
 	vec4 DiffuseTexel = texture(DiffuseTexture, Input.TextureCoord);
 	vec4 LightingTexel = texture(LightingTexture, Input.TextureCoord);
+	vec4 WaterTexel = texture(WaterTexture, Input.TextureCoord);
 
 	//frag_Diffuse = DiffuseTexel * (vec4(La, 0.0) * (vec4(LightingTexel.rgb, 0.0) + vec4(LightingTexel.a, LightingTexel.a, LightingTexel.a, 0.0)));
 	//frag_Diffuse = DiffuseTexel * (vec4(La, 0.0) + LightingTexel);
 	//frag_Diffuse = DiffuseTexel * (vec4(1.f, 1.f, 1.f, 0.0) + LightingTexel);
-	frag_Diffuse = DiffuseTexel + LightingTexel;
+	frag_Diffuse = DiffuseTexel + LightingTexel + WaterTexel;
 	//frag_Diffuse = DiffuseTexel;
 	//frag_Diffuse = vec4(LightingTexel.r, LightingTexel.g, LightingTexel.b, 1.0);
 }
