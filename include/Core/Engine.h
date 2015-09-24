@@ -42,8 +42,10 @@
 #include "Game/LevelSystem.h"
 #include "Game/PadSystem.h"
 #include "Game/CBall.h"
-#include "Game/CBrick.h"
 #include "Game/CPad.h"
+#include "Game/CBrick.h"
+#include "Game/BallSystem.h"
+#include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
@@ -63,8 +65,9 @@ public:
 
         m_Renderer = std::make_shared<Renderer>();
         m_Renderer->SetFullscreen(false);
-        m_Renderer->SetResolution(Rectangle(0, 0, 1920, 1080));
-        m_Renderer->Initialize();
+        //m_Renderer->SetResolution(Rectangle(0, 0, 1920, 1080));
+        m_Renderer->SetResolution(Rectangle(0, 0, 675, 1080));
+		m_Renderer->Initialize();
 
         m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
 
@@ -92,6 +95,10 @@ public:
 		m_World->ComponentFactory.Register<Components::Brick>();
 		m_World->ComponentFactory.Register<Components::Pad>();
 		m_World->ComponentFactory.Register<Components::Life>();
+
+		m_World->ComponentFactory.Register<Components::PowerUp>();
+		m_World->ComponentFactory.Register<Components::PowerUpBrick>();
+
         m_World->SystemFactory.Register<Systems::PhysicsSystem>(
                 [this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
         m_World->AddSystem<Systems::PhysicsSystem>();
@@ -100,6 +107,8 @@ public:
 		m_World->AddSystem<Systems::LevelSystem>();
 		m_World->SystemFactory.Register<Systems::PadSystem>([this]() { return new Systems::PadSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::PadSystem>();
+		m_World->SystemFactory.Register<Systems::BallSystem>([this]() { return new Systems::BallSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::BallSystem>();
 
         m_World->ComponentFactory.Register<Components::Model>();
         m_World->ComponentFactory.Register<Components::Template>();
@@ -115,15 +124,16 @@ public:
         {
             auto ent = m_World->CreateEntity();
             std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(0.5f, 0.f, -9.9f);
-			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
+            transform->Position = glm::vec3(-0.f, 0.26f, -10.f);
+			transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
+			transform->Velocity = glm::vec3(0.0f, -10.f, 0.f);
 
             auto model = m_World->AddComponent<Components::Model>(ent);
 			model->ModelFile = "Models/Test/Ball/Ballopus.obj";
 
             std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
 			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
-
+			ball->Speed = 10.f;
             std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
             physics->Static = false;
 
@@ -132,11 +142,7 @@ public:
 
             m_World->CommitEntity(ent);
 
-			Events::SetImpulse e;
-			e.Entity = ent;
-			e.Impulse = glm::vec2(0.f, -7.f);
-			e.Point = glm::vec2(0.5f, 0.f);
-			m_EventBroker->Publish(e);
+
         }
 
 		//PointLightTest
@@ -152,28 +158,17 @@ public:
 		{
 			auto t_halfPipe = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
-			transform->Position = glm::vec3(0.f, 0.f, -15.f);
-			transform->Scale = glm::vec3(15.f);
+			transform->Position = glm::vec3(0.f, 0.f, -13.f);
+			transform->Scale = glm::vec3(5.f);
 			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
 			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
-		}
-
-		//Brick test model
-		{
-			auto t_Brick = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(t_Brick);
-			transform->Position = glm::vec3(0.f, 0.f, -12.f);
-			transform->Orientation = glm::rotate(glm::quat(), 0.5f, glm::vec3(0,-1,-1));
-			auto model = m_World->AddComponent<Components::Model>(t_Brick);
-			model->ModelFile = "Models/Test/Brick/Brick.obj";
-
 		}
 
 		{
 			auto topWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
 			transform->Position = glm::vec3(0.f, 6.f, -10.f);
-			transform->Scale = glm::vec3(18.f, 0.5f, 1.f);
+			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
@@ -188,8 +183,8 @@ public:
 		{
 			auto leftWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(leftWall);
-			transform->Position = glm::vec3(-9.f, 1.f, -10.f);
-			transform->Scale = glm::vec3(0.5f, 10.f, 1.f);
+			transform->Position = glm::vec3(-4.f, 1.f, -10.f);
+			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
@@ -204,8 +199,8 @@ public:
 		{
 			auto rightWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(rightWall);
-			transform->Position = glm::vec3(9.f, 1.f, -10.f);
-			transform->Scale = glm::vec3(0.5f, 10.f, 1.f);
+			transform->Position = glm::vec3(4.f, 1.f, -10.f);
+			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
@@ -223,9 +218,10 @@ public:
 			m_World->SetProperty(ent, "Name", "Pad");
 			auto ctransform = m_World->AddComponent<Components::Transform>(ent);
 			ctransform->Position = glm::vec3(0.f, -5.f, -10.f);
-			ctransform->Scale = glm::vec3(3.2, 0.8, 0.);
+			ctransform->Scale = glm::vec3(1.6, 0.4, 0.);
 			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
 			auto physics = m_World->AddComponent<Components::Physics>(ent);
+			physics->Static = false;
 			auto csprite = m_World->AddComponent<Components::Sprite>(ent);
 			auto pad = m_World->AddComponent<Components::Pad>(ent);
 			csprite->SpriteFile = "Textures/Pad.png";

@@ -19,7 +19,8 @@ struct Contact : Event
 {
     EntityID Entity1;
     EntityID Entity2;
-    glm::vec2 ContactPoint;
+    glm::vec2 Normal;
+    glm::vec2 SignificantNormal;
 };
 
 }

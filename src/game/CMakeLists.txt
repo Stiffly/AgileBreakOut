@@ -87,7 +87,7 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Physics}
     ${SOURCE_FILES_Game}
-    ${SOURCE_FILES_Sound})
+    ${SOURCE_FILES_Sound} ../../include/Game/EGameOver.h ../../include/Game/Bricks/CPowerUpBrick.h ../../include/Game/CPowerUp.h ../../include/Game/ECreatePowerUp.h ../../include/Game/EPowerUpTaken.h)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
