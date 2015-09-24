@@ -122,6 +122,7 @@ struct FrameJob : SpriteJob
 {
 	Rectangle Scissor;
 	Rectangle Viewport;
+	std::string Name;
 
 	void CalculateHash() override
 	{
@@ -136,7 +137,7 @@ public:
 	void Add(T &job)
 	{
 		job.CalculateHash();
-		Jobs.push_front(std::shared_ptr<T>(new T(job)));
+		Jobs.push_back(std::shared_ptr<T>(new T(job)));
 	}
 
 	void Sort()
@@ -149,17 +150,17 @@ public:
 		Jobs.clear();
 	}
 
-	std::forward_list<std::shared_ptr<RenderJob>>::const_iterator begin()
+	std::list<std::shared_ptr<RenderJob>>::const_iterator begin()
 	{
 		return Jobs.begin();
 	}
 
-	std::forward_list<std::shared_ptr<RenderJob>>::const_iterator end()
+	std::list<std::shared_ptr<RenderJob>>::const_iterator end()
 	{
 		return Jobs.end();
 	}
 
-	std::forward_list<std::shared_ptr<RenderJob>> Jobs;
+	std::list<std::shared_ptr<RenderJob>> Jobs;
 };
 
 struct RenderQueueCollection

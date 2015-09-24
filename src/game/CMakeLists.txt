@@ -79,13 +79,10 @@ file(GLOB SOURCE_FILES_Sound
 )
 source_group(Sound FILES ${SOURCE_FILES_Sound})
 
-#file(GLOB SOURCE_FILES_GUI
-#    "${INCLUDE_PATH}/GUI/*.h"
-#    "GUI/*.cpp"
-#)
-set(SOURCE_FILES_GUI
-    "${INCLUDE_PATH}/GUI/Frame.h"
-        ../../include/GUI/Button.h)
+file(GLOB SOURCE_FILES_GUI
+    "${INCLUDE_PATH}/GUI/*.h"
+    "GUI/*.cpp"
+)
 source_group(GUI FILES ${SOURCE_FILES_GUI})
 
 set(SOURCE_FILES
@@ -102,7 +99,8 @@ set(SOURCE_FILES
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-    set(STATIC_LIBRARY_FLAGS  "${STATIC_LIBRARY_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+    set(STATIC_LIBRARY_FLAGS "${STATIC_LIBRARY_FLAGS}")
 endif()
 
 add_library(game ${SOURCE_FILES})

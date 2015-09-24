@@ -477,7 +477,6 @@ void dd::Renderer::DebugKeys()
 void dd::Renderer::DrawGUI(dd::RenderQueue& rq)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred3);
-	glEnable(GL_SCISSOR_TEST);
 	glDisable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glDisable(GL_DEPTH_TEST);
@@ -492,6 +491,7 @@ void dd::Renderer::DrawGUI(dd::RenderQueue& rq)
 	for (auto &job : rq) {
 		auto frameJob = std::dynamic_pointer_cast<FrameJob>(job);
 		if (frameJob) {
+			FrameJob jobCopy = *(frameJob.get());
 			glm::mat4 viewMatrix = glm::mat4(1); //frameJob->ViewMatrix;
 			glm::mat4 PV = glm::mat4(1); //frameJob->ProjectionMatrix * viewMatrix;
 			glm::mat4 modelMatrix = glm::mat4(1); //frameJob->ModelMatrix;
@@ -510,7 +510,12 @@ void dd::Renderer::DrawGUI(dd::RenderQueue& rq)
 			Rectangle& vp = frameJob->Viewport;
 			glViewport(vp.X, m_Resolution.Height - vp.Y - vp.Height, vp.Width, vp.Height);
 			Rectangle& sc = frameJob->Scissor;
-			glScissor(sc.X, m_Resolution.Height - sc.Y - sc.Height, sc.Width, sc.Height);
+			if (sc == Rectangle()) {
+				glDisable(GL_SCISSOR_TEST);
+			} else {
+				glEnable(GL_SCISSOR_TEST);
+				glScissor(sc.X, m_Resolution.Height - sc.Y - sc.Height, sc.Width, sc.Height);
+			}
 
 			glBindVertexArray(m_ScreenQuad);
 			glDrawArrays(GL_TRIANGLES, 0, 6);

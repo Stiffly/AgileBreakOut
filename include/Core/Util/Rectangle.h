@@ -44,24 +44,24 @@ struct Rectangle
 	int Height;
 
 	virtual int Left() const { return X; }
-	void SetLeft(int left)
+	virtual void SetLeft(int left)
 	{
-		Width += X - left;
+		//Width += X - left;
 		X = left;
 	}
 	virtual int Right() const { return X + Width; }
-	void SetRight(int right)
+	virtual void SetRight(int right)
 	{
 		Width = right - X;
 	}
 	virtual int Top() const { return Y; }
-	void SetTop(int top)
+	virtual void SetTop(int top)
 	{
-		Height += Y - top;
+		//Height += Y - top;
 		Y = top;
 	}
 	virtual int Bottom() const { return Y + Height; }
-	int SetBottom(int bottom)
+	virtual void SetBottom(int bottom)
 	{
 		Height = bottom - Y;
 	}

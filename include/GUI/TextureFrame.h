@@ -15,6 +15,9 @@ public:
 	TextureFrame(Frame* parent, std::string name)
 		: Frame(parent, name) { }
 
+	void EnableScissor() { m_ScissorEnabled = true; }
+	void DisableScissor() { m_ScissorEnabled = false; }
+
 	void Draw(RenderQueueCollection& rq) override
 	{
 		if (m_Texture == nullptr)
@@ -23,22 +26,24 @@ public:
 		// Main texture
 		{
 			FrameJob job;
-			job.Scissor = m_Parent->AbsoluteRectangle();
+			job.Scissor = (m_ScissorEnabled) ? m_Parent->AbsoluteRectangle() : Rectangle();
 			job.Viewport = Rectangle(Left(), Top(), Width, Height);
 			job.TextureID = m_Texture->ResourceID;
 			job.DiffuseTexture = *m_Texture;
 			job.Color = glm::vec4(m_Color.r, m_Color.g, m_Color.b, m_Color.a * m_CurrentFade);
+			job.Name = Name();
 			rq.GUI.Add(job);
 		}
 
 		// Texture while fading
 		if (m_FadeTexture && m_CurrentFade < 1) {
 			FrameJob job;
-			job.Scissor = m_Parent->AbsoluteRectangle();
+			job.Scissor = (m_ScissorEnabled) ? m_Parent->AbsoluteRectangle() : Rectangle();
 			job.Viewport = Rectangle(Left(), Top(), Width, Height);
 			job.TextureID = m_FadeTexture->ResourceID;
 			job.DiffuseTexture = *m_FadeTexture;
 			job.Color = glm::vec4(m_Color.r, m_Color.g, m_Color.b, m_Color.a);
+			job.Name = Name();
 			rq.GUI.Add(job);
 		}
 	}
@@ -50,6 +55,15 @@ public:
 		m_Texture = ResourceManager::Load<dd::Texture>(resourceName);
 		if (m_Texture == nullptr) {
 			m_Texture = ResourceManager::Load<dd::Texture>("Textures/Core/ErrorTexture.png");
+		}
+		SizeToTexture();
+	}
+
+	void SizeToTexture()
+	{
+		if (m_Texture != nullptr) {
+			this->Width = m_Texture->Width;
+			this->Height = m_Texture->Height;
 		}
 	}
 
@@ -77,6 +91,7 @@ public:
 	void SetColor(glm::vec4 val) { m_Color = val; }
 
 protected:
+	bool m_ScissorEnabled = true;
 	dd::Texture* m_Texture = nullptr;
 	dd::Texture* m_FadeTexture = nullptr;
 	glm::vec4 m_Color = glm::vec4(1.f, 1.f, 1.f, 1.f);

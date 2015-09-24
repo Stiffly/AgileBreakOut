@@ -73,8 +73,6 @@ public:
 			return;
 		}
 
-		Width = parent->Width;
-		Height = parent->Height;
 		m_Layer = parent->Layer() + 1;
 		parent->AddChild(this);
 		m_Parent = parent;
@@ -128,12 +126,25 @@ public:
 		else
 			return X;
 	}
+	void SetLeft(int absLeft) override
+	{
+		if (m_Parent) {
+			X = absLeft - m_Parent->Left();
+		} else {
+			X = absLeft;
+		}
+	}
 	int Right() const override
 	{
-		if (m_Parent)
-			return std::min(m_Parent->Right(), Left() + Width);
-		else
-			return Left() + Width;
+		return Left() + Width;
+	}
+	void SetRight(int absRight) override
+	{
+		if (m_Parent) {
+			X = absRight - Width - m_Parent->Left();
+		} else {
+			X = absRight - Width;
+		}
 	}
 	int Top() const override
 	{
@@ -142,12 +153,25 @@ public:
 		else
 			return Y;
 	}
+	void SetTop(int absTop) override
+	{
+		if (m_Parent) {
+			Y = absTop - m_Parent->Top();
+		} else {
+			Y = absTop;
+		}
+	}
 	int Bottom() const override
 	{
-		if (m_Parent)
-			return std::min(m_Parent->Bottom(), Top() + Height);
-		else
-			return Top() + Height;
+		return Top() + Height;
+	}
+	void SetBottom(int absBottom) override
+	{
+		if (m_Parent) {
+			Y = absBottom - Height - m_Parent->Top();
+		} else {
+			Y = absBottom - Height;
+		}
 	}
 
 	glm::vec2 Scale()

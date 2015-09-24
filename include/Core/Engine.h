@@ -54,6 +54,7 @@
 
 #include "GUI/Frame.h"
 #include "GUI/Button.h"
+#include "Game/MainMenu.h"
 
 namespace dd
 {
@@ -73,24 +74,7 @@ public:
 		m_FrameStack = new GUI::Frame(m_EventBroker.get());
 		m_FrameStack->Width = 1920;
 		m_FrameStack->Height = 1080;
-		{
-			auto button = new GUI::Button(m_FrameStack, "SuperButt");
-			button->TextureReleased = "Textures/Test/TestBrick_Specular.png";
-			button->TexturePressed = "Textures/Test/TestBrick_Normal.png";
-			button->TextureHover = "Textures/Test/TestBrick_Diffuse.png";
-			button->X = 50;
-			button->Y = 75;
-			button->Width = 100;
-			button->Height = 25;
-		}
-		{
-			auto button = new GUI::TextureFrame(m_FrameStack, "BALLZ");
-			button->SetTexture("Textures/Ball.png");
-			button->X = 50;
-			button->Y = 75;
-			button->Width = 100;
-			button->Height = 100;
-		}
+		auto menu = new GUI::MainMenu(m_FrameStack, "MainMenu");
 
         m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
 
@@ -265,18 +249,13 @@ public:
 		// Update input
 		m_InputManager->Update(dt);
 		// Swap event queues to get fresh input data in the read queue
-		m_EventBroker->Swap();
+		//m_EventBroker->Swap();
 
 		ResourceManager::Update();
 
 		m_World->Update(dt);
 		m_EventBroker->Process<GUI::Frame>();
 		m_FrameStack->UpdateLayered(dt);
-
-//
-//		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
-//			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
-//		}
 
 		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
 			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
