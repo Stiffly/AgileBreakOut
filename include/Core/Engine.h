@@ -161,9 +161,23 @@ public:
 		{
 			auto t_Light = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_Light);
-			transform->Position = glm::vec3(2.f, 1.5f, -9.f);
+			transform->Position = glm::vec3(-3.f, 6.f, -5.f);
 			auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
-			pl->Radius = 8.f;
+			pl->Radius = 20.f;
+			pl->Diffuse = glm::vec3(0.8f, 0.7f, 0.05f);
+			auto model = m_World->AddComponent<Components::Model>(t_Light);
+			model->ModelFile = "Core/UnitSphere.obj";
+			m_World->CommitEntity(t_Light);
+		}
+		{
+			auto t_Light = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_Light);
+			transform->Position = glm::vec3(3.f, -5.f, -5.f);
+			auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
+			pl->Radius = 15.f;
+			pl->Diffuse = glm::vec3(0.1f, 0.5f, 0.8f);
+			auto model = m_World->AddComponent<Components::Model>(t_Light);
+			model->ModelFile = "Core/UnitSphere.obj";
 			m_World->CommitEntity(t_Light);
 		}
 
@@ -172,7 +186,7 @@ public:
 			auto t_halfPipe = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
 			transform->Position = glm::vec3(0.f, 0.f, -15.f);
-			transform->Scale = glm::vec3(15.f);
+			transform->Scale = glm::vec3(6.f, 6.f, 10.f);
 			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
 			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
 			model->Color = glm::vec4(1.f, 1.f, 1.f, 0.3f);
