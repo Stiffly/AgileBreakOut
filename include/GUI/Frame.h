@@ -36,6 +36,7 @@ public:
 	// Set up a base frame with an event broker
 	Frame(dd::EventBroker* eventBroker)
 		: EventBroker(eventBroker)
+		, BaseFrame(this)
 		, Rectangle() { }
 
 	// Create a frame as a child
@@ -77,6 +78,7 @@ public:
 		parent->AddChild(this);
 		m_Parent = parent;
 		EventBroker = parent->EventBroker;
+		BaseFrame = parent->BaseFrame;
 	}
 
 	void AddChild(Frame* child)
@@ -236,6 +238,7 @@ public:
 
 protected:
 	dd::EventBroker* EventBroker;
+	Frame* BaseFrame = nullptr;
 
 	std::string m_Name = "UIParent";
 	int m_Layer = 0;

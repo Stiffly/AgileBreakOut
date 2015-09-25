@@ -41,6 +41,8 @@ public:
 		m_OptionsButton->SetTextureHover("Textures/GUI/Menu/MainOptionsHover.png");
 		m_OptionsButton->SetTexturePressed("Textures/GUI/Menu/MainOptionsClick.png");
 		m_OptionsButton->SizeToTexture();
+
+		EVENT_SUBSCRIBE_MEMBER(m_EButtonRelease, &MainMenuMain::OnButtonRelease);
 	}
 
 private:
@@ -48,6 +50,16 @@ private:
 	Button* m_SquidoutButton;
 	Button* m_TimeAttackButton;
 	Button* m_OptionsButton;
+
+	EventRelay<Frame, Events::ButtonRelease> m_EButtonRelease;
+	virtual bool OnButtonRelease(const Events::ButtonRelease& event)
+	{
+		if (event.Button == m_SquidoutButton) {
+			m_Parent->Hide();
+		}
+
+		return true;
+	}
 };
 
 }

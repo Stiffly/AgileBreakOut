@@ -59,6 +59,7 @@
 #include "GUI/Frame.h"
 #include "GUI/Button.h"
 #include "Game/MainMenu.h"
+#include "Game/HUD.h"
 
 namespace dd
 {
@@ -77,8 +78,9 @@ public:
 		m_Renderer->Initialize();
 
 		m_FrameStack = new GUI::Frame(m_EventBroker.get());
-		m_FrameStack->Width = 1920;
+		m_FrameStack->Width = 675;
 		m_FrameStack->Height = 1080;
+		auto hud = new GUI::HUD(m_FrameStack, "HUD");
 		auto menu = new GUI::MainMenu(m_FrameStack, "MainMenu");
 
 		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);

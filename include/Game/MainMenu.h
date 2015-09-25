@@ -4,6 +4,7 @@
 #include "GUI/TextureFrame.h"
 #include "Game/MainMenuMain.h"
 #include "Game/MainMenuOptions.h"
+#include "Core/EKeyUp.h"
 
 namespace dd
 {
@@ -32,12 +33,24 @@ public:
 		m_MainMenuOptions = new GUI::MainMenuOptions(this, "MainMenuOptions");
 		m_MainMenuOptions->SetLeft(m_LeftBanner->Right());
 		m_MainMenuOptions->SetTop(m_MainMenuMain->Bottom());
+
+		EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, &MainMenu::OnKeyUp);
 	}
 
 private:
 	TextureFrame* m_LeftBanner;
 	MainMenuMain* m_MainMenuMain;
 	MainMenuOptions* m_MainMenuOptions;
+
+	EventRelay<Frame, Events::KeyUp> m_EKeyUp;
+	bool OnKeyUp(const Events::KeyUp& event)
+	{
+		if (event.KeyCode == GLFW_KEY_ESCAPE) {
+			Show();
+		}
+
+		return true;
+	}
 };
 
 }
