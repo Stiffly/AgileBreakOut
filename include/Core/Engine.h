@@ -341,6 +341,7 @@ public:
 		m_EventBroker->Process<GUI::Frame>();
 		m_FrameStack->UpdateLayered(dt);
 
+		m_RendererQueue.Clear();
 		m_FrameStack->DrawLayered(m_RendererQueue);
 		//TODO Fill up the renderQueue with models (Temp fix)
 		if (m_GameIsRunning) {
@@ -364,11 +365,8 @@ public:
 	//TODO: Get this out of engine.h
 	void TEMPAddToRenderQueue()
 	{
-
 		if (!m_TransformSystem)
 			m_TransformSystem = m_World->GetSystem<Systems::TransformSystem>();
-
-		m_RendererQueue.Clear();
 
 		for (auto &pair : *m_World->GetEntities())
 		{
