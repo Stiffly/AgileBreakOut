@@ -72,6 +72,7 @@ void dd::Systems::PadSystem::Update(double dt)
     transform->Velocity += acceleration  * (float)dt;
     transform->Velocity -= transform->Velocity * pad->SlowdownModifier * (float)dt;
 
+
     if (Left()) {
         acceleration.x = -pad->AccelerationSpeed;
     } else if (Right()) {
@@ -188,10 +189,9 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
 
     //float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
     float movementY = glm::cos((abs(movementX) / ((1.6f) * movementMultiplier)) * 3.14159265359f / 2)+ 0.2;
-
     //std::cout << movementX << " " << movementY << std::endl;
-
     float len = glm::length<float>(transformBall->Velocity);
+    //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
 
 
     transformBall->Velocity += glm::vec3(transformPad->Velocity.x, 0, 0);
