@@ -34,7 +34,7 @@ public:
 		m_MainMenuOptions->SetLeft(m_LeftBanner->Right());
 		m_MainMenuOptions->SetTop(m_MainMenuMain->Bottom());
 
-		EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, &MainMenu::OnKeyUp);
+		//EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, &MainMenu::OnKeyUp);
 	}
 
 private:
@@ -42,7 +42,7 @@ private:
 	MainMenuMain* m_MainMenuMain;
 	MainMenuOptions* m_MainMenuOptions;
 
-	EventRelay<Frame, Events::KeyUp> m_EKeyUp;
+	//EventRelay<Frame, Events::KeyUp> m_EKeyUp;
 	bool OnKeyUp(const Events::KeyUp& event)
 	{
 		if (event.KeyCode == GLFW_KEY_ESCAPE) {

@@ -52,6 +52,11 @@ public:
 
 	void SetTexture(std::string resourceName)
 	{
+		if (resourceName.empty()) {
+			m_Texture = nullptr;
+			return;
+		}
+
 		m_Texture = ResourceManager::Load<dd::Texture>(resourceName);
 		if (m_Texture == nullptr) {
 			m_Texture = ResourceManager::Load<dd::Texture>("Textures/Core/ErrorTexture.png");
