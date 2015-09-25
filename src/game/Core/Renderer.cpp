@@ -288,6 +288,7 @@ void dd::Renderer::Draw(RenderQueueCollection& rq)
 	rq.Forward.Jobs.sort(dd::Renderer::DepthSort);
 	DrawDeferred(rq.Deferred, rq.Lights);
 	DrawForward(rq.Forward, rq.Lights);
+	DrawGUI(rq.GUI);
 
 	// Finally: Draw the deferred+forward combined texture to the screen
 	glDisable(GL_CULL_FACE);
@@ -671,4 +672,58 @@ void dd::Renderer::DebugKeys()
 	if (glfwGetKey(m_Window, GLFW_KEY_F8)) {
 		m_CurrentScreenBuffer  = t_m_BWater;
 	}
+}
+
+void dd::Renderer::DrawGUI(dd::RenderQueue& rq)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred3);
+	glDisable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	//glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+
+	m_spScreen->Bind();
+
+	glm::mat4 MVP;
+
+	for (auto &job : rq) {
+		auto frameJob = std::dynamic_pointer_cast<FrameJob>(job);
+		if (frameJob) {
+			FrameJob jobCopy = *(frameJob.get());
+			glm::mat4 viewMatrix = glm::mat4(1); //frameJob->ViewMatrix;
+			glm::mat4 PV = glm::mat4(1); //frameJob->ProjectionMatrix * viewMatrix;
+			glm::mat4 modelMatrix = glm::mat4(1); //frameJob->ModelMatrix;
+			MVP = PV * modelMatrix;
+			glUniformMatrix4fv(glGetUniformLocation(*m_spScreen, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+			glUniformMatrix4fv(glGetUniformLocation(*m_spScreen, "M"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+			glUniformMatrix4fv(glGetUniformLocation(*m_spScreen, "V"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, frameJob->DiffuseTexture);
+			//glActiveTexture(GL_TEXTURE1);
+			//glBindTexture(GL_TEXTURE_2D, frameJob->NormalTexture);
+			//glActiveTexture(GL_TEXTURE2);
+			//glBindTexture(GL_TEXTURE_2D, frameJob->SpecularTexture);
+
+			Rectangle& vp = frameJob->Viewport;
+			glViewport(vp.X, m_Resolution.Height - vp.Y - vp.Height, vp.Width, vp.Height);
+			Rectangle& sc = frameJob->Scissor;
+			if (sc == Rectangle()) {
+				glDisable(GL_SCISSOR_TEST);
+			} else {
+				glEnable(GL_SCISSOR_TEST);
+				glScissor(sc.X, m_Resolution.Height - sc.Y - sc.Height, sc.Width, sc.Height);
+			}
+
+			glBindVertexArray(m_ScreenQuad);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+
+			continue;
+		}
+	}
+
+	glDisable(GL_SCISSOR_TEST);
+	glViewport(0, 0, m_Resolution.Width, m_Resolution.Height);
 }

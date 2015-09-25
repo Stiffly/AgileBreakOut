@@ -117,6 +117,7 @@ private:
 	void DrawScene(RenderQueue &objects, ShaderProgram &program);
 	void DrawLightSpheres(RenderQueue &lights);
 	void DrawWater(RenderQueue &objects);
+	void DrawGUI(RenderQueue& rq);
 	void DebugKeys();
 };
 

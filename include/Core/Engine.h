@@ -53,6 +53,13 @@
 #include "Physics/ESetImpulse.h"
 #include "Physics/CWaterVolume.h"
 
+#include "Game/EGameStart.h"
+#include "Sound/EPlaySound.h"
+
+#include "GUI/Frame.h"
+#include "GUI/Button.h"
+#include "Game/MainMenu.h"
+#include "Game/HUD.h"
 
 namespace dd
 {
@@ -70,11 +77,15 @@ public:
 		m_Renderer->SetResolution(Rectangle(0, 0, 675, 1080));
 		m_Renderer->Initialize();
 
+		m_FrameStack = new GUI::Frame(m_EventBroker.get());
+		m_FrameStack->Width = 675;
+		m_FrameStack->Height = 1080;
+		auto hud = new GUI::HUD(m_FrameStack, "HUD");
+		auto menu = new GUI::MainMenu(m_FrameStack, "MainMenu");
+
 		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
 
 		m_World = std::make_shared<World>(m_EventBroker);
-
-
 
 		//TODO: Move this out of engine.h
 		m_World->ComponentFactory.Register<Components::Transform>();
@@ -123,7 +134,7 @@ public:
 
 
 		//OctoBall
-        {
+		{
           	auto ent = m_World->CreateEntity();
         	std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
 			transform->Position = glm::vec3(-0.f, 0.26f, -9.f);
@@ -134,14 +145,14 @@ public:
           	std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
 			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
 			ball->Speed = 5.f;
-            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-            physics->Static = false;
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+			physics->Static = false;
 
 			auto plight = m_World->AddComponent<Components::PointLight>(ent);
 			plight->Radius = 2.f;
 
 			m_World->CommitEntity(ent);
-        }
+		}
 
 		//PointLightTest
 		{
@@ -316,6 +327,11 @@ public:
 			m_World->CommitEntity(ent);
 		}
 
+
+		//EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &Engine::OnGameStart);
+		m_EGameStart = decltype(m_EGameStart)(std::bind(&Engine::OnGameStart, this, std::placeholders::_1));
+		m_EventBroker->Subscribe(m_EGameStart);
+
 			m_LastTime = glfwGetTime();
 	}
 
@@ -327,27 +343,32 @@ public:
 		double dt = currentTime - m_LastTime;
 		m_LastTime = currentTime;
 
-		ResourceManager::Update();
-
 		// Update input
 		m_InputManager->Update(dt);
+		// Swap event queues to get fresh input data in the read queue
+		//m_EventBroker->Swap();
 
-		m_World->Update(dt);
-
-
-		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
-			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
+		ResourceManager::Update();
+		if (m_GameIsRunning) {
+			m_World->Update(dt);
 		}
+		m_EventBroker->Process<GUI::Frame>();
+		m_FrameStack->UpdateLayered(dt);
 
+		m_RendererQueue.Clear();
+		m_FrameStack->DrawLayered(m_RendererQueue);
 		//TODO Fill up the renderQueue with models (Temp fix)
-		TEMPAddToRenderQueue();
+		if (m_GameIsRunning) {
+			TEMPAddToRenderQueue();
+		}
 
 		// Render scene
 		//TODO send renderqueue to draw.
 		m_Renderer->Draw(m_RendererQueue);
 
+		m_EventBroker->Process<Engine>();
 		// Swap event queues
-		m_EventBroker->Clear();
+		m_EventBroker->Swap();
 
 		glfwPollEvents();
 	}
@@ -358,11 +379,8 @@ public:
 	//TODO: Get this out of engine.h
 	void TEMPAddToRenderQueue()
 	{
-
 		if (!m_TransformSystem)
 			m_TransformSystem = m_World->GetSystem<Systems::TransformSystem>();
-
-		m_RendererQueue.Clear();
 
 		for (auto &pair : *m_World->GetEntities())
 		{
@@ -443,7 +461,6 @@ public:
 			}
 		}
 
-		m_RendererQueue.Sort();
 	}
 
 	//TODO: Get this out of engine.h
@@ -462,7 +479,6 @@ public:
 			job.EndIndex = texGroup.EndIndex;
 			job.ModelMatrix = modelMatrix;
 			job.Color = color;
-			job.fileName = fileName;
 
 			m_RendererQueue.Deferred.Add(job);
 		}
@@ -508,14 +524,34 @@ public:
 	}
 
 private:
-	std::shared_ptr<ResourceManager> m_ResourceManager;
 	std::shared_ptr<EventBroker> m_EventBroker;
+	GUI::Frame* m_FrameStack = nullptr;
 	std::shared_ptr<Renderer> m_Renderer;
 	RenderQueueCollection m_RendererQueue;
 	std::shared_ptr<InputManager> m_InputManager;
 	std::shared_ptr<World> m_World;
 
-
+	//TODO: Redo
+	bool m_GameIsRunning = false;
+	dd::EventRelay<Engine, dd::Events::GameStart> m_EGameStart;
+	bool OnGameStart(const dd::Events::GameStart &event)
+	{
+		m_GameIsRunning = true;
+		//Todo: Move this
+		{
+			dd::Events::PlaySound e;
+			e.path = "Sounds/BGM/under-the-sea-instrumental.wav";
+			e.isAmbient = true;
+			m_EventBroker->Publish(e);
+		}
+		{
+			dd::Events::PlaySound e;
+			e.path = "Sounds/BGM/water-flowing.wav";
+			e.volume = 0.3f;
+			e.isAmbient = true;
+			m_EventBroker->Publish(e);
+		}
+	};
 	double m_LastTime;
 };
 

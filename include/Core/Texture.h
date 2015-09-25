@@ -43,6 +43,9 @@ public:
 
 	operator GLuint() const { return m_Texture; }
 
+	unsigned int Width = 0;
+	unsigned int Height = 0;
+
 private:
 	GLuint m_Texture = 0;
 };
