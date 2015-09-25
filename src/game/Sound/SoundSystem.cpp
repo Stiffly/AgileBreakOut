@@ -36,26 +36,7 @@ void dd::Systems::SoundSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EMasterVolume, &SoundSystem::OnMasterVolume);
 
 
-    //Todo: Move this
-    {
-        dd::Events::PlaySound e;
-        e.path = "Sounds/BGM/under-the-sea-instrumental.wav";
-        e.isAmbient = true;
-        EventBroker->Publish(e);
-    }
-    {
-        dd::Events::PlaySound e;
-        e.path = "Sounds/BGM/water-flowing.wav";
-        e.volume = 0.3f;
-        e.isAmbient = true;
-        EventBroker->Publish(e);
-    }
-    {
-        dd::Events::MasterVolume e;
-        e.isAmbient = true;
-        e.gain = 1.f;
-        EventBroker->Publish(e);
-    }
+
 }
 
 void dd::Systems::SoundSystem::Update(double dt)
@@ -180,12 +161,6 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
             //None of the entities had a collisionSound component.
             return false;
         }
-    }
-
-    {
-        dd::Events::StopSound e;
-        e.path = "Sounds/BGM/water-flowing.wav";
-        EventBroker->Publish(e);
     }
 
     //Send play-sound event
