@@ -31,6 +31,9 @@ dd::Texture::Texture(std::string path)
 		}
 	}
 
+	this->Width = image->Width;
+	this->Height = image->Height;
+
 	GLint format;
 	switch (image->Format) {
 	case Image::ImageFormat::RGB:

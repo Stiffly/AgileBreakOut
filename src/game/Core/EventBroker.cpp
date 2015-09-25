@@ -79,7 +79,7 @@ int dd::EventBroker::Process(std::string contextTypeName)
 	return eventsProcessed;
 }
 
-void dd::EventBroker::Clear()
+void dd::EventBroker::Swap()
 {
 	std::swap(m_EventQueueRead, m_EventQueueWrite);
 	m_EventQueueWrite->clear();

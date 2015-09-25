@@ -24,6 +24,7 @@ layout (binding = 2) uniform sampler2D SpecularMap;
 
 uniform mat4 V;
 uniform float MaterialShininess;
+uniform vec4 Color;
 
 in VertexData
 {
@@ -49,6 +50,7 @@ void main()
 {
 	// Diffuse Texture
 	GDiffuse = texture(DiffuseTexture, Input.TextureCoord) * Input.DiffuseColor;
+	GDiffuse = GDiffuse * Color;
 
 	// G-buffer Position
 	GPosition = vec4(Input.Position.xyz, 1.0);

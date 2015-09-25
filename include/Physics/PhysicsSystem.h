@@ -5,7 +5,7 @@
 
 #include "Core/System.h"
 #include "Core/World.h"
-#include "Physics/CBoxShape.h"
+#include "CRectangleShape.h"
 #include "Physics/CPhysics.h"
 #include <Box2D/Box2D.h>
 #include "Core/CTransform.h"
@@ -15,7 +15,9 @@
 #include "Physics/CCircleShape.h"
 #include "Core/EventBroker.h"
 #include "Game/CPad.h"
+#include "Physics/CWaterVolume.h"
 #include "Game/CBall.h"
+#include "Rendering/CSprite.h"
 
 
 namespace dd
@@ -65,6 +67,15 @@ private:
 
     void CreateBody(EntityID entity);
 
+    b2ParticleSystem *m_ParticleSystem;
+    b2ParticleGroup* t_watergroup;
+
+    std::unordered_map<EntityID, const b2ParticleHandle*> m_EntitiesToParticleHandle;
+    std::unordered_map<const b2ParticleHandle*, EntityID> m_ParticleHandleToEntities;
+
+    void InitializeWater();
+    void SyncWater(); //TODO: Probably remove this
+    void CreateParticleGroup(EntityID entity);
 
     struct Impulse
     {

@@ -10,6 +10,7 @@
 #include "Sound.h"
 #include "Sound/EPlaySound.h"
 #include "Sound/EStopSound.h"
+#include "Sound/EMasterVolume.h"
 #include "Physics/EContact.h"
 #include "Game/CBall.h"
 #include "Game/CBrick.h"
@@ -38,17 +39,20 @@ private:
     dd::EventRelay<SoundSystem, dd::Events::PlaySound> m_EPlaySFX;
     dd::EventRelay<SoundSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<SoundSystem, dd::Events::StopSound> m_EStopSound;
+    dd::EventRelay<SoundSystem, dd::Events::MasterVolume> m_EMasterVolume;
     bool OnPlaySound(const dd::Events::PlaySound &event);
     bool OnContact(const dd::Events::Contact &event);
     bool OnStopSound(const dd::Events::StopSound &event);
+    bool OnMasterVolume(const dd::Events::MasterVolume &event);
 
     ALuint CreateSource();
 
-    std::map<ALuint, Sound*> m_SourcesToBuffers;
+    std::map<ALuint, Sound*> m_BGMSourcesToBuffers;
+    std::map<ALuint, Sound*> m_SFXSourcesToBuffers;
 
     ALCdevice* m_Device;
 
-    //Temp
+    float m_BGMMasterVolume, m_SFXMasterVolume;
 
 };
 }
