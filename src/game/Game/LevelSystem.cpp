@@ -176,6 +176,9 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(brick);
     cPhys->Static = false;
     cPhys->GravityScale = 0.f;
+    cPhys->Category = CollisionLayer::Type::Brick;
+    cPhys->Mask = CollisionLayer::Type::Ball;
+
     std::string fileName = "Textures/Bricks/";
     fileName.append(std::to_string(num));
     fileName.append(".png");
@@ -270,6 +273,20 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 
         auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
         physicsComponent->GravityScale = 1.f;
+        physicsComponent->Mask = CollisionLayer::Type::Water | CollisionLayer::Type::Wall;
+
+        auto transformComponentBrick = m_World->GetComponent<Components::Transform>(entityBrick);
+        auto transformComponentBall = m_World->GetComponent<Components::Transform>(entityBall);
+
+        Events::SetImpulse e;
+        e.Entity = entityBrick;
+
+        glm::vec2 point = glm::vec2(transformComponentBrick->Position.x + ((transformComponentBrick->Position.x - transformComponentBall->Position.x)/4), transformComponentBrick->Position.y  + ((transformComponentBrick->Position.y - transformComponentBall->Position.y )/4));
+
+        e.Impulse = glm::normalize(point)/2.f;
+        e.Point = point;
+        EventBroker->Publish(e);
+        //TODO: Bricks dont collide with walls D=
 
         SetNumberOfBricks(NumberOfBricks() - 1);
         if (NumberOfBricks() <= 0) {
@@ -279,7 +296,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         es.Score = brick->Score;
         EventBroker->Publish(es);
 
-        std::cout << NumberOfBricks() << std::endl;
+       // std::cout << NumberOfBricks() << std::endl;
         //std::cout << "Score: " << Score() << std::endl;
     }
 
@@ -313,8 +330,12 @@ bool dd::Systems::LevelSystem::OnCreatePowerUp(const dd::Events::CreatePowerUp &
     auto model = m_World->AddComponent<Components::Model>(powerUp);
     std::shared_ptr<Components::CircleShape> cRec = m_World->AddComponent<Components::CircleShape>(powerUp);
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(powerUp);
-    std::shared_ptr<Components::PowerUp> cPow = m_World->AddComponent<Components::PowerUp>(powerUp);
     cPhys->Static = false;
+    cPhys->Category = CollisionLayer::Type::PowerUp;
+    cPhys->Mask = CollisionLayer::Type::Pad;
+
+    std::shared_ptr<Components::PowerUp> cPow = m_World->AddComponent<Components::PowerUp>(powerUp);
+
 
     transform->Position = event.Position;
     transform->Scale = glm::vec3(0.2, 0.2, 0.2);

@@ -108,7 +108,9 @@ EntityID dd::Systems::PadSystem::CreateBall()
     std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
     std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
     physics->Static = false;
-
+    physics->Category = CollisionLayer::Type::Ball;
+    physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
+    physics->Calculate = true;
     cball->Speed = 5.f;
 
     m_World->CommitEntity(ent);
@@ -234,9 +236,9 @@ bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
         return false;
     }
 
-    m_World->RemoveComponent<Components::PowerUp>(entityPower);
-    m_World->RemoveComponent<Components::CircleShape>(entityPower);
-    m_World->RemoveComponent<Components::Physics>(entityPower);
+//    m_World->RemoveComponent<Components::PowerUp>(entityPower);
+//    m_World->RemoveComponent<Components::CircleShape>(entityPower);
+//    m_World->RemoveComponent<Components::Physics>(entityPower);
     m_World->RemoveEntity(entityPower);
     Events::PowerUpTaken ep;
     ep.Name = "Something";

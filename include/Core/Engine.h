@@ -135,6 +135,9 @@ public:
 			ball->Speed = 5.f;
             std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
             physics->Static = false;
+			physics->Category = CollisionLayer::Type::Ball;
+			physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
+			physics->Calculate = true;
 
 			auto plight = m_World->AddComponent<Components::PointLight>(ent);
 			plight->Radius = 2.f;
@@ -176,6 +179,8 @@ public:
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
 			physics->Static = true;
+			physics->Category = CollisionLayer::Type::Wall;
+			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
 
 			m_World->CommitEntity(topWall);
 		}
@@ -192,6 +197,8 @@ public:
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(leftWall);
 			physics->Static = true;
+			physics->Category = CollisionLayer::Type::Wall;
+			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
 
 			m_World->CommitEntity(leftWall);
 		}
@@ -208,6 +215,8 @@ public:
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(rightWall);
 			physics->Static = true;
+			physics->Category = CollisionLayer::Type::Wall;
+			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
 
 			m_World->CommitEntity(rightWall);
 		}
@@ -221,8 +230,12 @@ public:
 			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
 			auto physics = m_World->AddComponent<Components::Physics>(ent);
 			physics->Static = false;
+			physics->Category = CollisionLayer::Type::Pad;
+			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::PowerUp;
+			physics->Calculate = true;
 			auto cModel = m_World->AddComponent<Components::Model>(ent);
-			cModel->ModelFile = "Models/Submarine.obj";
+			cModel->ModelFile = "Models/Submarine2.obj";
+
 			auto pad = m_World->AddComponent<Components::Pad>(ent);
 			m_World->CommitEntity(ent);
 		}

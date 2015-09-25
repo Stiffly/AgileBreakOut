@@ -60,9 +60,10 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         return false;
     }
 
-    //Which is the ball?
+
     EntityID ballEntity, otherEntitiy;
 
+    //Which is the ball?
     if (ballComponent1 != nullptr) {
         ballEntity = event.Entity1;
         otherEntitiy = event.Entity2;
@@ -78,6 +79,8 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         //TODO: Add support for power-up collisions
     }
 
+    //if this is a brick thats dead do not collide :)
+
     auto ballTransform = m_World->GetComponent<Components::Transform>(ballEntity);
     glm::vec2 ballVelocity = glm::vec2(ballTransform->Velocity.x, ballTransform->Velocity.y);
 
@@ -85,7 +88,6 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         auto padTransform = m_World->GetComponent<Components::Transform>(otherEntitiy);
         float x = ballTransform->Position.x - padTransform->Position.x;
 
-        float movementMultiplier = 5.0f;
         float y = glm::cos((abs(x) / (1.6f)) * glm::pi<float>() / 2.f) + 1.f;
 
         ballTransform->Velocity = glm::normalize(glm::vec3(x, y ,0.f)) * ballComponent->Speed;

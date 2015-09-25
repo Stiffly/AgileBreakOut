@@ -15,6 +15,7 @@
 #include "Physics/CCircleShape.h"
 #include "Core/EventBroker.h"
 #include "Game/CPad.h"
+#include "Game/CBall.h"
 
 
 namespace dd
@@ -102,15 +103,18 @@ private:
         void PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
         {
             EntityID entityA = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureA()->GetBody()];
-            EntityID entityB = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureA()->GetBody()];
+            EntityID entityB = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureB()->GetBody()];
 
             auto physicsComponentA = m_PhysicsSystem->m_World->GetComponent<Components::Physics>(entityA);
             auto physicsComponentB = m_PhysicsSystem->m_World->GetComponent<Components::Physics>(entityB);
 
-            if (physicsComponentA != nullptr || physicsComponentB != nullptr) {
-                // Turn of collisions
-                contact->SetEnabled(false);
+            if (physicsComponentA != nullptr && physicsComponentB != nullptr) {
+                if (physicsComponentA->Calculate || physicsComponentB->Calculate) {
+                    // Turn of collisions
+                    contact->SetEnabled(false);
+                }
             }
+
 
         }
         void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)

@@ -85,6 +85,12 @@ void dd::Systems::PhysicsSystem::Update(double dt)
                 body->SetLinearVelocity(b2Vec2(transformComponent->Velocity.x, transformComponent->Velocity.y));
 
                 body->SetGravityScale(physicsComponent->GravityScale);
+
+
+                b2Filter filter;
+                filter.categoryBits = physicsComponent->Category;
+                filter.maskBits = physicsComponent->Mask;
+                body->GetFixtureList()->SetFilterData(filter);
             }
         }
 
@@ -106,7 +112,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             b2Body* body = i.second;
 
             if (body == nullptr) {
-                //LOG_ERROR("This body should not exist");
+                LOG_ERROR("This body should not exist");
                 continue;
             }
 
@@ -149,6 +155,11 @@ void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)
 
 void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
 {
+    auto physics = m_World->GetComponent<Components::Physics>(entity);
+    if (physics == nullptr) {
+        return;
+    }
+
     b2Body* body = m_EntitiesToBodies[entity];
 
     if (body != nullptr) {
@@ -180,8 +191,6 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
 
     b2BodyDef bodyDef;
     bodyDef.position.Set(absoluteTransform.Position.x, absoluteTransform.Position.y);
-
-
     bodyDef.angle = -glm::eulerAngles(absoluteTransform.Orientation).z;
 
     if (physicsComponent->Static) {
@@ -190,7 +199,6 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
         bodyDef.type = b2_dynamicBody;
 
     }
-
 
     b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
 
@@ -216,12 +224,16 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
         }
     }
 
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = pShape;
+    fixtureDef.filter.categoryBits = physicsComponent->Category;
+    fixtureDef.filter.maskBits = physicsComponent->Mask;
+
+
     if(physicsComponent->Static) {
-        body->CreateFixture(pShape, 0); //Density kanske ska vara 0 på statiska kroppar
+        body->CreateFixture(&fixtureDef); //Density kanske ska vara 0 på statiska kroppar
     }
     else {
-        //TODO: FIX THIS SHIT INTO COMPONENTS
-        b2FixtureDef fixtureDef;
         fixtureDef.shape = pShape;
         fixtureDef.density = 1.f;
         fixtureDef.restitution = 1.0f;
@@ -231,6 +243,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
     }
 
     delete pShape;
+
 
     body->SetGravityScale(physicsComponent->GravityScale);
     m_EntitiesToBodies.insert(std::make_pair(entity, body));
