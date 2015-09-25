@@ -281,9 +281,10 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         Events::SetImpulse e;
         e.Entity = entityBrick;
 
-        glm::vec2 point = glm::vec2(transformComponentBrick->Position.x + ((transformComponentBrick->Position.x - transformComponentBall->Position.x)/4), transformComponentBrick->Position.y  + ((transformComponentBrick->Position.y - transformComponentBall->Position.y )/4));
+        glm::vec2 point = glm::vec2(transformComponentBrick->Position.x + ((transformComponentBall->Position.x - transformComponentBrick->Position.x )/4),
+                                    transformComponentBrick->Position.y  + ((transformComponentBall->Position.y - transformComponentBrick->Position.y)/4));
 
-        e.Impulse = glm::normalize(point)/2.f;
+        e.Impulse = glm::normalize(point)*5.f;///2.f;
         e.Point = point;
         EventBroker->Publish(e);
         //TODO: Bricks dont collide with walls D=

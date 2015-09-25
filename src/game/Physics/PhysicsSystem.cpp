@@ -90,7 +90,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
                 b2Vec2 position;
                 position.x = transformComponent->Position.x;
                 position.y = transformComponent->Position.y;
-                float angle = -glm::eulerAngles(transformComponent->Orientation).z;
+                float angle = glm::eulerAngles(transformComponent->Orientation).z;
                 body->SetTransform(position, angle);
                 body->SetLinearVelocity(b2Vec2(transformComponent->Velocity.x, transformComponent->Velocity.y));
                 body->SetGravityScale(physicsComponent->GravityScale);
@@ -128,7 +128,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
         if (parent == 0) {
 
                 auto physicsComponent = m_World->GetComponent<Components::Physics>(entity);
-                if (physicsComponent->Calculate) {
+                if (physicsComponent->Calculate) { //TODO: REPLACE THIS WITH PARTICLE COLLISION FILTERS
                     transformComponent->Position.x = transformComponent->Position.x + (transformComponent->Velocity.x * m_TimeStep);
                     transformComponent->Position.y = transformComponent->Position.y + (transformComponent->Velocity.y * m_TimeStep);
                 }
@@ -138,7 +138,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
                     transformComponent->Position.y = position.y;
 
                     float angle = body->GetAngle();
-                    transformComponent->Orientation =  glm::quat(glm::vec3(0, 0, -angle));
+                    transformComponent->Orientation =  glm::quat(glm::vec3(0, 0, angle));
 
                     b2Vec2 velocity = body->GetLinearVelocity();
                     transformComponent->Velocity.x = velocity.x;
@@ -272,7 +272,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
     }
     else {
         fixtureDef.shape = pShape;
-        fixtureDef.density = 1.f;
+        fixtureDef.density = 10.f;
         fixtureDef.restitution = 1.0f;
         fixtureDef.friction = 0.0f;
         body->CreateFixture(&fixtureDef);
