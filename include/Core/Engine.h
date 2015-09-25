@@ -49,8 +49,9 @@
 
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
-#include "Physics/CBoxShape.h"
+#include "Physics/CRectangleShape.h"
 #include "Physics/ESetImpulse.h"
+#include "Physics/CWaterVolume.h"
 
 #include "GUI/Frame.h"
 #include "GUI/Button.h"
@@ -61,14 +62,15 @@ namespace dd
 
 class Engine
 {
+
 public:
 	Engine(int argc, char* argv[]) {
-        m_EventBroker = std::make_shared<EventBroker>();
+		m_EventBroker = std::make_shared<EventBroker>();
 
-        m_Renderer = std::make_shared<Renderer>();
-        m_Renderer->SetFullscreen(false);
-        //m_Renderer->SetResolution(Rectangle(0, 0, 1920, 1080));
-        m_Renderer->SetResolution(Rectangle(0, 0, 675, 1080));
+		m_Renderer = std::make_shared<Renderer>();
+		m_Renderer->SetFullscreen(false);
+		//m_Renderer->SetResolution(Rectangle(0, 0, 1920, 1080));
+		m_Renderer->SetResolution(Rectangle(0, 0, 675, 1080));
 		m_Renderer->Initialize();
 
 		m_FrameStack = new GUI::Frame(m_EventBroker.get());
@@ -76,28 +78,29 @@ public:
 		m_FrameStack->Height = 1080;
 		auto menu = new GUI::MainMenu(m_FrameStack, "MainMenu");
 
-        m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
+		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
 
 		m_World = std::make_shared<World>(m_EventBroker);
 
 
 
-        //TODO: Move this out of engine.h
-        m_World->ComponentFactory.Register<Components::Transform>();
-        m_World->SystemFactory.Register<Systems::TransformSystem>(
-                [this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
-        m_World->AddSystem<Systems::TransformSystem>();
+		//TODO: Move this out of engine.h
+		m_World->ComponentFactory.Register<Components::Transform>();
+		m_World->SystemFactory.Register<Systems::TransformSystem>(
+				[this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::TransformSystem>();
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
 
 		m_World->ComponentFactory.Register<Components::CollisionSound>();
-		m_World->SystemFactory.Register<Systems::SoundSystem>([this]() { return new Systems::SoundSystem(m_World.get(), m_EventBroker); });
+		m_World->SystemFactory.Register<Systems::SoundSystem>(
+				[this]() { return new Systems::SoundSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::SoundSystem>();
 
-        m_World->ComponentFactory.Register<Components::Sprite>();
+		m_World->ComponentFactory.Register<Components::Sprite>();
 
-        m_World->ComponentFactory.Register<Components::RectangleShape>();
-        m_World->ComponentFactory.Register<Components::Physics>();
+		m_World->ComponentFactory.Register<Components::RectangleShape>();
+		m_World->ComponentFactory.Register<Components::Physics>();
 		m_World->ComponentFactory.Register<Components::Ball>();
 		m_World->ComponentFactory.Register<Components::Brick>();
 		m_World->ComponentFactory.Register<Components::Pad>();
@@ -106,39 +109,37 @@ public:
 		m_World->ComponentFactory.Register<Components::PowerUp>();
 		m_World->ComponentFactory.Register<Components::PowerUpBrick>();
 
-        m_World->SystemFactory.Register<Systems::PhysicsSystem>(
-                [this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
-        m_World->AddSystem<Systems::PhysicsSystem>();
+		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
+				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::PhysicsSystem>();
 
-		m_World->SystemFactory.Register<Systems::LevelSystem>([this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
+		m_World->SystemFactory.Register<Systems::LevelSystem>(
+				[this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LevelSystem>();
-		m_World->SystemFactory.Register<Systems::PadSystem>([this]() { return new Systems::PadSystem(m_World.get(), m_EventBroker); });
+		m_World->SystemFactory.Register<Systems::PadSystem>(
+				[this]() { return new Systems::PadSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::PadSystem>();
-		m_World->SystemFactory.Register<Systems::BallSystem>([this]() { return new Systems::BallSystem(m_World.get(), m_EventBroker); });
+		m_World->SystemFactory.Register<Systems::BallSystem>(
+				[this]() { return new Systems::BallSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::BallSystem>();
 
-        m_World->ComponentFactory.Register<Components::Model>();
-        m_World->ComponentFactory.Register<Components::Template>();
+		m_World->ComponentFactory.Register<Components::Model>();
+		m_World->ComponentFactory.Register<Components::Template>();
 		m_World->ComponentFactory.Register<Components::PointLight>();
-        m_World->Initialize();
+		m_World->ComponentFactory.Register<Components::WaterVolume>();
+		m_World->Initialize();
 
-
-		//TODO: Remove tobias light-test code.
-		/*{
-		}*/
 
 		//OctoBall
         {
-            auto ent = m_World->CreateEntity();
-            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(-0.f, 0.26f, -10.f);
+          	auto ent = m_World->CreateEntity();
+        	std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+			transform->Position = glm::vec3(-0.f, 0.26f, -9.f);
 			transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
 			transform->Velocity = glm::vec3(0.0f, -10.f, 0.f);
-
-            auto model = m_World->AddComponent<Components::Model>(ent);
+          	auto model = m_World->AddComponent<Components::Model>(ent);
 			model->ModelFile = "Models/Test/Ball/Ballopus.obj";
-
-            std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
+          	std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
 			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
 			ball->Speed = 5.f;
             std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
@@ -147,9 +148,7 @@ public:
 			auto plight = m_World->AddComponent<Components::PointLight>(ent);
 			plight->Radius = 2.f;
 
-            m_World->CommitEntity(ent);
-
-
+			m_World->CommitEntity(ent);
         }
 
 		//PointLightTest
@@ -159,60 +158,136 @@ public:
 			transform->Position = glm::vec3(2.f, 1.5f, -9.f);
 			auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
 			pl->Radius = 8.f;
+			m_World->CommitEntity(t_Light);
 		}
 
 		//Halfpipe background test model.
 		{
 			auto t_halfPipe = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
-			transform->Position = glm::vec3(0.f, 0.f, -13.f);
-			transform->Scale = glm::vec3(5.f);
+			transform->Position = glm::vec3(0.f, 0.f, -15.f);
+			transform->Scale = glm::vec3(15.f);
 			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
 			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
+			model->Color = glm::vec4(1.f, 1.f, 1.f, 0.3f);
+			m_World->CommitEntity(t_halfPipe);
 		}
+
+		//Background
+		{
+			auto background = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(background);
+			transform->Position = glm::vec3(0.f, 0.f, -30.f);
+			transform->Scale = glm::vec3(2681.f / 50.f, 1080.f / 50.f, 1.f);
+			auto sprite = m_World->AddComponent<Components::Sprite>(background);
+			sprite->SpriteFile = "Textures/Background.png";
+			m_World->CommitEntity(background);
+		}
+
+		//Water test
+		{
+			auto t_waterBody = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
+			transform->Position = glm::vec3(0.f, -4.5f, -10.f);
+			transform->Scale = glm::vec3(7.f, 1.5f, 1.f);
+			auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
+			auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
+			m_World->CommitEntity(t_waterBody);
+		}
+		//TODO: Why does the ball not collide with these bricks?
+		//BottomBox
+		{
+			auto topWall = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(topWall);
+			transform->Position = glm::vec3(0.f, -6.f, -9.9f);
+			transform->Scale = glm::vec3(10.f, 0.5f, 1.f);
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
+					topWall);
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
+			physics->Static = true;
+			m_World->CommitEntity(topWall);
+		}
+		//SideBox
+//		{
+//			auto topWall = m_World->CreateEntity();
+//			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
+//			transform->Position = glm::vec3(3.f, -3.0f, -9.9f);
+//			transform->Scale = glm::vec3(0.5f, 3.f, 1.f);
+//			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+//			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+//			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
+//					topWall);
+//			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
+//			physics->Static = true;
+//			m_World->CommitEntity(topWall);
+//		}
+//		//OtherSideBox
+//		{
+//			auto topWall = m_World->CreateEntity();
+//			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
+//			transform->Position = glm::vec3(-4.f, -3.0f, -9.9f);
+//			transform->Scale = glm::vec3(0.5f, 3.0f, 1.f);
+//			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+//			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+//			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
+//					topWall);
+//			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
+//			physics->Static = true;
+//			m_World->CommitEntity(topWall);
+//		}
 
 		{
 			auto topWall = m_World->CreateEntity();
-			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
+					topWall);
 			transform->Position = glm::vec3(0.f, 6.f, -10.f);
 			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
-			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(topWall);
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
+					topWall);
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
 			physics->Static = true;
 
 			m_World->CommitEntity(topWall);
 		}
+
 		{
 			auto leftWall = m_World->CreateEntity();
-			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(leftWall);
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
+					leftWall);
 			transform->Position = glm::vec3(-4.f, 1.f, -10.f);
 			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
-			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(leftWall);
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
+					leftWall);
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(leftWall);
 			physics->Static = true;
 
 			m_World->CommitEntity(leftWall);
 		}
+
 		{
 			auto rightWall = m_World->CreateEntity();
-			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(rightWall);
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
+					rightWall);
 			transform->Position = glm::vec3(4.f, 1.f, -10.f);
 			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
-			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(rightWall);
+			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
+					rightWall);
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(rightWall);
 			physics->Static = true;
@@ -235,7 +310,7 @@ public:
 			m_World->CommitEntity(ent);
 		}
 
-		m_LastTime = glfwGetTime();
+			m_LastTime = glfwGetTime();
 	}
 
 	bool Running() const { return !glfwWindowShouldClose(m_Renderer->Window()); }
@@ -256,7 +331,6 @@ public:
 		m_World->Update(dt);
 		m_EventBroker->Process<GUI::Frame>();
 		m_FrameStack->UpdateLayered(dt);
-
 		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
 			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
 		}
@@ -315,8 +389,6 @@ public:
 				}
 			}
 
-			//TODO: Add LightLoadShit
-
 			auto pointLightComponent = m_World->GetComponent<Components::PointLight>(entity);
 			if (pointLightComponent)
 			{
@@ -325,6 +397,19 @@ public:
 								  pointLightComponent->Diffuse,
 								  pointLightComponent->Specular,
 								  pointLightComponent->Radius);
+			}
+
+			auto parent = m_World->GetEntityParent(entity);
+			if(parent != 0) {
+				auto waterParticleComponent = m_World->GetComponent<Components::WaterVolume>(parent);
+				if (waterParticleComponent) {
+					//TODO: Remove hardcoded color.
+					//TODO: Do i even need modelMatrix?
+					Components::Transform absoluteTransform = m_TransformSystem->AbsoluteTransform(entity);
+					glm::mat4 modelMatrix = glm::translate(absoluteTransform.Position)
+											* glm::scale(absoluteTransform.Scale);
+					EnqueueWaterParticles(absoluteTransform.Position, glm::vec4(1.f, 1.f, 1.f, 1.f), modelMatrix, absoluteTransform.Position.z);
+				}
 			}
 
 
@@ -405,6 +490,17 @@ public:
 
 		m_RendererQueue.Lights.Add(job);
 
+	}
+
+	void EnqueueWaterParticles(glm::vec3 position, glm::vec4 color, glm::mat4 modelMatrix, float depth)
+	{
+		WaterParticleJob job;
+		job.Position = position;
+		job.Color = color;
+		job.ModelMatrix = modelMatrix;
+		job.Depth = depth;
+
+		m_RendererQueue.Forward.Add(job);
 	}
 
 private:
