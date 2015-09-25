@@ -3,6 +3,7 @@
 
 #include "GUI/TextureFrame.h"
 #include "GUI/Button.h"
+#include "Game/EGameStart.h"
 
 namespace dd
 {
@@ -55,6 +56,8 @@ private:
 	virtual bool OnButtonRelease(const Events::ButtonRelease& event)
 	{
 		if (event.Button == m_SquidoutButton) {
+			Events::GameStart e;
+			EventBroker->Publish(e);
 			m_Parent->Hide();
 		}
 

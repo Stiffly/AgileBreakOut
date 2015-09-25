@@ -338,14 +338,10 @@ public:
 		if (m_GameIsRunning) {
 			m_World->Update(dt);
 		}
-		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_ENTER)) {
-			Events::GameStart e;
-			m_EventBroker->Publish(e);
-		}
-		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
-			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
-		}
+		m_EventBroker->Process<GUI::Frame>();
+		m_FrameStack->UpdateLayered(dt);
 
+		m_FrameStack->DrawLayered(m_RendererQueue);
 		//TODO Fill up the renderQueue with models (Temp fix)
 		if (m_GameIsRunning) {
 			TEMPAddToRenderQueue();
