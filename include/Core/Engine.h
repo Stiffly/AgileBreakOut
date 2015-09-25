@@ -52,6 +52,9 @@
 #include "Physics/CBoxShape.h"
 #include "Physics/ESetImpulse.h"
 
+#include "Game/EGameStart.h"
+#include "Sound/EPlaySound.h"
+
 
 namespace dd
 {
@@ -72,13 +75,11 @@ public:
 
 		m_World = std::make_shared<World>(m_EventBroker);
 
-
-
-        //TODO: Move this out of engine.h
-        m_World->ComponentFactory.Register<Components::Transform>();
-        m_World->SystemFactory.Register<Systems::TransformSystem>(
-                [this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
-        m_World->AddSystem<Systems::TransformSystem>();
+		//TODO: Move this out of engine.h
+		m_World->ComponentFactory.Register<Components::Transform>();
+		m_World->SystemFactory.Register<Systems::TransformSystem>(
+				[this]() { return new Systems::TransformSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::TransformSystem>();
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
 
@@ -86,10 +87,10 @@ public:
 		m_World->SystemFactory.Register<Systems::SoundSystem>([this]() { return new Systems::SoundSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::SoundSystem>();
 
-        m_World->ComponentFactory.Register<Components::Sprite>();
+		m_World->ComponentFactory.Register<Components::Sprite>();
 
-        m_World->ComponentFactory.Register<Components::RectangleShape>();
-        m_World->ComponentFactory.Register<Components::Physics>();
+		m_World->ComponentFactory.Register<Components::RectangleShape>();
+		m_World->ComponentFactory.Register<Components::Physics>();
 		m_World->ComponentFactory.Register<Components::Ball>();
 		m_World->ComponentFactory.Register<Components::Brick>();
 		m_World->ComponentFactory.Register<Components::Pad>();
@@ -98,9 +99,9 @@ public:
 		m_World->ComponentFactory.Register<Components::PowerUp>();
 		m_World->ComponentFactory.Register<Components::PowerUpBrick>();
 
-        m_World->SystemFactory.Register<Systems::PhysicsSystem>(
-                [this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
-        m_World->AddSystem<Systems::PhysicsSystem>();
+		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
+				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::PhysicsSystem>();
 
 		m_World->SystemFactory.Register<Systems::LevelSystem>([this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LevelSystem>();
@@ -109,10 +110,10 @@ public:
 		m_World->SystemFactory.Register<Systems::BallSystem>([this]() { return new Systems::BallSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::BallSystem>();
 
-        m_World->ComponentFactory.Register<Components::Model>();
-        m_World->ComponentFactory.Register<Components::Template>();
+		m_World->ComponentFactory.Register<Components::Model>();
+		m_World->ComponentFactory.Register<Components::Template>();
 		m_World->ComponentFactory.Register<Components::PointLight>();
-        m_World->Initialize();
+		m_World->Initialize();
 
 
 		//TODO: Remove tobias light-test code.
@@ -120,29 +121,29 @@ public:
 		}*/
 
 		//OctoBall
-        {
-            auto ent = m_World->CreateEntity();
-            std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-            transform->Position = glm::vec3(-0.f, 0.26f, -10.f);
+		{
+			auto ent = m_World->CreateEntity();
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+			transform->Position = glm::vec3(-0.f, 0.26f, -10.f);
 			transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
 			transform->Velocity = glm::vec3(0.0f, -10.f, 0.f);
 
-            auto model = m_World->AddComponent<Components::Model>(ent);
+			auto model = m_World->AddComponent<Components::Model>(ent);
 			model->ModelFile = "Models/Test/Ball/Ballopus.obj";
 
-            std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
+			std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
 			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
 			ball->Speed = 5.f;
-            std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-            physics->Static = false;
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+			physics->Static = false;
 
 			auto plight = m_World->AddComponent<Components::PointLight>(ent);
 			plight->Radius = 2.f;
 
-            m_World->CommitEntity(ent);
+			m_World->CommitEntity(ent);
 
 
-        }
+		}
 
 		//PointLightTest
 		{
@@ -227,6 +228,11 @@ public:
 			m_World->CommitEntity(ent);
 		}
 
+
+		//EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &Engine::OnGameStart);
+		m_EGameStart = decltype(m_EGameStart)(std::bind(&Engine::OnGameStart, this, std::placeholders::_1));
+		m_EventBroker->Subscribe(m_EGameStart);
+
 		m_LastTime = glfwGetTime();
 	}
 
@@ -243,9 +249,14 @@ public:
 		// Update input
 		m_InputManager->Update(dt);
 
-		m_World->Update(dt);
+		if (m_GameIsRunning) {
+			m_World->Update(dt);
+		}
 
-
+		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_ENTER)) {
+			Events::GameStart e;
+			m_EventBroker->Publish(e);
+		}
 //
 //		if (glfwGetKey(m_Renderer->Window(), GLFW_KEY_R)) {
 //			ResourceManager::Reload("Shaders/Deferred/3/Fragment.glsl");
@@ -263,12 +274,15 @@ public:
 		}
 
 		//TODO Fill up the renderQueue with models (Temp fix)
-		TEMPAddToRenderQueue();
+		if (m_GameIsRunning) {
+			TEMPAddToRenderQueue();
+		}
 
 		// Render scene
 		//TODO send renderqueue to draw.
 		m_Renderer->Draw(m_RendererQueue);
 
+		m_EventBroker->Process<Engine>();
 		// Swap event queues
 		m_EventBroker->Clear();
 
@@ -355,7 +369,6 @@ public:
 			}
 		}
 
-		m_RendererQueue.Sort();
 	}
 
 	//TODO: Get this out of engine.h
@@ -416,7 +429,27 @@ private:
 	std::shared_ptr<InputManager> m_InputManager;
 	std::shared_ptr<World> m_World;
 
-
+	//TODO: Redo
+	bool m_GameIsRunning = false;
+	dd::EventRelay<Engine, dd::Events::GameStart> m_EGameStart;
+	bool OnGameStart(const dd::Events::GameStart &event)
+	{
+		m_GameIsRunning = true;
+		//Todo: Move this
+		{
+			dd::Events::PlaySound e;
+			e.path = "Sounds/BGM/under-the-sea-instrumental.wav";
+			e.isAmbient = true;
+			m_EventBroker->Publish(e);
+		}
+		{
+			dd::Events::PlaySound e;
+			e.path = "Sounds/BGM/water-flowing.wav";
+			e.volume = 0.3f;
+			e.isAmbient = true;
+			m_EventBroker->Publish(e);
+		}
+	};
 	double m_LastTime;
 };
 
