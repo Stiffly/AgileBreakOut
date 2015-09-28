@@ -72,6 +72,7 @@ void dd::Systems::PadSystem::Update(double dt)
     transform->Velocity += acceleration  * (float)dt;
     transform->Velocity -= transform->Velocity * pad->SlowdownModifier * (float)dt;
 
+
     if (Left()) {
         acceleration.x = -pad->AccelerationSpeed;
     } else if (Right()) {
@@ -108,7 +109,9 @@ EntityID dd::Systems::PadSystem::CreateBall()
     std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
     std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
     physics->Static = false;
-
+    physics->Category = CollisionLayer::Type::Ball;
+    physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
+    physics->Calculate = true;
     cball->Speed = 5.f;
 
     m_World->CommitEntity(ent);
@@ -188,10 +191,9 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
 
     //float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
     float movementY = glm::cos((abs(movementX) / ((1.6f) * movementMultiplier)) * 3.14159265359f / 2)+ 0.2;
-
     //std::cout << movementX << " " << movementY << std::endl;
-
     float len = glm::length<float>(transformBall->Velocity);
+    //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
 
 
     transformBall->Velocity += glm::vec3(transformPad->Velocity.x, 0, 0);
@@ -234,9 +236,9 @@ bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
         return false;
     }
 
-    m_World->RemoveComponent<Components::PowerUp>(entityPower);
-    m_World->RemoveComponent<Components::CircleShape>(entityPower);
-    m_World->RemoveComponent<Components::Physics>(entityPower);
+//    m_World->RemoveComponent<Components::PowerUp>(entityPower);
+//    m_World->RemoveComponent<Components::CircleShape>(entityPower);
+//    m_World->RemoveComponent<Components::Physics>(entityPower);
     m_World->RemoveEntity(entityPower);
     Events::PowerUpTaken ep;
     ep.Name = "Something";
