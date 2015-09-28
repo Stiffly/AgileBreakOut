@@ -6,24 +6,15 @@
 void dd::Systems::PhysicsSystem::RegisterComponents(ComponentFactory* cf)
 {
     cf->Register<Components::CircleShape>();
+    //TODO: REGISTER PHYSICS COMPONENTS HERE
 }
 
 void dd::Systems::PhysicsSystem::Initialize()
 {
     m_ContactListener = new ContactListener(this);
-
-    m_Gravity = b2Vec2(0.f, -9.82f);
     m_PhysicsWorld = new b2World(m_Gravity);
-
-    m_TimeStep = 1.f/60.f;
-    m_VelocityIterations = 6;
-    m_PositionIterations = 2;
-    m_Accumulator = 0.f;
-
     m_PhysicsWorld->SetContactListener(m_ContactListener);
-
     InitializeWater();
-
     EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, PhysicsSystem::SetImpulse);
 }
 
@@ -325,8 +316,11 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
     LOG_INFO("ParticleCount: %i", m_ParticleSystem->GetParticleCount());
 }
 
+
+
 dd::Systems::PhysicsSystem::~PhysicsSystem()
 {
+    //TODO: INPUT CODE HERE
     if (m_ContactListener != nullptr) {
         delete m_ContactListener;
         m_ContactListener = nullptr;
