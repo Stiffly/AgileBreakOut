@@ -79,6 +79,12 @@ file(GLOB SOURCE_FILES_Sound
 )
 source_group(Sound FILES ${SOURCE_FILES_Sound})
 
+file(GLOB SOURCE_FILES_GUI
+    "${INCLUDE_PATH}/GUI/*.h"
+    "GUI/*.cpp"
+)
+source_group(GUI FILES ${SOURCE_FILES_GUI})
+
 set(SOURCE_FILES
     ${SOURCE_FILES_Core}
     ${SOURCE_FILES_Core_Util}
@@ -87,11 +93,14 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Physics}
     ${SOURCE_FILES_Game}
-    ${SOURCE_FILES_Sound} ../../include/Game/EGameOver.h ../../include/Game/Bricks/CPowerUpBrick.h ../../include/Game/CPowerUp.h ../../include/Game/ECreatePowerUp.h ../../include/Game/EPowerUpTaken.h)
+    ${SOURCE_FILES_Sound}
+    ${SOURCE_FILES_GUI}
+)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-    set(STATIC_LIBRARY_FLAGS  "${STATIC_LIBRARY_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+    set(STATIC_LIBRARY_FLAGS "${STATIC_LIBRARY_FLAGS}")
 endif()
 
 add_library(game ${SOURCE_FILES})

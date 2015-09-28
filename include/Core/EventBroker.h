@@ -119,7 +119,7 @@ public:
 	template <typename ContextType>
 	int Process();
 	int Process(std::string contextTypeName);
-	void Clear();
+	void Swap();
 	void Unsubscribe(BaseEventRelay &relay);
 
 private:

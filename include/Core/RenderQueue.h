@@ -22,8 +22,9 @@
 #include <cstdint>
 #include <forward_list>
 
-#include "Texture.h"
-#include "Model.h"
+#include "Core/Util/Rectangle.h"
+#include "Core/Texture.h"
+#include "Core/Model.h"
 
 namespace dd
 {
@@ -52,8 +53,8 @@ struct ModelJob : RenderJob
 	unsigned int ShaderID;
 	unsigned int TextureID;
 
-	std::string fileName;
-
+	glm::mat4 ProjectionMatrix;
+	glm::mat4 ViewMatrix;
 	glm::mat4 ModelMatrix;
 	GLuint DiffuseTexture;
 	GLuint NormalTexture;
@@ -90,6 +91,8 @@ struct SpriteJob : RenderJob
 	unsigned int ShaderID;
 	unsigned int TextureID;
 
+	glm::mat4 ProjectionMatrix;
+	glm::mat4 ViewMatrix;
 	glm::mat4 ModelMatrix;
 	GLuint DiffuseTexture;
 	GLuint NormalTexture;
@@ -115,6 +118,30 @@ struct PointLightJob : RenderJob
 	}
 };
 
+struct FrameJob : SpriteJob
+{
+	Rectangle Scissor;
+	Rectangle Viewport;
+	std::string Name;
+
+	void CalculateHash() override
+	{
+		Hash = 0;
+	}
+};
+
+struct WaterParticleJob : RenderJob
+{
+	glm::vec3 Position;
+	glm::vec4 Color;
+	glm::mat4 ModelMatrix;
+
+	void CalculateHash() override
+	{
+		Hash = 0;
+	}
+};
+
 class RenderQueue
 {
 public:
@@ -122,7 +149,8 @@ public:
 	void Add(T &job)
 	{
 		job.CalculateHash();
-		Jobs.push_front(std::shared_ptr<T>(new T(job)));
+		Jobs.push_back(std::shared_ptr<T>(new T(job)));
+		m_Size++;
 	}
 
 	void Sort()
@@ -133,19 +161,24 @@ public:
 	void Clear()
 	{
 		Jobs.clear();
+		m_Size = 0;
 	}
 
-	std::forward_list<std::shared_ptr<RenderJob>>::const_iterator begin()
+	int Size() const { return m_Size; }
+	std::list<std::shared_ptr<RenderJob>>::const_iterator begin()
 	{
 		return Jobs.begin();
 	}
 
-	std::forward_list<std::shared_ptr<RenderJob>>::const_iterator end()
+	std::list<std::shared_ptr<RenderJob>>::const_iterator end()
 	{
 		return Jobs.end();
 	}
 
-	std::forward_list<std::shared_ptr<RenderJob>> Jobs;
+	std::list<std::shared_ptr<RenderJob>> Jobs;
+
+private:
+	int m_Size = 0;
 };
 
 struct RenderQueueCollection
@@ -153,12 +186,14 @@ struct RenderQueueCollection
 	RenderQueue Deferred;
 	RenderQueue Forward;
 	RenderQueue Lights;
+	RenderQueue GUI;
 
 	void Clear()
 	{
 		Deferred.Clear();
 		Forward.Clear();
 		Lights.Clear();
+		GUI.Clear();
 	}
 
 	void Sort()
@@ -166,6 +201,7 @@ struct RenderQueueCollection
 		Deferred.Sort();
 		Forward.Sort();
 		Lights.Sort();
+		GUI.Sort();
 	}
 };
 

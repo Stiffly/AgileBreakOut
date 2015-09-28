@@ -14,7 +14,7 @@ struct PlaySound : Event
 	std::string path;
 	float volume = 1.f;
 	float pitch = 1.f;
-	bool loop = false;
+	bool isAmbient = false;
 };
 
 }
