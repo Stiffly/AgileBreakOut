@@ -1,6 +1,6 @@
 # Blender v2.75 (sub 0) OBJ File: 'submarine.blend'
 # www.blender.org
-mtllib submarine2.mtl
+mtllib Submarine2.mtl
 o Cube
 v -0.378953 -0.002680 -0.065172
 v 0.212611 0.044805 -0.044067
