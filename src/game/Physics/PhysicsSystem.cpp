@@ -15,10 +15,10 @@ void dd::Systems::PhysicsSystem::Initialize()
     m_Gravity = b2Vec2(0.f, -9.82f);
     m_PhysicsWorld = new b2World(m_Gravity);
 
-    m_TimeStep = 1.f/60.f;
+    m_TimeStep = 1.0/60.0;
     m_VelocityIterations = 6;
     m_PositionIterations = 2;
-    m_Accumulator = 0.f;
+    m_Accumulator = 0.0;
 
     m_PhysicsWorld->SetContactListener(m_ContactListener);
 
