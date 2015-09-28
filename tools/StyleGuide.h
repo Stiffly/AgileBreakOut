@@ -1,6 +1,12 @@
 #ifndef NAMESPACE_FILENAME_H__
 #define NAMESPACE_FILENAME_H__
 
+#include <standard_library>
+
+#include <external_dependency>
+
+#include "Internal/Header.h"
+
 namespace dd
 {
 
