@@ -24,7 +24,7 @@ void dd::Systems::PhysicsSystem::Initialize()
 
     InitializeWater();
 
-    EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, PhysicsSystem::SetImpulse);
+    EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, &PhysicsSystem::SetImpulse);
 }
 
 void dd::Systems::PhysicsSystem::InitializeWater()
@@ -268,7 +268,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
 
 
     if(physicsComponent->Static) {
-        body->CreateFixture(&fixtureDef); //Density kanske ska vara 0 på statiska kroppar
+        body->CreateFixture(&fixtureDef); //Density kanske ska vara 0 pï¿½ statiska kroppar
     }
     else {
         fixtureDef.shape = pShape;
@@ -289,7 +289,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
 
 void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
 {
-    //TODO: Lägg alla pd i en lista
+    //TODO: Lï¿½gg alla pd i en lista
     auto transform = m_World->GetComponent<Components::Transform>(e);
     if (!transform) {
         LOG_ERROR("No Transform component in CreateParticleGroup");

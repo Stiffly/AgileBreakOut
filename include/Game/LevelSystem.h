@@ -33,7 +33,6 @@
 #include "Game/PadSystem.h"
 #include <fstream>
 #include <iostream>
-#include <intrin.h>
 
 namespace dd
 {
