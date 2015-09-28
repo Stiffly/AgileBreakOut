@@ -95,7 +95,7 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Game}
     ${SOURCE_FILES_Sound}
     ${SOURCE_FILES_GUI}
-)
+        ../../include/Game/EMultiBallLost.h)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
