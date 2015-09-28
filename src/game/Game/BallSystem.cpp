@@ -34,6 +34,10 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 {
     auto ballComponent = m_World->GetComponent<Components::Ball>(entity);
     if (ballComponent != nullptr) {
+        if (Ball() == NULL) {
+            SetBall(entity);
+        }
+
         if (ReplaceBall() == true) {
             SetReplaceBall(false);
 
@@ -175,7 +179,9 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 
 EntityID dd::Systems::BallSystem::CreateBall()
 {
-    auto ent = m_World->CreateEntity();
+    auto ent = m_World->CloneEntity(Ball());
+
+   /* auto ent = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
     transform->Position = glm::vec3(0.5f, 0.26f, -10.f);
     transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
@@ -190,6 +196,9 @@ EntityID dd::Systems::BallSystem::CreateBall()
     physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
     physics->Calculate = true;
     cball->Speed = 5.f;
+
+    auto plight = m_World->AddComponent<Components::PointLight>(ent);
+    plight->Radius = 2.f;*/
 
     m_World->CommitEntity(ent);
 

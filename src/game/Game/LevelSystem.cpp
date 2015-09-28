@@ -70,14 +70,12 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
             }
         } else {
             if (ball != nullptr && MultiBalls() > 0) {
-                Events::MultiBallLost e;
-                EventBroker->Publish(e);
+                SetMultiBalls(MultiBalls()-1);
                 m_World->RemoveComponent<Components::Ball>(entity);
                 m_World->RemoveComponent<Components::Transform>(entity);
                 m_World->RemoveComponent<Components::CircleShape>(entity);
                 m_World->RemoveComponent<Components::Physics>(entity);
                 m_World->RemoveEntity(entity);
-                auto transformBall = m_World->GetComponent<Components::Transform>(entity);
             } else {
                 auto powerUp = m_World->GetComponent<Components::PowerUp>(entity);
                 if (powerUp != nullptr) {
@@ -259,12 +257,14 @@ bool dd::Systems::LevelSystem::OnScoreEvent(const dd::Events::ScoreEvent &event)
 bool dd::Systems::LevelSystem::OnMultiBall(const dd::Events::MultiBall &event)
 {
     SetMultiBalls(MultiBalls()+2);
+    std::cout << MultiBalls() << std::endl;
     return true;
 }
 
 bool dd::Systems::LevelSystem::OnMultiBallLost(const dd::Events::MultiBallLost &event)
 {
     SetMultiBalls(MultiBalls()-1);
+    std::cout << MultiBalls() << std::endl;
     return true;
 }
 

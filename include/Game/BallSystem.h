@@ -9,6 +9,7 @@
 #include "Physics/CCircleShape.h"
 #include "Physics/EContact.h"
 #include "Rendering/CModel.h"
+#include "Rendering/CPointLight.h"
 #include "Game/CBall.h"
 #include "Game/CPowerUp.h"
 #include "Game/ELifeLost.h"
@@ -48,6 +49,8 @@ public:
     void OnEntityRemoved(EntityID entity) override;
 
     EntityID CreateBall();
+    EntityID Ball() { return m_Ball; };
+    void SetBall(const EntityID& ball) { m_Ball = ball; }
 
     float& EdgeX() { return m_EdgeX; }
     void SetEdgeX(const float& edgeX) { m_EdgeX = edgeX; }
@@ -72,6 +75,8 @@ private:
     int m_PastLives = 3;
     bool m_ReplaceBall = false;
     bool m_MultiBall = false;
+
+    EntityID m_Ball;
 
     dd::EventRelay<BallSystem, dd::Events::LifeLost> m_ELifeLost;
     dd::EventRelay<BallSystem, dd::Events::MultiBallLost> m_EMultiBallLost;
