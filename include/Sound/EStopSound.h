@@ -8,16 +8,12 @@ namespace dd
 
 namespace Events
 {
-
 struct StopSound : public Event
 {
-    std::string path;
+    std::string FilePath;
 };
 
-
 }
-
-
 }
 
 #endif

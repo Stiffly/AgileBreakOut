@@ -12,11 +12,16 @@ namespace dd
 class Sound : public Resource
 {
     friend class ResourceManager;
+
 public:
     ALuint Buffer() { return m_Buffer; };
     std::string Path() { return m_Path; };
+
 private:
     Sound(std::string path);
+
+    ALuint m_Buffer;
+    std::string m_Path;
 
     //File-info
     char m_Type[4];
@@ -27,11 +32,7 @@ private:
     unsigned long m_DataSize;
     std::map<std::string, ALuint> m_BufferCache;
     ALuint LoadFile(std::string path);
-
-    ALuint m_Buffer;
-    std::string m_Path;
 };
-
 
 }
 
