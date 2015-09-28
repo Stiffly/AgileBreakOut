@@ -24,7 +24,6 @@ public:
 		m_NumberTextures[7] = "Textures/GUI/Numbers/N7.png";
 		m_NumberTextures[8] = "Textures/GUI/Numbers/N8.png";
 		m_NumberTextures[9] = "Textures/GUI/Numbers/N9.png";
-		SetNumber(0);
 
 		// Create number frame if missing
 		for (int i = 0; i < 10; i++) {
@@ -41,6 +40,8 @@ public:
 			}
 			m_NumberFrames.push_front(frame);
 		}
+
+		SetNumber(0);
 	}
 
 	int Number() const { return m_Number; }

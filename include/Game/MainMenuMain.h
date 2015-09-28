@@ -4,6 +4,7 @@
 #include "GUI/TextureFrame.h"
 #include "GUI/Button.h"
 #include "Game/EGameStart.h"
+#include "Game/HUD.h"
 
 namespace dd
 {
@@ -59,6 +60,7 @@ private:
 			Events::GameStart e;
 			EventBroker->Publish(e);
 			m_Parent->Hide();
+			auto hud = new GUI::HUD(BaseFrame, "HUD");
 		}
 
 		return true;

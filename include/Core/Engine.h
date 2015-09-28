@@ -80,7 +80,6 @@ public:
 		m_FrameStack = new GUI::Frame(m_EventBroker.get());
 		m_FrameStack->Width = 675;
 		m_FrameStack->Height = 1080;
-		auto hud = new GUI::HUD(m_FrameStack, "HUD");
 		auto menu = new GUI::MainMenu(m_FrameStack, "MainMenu");
 
 		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
