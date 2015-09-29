@@ -289,7 +289,6 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
 
 void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
 {
-    //TODO: Lägg alla pd i en lista
     auto transform = m_World->GetComponent<Components::Transform>(e);
     if (!transform) {
         LOG_ERROR("No Transform component in CreateParticleGroup");
@@ -303,18 +302,15 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
     pd.shape = &shape;
     pd.flags = b2_tensileParticle;
     pd.position.Set(transform->Position.x, transform->Position.y);
-    //TODO: PUT IN LIST
-    t_watergroup = m_ParticleSystem->CreateParticleGroup(pd);
+    t_ParticleGroup.push_back(m_ParticleSystem->CreateParticleGroup(pd));
     b2Vec2* t_ParticlePositions = m_ParticleSystem->GetPositionBuffer();
     for(int i = 0; i < m_ParticleSystem->GetParticleCount(); i++){
         {
             auto t_waterparticle = m_World->CreateEntity(e);
             auto transformChild = m_World->AddComponent<Components::Transform>(t_waterparticle);
-            //auto sprite = m_World->AddComponent<Components::Sprite>(t_waterparticle);
 
             transformChild->Position = glm::vec3(t_ParticlePositions[i].x - transform->Position.x, t_ParticlePositions[i].y - transform->Position.y, -9.5f);
             transformChild->Scale = glm::vec3(m_ParticleSystem->GetRadius())/transform->Scale;
-            //sprite->SpriteFile = "Textures/Ball.png";
             m_World->CommitEntity(t_waterparticle);
 
             m_EntitiesToParticleHandle.insert(std::make_pair(t_waterparticle, m_ParticleSystem->GetParticleHandleFromIndex(i)));
@@ -322,7 +318,6 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
         }
 
     }
-    LOG_INFO("ParticleCount: %i", m_ParticleSystem->GetParticleCount());
 }
 
 dd::Systems::PhysicsSystem::~PhysicsSystem()

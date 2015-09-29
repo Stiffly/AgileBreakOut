@@ -67,8 +67,8 @@ private:
 
     void CreateBody(EntityID entity);
 
-    b2ParticleSystem *m_ParticleSystem;
-    b2ParticleGroup* t_watergroup;
+    b2ParticleSystem* m_ParticleSystem;
+    std::vector<b2ParticleGroup*> t_ParticleGroup;
 
     std::unordered_map<EntityID, const b2ParticleHandle*> m_EntitiesToParticleHandle;
     std::unordered_map<const b2ParticleHandle*, EntityID> m_ParticleHandleToEntities;

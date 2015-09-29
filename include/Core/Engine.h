@@ -207,12 +207,23 @@ public:
 		{
 			auto t_waterBody = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
+			transform->Position = glm::vec3(0.f, -0.5f, -10.f);
+			transform->Scale = glm::vec3(1.f, 1.f, 1.f);
+			auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
+			auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
+			m_World->CommitEntity(t_waterBody);
+		}
+		//Water test
+		{
+			auto t_waterBody = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
 			transform->Position = glm::vec3(0.f, -5.5f, -10.f);
 			transform->Scale = glm::vec3(7.f, 1.5f, 1.f);
 			auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
 			auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
 			m_World->CommitEntity(t_waterBody);
 		}
+
 		//TODO: Why does the ball not collide with these bricks?
 		//BottomBox
 		{

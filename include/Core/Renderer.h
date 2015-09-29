@@ -72,37 +72,32 @@ private:
 	ShaderProgram* m_spDeferred3;
 	ShaderProgram* m_spForward;
 	ShaderProgram* m_spScreen;
-	ShaderProgram* t_m_spWater;
-	ShaderProgram* t_m_spWater2;
+	ShaderProgram*m_spWater;
+	ShaderProgram*m_spWater2;
 
 	GLuint m_ScreenQuad = 0;
 	Model* m_UnitSphere = nullptr;
 	Model* m_UnitQuad = nullptr;
 	Texture* m_StandardNormal;
 	Texture* m_StandardSpecular;
-	Texture* t_m_WhiteSphereTexture;
+	Texture* m_WhiteSphereTexture;
 
-	GLuint m_rbDepthBuffer = 0;
-	GLuint m_fbDeferred1 = 0;
-	GLuint m_GDiffuse = 0;
-	GLuint m_GPosition = 0;
-	GLuint m_GNormal = 0;
-	GLuint m_GSpecular = 0;
-	GLuint m_fbDeferred2 = 0;
-	GLuint m_tLighting = 0;
-	GLuint m_fbDeferred3 = 0;
-	GLuint m_tFinal = 0;
-	//Water GTexture
-	GLuint t_m_Gwater = 0;
-	//Water blur texture
-	GLuint t_m_BWater;
-	GLuint t_m_BWater2;
-	//WAterpass Framebuffer
-	GLuint t_m_fbWater;
-	//Waterpass Framebuffer
-	GLuint t_m_fbWaterBlur;
-	GLuint t_m_fbWaterBlur2;
-
+	GLuint m_rbDepthBuffer = 0;	//DepthBuffer Texture
+	GLuint m_fbDeferred1 = 0;	//Framebuffer for first pass
+	GLuint m_GDiffuse = 0;		//Texture for diffuseColors
+	GLuint m_GPosition = 0;		//Texture for positions
+	GLuint m_GNormal = 0;		//Texture for normals
+	GLuint m_GSpecular = 0;		//Texture for specular
+	GLuint m_fbDeferred2 = 0;	//Framebuffer that handles the lighting pass
+	GLuint m_tLighting = 0;		//Texture for the lighting pass
+	GLuint m_fbDeferred3 = 0;	//Frambuffer for handling the last pass.
+	GLuint m_tFinal = 0;		//Final Texture to be printed to screen
+	GLuint m_Gwater = 0;		//Water Color Texture
+	GLuint m_BWater;			//Water blur texture
+	GLuint m_BWater2;			//Water blur texture
+	GLuint m_fbWater;			//Waterpass Framebuffer
+	GLuint m_fbWaterBlur; 		//Waterpass Framebuffer
+	GLuint m_fbWaterBlur2;		//Waterpass Framebuffer
 
 	GLuint m_CurrentScreenBuffer = 0;
 	void LoadShaders();

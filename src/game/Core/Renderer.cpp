@@ -92,10 +92,10 @@ void dd::Renderer::LoadShaders()
 	m_spDeferred2->Link();
 
 	//Water Pass
-	t_m_spWater = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/water/");
-	t_m_spWater->Link();
-	t_m_spWater2 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/water2/");
-	t_m_spWater2->Link();
+	m_spWater = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/water/");
+	m_spWater->Link();
+	m_spWater2 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/water2/");
+	m_spWater2->Link();
 
 	// Pass #3: Combining into final image
 	m_spDeferred3 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/3/");
@@ -122,7 +122,7 @@ void dd::Renderer::CreateBuffers()
 	m_UnitSphere = ResourceManager::Load<Model>("Models/Core/UnitSphere.obj");
 	m_StandardNormal = ResourceManager::Load<Texture>("Textures/Core/NeutralNormalMap.png");
 	m_StandardSpecular = ResourceManager::Load<Texture>("Textures/Core/NeutralSpecularMap.png");
-	t_m_WhiteSphereTexture = ResourceManager::Load<Texture>("Textures/Test/Water.png");
+	m_WhiteSphereTexture = ResourceManager::Load<Texture>("Textures/Test/Water.png");
 
 	glGenRenderbuffers(1, &m_rbDepthBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_rbDepthBuffer);
@@ -157,8 +157,8 @@ void dd::Renderer::CreateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glGenTextures(1, &t_m_Gwater);
-	glBindTexture(GL_TEXTURE_2D, t_m_Gwater);
+	glGenTextures(1, &m_Gwater);
+	glBindTexture(GL_TEXTURE_2D, m_Gwater);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -201,8 +201,8 @@ void dd::Renderer::CreateBuffers()
 	}
 
 	//Fill Water Texture
-	glGenTextures(1, &t_m_Gwater);
-	glBindTexture(GL_TEXTURE_2D, t_m_Gwater);
+	glGenTextures(1, &m_Gwater);
+	glBindTexture(GL_TEXTURE_2D, m_Gwater);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -210,9 +210,9 @@ void dd::Renderer::CreateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	//Fill water pass
-	glGenFramebuffers(1, &t_m_fbWater);
-	glBindFramebuffer(GL_FRAMEBUFFER, t_m_fbWater);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t_m_Gwater, 0);
+	glGenFramebuffers(1, &m_fbWater);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbWater);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_Gwater, 0);
 	GLenum waterPassDrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, waterPassDrawBuffers);
 	if (GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -221,8 +221,8 @@ void dd::Renderer::CreateBuffers()
 	}
 
 	//water Blur texture
-	glGenTextures(1, &t_m_BWater);
-	glBindTexture(GL_TEXTURE_2D, t_m_BWater);
+	glGenTextures(1, &m_BWater);
+	glBindTexture(GL_TEXTURE_2D, m_BWater);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -230,9 +230,9 @@ void dd::Renderer::CreateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	//Fill waterBlur pass
-	glGenFramebuffers(1, &t_m_fbWaterBlur);
-	glBindFramebuffer(GL_FRAMEBUFFER, t_m_fbWaterBlur);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t_m_BWater, 0);
+	glGenFramebuffers(1, &m_fbWaterBlur);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbWaterBlur);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_BWater, 0);
 	GLenum waterBlurDrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, waterBlurDrawBuffers);
 	if (GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -241,8 +241,8 @@ void dd::Renderer::CreateBuffers()
 	}
 
 	//water Blur texture2
-	glGenTextures(1, &t_m_BWater2);
-	glBindTexture(GL_TEXTURE_2D, t_m_BWater2);
+	glGenTextures(1, &m_BWater2);
+	glBindTexture(GL_TEXTURE_2D, m_BWater2);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbDepthBuffer);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -251,9 +251,9 @@ void dd::Renderer::CreateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	//Fill waterBlur pass2
-	glGenFramebuffers(1, &t_m_fbWaterBlur2);
-	glBindFramebuffer(GL_FRAMEBUFFER, t_m_fbWaterBlur2);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t_m_BWater2, 0);
+	glGenFramebuffers(1, &m_fbWaterBlur2);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbWaterBlur2);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_BWater2, 0);
 	GLenum waterBlur2DrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, waterBlur2DrawBuffers);
 	if (GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -379,10 +379,10 @@ void dd::Renderer::DrawForward(RenderQueue &objects, RenderQueue &lights)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBindFramebuffer(GL_FRAMEBUFFER, t_m_fbWater);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbWater);
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	t_m_spWater->Bind();
+	m_spWater->Bind();
 	DrawWater(objects);
 }
 
@@ -499,7 +499,7 @@ void dd::Renderer::DrawLightSpheres(RenderQueue &lights)
 
 void dd::Renderer::DrawWater(RenderQueue &rq)
 {
-	GLuint shaderProgramHandle = *t_m_spWater;
+	GLuint shaderProgramHandle = *m_spWater;
 
 	glm::mat4 projectionMatrix = m_Camera->ProjectionMatrix();
 	glm::mat4 viewMatrix = m_Camera->ViewMatrix();
@@ -517,7 +517,7 @@ void dd::Renderer::DrawWater(RenderQueue &rq)
 							   glm::value_ptr(viewMatrix));
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, *t_m_WhiteSphereTexture);
+			glBindTexture(GL_TEXTURE_2D, *m_WhiteSphereTexture);
 
 			glBindVertexArray(m_UnitQuad->VAO);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_UnitQuad->ElementBuffer);
@@ -528,16 +528,17 @@ void dd::Renderer::DrawWater(RenderQueue &rq)
 
 
 	//blur1
-	shaderProgramHandle = *t_m_spWater2;
+	shaderProgramHandle = *m_spWater2;
 	glDisable(GL_CULL_FACE);
 	glDepthMask(GL_FALSE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBindFramebuffer(GL_FRAMEBUFFER, t_m_fbWaterBlur);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbWaterBlur);
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	t_m_spWater2->Bind();
+	m_spWater2->Bind();
+	//TODO: Add this in water particle component. Blurradius
 	float radius = 3.f;
 
 	glUniform2fv(glGetUniformLocation(shaderProgramHandle, "dir"), 1, glm::value_ptr(glm::vec2(1.0f, 0.0f)));
@@ -545,62 +546,29 @@ void dd::Renderer::DrawWater(RenderQueue &rq)
 	glUniform1f(glGetUniformLocation(shaderProgramHandle, "radius"), radius);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, t_m_Gwater);
+	glBindTexture(GL_TEXTURE_2D, m_Gwater);
 	glBindVertexArray(m_ScreenQuad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
 	//blur2
-	shaderProgramHandle = *t_m_spWater2;
+	shaderProgramHandle = *m_spWater2;
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred3);
-	t_m_spWater2->Bind();
+	m_spWater2->Bind();
 
 	glUniform2fv(glGetUniformLocation(shaderProgramHandle, "dir"), 1, glm::value_ptr(glm::vec2(0.0f, 1.0f)));
 	glUniform1f(glGetUniformLocation(shaderProgramHandle, "res"), m_Resolution.Height);
 	glUniform1f(glGetUniformLocation(shaderProgramHandle, "radius"), radius);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, t_m_BWater);
+	glBindTexture(GL_TEXTURE_2D, m_BWater);
 	glBindVertexArray(m_ScreenQuad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-}
-
-
-
-GLuint dd::Renderer::CreateWaterParticleVAO(RenderQueue &particles)
-{
-	float waterVerts[particles.Size()];
-	int i = 0;
-
-	for ( auto &job : particles ) {
-		auto waterJob = std::dynamic_pointer_cast<WaterParticleJob>(job);
-		if (!waterJob)
-			continue;
-		waterVerts[i  ] = waterJob->Position.x;
-		waterVerts[i+1] = waterJob->Position.y;
-		waterVerts[i+2] = waterJob->Position.z;
-		i+3;
-	}
-
-	GLuint vbo[1], vao;
-	glGenBuffers(1, vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, 3 * particles.Size() * sizeof(float), waterVerts, GL_STATIC_DRAW);
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	return vao;
 }
 
 GLuint dd::Renderer::CreateQuad()
@@ -667,10 +635,10 @@ void dd::Renderer::DebugKeys()
 		m_CurrentScreenBuffer = m_tLighting;
 	}
 	if (glfwGetKey(m_Window, GLFW_KEY_F7)) {
-		m_CurrentScreenBuffer  = t_m_Gwater;
+		m_CurrentScreenBuffer  = m_Gwater;
 	}
 	if (glfwGetKey(m_Window, GLFW_KEY_F8)) {
-		m_CurrentScreenBuffer  = t_m_BWater;
+		m_CurrentScreenBuffer  = m_BWater;
 	}
 }
 
