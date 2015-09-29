@@ -13,7 +13,7 @@ void dd::Systems::BallSystem::RegisterComponents(ComponentFactory *cf)
 void dd::Systems::BallSystem::Initialize()
 {
 
-    EVENT_SUBSCRIBE_MEMBER(m_Contact, BallSystem::Contact);
+    EVENT_SUBSCRIBE_MEMBER(m_Contact, &BallSystem::Contact);
 }
 
 void dd::Systems::BallSystem::Update(double dt)
