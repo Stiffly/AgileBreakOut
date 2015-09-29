@@ -3,3 +3,4 @@
 /lib/
 # CLion
 .idea/
+.orig

@@ -9,13 +9,13 @@
 
 void dd::Systems::LevelSystem::Initialize()
 {
-    EVENT_SUBSCRIBE_MEMBER(m_EContact, LevelSystem::OnContact);
-    EVENT_SUBSCRIBE_MEMBER(m_EScoreEvent, LevelSystem::OnScoreEvent);
-    EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, LevelSystem::OnMultiBall);
-    EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, LevelSystem::OnMultiBallLost);
-    EVENT_SUBSCRIBE_MEMBER(m_ECreatePowerUp, LevelSystem::OnCreatePowerUp);
-    EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, LevelSystem::OnPowerUpTaken);
-    EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, LevelSystem::OnStageCleared);
+    EVENT_SUBSCRIBE_MEMBER(m_EContact, &LevelSystem::OnContact);
+    EVENT_SUBSCRIBE_MEMBER(m_EScoreEvent, &LevelSystem::OnScoreEvent);
+    EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &LevelSystem::OnMultiBall);
+    EVENT_SUBSCRIBE_MEMBER(m_ECreatePowerUp, &LevelSystem::OnCreatePowerUp);
+    EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &LevelSystem::OnMultiBallLost);
+    EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, &LevelSystem::OnPowerUpTaken);
+    EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &LevelSystem::OnStageCleared);
 
     /*for (int i = 0; i < Lives(); i++) {
         CreateLife(i);

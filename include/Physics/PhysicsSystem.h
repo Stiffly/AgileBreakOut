@@ -57,8 +57,8 @@ public:
 private:
     b2Vec2 m_Gravity;
     b2World* m_PhysicsWorld;
-    float m_TimeStep;
-    float m_Accumulator;
+    double m_TimeStep;
+    double m_Accumulator;
 
     int m_VelocityIterations, m_PositionIterations;
 

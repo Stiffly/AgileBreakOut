@@ -13,9 +13,9 @@ void dd::Systems::BallSystem::RegisterComponents(ComponentFactory *cf)
 void dd::Systems::BallSystem::Initialize()
 {
 
-    EVENT_SUBSCRIBE_MEMBER(m_Contact, BallSystem::Contact);
-    EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, BallSystem::OnLifeLost);
-    EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, BallSystem::OnMultiBallLost);
+    EVENT_SUBSCRIBE_MEMBER(m_Contact, &BallSystem::Contact);
+    EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, &BallSystem::OnLifeLost);
+    EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &BallSystem::OnMultiBallLost);
     EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &BallSystem::OnResetBall);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &BallSystem::OnMultiBall);
 }
