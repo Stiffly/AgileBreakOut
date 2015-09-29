@@ -81,6 +81,7 @@ bool dd::Systems::SoundSystem::OnPlaySound(const dd::Events::PlaySound &event)
     ALuint source = CreateSource();
     ALuint buffer = sound->Buffer();
     alSourcei(source, AL_BUFFER, buffer);
+    sound->SetGain(event.Gain);
 
     //Sound settings
     float relativeVolume = 1.f;
@@ -97,9 +98,8 @@ bool dd::Systems::SoundSystem::OnPlaySound(const dd::Events::PlaySound &event)
         relativeVolume = m_SFXMasterVolume;
     }
 
-    alSourcef(source, AL_GAIN, (event.Gain * relativeVolume));
+    alSourcef(source, AL_GAIN, (sound->Gain() * relativeVolume));
     alSourcef(source, AL_PITCH, event.Pitch);
-
 
     //Play
     alSourcePlay(source);
@@ -133,13 +133,11 @@ bool dd::Systems::SoundSystem::OnStopSound(const dd::Events::StopSound &event)
 
 bool dd::Systems::SoundSystem::OnMasterVolume(const dd::Events::MasterVolume &event)
 {
-    //TODO: Make the Gain depend on the value given when stored.
-    //TODO: .. now it ONLY uses the master Gain
     if (event.IsAmbient) {
         m_BGMMasterVolume = event.Gain;
         for (auto& item : m_BGMSourcesToBuffers)
         {
-            alSourcef(item.first, AL_GAIN, event.Gain);
+            alSourcef(item.first, AL_GAIN, (item.second->Gain() * m_BGMMasterVolume));
         }
         return true;
     }
@@ -147,7 +145,7 @@ bool dd::Systems::SoundSystem::OnMasterVolume(const dd::Events::MasterVolume &ev
         m_SFXMasterVolume = event.Gain;
         for (auto& item : m_SFXSourcesToBuffers)
         {
-            alSourcef(item.first, AL_GAIN, event.Gain);
+            alSourcef(item.first, AL_GAIN, (item.second->Gain() * m_SFXMasterVolume));
         }
         return true;
     }

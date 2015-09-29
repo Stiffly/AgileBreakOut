@@ -16,10 +16,13 @@ class Sound : public Resource
 public:
     ALuint Buffer() { return m_Buffer; };
     std::string Path() { return m_Path; };
+    float Gain() { return m_Gain; };
+    void SetGain(const float Gain) { m_Gain = Gain; };
 
 private:
     Sound(std::string path);
 
+    float m_Gain = 1;
     ALuint m_Buffer;
     std::string m_Path;
 
