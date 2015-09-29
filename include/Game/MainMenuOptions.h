@@ -61,15 +61,15 @@ private:
 	{
 		if (event.Slider == m_SFXSlider) {
 			Events::MasterVolume e;
-			e.isAmbient = false;
-			e.gain = event.Percentage;
+			e.IsAmbient = false;
+			e.Gain = event.Percentage;
 			EventBroker->Publish(e);
 		}
 
 		if (event.Slider == m_BGMSlider) {
 			Events::MasterVolume e;
-			e.isAmbient = true;
-			e.gain = event.Percentage;
+			e.IsAmbient = true;
+			e.Gain = event.Percentage;
 			EventBroker->Publish(e);
 		}
 
