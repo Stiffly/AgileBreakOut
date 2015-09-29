@@ -70,6 +70,8 @@ private:
     std::list<Impulse> m_Impulses;
 
     void CreateBody(EntityID entity);
+    void SyncEntitiesWithBodies();
+    void SyncBodiesWithEntities();
     void InitializeWater();
     void SyncWater(); //TODO: Probably remove this
     void CreateParticleGroup(EntityID entity);
@@ -96,6 +98,7 @@ private:
 };
 
 }
+
 }
 
-#endif //DAYDREAM_PHYSICSSYSTEM_H
+#endif
