@@ -150,8 +150,8 @@ public:
 			physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
 			physics->Calculate = true;
 
-			auto plight = m_World->AddComponent<Components::PointLight>(ent);
-			plight->Radius = 2.f;
+			//auto plight = m_World->AddComponent<Components::PointLight>(ent);
+			//plight->Radius = 2.f;
 
 			m_World->CommitEntity(ent);
 		}

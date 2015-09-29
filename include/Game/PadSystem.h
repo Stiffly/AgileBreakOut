@@ -9,6 +9,7 @@
 #include "Core/System.h"
 #include "Core/Component.h"
 #include "Core/CTransform.h"
+#include "Core/CTemplate.h"
 #include "Core/EventBroker.h"
 #include "Core/EKeyDown.h"
 #include "Core/EKeyUp.h"

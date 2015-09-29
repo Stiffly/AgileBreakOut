@@ -7,6 +7,7 @@
 
 #include "Core/System.h"
 #include "Core/CTransform.h"
+#include "Core/CTemplate.h"
 #include "Core/EventBroker.h"
 #include "Core/World.h"
 #include "Rendering/CSprite.h"
@@ -19,7 +20,7 @@
 #include "Game/ELifeLost.h"
 #include "Game/EResetBall.h"
 #include "Game/EScoreEvent.h"
-#include "Physics/CRectangleShape.h"
+#include "Game/EComboEvent.h"
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
 #include "Game/EGameOver.h"
@@ -28,6 +29,7 @@
 #include "Game/Bricks/CPowerUpBrick.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
+#include "Physics/CRectangleShape.h"
 #include "Physics/ESetImpulse.h"
 #include "Physics/EContact.h"
 #include "Sound/CCollisionSound.h"
@@ -62,7 +64,6 @@ public:
     void Initialize() override;
 
     void CreateBasicLevel(int, int, glm::vec2, float);
-    void CreateLife(int);
     void SaveLevel(int, int, glm::vec2, int); // Shouldn't be here, but I'm experimenting.
     void LoadLevel(char[20]);
     void CreateBrick(int, int, glm::vec2, float, int);

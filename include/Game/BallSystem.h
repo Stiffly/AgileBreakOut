@@ -5,6 +5,7 @@
 #include "Core/World.h"
 #include "Core/EventBroker.h"
 #include "Core/CTransform.h"
+#include "Core/CTemplate.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/EContact.h"
@@ -12,17 +13,22 @@
 #include "Rendering/CPointLight.h"
 #include "Game/CBall.h"
 #include "Game/CPowerUp.h"
+#include "Game/CLife.h"
 #include "Game/ELifeLost.h"
+#include "Game/EComboEvent.h"
 #include "Game/EResetBall.h"
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
 #include "Game/EGameOver.h"
 
-namespace dd {
+namespace dd
+{
 
-namespace Systems {
+namespace Systems
+{
 
-class BallSystem : public System {
+class BallSystem : public System
+{
 public:
     BallSystem(World *world, std::shared_ptr<dd::EventBroker> eventBroker)
             : System(world, eventBroker) { }
@@ -49,9 +55,12 @@ public:
     void OnEntityRemoved(EntityID entity) override;
 
     EntityID CreateBall();
+    void CreateLife(int);
     EntityID Ball() { return m_Ball; };
     void SetBall(const EntityID& ball) { m_Ball = ball; }
 
+    float& XMovementMultiplier() { return m_XMovementMultiplier; }
+    void SetXMovementMultiplier(const float& xMovementMultiplier) { m_XMovementMultiplier = xMovementMultiplier; }
     float& EdgeX() { return m_EdgeX; }
     void SetEdgeX(const float& edgeX) { m_EdgeX = edgeX; }
     float& EdgeY() { return m_EdgeY; }
@@ -68,6 +77,7 @@ public:
     void SetMultiBall(const bool& multiBall) { m_MultiBall = multiBall; }
 
 private:
+    float m_XMovementMultiplier = 2.f;
     float m_EdgeX = 3.2f;
     float m_EdgeY = 5.2f;
     int m_MultiBalls = 0;
@@ -90,6 +100,7 @@ private:
 };
 
 }
+
 }
 
 #endif

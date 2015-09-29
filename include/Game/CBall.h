@@ -17,6 +17,7 @@ struct Ball : Component
 {
     int Number = 0;
     float Speed = 5.f;
+    int Combo = 0;
 };
 
 }

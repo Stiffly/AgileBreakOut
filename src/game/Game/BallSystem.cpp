@@ -18,6 +18,30 @@ void dd::Systems::BallSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &BallSystem::OnMultiBallLost);
     EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &BallSystem::OnResetBall);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &BallSystem::OnMultiBall);
+
+    auto ent = m_World->CreateEntity();
+    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
+    transform->Position = glm::vec3(-0.f, 50.f, -10.f);
+    transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
+    transform->Velocity = glm::vec3(0.0f, 0.f, 0.f);
+    auto model = m_World->AddComponent<Components::Model>(ent);
+    model->ModelFile = "Models/Test/Ball/Ballopus.obj";
+    std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
+    std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
+    ball->Speed = 5.f;
+    std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
+    std::shared_ptr<Components::Template> ballTemplate = m_World->AddComponent<Components::Template>(ent);
+    physics->Static = false;
+    physics->Category = CollisionLayer::Type::Ball;
+    physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
+    physics->Calculate = true;
+    m_World->CommitEntity(ent);
+
+    SetBall(ent);
+
+    for (int i = 0; i < Lives(); i++) {
+        CreateLife(i);
+    }
 }
 
 void dd::Systems::BallSystem::Update(double dt)
@@ -32,12 +56,10 @@ void dd::Systems::BallSystem::Update(double dt)
 
 void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
+    auto templateCheck = m_World->GetComponent<Components::Template>(entity);
+    if (templateCheck != nullptr){ return; }
     auto ballComponent = m_World->GetComponent<Components::Ball>(entity);
     if (ballComponent != nullptr) {
-        if (Ball() == NULL) {
-            SetBall(entity);
-        }
-
         if (ReplaceBall() == true) {
             SetReplaceBall(false);
 
@@ -90,15 +112,15 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
     }
 
     if (Lives() != PastLives()) {
-        /*auto life = m_World->GetComponent<Components::Life>(entity);
+        auto life = m_World->GetComponent<Components::Life>(entity);
         if (life != nullptr) {
             if (life->Number + 1 == PastLives()) {
-                /*m_World->RemoveComponent<Components::Life>(entity);
-//                m_World->RemoveComponent<Components::Transform>(entity);
-                m_World->RemoveEntity(entity);*/
-        SetPastLives(Lives());
-        //  }
-        //}
+                m_World->RemoveComponent<Components::Life>(entity);
+                m_World->RemoveComponent<Components::Transform>(entity);
+                m_World->RemoveEntity(entity);
+                SetPastLives(Lives());
+            }
+        }
     }
 
     if (ballComponent != nullptr) {
@@ -163,11 +185,17 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 
     if (m_World->GetProperty<std::string>(otherEntitiy, "Name") == "Pad"){
         auto padTransform = m_World->GetComponent<Components::Transform>(otherEntitiy);
-        float x = ballTransform->Position.x - padTransform->Position.x;
+        float x = (ballTransform->Position.x - padTransform->Position.x) * XMovementMultiplier();
 
         float y = glm::cos((abs(x) / (1.6f)) * glm::pi<float>() / 2.f) + 1.f;
 
         ballTransform->Velocity = glm::normalize(glm::vec3(x, y ,0.f)) * ballComponent->Speed;
+        ballComponent->Combo = 0;
+        Events::ComboEvent ec;
+        ec.Combo = ballComponent->Combo;
+        ec.Ball = ballEntity;
+        EventBroker->Publish(ec);
+        //std::cout << "Combo: " << ballComponent->Combo << std::endl;
     }
     else {
         glm::vec2 reflectedVelocity = glm::reflect(ballVelocity, event.Normal);
@@ -180,6 +208,8 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 EntityID dd::Systems::BallSystem::CreateBall()
 {
     auto ent = m_World->CloneEntity(Ball());
+
+    m_World->RemoveComponent<Components::Template>(ent);
 
    /* auto ent = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
@@ -203,6 +233,23 @@ EntityID dd::Systems::BallSystem::CreateBall()
     m_World->CommitEntity(ent);
 
     return ent;
+}
+
+void dd::Systems::BallSystem::CreateLife(int number)
+{
+    auto life = m_World->CreateEntity();
+    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(life);
+    transform->Position = glm::vec3(-1.5f + number * 0.15f, -2.f, -5.f);
+    transform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
+
+    std::shared_ptr<Components::Life> lifeNr = m_World->AddComponent<Components::Life>(life);
+    lifeNr->Number = number;
+
+    auto model = m_World->AddComponent<Components::Model>(life);
+    model->ModelFile = "Models/Test/Ball/Ballopus.obj";
+
+
+    m_World->CommitEntity(life);
 }
 
 bool dd::Systems::BallSystem::OnLifeLost(const dd::Events::LifeLost &event)

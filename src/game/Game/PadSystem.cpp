@@ -31,7 +31,8 @@ void dd::Systems::PadSystem::Initialize()
 
 void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
-
+    auto templateCheck = m_World->GetComponent<Components::Template>(entity);
+    if (templateCheck != nullptr){ return; }
 }
 
 void dd::Systems::PadSystem::Update(double dt)
@@ -59,7 +60,9 @@ void dd::Systems::PadSystem::Update(double dt)
     }
     transform->Position += transform->Velocity * (float)dt;
     transform->Velocity += acceleration  * (float)dt;
-    transform->Velocity -= transform->Velocity * pad->SlowdownModifier * (float)dt;
+    if (glm::abs(transform->Velocity.x) > 1 || (!Left() && !Right())) {
+        transform->Velocity -= transform->Velocity * pad->SlowdownModifier * (float) dt;
+    }
 
     if (Left()) {
         acceleration.x = -pad->AccelerationSpeed;

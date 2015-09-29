@@ -17,28 +17,7 @@ void dd::Systems::LevelSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, &LevelSystem::OnPowerUpTaken);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &LevelSystem::OnStageCleared);
 
-    /*for (int i = 0; i < Lives(); i++) {
-        CreateLife(i);
-    }*/
-
     return;
-}
-
-void dd::Systems::LevelSystem::CreateLife(int number)
-{
-    /*auto life = m_World->CreateEntity();
-    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(life);
-    transform->Position = glm::vec3(-1.5f + number * 0.15f, -2.f, -5.f);
-    transform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
-
-    std::shared_ptr<Components::Life> lifeNr = m_World->AddComponent<Components::Life>(life);
-    lifeNr->Number = number;
-
-    auto model = m_World->AddComponent<Components::Model>(life);
-    model->ModelFile = "Models/Test/Ball/Ballopus.obj";
-
-
-    m_World->CommitEntity(life);*/
 }
 
 void dd::Systems::LevelSystem::Update(double dt)
@@ -51,6 +30,9 @@ void dd::Systems::LevelSystem::Update(double dt)
 
 void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
+    auto templateCheck = m_World->GetComponent<Components::Template>(entity);
+    if (templateCheck != nullptr){ return; }
+
     auto ball = m_World->GetComponent<Components::Ball>(entity);
     SetNotResettingTheStage(NotResettingTheStage() + 0.01 * dt);
 
@@ -93,14 +75,14 @@ void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 s
 {
     SetNumberOfBricks(rows * lines);
     //std::cout << "You're only doing this once, right?" << std::endl;
-    int num = 0;
+    int num = Lines();
     for (int i = 0; i < rows; i++) {
-        num++;
+        num--;
         for (int j = 0; j < Lines(); j++) {
             CreateBrick(i, j, spacesBetweenBricks, spaceToEdge, num);
         }
-        if (num == 7)
-            num = 0;
+        if (num == 1)
+            num = Lines();
     }
 
     SetNumberOfBricks(rows * lines);
@@ -121,9 +103,9 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = CollisionLayer::Type::Ball;
 
-    std::string fileName = "Textures/Bricks/";
+    /*std::string fileName = "Textures/Bricks/";
     fileName.append(std::to_string(num));
-    fileName.append(".png");
+    fileName.append(".png");*/
     //sprite->SpriteFile =  fileName;
     model->ModelFile = "Models/Test/Brick/Brick.obj";
     if ((line == 1 && row == 4) || (line == 3 && row == 2) || (line == 5 && row == 2)) {
@@ -151,17 +133,17 @@ void dd::Systems::LevelSystem::ProcessCollision()
 
 void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
 {
-    auto brick = m_World->GetComponent<Components::Brick>(entity);
+    /*auto brick = m_World->GetComponent<Components::Brick>(entity);
     if (brick != nullptr) {
         SetNumberOfBricks(NumberOfBricks() - 1);
         Events::ScoreEvent es;
         es.Score = brick->Score;
         EventBroker->Publish(es);
-        /*if (numberOfBricks < 1) {
+        if (numberOfBricks < 1) {
             EndLevel();
-        }*/
+        }
     }
-    return;
+    return;*/
 }
 
 bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
@@ -205,6 +187,12 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
     }
 
     if (ball != nullptr && Restarting() == false) {
+        ball->Combo += 1;
+        Events::ComboEvent ec;
+        ec.Combo = ball->Combo;
+        ec.Ball = entityBall;
+        EventBroker->Publish(ec);
+
         auto ballTransform = m_World->GetComponent<Components::Transform>(entityBall);
 
 //        m_World->RemoveComponent<Components::Brick>(entityBrick);
@@ -237,11 +225,13 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
             //SetMultiBalls(MultiBalls() + 1);
         }
         Events::ScoreEvent es;
-        es.Score = brick->Score;
+        es.Score = brick->Score * ball->Combo;
         EventBroker->Publish(es);
 
+        std::cout << "Combo: " << ball->Combo << std::endl;
         //std::cout << NumberOfBricks() << std::endl;
-        //std::cout << "Score: " << Score() << std::endl;
+        //std::cout << "Brick Score: " << brick->Score  << std::endl;
+        std::cout << "Score: " << Score() << std::endl;
     }
 
     return true;
