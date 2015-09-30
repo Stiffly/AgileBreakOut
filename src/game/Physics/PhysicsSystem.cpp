@@ -29,10 +29,10 @@ void dd::Systems::PhysicsSystem::Initialize()
 
 void dd::Systems::PhysicsSystem::InitializeWater()
 {
-    b2ParticleSystemDef m_ParticleSystemDef;
-    m_ParticleSystemDef.radius = 0.13f;
+    float radius = 0.13f;
 
-    m_ParticleSystem = m_PhysicsWorld->CreateParticleSystem(&m_ParticleSystemDef);
+
+    CreateParticleSystem(radius);
 }
 
 bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
@@ -148,7 +148,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
         }
 
-    b2Vec2* positionBuffer = m_ParticleSystem->GetPositionBuffer();
+    b2Vec2* positionBuffer = m_ParticleSystem[0]->GetPositionBuffer();
     for (auto i : m_EntitiesToParticleHandle) {
         EntityID entity = i.first;
         b2ParticleHandle* particleH = i.second;
@@ -297,27 +297,36 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
 
     b2ParticleGroupDef pd;
     b2PolygonShape shape;
+    //TODO: FIX SO IT CAN NOTICE WHAT PARTICLE SYSTEM IS WATER! [0] IS A FUCKING BULLSHIT FIX.
 
     shape.SetAsBox(transform->Scale.x/2.f, transform->Scale.y/2.f);
     pd.shape = &shape;
     pd.flags = b2_tensileParticle;
     pd.position.Set(transform->Position.x, transform->Position.y);
-    t_ParticleGroup.push_back(m_ParticleSystem->CreateParticleGroup(pd));
-    b2Vec2* t_ParticlePositions = m_ParticleSystem->GetPositionBuffer();
-    for(int i = 0; i < m_ParticleSystem->GetParticleCount(); i++){
+    t_ParticleGroup.push_back(m_ParticleSystem[0]->CreateParticleGroup(pd));
+    b2Vec2* t_ParticlePositions = m_ParticleSystem[0]->GetPositionBuffer();
+    for(int i = 0; i < m_ParticleSystem[0]->GetParticleCount(); i++){
         {
             auto t_waterparticle = m_World->CreateEntity(e);
             auto transformChild = m_World->AddComponent<Components::Transform>(t_waterparticle);
 
             transformChild->Position = glm::vec3(t_ParticlePositions[i].x - transform->Position.x, t_ParticlePositions[i].y - transform->Position.y, -9.5f);
-            transformChild->Scale = glm::vec3(m_ParticleSystem->GetRadius())/transform->Scale;
+            transformChild->Scale = glm::vec3(m_ParticleSystem[0]->GetRadius())/transform->Scale;
             m_World->CommitEntity(t_waterparticle);
 
-            m_EntitiesToParticleHandle.insert(std::make_pair(t_waterparticle, m_ParticleSystem->GetParticleHandleFromIndex(i)));
-            m_ParticleHandleToEntities.insert(std::make_pair( m_ParticleSystem->GetParticleHandleFromIndex(i), t_waterparticle));
+            m_EntitiesToParticleHandle.insert(std::make_pair(t_waterparticle, m_ParticleSystem[0]->GetParticleHandleFromIndex(i)));
+            m_ParticleHandleToEntities.insert(std::make_pair( m_ParticleSystem[0]->GetParticleHandleFromIndex(i), t_waterparticle));
         }
 
     }
+}
+
+void dd::Systems::PhysicsSystem::CreateParticleSystem(float radius)
+{
+    b2ParticleSystemDef m_ParticleSystemDef;
+    m_ParticleSystemDef.radius = radius;
+
+    m_ParticleSystem.push_back(m_PhysicsWorld->CreateParticleSystem(&m_ParticleSystemDef));
 }
 
 dd::Systems::PhysicsSystem::~PhysicsSystem()
