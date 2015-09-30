@@ -19,7 +19,6 @@ void dd::Systems::BallSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &BallSystem::OnResetBall);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &BallSystem::OnMultiBall);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &BallSystem::OnPause);
-    EVENT_SUBSCRIBE_MEMBER(m_EHitLag, &BallSystem::OnHitLag);
 
     //OctoBall
     {
@@ -68,27 +67,11 @@ void dd::Systems::BallSystem::Update(double dt)
         Events::GameOver e;
         EventBroker->Publish(e);
     }
-
-   /* if (HitLag()) {
-        m_HitLagTimer += 0.1 * dt;
-        if (Pause()) {
-            if (m_HitLagTimer > 1) {
-                SetPause(false);
-                m_HitLagTimer = 0;
-            }
-        } else {
-            if (m_HitLagTimer > m_HitLagPlacement) {
-                SetPause(true);
-                m_HitLagPlacement *= 0.9;
-                m_HitLagTimer = 0;
-            }
-        }
-    }*/
 }
 
 void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
-    if (Pause()) {
+    if (IsPaused()) {
         return;
     }
 
@@ -170,23 +153,10 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 
 bool dd::Systems::BallSystem::OnPause(const dd::Events::Pause &event)
 {
-    if (Pause()) {
+    if (IsPaused()) {
         SetPause(false);
     } else {
         SetPause(true);
-    }
-    return true;
-}
-
-bool dd::Systems::BallSystem::OnHitLag(const dd::Events::HitLag &event)
-{
-    if (HitLag()) {
-        SetHitLag(false);
-    } else {
-        SetHitLag(true);
-        m_Time = event.Time;
-        m_SlowdownTime = event.SlowdownTime;
-        m_HitLagTimer = m_SlowdownTime;
     }
     return true;
 }

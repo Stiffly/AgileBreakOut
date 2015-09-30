@@ -31,7 +31,7 @@ void dd::Systems::LevelSystem::Update(double dt)
 
 void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
-    if (Pause()) {
+    if (IsPaused()) {
         return;
     }
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
@@ -77,7 +77,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 
 bool dd::Systems::LevelSystem::OnPause(const dd::Events::Pause &event)
 {
-    if (Pause()) {
+    if (IsPaused()) {
         SetPause(false);
     } else {
         SetPause(true);

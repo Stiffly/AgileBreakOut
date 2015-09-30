@@ -21,7 +21,6 @@
 #include "Game/EMultiBallLost.h"
 #include "Game/EGameOver.h"
 #include "Game/EPause.h"
-#include "Game/EHitLag.h"
 
 namespace dd
 {
@@ -77,10 +76,8 @@ public:
     void SetReplaceBall(const bool& replaceBall) { m_ReplaceBall = replaceBall; }
     bool MultiBall() const { return m_MultiBall; }
     void SetMultiBall(const bool& multiBall) { m_MultiBall = multiBall; }
-    bool Pause() const { return m_Pause; }
+    bool IsPaused() const { return m_Pause; }
     void SetPause(const bool& pause) { m_Pause = pause; }
-    bool HitLag() const { return m_HitLag; }
-    void SetHitLag(const bool& hitLag) { m_HitLag = hitLag; }
 
 private:
     float m_XMovementMultiplier = 2.f;
@@ -93,12 +90,6 @@ private:
     bool m_MultiBall = false;
     bool m_Pause = false;
 
-    bool m_HitLag = false;
-    float m_Time;
-    float m_SlowdownTime;
-    float m_HitLagTimer = 0;
-    float m_HitLagPlacement = 0;
-
     EntityID m_Ball;
 
     dd::EventRelay<BallSystem, dd::Events::LifeLost> m_ELifeLost;
@@ -106,14 +97,12 @@ private:
     dd::EventRelay<BallSystem, dd::Events::ResetBall> m_EResetBall;
     dd::EventRelay<BallSystem, dd::Events::MultiBall> m_EMultiBall;
     dd::EventRelay<BallSystem, dd::Events::Pause> m_EPause;
-    dd::EventRelay<BallSystem, dd::Events::HitLag> m_EHitLag;
 
     bool OnLifeLost(const dd::Events::LifeLost &event);
     bool OnMultiBallLost(const dd::Events::MultiBallLost &event);
     bool OnResetBall(const dd::Events::ResetBall &event);
     bool OnMultiBall(const dd::Events::MultiBall &event);
     bool OnPause(const dd::Events::Pause &event);
-    bool OnHitLag(const dd::Events::HitLag &event);
 };
 
 }

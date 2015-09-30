@@ -65,7 +65,7 @@ public:
     Components::Pad* Pad() const { return m_Pad; }
     void SetPad(Components::Pad* pad) { m_Pad = pad; }
 
-    bool Pause() const { return m_Pause; }
+    bool IsPaused() const { return m_Pause; }
     void SetPause(const bool& pause) { m_Pause = pause; }
 
 private:

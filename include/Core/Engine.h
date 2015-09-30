@@ -45,6 +45,7 @@
 #include "Game/CPad.h"
 #include "Game/CBrick.h"
 #include "Game/BallSystem.h"
+#include "Game/HitLagSystem.h"
 #include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Physics/PhysicsSystem.h"
@@ -120,6 +121,9 @@ public:
 		m_World->SystemFactory.Register<Systems::BallSystem>(
 				[this]() { return new Systems::BallSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::BallSystem>();
+		m_World->SystemFactory.Register<Systems::HitLagSystem>(
+				[this]() { return new Systems::HitLagSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::HitLagSystem>();
 		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
 				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::PhysicsSystem>();

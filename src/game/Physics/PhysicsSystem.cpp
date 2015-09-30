@@ -26,7 +26,6 @@ void dd::Systems::PhysicsSystem::Initialize()
 
     EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, &PhysicsSystem::SetImpulse);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PhysicsSystem::OnPause);
-    EVENT_SUBSCRIBE_MEMBER(m_EHitLag, &PhysicsSystem::OnHitLag);
 }
 
 void dd::Systems::PhysicsSystem::InitializeWater()
@@ -62,17 +61,7 @@ bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
 
 void dd::Systems::PhysicsSystem::Update(double dt)
 {
-    if (Pause()) {
-        if (HitLag()) {
-            m_HitLagTimer += dt;
-            std::cout << m_HitLagTimer << std::endl;
-            if (m_HitLagPlacement < m_HitLagTimer) {
-                m_HitLagTimer = 0;
-                SetHitLag(false);
-                Events::Pause e;
-                EventBroker->Publish(e);
-            }
-        }
+    if (IsPaused()) {
         return;
     }
 
@@ -190,22 +179,11 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 
 bool dd::Systems::PhysicsSystem::OnPause(const dd::Events::Pause &event)
 {
-    if (Pause()) {
+    if (IsPaused()) {
         SetPause(false);
     } else {
         SetPause(true);
     }
-    return true;
-}
-
-bool dd::Systems::PhysicsSystem::OnHitLag(const dd::Events::HitLag &event)
-{
-    SetHitLag(true);
-    Events::Pause e;
-    EventBroker->Publish(e);
-    m_HitLagPlacement = event.Time + 10;
-    m_SlowdownTime = event.SlowdownTime;
-    m_HitLagTimer = m_SlowdownTime;
     return true;
 }
 

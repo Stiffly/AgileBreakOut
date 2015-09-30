@@ -81,7 +81,7 @@ public:
     void SetRestarting(const bool& restarting) { m_Restarting = restarting; }
     bool Initialized() const { return m_Initialized; }
     void SetInitialized(const bool& initialized) { m_Initialized = initialized; }
-    bool Pause() const { return m_Pause; }
+    bool IsPaused() const { return m_Pause; }
     void SetPause(const bool& pause) { m_Pause = pause; }
     int& MultiBalls() { return m_MultiBalls; }
     void SetMultiBalls(const int& multiBalls) { m_MultiBalls = multiBalls; }

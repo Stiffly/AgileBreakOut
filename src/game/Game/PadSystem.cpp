@@ -59,7 +59,7 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 
 void dd::Systems::PadSystem::Update(double dt)
 {
-    if (Pause()) {
+    if (IsPaused()) {
         return;
     }
     if (Entity() == 0) {
@@ -111,7 +111,7 @@ void dd::Systems::PadSystem::Update(double dt)
 
 bool dd::Systems::PadSystem::OnPause(const dd::Events::Pause &event)
 {
-    if (Pause()) {
+    if (IsPaused()) {
         SetPause(false);
     } else {
         SetPause(true);
@@ -143,14 +143,10 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_P) {
         Events::Pause e;
-        e.Time = 0;
-        e.SlowdownTime = 0;
-        e.Type = "All";
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_H) {
         Events::HitLag e;
         e.Time = 0.3;
-        e.SlowdownTime = 10;
         e.Type = "All";
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_D) {
