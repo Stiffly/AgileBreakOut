@@ -27,6 +27,7 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &PadSystem::OnContact);
     EVENT_SUBSCRIBE_MEMBER(m_EContactPowerUp, &PadSystem::OnContactPowerUp);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PadSystem::OnStageCleared);
+    EVENT_SUBSCRIBE_MEMBER(m_EPause, &PadSystem::OnPause);
 
     {
         auto ent = m_World->CreateEntity();
@@ -58,6 +59,9 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 
 void dd::Systems::PadSystem::Update(double dt)
 {
+    if (Pause()) {
+        return;
+    }
     if (Entity() == 0) {
         for (auto it = m_World->GetEntities()->begin(); it != m_World->GetEntities()->end(); it++) {
             if (m_World->GetProperty<std::string>(it->first, "Name") == "Pad") {
@@ -105,6 +109,16 @@ void dd::Systems::PadSystem::Update(double dt)
     return;
 }
 
+bool dd::Systems::PadSystem::OnPause(const dd::Events::Pause &event)
+{
+    if (Pause()) {
+        SetPause(false);
+    } else {
+        SetPause(true);
+    }
+    return true;
+}
+
 bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
 {
     int val = event.KeyCode;
@@ -126,6 +140,18 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
     } else if (val == GLFW_KEY_M) {
         Events::MultiBall e;
         e.padTransform = Transform();
+        EventBroker->Publish(e);
+    } else if (val == GLFW_KEY_P) {
+        Events::Pause e;
+        e.Time = 0;
+        e.SlowdownTime = 0;
+        e.Type = "All";
+        EventBroker->Publish(e);
+    } else if (val == GLFW_KEY_H) {
+        Events::HitLag e;
+        e.Time = 0.3;
+        e.SlowdownTime = 10;
+        e.Type = "All";
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_D) {
         return false;

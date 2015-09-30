@@ -23,6 +23,7 @@
 #include "Game/EComboEvent.h"
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
+#include "Game/EPause.h"
 #include "Game/EGameOver.h"
 #include "Game/ECreatePowerUp.h"
 #include "Game/EPowerUpTaken.h"
@@ -80,6 +81,8 @@ public:
     void SetRestarting(const bool& restarting) { m_Restarting = restarting; }
     bool Initialized() const { return m_Initialized; }
     void SetInitialized(const bool& initialized) { m_Initialized = initialized; }
+    bool Pause() const { return m_Pause; }
+    void SetPause(const bool& pause) { m_Pause = pause; }
     int& MultiBalls() { return m_MultiBalls; }
     void SetMultiBalls(const int& multiBalls) { m_MultiBalls = multiBalls; }
     int& PowerUps() { return m_PowerUps; }
@@ -103,6 +106,7 @@ public:
 private:
     bool m_Restarting = false;
     bool m_Initialized = false;
+    bool m_Pause = false;
     int m_MultiBalls = 0;
     int m_PowerUps = 0;
     int m_Score = 0;
@@ -120,6 +124,7 @@ private:
     dd::EventRelay<LevelSystem, dd::Events::CreatePowerUp> m_ECreatePowerUp;
     dd::EventRelay<LevelSystem, dd::Events::PowerUpTaken> m_EPowerUpTaken;
     dd::EventRelay<LevelSystem, dd::Events::StageCleared> m_EStageCleared;
+    dd::EventRelay<LevelSystem, dd::Events::Pause> m_EPause;
 
     bool OnContact(const dd::Events::Contact &event);
     bool OnScoreEvent(const dd::Events::ScoreEvent &event);
@@ -128,6 +133,7 @@ private:
     bool OnCreatePowerUp(const dd::Events::CreatePowerUp &event);
     bool OnPowerUpTaken(const dd::Events::PowerUpTaken &event);
     bool OnStageCleared(const dd::Events::StageCleared &event);
+    bool OnPause(const dd::Events::Pause &event);
 };
 
 }

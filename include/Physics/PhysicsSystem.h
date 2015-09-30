@@ -3,21 +3,23 @@
 
 #include <unordered_map>
 
+#include "Core/CTransform.h"
 #include "Core/System.h"
 #include "Core/World.h"
-#include "CRectangleShape.h"
+#include "Core/EventBroker.h"
+#include "Physics/CRectangleShape.h"
+#include "Physics/CCircleShape.h"
 #include "Physics/CPhysics.h"
-#include <Box2D/Box2D.h>
-#include "Core/CTransform.h"
-#include "Transform/TransformSystem.h"
+#include "Physics/CWaterVolume.h"
 #include "Physics/EContact.h"
 #include "Physics/ESetImpulse.h"
-#include "Physics/CCircleShape.h"
-#include "Core/EventBroker.h"
+#include "Game/EPause.h"
+#include "Game/EHitLag.h"
 #include "Game/CPad.h"
-#include "Physics/CWaterVolume.h"
 #include "Game/CBall.h"
+#include "Transform/TransformSystem.h"
 #include "Rendering/CSprite.h"
+#include <Box2D/Box2D.h>
 
 
 namespace dd
@@ -54,11 +56,28 @@ public:
     // Called when an entity is removed
     void OnEntityRemoved(EntityID entity) override;
 
+    bool Pause() const { return m_Pause; }
+    void SetPause(const bool& pause) { m_Pause = pause; }
+    bool HitLag() const { return m_HitLag; }
+    void SetHitLag(const bool& hitLag) { m_HitLag = hitLag; }
+
 private:
     b2Vec2 m_Gravity;
     b2World* m_PhysicsWorld;
     double m_TimeStep;
     double m_Accumulator;
+    bool m_Pause = false;
+
+    bool m_HitLag = false;
+    float m_Time;
+    float m_SlowdownTime;
+    float m_HitLagTimer = 0;
+    float m_HitLagPlacement = 0;
+
+    dd::EventRelay<PhysicsSystem, dd::Events::Pause> m_EPause;
+    dd::EventRelay<PhysicsSystem, dd::Events::HitLag> m_EHitLag;
+    bool OnPause(const dd::Events::Pause &event);
+    bool OnHitLag(const dd::Events::HitLag &event);
 
     int m_VelocityIterations, m_PositionIterations;
 

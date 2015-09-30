@@ -16,6 +16,7 @@ void dd::Systems::LevelSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &LevelSystem::OnMultiBallLost);
     EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, &LevelSystem::OnPowerUpTaken);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &LevelSystem::OnStageCleared);
+    EVENT_SUBSCRIBE_MEMBER(m_EPause, &LevelSystem::OnPause);
 
     return;
 }
@@ -30,6 +31,9 @@ void dd::Systems::LevelSystem::Update(double dt)
 
 void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
+    if (Pause()) {
+        return;
+    }
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
 
@@ -69,6 +73,16 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
             }
         }
     }
+}
+
+bool dd::Systems::LevelSystem::OnPause(const dd::Events::Pause &event)
+{
+    if (Pause()) {
+        SetPause(false);
+    } else {
+        SetPause(true);
+    }
+    return true;
 }
 
 void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 spacesBetweenBricks, float spaceToEdge)
