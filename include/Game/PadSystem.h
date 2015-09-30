@@ -55,6 +55,8 @@ public:
     void SetLeft(const bool& left) { m_Left = left; }
     bool Right() const { return m_Right; }
     void SetRight(const bool& right) { m_Right = right; }
+    float Edge() const { return m_Edge; }
+    void SetEdge(const float& edge) { m_Edge = edge; }
 
     Components::Transform* Transform() const { return m_Transform; }
     void SetTransform(Components::Transform* transform) { m_Transform = transform; }
@@ -66,6 +68,7 @@ private:
     glm::vec3 m_Acceleration = glm::vec3(0.f, 0.f, 0.f);
     bool m_Left = false;
     bool m_Right = false;
+    float m_Edge = 2.8f;
     Components::Transform* m_Transform;
     Components::Pad* m_Pad;
 

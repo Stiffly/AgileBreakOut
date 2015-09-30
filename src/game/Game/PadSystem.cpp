@@ -27,6 +27,27 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &PadSystem::OnContact);
     EVENT_SUBSCRIBE_MEMBER(m_EContactPowerUp, &PadSystem::OnContactPowerUp);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PadSystem::OnStageCleared);
+
+    {
+        auto ent = m_World->CreateEntity();
+        m_World->SetProperty(ent, "Name", "Pad");
+        auto ctransform = m_World->AddComponent<Components::Transform>(ent);
+        ctransform->Position = glm::vec3(0.f, -3.5f, -10.f);
+        ctransform->Scale = glm::vec3(1.0f, 1.0f, 1.f);
+        auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
+        auto physics = m_World->AddComponent<Components::Physics>(ent);
+        physics->Static = false;
+        physics->Category = CollisionLayer::Type::Pad;
+        physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::PowerUp;
+        physics->Calculate = true;
+        auto cModel = m_World->AddComponent<Components::Model>(ent);
+        cModel->ModelFile = "Models/Submarine2.obj";
+
+        auto pad = m_World->AddComponent<Components::Pad>(ent);
+        m_World->CommitEntity(ent);
+
+        SetEdge(3.2 - (ctransform->Scale.x / 2));
+    }
 }
 
 void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
@@ -59,6 +80,11 @@ void dd::Systems::PadSystem::Update(double dt)
         transform->Velocity.x = pad->MaxSpeed;
     }
     transform->Position += transform->Velocity * (float)dt;
+    if (transform->Position.x > Edge()) {
+        transform->Position.x = Edge();
+    } else if (transform->Position.x < -Edge()) {
+        transform->Position.x = -Edge();
+    }
     transform->Velocity += acceleration  * (float)dt;
     if (glm::abs(transform->Velocity.x) > 1 || (!Left() && !Right())) {
         transform->Velocity -= transform->Velocity * pad->SlowdownModifier * (float) dt;

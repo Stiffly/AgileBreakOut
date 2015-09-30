@@ -111,10 +111,6 @@ public:
 		m_World->ComponentFactory.Register<Components::PowerUp>();
 		m_World->ComponentFactory.Register<Components::PowerUpBrick>();
 
-		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
-				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
-		m_World->AddSystem<Systems::PhysicsSystem>();
-
 		m_World->SystemFactory.Register<Systems::LevelSystem>(
 				[this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LevelSystem>();
@@ -124,6 +120,9 @@ public:
 		m_World->SystemFactory.Register<Systems::BallSystem>(
 				[this]() { return new Systems::BallSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::BallSystem>();
+		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
+				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::PhysicsSystem>();
 
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
@@ -318,25 +317,6 @@ public:
 			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
 
 			m_World->CommitEntity(rightWall);
-		}
-
-		{
-			auto ent = m_World->CreateEntity();
-			m_World->SetProperty(ent, "Name", "Pad");
-			auto ctransform = m_World->AddComponent<Components::Transform>(ent);
-			ctransform->Position = glm::vec3(0.f, -3.5f, -10.f);
-			ctransform->Scale = glm::vec3(1.0f, 1.0f, 1.f);
-			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
-			auto physics = m_World->AddComponent<Components::Physics>(ent);
-			physics->Static = false;
-			physics->Category = CollisionLayer::Type::Pad;
-			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::PowerUp;
-			physics->Calculate = true;
-			auto cModel = m_World->AddComponent<Components::Model>(ent);
-			cModel->ModelFile = "Models/Submarine2.obj";
-
-			auto pad = m_World->AddComponent<Components::Pad>(ent);
-			m_World->CommitEntity(ent);
 		}
 
 
