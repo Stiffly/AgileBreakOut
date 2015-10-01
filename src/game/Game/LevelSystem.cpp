@@ -9,13 +9,13 @@
 
 void dd::Systems::LevelSystem::Initialize()
 {
-    EVENT_SUBSCRIBE_MEMBER(m_EContact, LevelSystem::OnContact);
-    EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, LevelSystem::OnLifeLost);
-    EVENT_SUBSCRIBE_MEMBER(m_EScoreEvent, LevelSystem::OnScoreEvent);
-    EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, LevelSystem::OnMultiBall);
-    EVENT_SUBSCRIBE_MEMBER(m_ECreatePowerUp, LevelSystem::OnCreatePowerUp);
-    EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, LevelSystem::OnPowerUpTaken);
-    EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, LevelSystem::OnStageCleared);
+    EVENT_SUBSCRIBE_MEMBER(m_EContact, &LevelSystem::OnContact);
+    EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, &LevelSystem::OnLifeLost);
+    EVENT_SUBSCRIBE_MEMBER(m_EScoreEvent, &LevelSystem::OnScoreEvent);
+    EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &LevelSystem::OnMultiBall);
+    EVENT_SUBSCRIBE_MEMBER(m_ECreatePowerUp, &LevelSystem::OnCreatePowerUp);
+    EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, &LevelSystem::OnPowerUpTaken);
+    EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &LevelSystem::OnStageCleared);
 
     for (int i = 0; i < Lives(); i++) {
         CreateLife(i);
@@ -195,7 +195,7 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
 
     //sound
     auto collisionSound = m_World->AddComponent<Components::CollisionSound>(brick);
-    collisionSound->filePath = "Sounds/Brick/shortbrickbreak.wav";
+    collisionSound->FilePath = "Sounds/Brick/shortbrickbreak.wav";
 
     m_World->CommitEntity(brick);
     return;
