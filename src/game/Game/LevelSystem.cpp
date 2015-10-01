@@ -77,6 +77,10 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 
 bool dd::Systems::LevelSystem::OnPause(const dd::Events::Pause &event)
 {
+    if (event.Type != "LevelSystem" && event.Type != "All") {
+        return false;
+    }
+
     if (IsPaused()) {
         SetPause(false);
     } else {

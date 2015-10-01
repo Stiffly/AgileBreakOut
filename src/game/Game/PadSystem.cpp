@@ -111,6 +111,10 @@ void dd::Systems::PadSystem::Update(double dt)
 
 bool dd::Systems::PadSystem::OnPause(const dd::Events::Pause &event)
 {
+    if (event.Type != "PadSystem" && event.Type != "All") {
+        return false;
+    }
+
     if (IsPaused()) {
         SetPause(false);
     } else {
@@ -143,10 +147,11 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_P) {
         Events::Pause e;
+        e.Type = "All";
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_H) {
         Events::HitLag e;
-        e.Time = 0.3;
+        e.Time = 0.2;
         e.Type = "All";
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_D) {

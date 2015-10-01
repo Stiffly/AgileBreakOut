@@ -57,16 +57,24 @@ public:
     void Initialize() override;
 
     void Update(double dt) override;
+    void FlipPause();
 
     bool IsPaused() const { return m_Pause; }
     void SetPause(const bool& pause) { m_Pause = pause; }
     bool HitLag() const { return m_HitLag; }
     void SetHitLag(const bool& hitLag) { m_HitLag = hitLag; }
+    float& HitLagDuration() { return m_HitLagDuration; }
+    void SetHitLagDuration(const float& hitLagDuration) { m_HitLagDuration = hitLagDuration; }
+    float& HitLagTimer() { return m_HitLagTimer; }
+    void SetHitLagTimer(const float& hitLagTimer) { m_HitLagTimer = hitLagTimer; }
+    std::string& CurrentType() { return m_CurrentType; }
+    void SetCurrentType(const std::string& currentType) { m_CurrentType = currentType; }
 private:
     bool m_Pause;
     bool m_HitLag;
     float m_HitLagDuration;
     float m_HitLagTimer;
+    std::string m_CurrentType;
 
     dd::EventRelay<HitLagSystem, dd::Events::Pause> m_EPause;
     dd::EventRelay<HitLagSystem, dd::Events::HitLag> m_EHitLag;

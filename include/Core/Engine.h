@@ -183,10 +183,12 @@ public:
 
 		//Water test
 		{
+			float amount = 1.5f;
+
 			auto t_waterBody = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
-			transform->Position = glm::vec3(0.f, -5.5f, -10.f);
-			transform->Scale = glm::vec3(7.f, 1.5f, 1.f);
+			transform->Position = glm::vec3(0.f, -6.25f + (amount / 2), -10.f);
+			transform->Scale = glm::vec3(7.f, amount, 1.f);
 			auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
 			auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
 			m_World->CommitEntity(t_waterBody);
@@ -235,7 +237,7 @@ public:
 //			m_World->CommitEntity(topWall);
 //		}
 
-		{
+		/*{
 			auto topWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
 					topWall);
@@ -254,14 +256,14 @@ public:
 			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
 
 			m_World->CommitEntity(topWall);
-		}
+		}*/
 
 		{
 			auto leftWall = m_World->CreateEntity();
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
 					leftWall);
 			transform->Position = glm::vec3(-4.f, 1.f, -10.f);
-			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
+			transform->Scale = glm::vec3(0.5f, 35.f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
@@ -282,7 +284,7 @@ public:
 			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
 					rightWall);
 			transform->Position = glm::vec3(4.f, 1.f, -10.f);
-			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
+			transform->Scale = glm::vec3(0.5f, 35.f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";

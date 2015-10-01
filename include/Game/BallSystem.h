@@ -90,6 +90,9 @@ private:
     bool m_MultiBall = false;
     bool m_Pause = false;
 
+    glm::vec3 m_SavedSpeed;
+    bool m_InitializePause = false;
+
     EntityID m_Ball;
 
     dd::EventRelay<BallSystem, dd::Events::LifeLost> m_ELifeLost;

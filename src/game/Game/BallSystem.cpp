@@ -71,15 +71,34 @@ void dd::Systems::BallSystem::Update(double dt)
 
 void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
+    auto ballComponent = m_World->GetComponent<Components::Ball>(entity);
     if (IsPaused()) {
+        if (ballComponent != nullptr) {
+            auto transform = m_World->GetComponent<Components::Transform>(entity);
+
+            if (!ballComponent->Paused) {
+                ballComponent->Paused = true;
+                ballComponent->SavedSpeed = transform->Velocity;
+                transform->Velocity = glm::vec3(0, 0, 0);
+            }
+        }
         return;
+    } else {
+        if (ballComponent != nullptr) {
+            auto transform = m_World->GetComponent<Components::Transform>(entity);
+
+            if (ballComponent->Paused) {
+                transform->Velocity = ballComponent->SavedSpeed;
+                ballComponent->Paused = false;
+            }
+        }
     }
 
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
-    auto ballComponent = m_World->GetComponent<Components::Ball>(entity);
+
     if (ballComponent != nullptr) {
-        if (ReplaceBall() == true) {
+        if (ReplaceBall()) {
             SetReplaceBall(false);
 
             auto transform = m_World->GetComponent<Components::Transform>(entity);
@@ -153,6 +172,10 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 
 bool dd::Systems::BallSystem::OnPause(const dd::Events::Pause &event)
 {
+    if (event.Type != "BallSystem" && event.Type != "All") {
+        return false;
+    }
+
     if (IsPaused()) {
         SetPause(false);
     } else {

@@ -179,6 +179,10 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 
 bool dd::Systems::PhysicsSystem::OnPause(const dd::Events::Pause &event)
 {
+    if (event.Type != "PhysicsSystem" && event.Type != "All") {
+        return false;
+    }
+
     if (IsPaused()) {
         SetPause(false);
     } else {

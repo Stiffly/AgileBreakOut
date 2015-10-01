@@ -15,7 +15,7 @@ namespace Events
 
 struct Pause : Event
 {
-
+    std::string Type;
 };
 
 }

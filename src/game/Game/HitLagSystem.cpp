@@ -15,17 +15,23 @@ void dd::Systems::HitLagSystem::Update(double dt)
 {
     if (IsPaused()) {
         if (HitLag()) {
-            m_HitLagTimer += dt;
-            std::cout << m_HitLagTimer << std::endl;
-            if (m_HitLagDuration < m_HitLagTimer) {
-                m_HitLagTimer = 0;
+            SetHitLagTimer(HitLagTimer() += dt);
+            std::cout << HitLagTimer() << std::endl;
+            if (HitLagDuration() < HitLagTimer()) {
+                SetHitLagTimer(0);
                 SetHitLag(false);
-                Events::Pause e;
-                EventBroker->Publish(e);
+                FlipPause();
             }
         }
         return;
     }
+}
+
+void dd::Systems::HitLagSystem::FlipPause()
+{
+    Events::Pause e;
+    e.Type = CurrentType();
+    EventBroker->Publish(e);
 }
 
 bool dd::Systems::HitLagSystem::OnPause(const dd::Events::Pause &event)
@@ -40,9 +46,12 @@ bool dd::Systems::HitLagSystem::OnPause(const dd::Events::Pause &event)
 
 bool dd::Systems::HitLagSystem::OnHitLag(const dd::Events::HitLag &event)
 {
+    if (HitLag()) {
+        FlipPause();
+    }
     SetHitLag(true);
-    Events::Pause e;
-    EventBroker->Publish(e);
-    m_HitLagDuration = event.Time;
+    SetCurrentType(event.Type);
+    FlipPause();
+    SetHitLagDuration(event.Time);
     return true;
 }
