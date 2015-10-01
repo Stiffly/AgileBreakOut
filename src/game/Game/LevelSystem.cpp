@@ -10,35 +10,15 @@
 void dd::Systems::LevelSystem::Initialize()
 {
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &LevelSystem::OnContact);
-    EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, &LevelSystem::OnLifeLost);
     EVENT_SUBSCRIBE_MEMBER(m_EScoreEvent, &LevelSystem::OnScoreEvent);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &LevelSystem::OnMultiBall);
     EVENT_SUBSCRIBE_MEMBER(m_ECreatePowerUp, &LevelSystem::OnCreatePowerUp);
+    EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &LevelSystem::OnMultiBallLost);
     EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, &LevelSystem::OnPowerUpTaken);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &LevelSystem::OnStageCleared);
-
-    for (int i = 0; i < Lives(); i++) {
-        CreateLife(i);
-    }
+    EVENT_SUBSCRIBE_MEMBER(m_EPause, &LevelSystem::OnPause);
 
     return;
-}
-
-void dd::Systems::LevelSystem::CreateLife(int number)
-{
-    auto life = m_World->CreateEntity();
-    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(life);
-    transform->Position = glm::vec3(-1.5f + number * 0.15f, -2.f, -5.f);
-    transform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
-
-    std::shared_ptr<Components::Life> lifeNr = m_World->AddComponent<Components::Life>(life);
-    lifeNr->Number = number;
-
-    auto model = m_World->AddComponent<Components::Model>(life);
-    model->ModelFile = "Models/Test/Ball/Ballopus.obj";
-
-
-    m_World->CommitEntity(life);
 }
 
 void dd::Systems::LevelSystem::Update(double dt)
@@ -47,93 +27,41 @@ void dd::Systems::LevelSystem::Update(double dt)
         CreateBasicLevel(Rows(), Lines(), SpaceBetweenBricks(), SpaceToEdge());
         m_Initialized = true;
     }
-
-    if (Lives() < 0)
-    {
-        SetLives(3);
-        Events::GameOver e;
-        EventBroker->Publish(e);
-    }
 }
 
 void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
+    if (IsPaused()) {
+        return;
+    }
+    auto templateCheck = m_World->GetComponent<Components::Template>(entity);
+    if (templateCheck != nullptr){ return; }
+
     auto ball = m_World->GetComponent<Components::Ball>(entity);
+    SetNotResettingTheStage(NotResettingTheStage() + 0.01 * dt);
 
-    if (ball != nullptr) {
-        auto transformBall = m_World->GetComponent<Components::Transform>(entity);
-        if (glm::abs(transformBall->Velocity.y) < 2) {
-            if (transformBall->Velocity.y > 0) {
-                transformBall->Velocity.y = 2;
-            } else {
-                transformBall->Velocity.y = -2;
-            }
-        }
-        if (transformBall->Position.y < -EdgeY() - 4) {
-            if (MultiBalls() != 0) {
-                SetMultiBalls(MultiBalls() - 1);
-//                m_World->RemoveComponent<Components::Ball>(entity);
-//                m_World->RemoveComponent<Components::Transform>(entity);
-//                m_World->RemoveComponent<Components::CircleShape>(entity);
-//                m_World->RemoveComponent<Components::Physics>(entity);
-                m_World->RemoveEntity(entity);
-            } else if (Lives() == PastLives()) {
-                Events::ResetBall be;
-                EventBroker->Publish(be);
-                Events::LifeLost e;
-                e.Entity = entity;
-                EventBroker->Publish(e);
-                return;
-            }
-        } else if (transformBall->Position.x > EdgeX()) {
-            if (transformBall->Velocity.x > 0) {
-                glm::vec2 reflectedVelocity = glm::reflect(glm::vec2(transformBall->Velocity.x, transformBall->Velocity.y), glm::vec2(1, 0));
-                transformBall->Velocity = glm::vec3(reflectedVelocity, 0.f);
-            }
-        } else if (transformBall->Position.x < -EdgeX()) {
-            if (transformBall->Velocity.x < 0) {
-                glm::vec2 reflectedVelocity = glm::reflect(glm::vec2(transformBall->Velocity.x, transformBall->Velocity.y), glm::vec2(-1, 0));
-                transformBall->Velocity = glm::vec3(reflectedVelocity, 0.f);
-            }
-        } else if (transformBall->Position.y > EdgeY()) {
-            if (transformBall->Velocity.y > 0) {
-                glm::vec2 reflectedVelocity = glm::reflect(glm::vec2(transformBall->Velocity.x, transformBall->Velocity.y), glm::vec2(0, 1));
-                transformBall->Velocity = glm::vec3(reflectedVelocity, 0.f);
-            }
-        }
-    }
-
-    if (Lives() != PastLives()) {
-        auto life = m_World->GetComponent<Components::Life>(entity);
-        if (life != nullptr) {
-            if (life->Number + 1 == PastLives()) {
-//                m_World->RemoveComponent<Components::Life>(entity);
-//                m_World->RemoveComponent<Components::Transform>(entity);
-                m_World->RemoveEntity(entity);
-                SetPastLives(Lives());
-            }
-        }
-    }
-    if (NumberOfBricks() <= 0) {
-        /*SetRestarting(true);
+    if (NumberOfBricks() <= 0 && Restarting() == false) {
         if (MultiBalls() <= 0 && PowerUps() <= 0) {
-            Events::ResetBall e;
-            EventBroker->Publish(e);
-            Events::ScoreEvent es;
-            es.Score = 500;
-            EventBroker->Publish(es);
-            Events::StageCleared ec;
-            EventBroker->Publish(ec);
-            CreateBasicLevel(Rows(), Lines(), SpaceBetweenBricks(), SpaceToEdge());
+            if (NotResettingTheStage() > 5) {
+                SetRestarting(true);
+                Events::ResetBall e;
+                EventBroker->Publish(e);
+                Events::ScoreEvent es;
+                es.Score = 500;
+                EventBroker->Publish(es);
+                Events::StageCleared ec;
+                EventBroker->Publish(ec);
+                SetNotResettingTheStage(0);
+                //CreateBasicLevel(Rows(), Lines(), SpaceBetweenBricks(), SpaceToEdge());
+            }
         } else {
             if (ball != nullptr && MultiBalls() > 0) {
-                SetMultiBalls(MultiBalls() - 1);
+                SetMultiBalls(MultiBalls()-1);
                 m_World->RemoveComponent<Components::Ball>(entity);
                 m_World->RemoveComponent<Components::Transform>(entity);
                 m_World->RemoveComponent<Components::CircleShape>(entity);
                 m_World->RemoveComponent<Components::Physics>(entity);
                 m_World->RemoveEntity(entity);
-                auto transformBall = m_World->GetComponent<Components::Transform>(entity);
             } else {
                 auto powerUp = m_World->GetComponent<Components::PowerUp>(entity);
                 if (powerUp != nullptr) {
@@ -143,22 +71,36 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
                     m_World->RemoveEntity(entity);
                 }
             }
-        }*/
+        }
     }
+}
+
+bool dd::Systems::LevelSystem::OnPause(const dd::Events::Pause &event)
+{
+    if (event.Type != "LevelSystem" && event.Type != "All") {
+        return false;
+    }
+
+    if (IsPaused()) {
+        SetPause(false);
+    } else {
+        SetPause(true);
+    }
+    return true;
 }
 
 void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 spacesBetweenBricks, float spaceToEdge)
 {
     SetNumberOfBricks(rows * lines);
-    std::cout << "You're only doing this once, right?" << std::endl;
-    int num = 0;
+    //std::cout << "You're only doing this once, right?" << std::endl;
+    int num = Lines();
     for (int i = 0; i < rows; i++) {
-        num++;
+        num--;
         for (int j = 0; j < Lines(); j++) {
             CreateBrick(i, j, spacesBetweenBricks, spaceToEdge, num);
         }
-        if (num == 7)
-            num = 0;
+        if (num == 1)
+            num = Lines();
     }
 
     SetNumberOfBricks(rows * lines);
@@ -179,12 +121,12 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = CollisionLayer::Type::Ball;
 
-    std::string fileName = "Textures/Bricks/";
+    /*std::string fileName = "Textures/Bricks/";
     fileName.append(std::to_string(num));
-    fileName.append(".png");
+    fileName.append(".png");*/
     //sprite->SpriteFile =  fileName;
     model->ModelFile = "Models/Test/Brick/Brick.obj";
-    if ((line == 1 && row == 4) || (line == 3 && row == 2) || (line == 6 && row == 6)) {
+    if ((line == 1 && row == 4) || (line == 3 && row == 2) || (line == 5 && row == 2)) {
         std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
     }
     float x = line * spacesBetweenBricks.x;
@@ -209,17 +151,17 @@ void dd::Systems::LevelSystem::ProcessCollision()
 
 void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
 {
-    auto brick = m_World->GetComponent<Components::Brick>(entity);
+    /*auto brick = m_World->GetComponent<Components::Brick>(entity);
     if (brick != nullptr) {
         SetNumberOfBricks(NumberOfBricks() - 1);
         Events::ScoreEvent es;
         es.Score = brick->Score;
         EventBroker->Publish(es);
-        /*if (numberOfBricks < 1) {
+        if (numberOfBricks < 1) {
             EndLevel();
-        }*/
+        }
     }
-    return;
+    return;*/
 }
 
 bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
@@ -255,7 +197,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
     }
 
     auto power = m_World->GetComponent<Components::PowerUpBrick>(entityBrick);
-    if (power != nullptr) {
+    if (power != nullptr && NumberOfBricks() > 1) {
         Events::CreatePowerUp e;
         auto transform = m_World->GetComponent<Components::Transform>(entityBrick);
         e.Position = transform->Position;
@@ -263,6 +205,12 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
     }
 
     if (ball != nullptr && Restarting() == false) {
+        ball->Combo += 1;
+        Events::ComboEvent ec;
+        ec.Combo = ball->Combo;
+        ec.Ball = entityBall;
+        EventBroker->Publish(ec);
+
         auto ballTransform = m_World->GetComponent<Components::Transform>(entityBall);
 
 //        m_World->RemoveComponent<Components::Brick>(entityBrick);
@@ -289,24 +237,20 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         EventBroker->Publish(e);
         //TODO: Bricks dont collide with walls D=
 
+
         SetNumberOfBricks(NumberOfBricks() - 1);
         if (NumberOfBricks() <= 0) {
-            SetMultiBalls(MultiBalls() + 1);
+            //SetMultiBalls(MultiBalls() + 1);
         }
         Events::ScoreEvent es;
-        es.Score = brick->Score;
+        es.Score = brick->Score * ball->Combo;
         EventBroker->Publish(es);
 
-       // std::cout << NumberOfBricks() << std::endl;
-        //std::cout << "Score: " << Score() << std::endl;
+        std::cout << "Combo: " << ball->Combo << std::endl;
+        //std::cout << NumberOfBricks() << std::endl;
+        //std::cout << "Brick Score: " << brick->Score  << std::endl;
+        std::cout << "Score: " << Score() << std::endl;
     }
-
-    return true;
-}
-
-bool dd::Systems::LevelSystem::OnLifeLost(const dd::Events::LifeLost &event)
-{
-    SetLives(Lives() - 1);
 
     return true;
 }
@@ -321,6 +265,15 @@ bool dd::Systems::LevelSystem::OnScoreEvent(const dd::Events::ScoreEvent &event)
 bool dd::Systems::LevelSystem::OnMultiBall(const dd::Events::MultiBall &event)
 {
     SetMultiBalls(MultiBalls()+2);
+    std::cout << MultiBalls() << std::endl;
+    return true;
+}
+
+bool dd::Systems::LevelSystem::OnMultiBallLost(const dd::Events::MultiBallLost &event)
+{
+    SetMultiBalls(MultiBalls()-1);
+    std::cout << MultiBalls() << std::endl;
+    return true;
 }
 
 bool dd::Systems::LevelSystem::OnCreatePowerUp(const dd::Events::CreatePowerUp &event)
