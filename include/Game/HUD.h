@@ -6,6 +6,7 @@
 #include "GUI/NumberFrame.h"
 #include "Core/EKeyUp.h"
 #include "Game/EScoreEvent.h"
+#include "Game/FPSCounter.h"
 
 namespace dd
 {
@@ -31,6 +32,8 @@ public:
 		m_ScoreNumberFrame->X = 15;
 		m_ScoreNumberFrame->Y = 21;
 
+		//m_FPSCounter = new GUI::FPSCounter(this, "FPSCounter");
+
 		EVENT_SUBSCRIBE_MEMBER(m_EScore, &HUD::OnScore);
 	}
 
@@ -38,6 +41,7 @@ private:
 	TextureFrame* m_LevelIndicator = nullptr;
 	TextureFrame* m_ScoreIndicator = nullptr;
 	NumberFrame* m_ScoreNumberFrame = nullptr;
+	FPSCounter* m_FPSCounter = nullptr;
 
 	EventRelay<Frame, Events::ScoreEvent> m_EScore;
 
