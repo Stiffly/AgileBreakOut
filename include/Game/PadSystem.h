@@ -69,9 +69,12 @@ public:
 private:
     EntityID m_Entity = 0;
     glm::vec3 m_Acceleration = glm::vec3(0.f, 0.f, 0.f);
-    bool m_Left = false, m_Right = false, m_ReplaceBall = false, m_MultiBall = false;
-    Components::Transform* m_Transform;
-    Components::Pad* m_Pad;
+    bool m_Left = false;
+    bool m_Right = false;
+    bool m_ReplaceBall = false;
+    bool m_MultiBall = false;
+    Components::Transform* m_Transform = nullptr;
+    Components::Pad* m_Pad = nullptr;
 
     dd::EventRelay<PadSystem, dd::Events::KeyDown> m_EKeyDown;
     dd::EventRelay<PadSystem, dd::Events::KeyUp> m_EKeyUp;

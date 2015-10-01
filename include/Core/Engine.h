@@ -360,7 +360,7 @@ public:
 		// Swap event queues to get fresh input data in the read queue
 		//m_EventBroker->Swap();
 
-		ResourceManager::Update();
+		//ResourceManager::Update();
 		if (m_GameIsRunning) {
 			m_World->Update(dt);
 		}

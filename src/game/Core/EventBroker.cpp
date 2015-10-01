@@ -68,9 +68,10 @@ int dd::EventBroker::Process(std::string contextTypeName)
 		std::shared_ptr<Event> event = pair.second;
 
 		auto itpair = relays.equal_range(eventTypeName);
-		for (auto it2 = itpair.first; it2 != itpair.second; ++it2)
+		for (auto it2 = itpair.first; it2 != itpair.second; it2++)
 		{
-			auto relay = it2->second;
+			std::string name = it2->first;
+			BaseEventRelay* relay = it2->second;
 			relay->Receive(event);
 			eventsProcessed++;
 		}

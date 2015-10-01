@@ -27,22 +27,6 @@ public:
 		m_CharacterTextures['8'] = "Textures/GUI/Numbers/N8.png";
 		m_CharacterTextures['9'] = "Textures/GUI/Numbers/N9.png";
 
-		// Create number frame if missing
-//		for (int i = 0; i < 10; i++) {
-//			auto frame = new GUI::TextureFrame(this, "NumberFrameDigit");
-//			frame->SetTexture(m_NumberTextures[0]);
-//			frame->DisableScissor();
-//			// Position frame based on alignment
-//			if (i > 0) {
-//				frame->SetLeft(m_NumberFrames[0]->Right());
-//			}
-//			Width += frame->Width;
-//			if (Height < frame->Height) {
-//				Height = frame->Height;
-//			}
-//			m_NumberFrames.push_front(frame);
-//		}
-
 		SetNumber(0);
 	}
 
@@ -100,7 +84,6 @@ private:
 	int m_Number = 0;
 	bool m_LeftAligned = true;
 
-	std::string m_NumberTextures[10];
 	std::unordered_map<char, std::string> m_CharacterTextures;
 	std::deque<TextureFrame*> m_NumberFrames;
 };
