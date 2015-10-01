@@ -44,9 +44,9 @@ public:
 		: m_Name(name)
 	{
 		SetParent(parent);
-		EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, &Frame::OnKeyDown);
-		EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, &Frame::OnKeyUp);
-		EVENT_SUBSCRIBE_MEMBER(m_EInputCommand, &Frame::OnCommand);
+		//EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, &Frame::OnKeyDown);
+		//EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, &Frame::OnKeyUp);
+		//EVENT_SUBSCRIBE_MEMBER(m_EInputCommand, &Frame::OnCommand);
 	}
 
 	~Frame()
@@ -253,9 +253,9 @@ protected:
 	virtual bool OnCommand(const Events::InputCommand& event) { return false; }
 
 private:
-	EventRelay<Frame, Events::KeyDown> m_EKeyDown;
-	EventRelay<Frame, Events::KeyUp> m_EKeyUp;
-	EventRelay<Frame, Events::InputCommand> m_EInputCommand;
+	//EventRelay<Frame, Events::KeyDown> m_EKeyDown;
+	//EventRelay<Frame, Events::KeyUp> m_EKeyUp;
+	//EventRelay<Frame, Events::InputCommand> m_EInputCommand;
 };
 
 }

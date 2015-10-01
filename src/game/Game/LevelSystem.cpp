@@ -246,10 +246,10 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         es.Score = brick->Score * ball->Combo;
         EventBroker->Publish(es);
 
-        std::cout << "Combo: " << ball->Combo << std::endl;
+        //std::cout << "Combo: " << ball->Combo << std::endl;
         //std::cout << NumberOfBricks() << std::endl;
         //std::cout << "Brick Score: " << brick->Score  << std::endl;
-        std::cout << "Score: " << Score() << std::endl;
+        //std::cout << "Score: " << Score() << std::endl;
     }
 
     return true;
@@ -257,7 +257,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 
 bool dd::Systems::LevelSystem::OnScoreEvent(const dd::Events::ScoreEvent &event)
 {
-    SetScore(Score() += event.Score);
+    //SetScore(Score() += event.Score);
 
     return true;
 }

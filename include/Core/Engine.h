@@ -214,14 +214,14 @@ public:
 //			m_World->CommitEntity(Pe);
 //		}
 
-//		{
-//			auto Pt = m_World->CreateEntity();
-//			auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
-//			auto PtSprite = m_World->AddComponent<Components::Sprite>(Pt);
-//
-//			PtTransform->Position = glm::vec3(2.f, 0.f, -10.f);
-//			PtSprite->SpriteFile = "Textures/Ball.png";
-//		}
+		{
+			auto Pt = m_World->CreateEntity();
+			auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
+			auto PtSprite = m_World->AddComponent<Components::Sprite>(Pt);
+
+			PtTransform->Position = glm::vec3(2.f, 0.f, -10.f);
+			PtSprite->SpriteFile = "Textures/Ball.png";
+		}
 		
 		//Water test
 		{

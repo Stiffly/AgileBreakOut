@@ -31,6 +31,9 @@ public:
 		m_A2 = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
 		m_A2->X = 60;
 		m_A2->SetNumber(1);
+		//m_A3 = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
+		//m_A3->X = 80;
+		//m_A3->SetNumber(123);
 
 		m_ScoreIndicator = new GUI::TextureFrame(this, "HUDScoreIndicator");
 		m_ScoreIndicator->SetTexture("Textures/GUI/HUD/ScoreIndicatorBG.png");
@@ -49,6 +52,7 @@ private:
 	TextureFrame* m_ScoreIndicator = nullptr;
 	NumberFrame* m_A1 = nullptr;
 	NumberFrame* m_A2 = nullptr;
+	//NumberFrame* m_A3 = nullptr;
 	NumberFrame* m_ScoreNumberFrame = nullptr;
 	FPSCounter* m_FPSCounter = nullptr;
 
