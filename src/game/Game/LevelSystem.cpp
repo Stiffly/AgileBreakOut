@@ -195,7 +195,7 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
 
     //sound
     auto collisionSound = m_World->AddComponent<Components::CollisionSound>(brick);
-    collisionSound->filePath = "Sounds/Brick/shortbrickbreak.wav";
+    collisionSound->FilePath = "Sounds/Brick/shortbrickbreak.wav";
 
     m_World->CommitEntity(brick);
     return;

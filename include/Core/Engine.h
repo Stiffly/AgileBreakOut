@@ -552,15 +552,15 @@ private:
 		//Todo: Move this
 		{
 			dd::Events::PlaySound e;
-			e.path = "Sounds/BGM/under-the-sea-instrumental.wav";
-			e.isAmbient = true;
+			e.FilePath = "Sounds/BGM/under-the-sea-instrumental.wav";
+			e.IsAmbient = true;
 			m_EventBroker->Publish(e);
 		}
 		{
 			dd::Events::PlaySound e;
-			e.path = "Sounds/BGM/water-flowing.wav";
-			e.volume = 0.3f;
-			e.isAmbient = true;
+			e.FilePath = "Sounds/BGM/water-flowing.wav";
+			e.Gain = 0.3f;
+			e.IsAmbient = true;
 			m_EventBroker->Publish(e);
 		}
 	};
