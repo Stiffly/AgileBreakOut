@@ -25,6 +25,13 @@ public:
 		m_LevelIndicator = new GUI::TextureFrame(this, "HUDLevelIndicator");
 		m_LevelIndicator->SetTexture("Textures/GUI/HUD/LevelIndicatorBG.png");
 
+		m_A1 = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
+		m_A1->X = 40;
+		m_A1->SetNumber(1);
+		m_A2 = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
+		m_A2->X = 60;
+		m_A2->SetNumber(1);
+
 		m_ScoreIndicator = new GUI::TextureFrame(this, "HUDScoreIndicator");
 		m_ScoreIndicator->SetTexture("Textures/GUI/HUD/ScoreIndicatorBG.png");
 		m_ScoreIndicator->SetRight(Right());
@@ -40,6 +47,8 @@ public:
 private:
 	TextureFrame* m_LevelIndicator = nullptr;
 	TextureFrame* m_ScoreIndicator = nullptr;
+	NumberFrame* m_A1 = nullptr;
+	NumberFrame* m_A2 = nullptr;
 	NumberFrame* m_ScoreNumberFrame = nullptr;
 	FPSCounter* m_FPSCounter = nullptr;
 
