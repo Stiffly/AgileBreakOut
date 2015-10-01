@@ -138,6 +138,7 @@ public:
 		m_World->ComponentFactory.Register<Components::ParticleEmitter>();
 		m_World->Initialize();
 
+
 		//PointLightTest
 		{
 			auto t_Light = m_World->CreateEntity();
