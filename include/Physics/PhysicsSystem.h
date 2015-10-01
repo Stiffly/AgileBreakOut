@@ -7,18 +7,21 @@
 #include "Core/System.h"
 #include "Core/World.h"
 #include "Core/EventBroker.h"
+#include "Core/CTemplate.h"
+#include "Box2D/Box2D.h"
 #include "Physics/CRectangleShape.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CWaterVolume.h"
 #include "Physics/EContact.h"
 #include "Physics/ESetImpulse.h"
+#include "Physics/CParticle.h"
+#include "Physics/CParticleEmitter.h"
 #include "Game/EPause.h"
 #include "Game/CPad.h"
 #include "Game/CBall.h"
 #include "Transform/TransformSystem.h"
 #include "Rendering/CSprite.h"
-#include <Box2D/Box2D.h>
 
 
 namespace dd
@@ -75,16 +78,28 @@ private:
 
     void CreateBody(EntityID entity);
 
-    b2ParticleSystem *m_ParticleSystem;
-    b2ParticleGroup* t_watergroup;
+    std::vector<b2ParticleSystem*> m_ParticleSystem;
+    std::vector<b2ParticleGroup*> t_ParticleGroup;
 
-    std::unordered_map<EntityID, const b2ParticleHandle*> m_EntitiesToParticleHandle;
-    std::unordered_map<const b2ParticleHandle*, EntityID> m_ParticleHandleToEntities;
+    std::vector<std::unordered_map<EntityID, const b2ParticleHandle*>> m_EntitiesToParticleHandle;
+    std::vector<std::unordered_map<const b2ParticleHandle*, EntityID>> m_ParticleHandleToEntities;
 
+    b2ParticleSystem* CreateParticleSystem(float radius, float gravityScale);
     void InitializeWater();
-    void SyncWater(); //TODO: Probably remove this
     void CreateParticleGroup(EntityID entity);
+    void CreateParticleEmitter(EntityID entity);
+    void UpdateParticleEmitters(double dt); //TODO: Remove them and particles if needed.
 
+    //TODO: Fill struct with info needed.
+    struct ParticleEmitter
+    {
+        std::vector<b2ParticleSystem*> ParticleSystem;
+        std::vector<EntityID> ParticleEmitter;
+        std::vector<EntityID> ParticleTemplate;
+    };
+    ParticleEmitter m_ParticleEmitters;
+
+    //TODO: Struct med listor är bättre än en lista med structs
     struct Impulse
     {
         b2Body* Body;
