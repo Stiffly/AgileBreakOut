@@ -40,7 +40,7 @@ struct EventFixture
 		// Publish the event
 		this->EventBroker->Publish(Before);
 		// Clear to swap buffers
-		this->EventBroker->Clear();
+		this->EventBroker->Swap();
 		// Process the event
 		this->EventBroker->template Process<EventFixture>();
 	}
