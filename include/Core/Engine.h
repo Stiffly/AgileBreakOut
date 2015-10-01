@@ -137,10 +137,10 @@ public:
           	auto ent = m_World->CreateEntity();
         	std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
 			transform->Position = glm::vec3(-0.f, 0.26f, -9.f);
-			transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
+			transform->Scale = glm::vec3(0.35f, 0.35f, 0.2f);
 			transform->Velocity = glm::vec3(0.0f, -10.f, 0.f);
           	auto model = m_World->AddComponent<Components::Model>(ent);
-			model->ModelFile = "Models/Test/Ball/Ballopus.obj";
+			model->ModelFile = "Models/Test/Ball/Sid.obj";
           	std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
 			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
 			ball->Speed = 5.f;
@@ -150,8 +150,8 @@ public:
 			physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
 			physics->Calculate = true;
 
-			auto plight = m_World->AddComponent<Components::PointLight>(ent);
-			plight->Radius = 2.f;
+			//auto plight = m_World->AddComponent<Components::PointLight>(ent);
+			//plight->Radius = 2.f;
 
 			m_World->CommitEntity(ent);
 		}

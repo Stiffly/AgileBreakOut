@@ -312,7 +312,7 @@ void dd::Renderer::Draw(RenderQueueCollection& rq)
 void dd::Renderer::DrawDeferred(RenderQueue &objects, RenderQueue &lights)
 {
 	// Pass #1: Fill G-buffers
-	glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
