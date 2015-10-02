@@ -25,12 +25,14 @@ public:
 		m_LevelIndicator = new GUI::TextureFrame(this, "HUDLevelIndicator");
 		m_LevelIndicator->SetTexture("Textures/GUI/HUD/LevelIndicatorBG.png");
 
-		m_A1 = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
-		m_A1->X = 40;
-		m_A1->SetNumber(1);
-		m_A2 = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
-		m_A2->X = 60;
-		m_A2->SetNumber(1);
+		m_AreaNumberFrame = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
+		m_AreaNumberFrame->X = 132;
+		m_AreaNumberFrame->Y = 19;
+		m_AreaNumberFrame->SetNumber(6);
+		m_StageNumberFrame = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
+		m_StageNumberFrame->X = 165;
+		m_StageNumberFrame->Y = 19;
+		m_StageNumberFrame->SetNumber(5);
 
 		m_ScoreIndicator = new GUI::TextureFrame(this, "HUDScoreIndicator");
 		m_ScoreIndicator->SetTexture("Textures/GUI/HUD/ScoreIndicatorBG.png");
@@ -39,7 +41,7 @@ public:
 		m_ScoreNumberFrame->X = 15;
 		m_ScoreNumberFrame->Y = 21;
 
-		//m_FPSCounter = new GUI::FPSCounter(this, "FPSCounter");
+		m_FPSCounter = new GUI::FPSCounter(this, "FPSCounter");
 
 		EVENT_SUBSCRIBE_MEMBER(m_EScore, &HUD::OnScore);
 	}
@@ -47,8 +49,8 @@ public:
 private:
 	TextureFrame* m_LevelIndicator = nullptr;
 	TextureFrame* m_ScoreIndicator = nullptr;
-	NumberFrame* m_A1 = nullptr;
-	NumberFrame* m_A2 = nullptr;
+	NumberFrame* m_AreaNumberFrame = nullptr;
+	NumberFrame* m_StageNumberFrame = nullptr;
 	NumberFrame* m_ScoreNumberFrame = nullptr;
 	FPSCounter* m_FPSCounter = nullptr;
 
