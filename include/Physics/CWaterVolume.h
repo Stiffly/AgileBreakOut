@@ -9,7 +9,7 @@ namespace Components
 
 struct WaterVolume : public Component
 {
-
+    float Radius;
 };
 
 }
