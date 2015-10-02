@@ -153,8 +153,6 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
         auto life = m_World->GetComponent<Components::Life>(entity);
         if (life != nullptr) {
             if (life->Number + 1 == PastLives()) {
-                m_World->RemoveComponent<Components::Life>(entity);
-                m_World->RemoveComponent<Components::Transform>(entity);
                 m_World->RemoveEntity(entity);
                 SetPastLives(Lives());
             }
@@ -262,25 +260,6 @@ EntityID dd::Systems::BallSystem::CreateBall()
     auto ent = m_World->CloneEntity(Ball());
 
     m_World->RemoveComponent<Components::Template>(ent);
-
-   /* auto ent = m_World->CreateEntity();
-    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-    transform->Position = glm::vec3(0.5f, 0.26f, -10.f);
-    transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
-    auto model = m_World->AddComponent<Components::Model>(ent);
-    model->ModelFile = "Models/Test/Ball/Ballopus.obj";
-    //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
-    std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-    std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
-    std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-    physics->Static = false;
-    physics->Category = CollisionLayer::Type::Ball;
-    physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
-    physics->Calculate = true;
-    cball->Speed = 5.f;
-
-    auto plight = m_World->AddComponent<Components::PointLight>(ent);
-    plight->Radius = 2.f;*/
 
     m_World->CommitEntity(ent);
 

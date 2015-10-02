@@ -57,17 +57,11 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
         } else {
             if (ball != nullptr && MultiBalls() > 0) {
                 SetMultiBalls(MultiBalls()-1);
-                m_World->RemoveComponent<Components::Ball>(entity);
-                m_World->RemoveComponent<Components::Transform>(entity);
-                m_World->RemoveComponent<Components::CircleShape>(entity);
-                m_World->RemoveComponent<Components::Physics>(entity);
                 m_World->RemoveEntity(entity);
             } else {
                 auto powerUp = m_World->GetComponent<Components::PowerUp>(entity);
                 if (powerUp != nullptr) {
                     SetPowerUps(PowerUps() - 1);
-                    m_World->RemoveComponent<Components::PowerUp>(entity);
-                    m_World->RemoveComponent<Components::Transform>(entity);
                     m_World->RemoveEntity(entity);
                 }
             }
@@ -212,12 +206,6 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         EventBroker->Publish(ec);
 
         auto ballTransform = m_World->GetComponent<Components::Transform>(entityBall);
-
-//        m_World->RemoveComponent<Components::Brick>(entityBrick);
-//        m_World->RemoveComponent<Components::Transform>(entityBrick);
-//        m_World->RemoveComponent<Components::RectangleShape>(entityBrick);
-//        m_World->RemoveComponent<Components::Physics>(entityBrick);
-//        m_World->RemoveEntity(entityBrick);
 
         auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
         physicsComponent->GravityScale = 1.f;
