@@ -141,6 +141,10 @@ void dd::Systems::PhysicsSystem::SyncBodiesWithEntities()
 
 void dd::Systems::PhysicsSystem::Update(double dt)
 {
+    if (m_Pause) {
+        return;
+    }
+
     m_Accumulator += dt;
 
     while(m_Accumulator >= m_TimeStep)
