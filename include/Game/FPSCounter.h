@@ -15,25 +15,26 @@ public:
 	FPSCounter(Frame* parent, std::string name)
 		: Frame(parent, name)
 	{
+		m_FrameTimes.resize(m_MaxSamples);
 		m_Numbers = new GUI::NumberFrame(this, "FPSCounterNumberFrame");
 	}
 
 	virtual void Update(double dt)
 	{
-		m_NumFrames++;
-		m_Accum += dt;
+		m_FrameTimes[m_CurrentFrame % m_MaxSamples] = dt;
+		double sum = std::accumulate(m_FrameTimes.begin(), m_FrameTimes.end(), 0.0);
+		sum /= std::min(m_CurrentFrame, m_MaxSamples);
+		m_Numbers->SetNumber(std::round(1.0 / sum));
 
-		m_Numbers->SetNumber(1.0/(m_Accum/m_NumFrames));
-		if (m_NumFrames % 20) {
-			//LOG_INFO("FPS: %f", 1.0/(m_Accum/m_NumFrames));
-		}
+		m_CurrentFrame++;
 	}
 
 private:
 	NumberFrame* m_Numbers = nullptr;
 
-	double m_Accum = 0.0;
-	int m_NumFrames = 0;
+	int m_MaxSamples = 100;
+	int m_CurrentFrame = 0;
+	std::vector<double> m_FrameTimes;
 };
 
 }
