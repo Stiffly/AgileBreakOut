@@ -10,7 +10,7 @@ struct EventFixture
 	EventFixture()
 	{
 		this->EventBroker = new dd::EventBroker();
-		m_EEventType = decltype(m_EEventType)(std::bind(&OnEvent, this, std::placeholders::_1));
+		m_EEventType = decltype(m_EEventType)(std::bind(&EventFixture::OnEvent, this, std::placeholders::_1));
 		this->EventBroker->Subscribe(m_EEventType);
 		Run();
 		Check();
