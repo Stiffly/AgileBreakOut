@@ -70,13 +70,16 @@ private:
 
     void CreateBody(EntityID entity);
 
-    std::vector<b2ParticleSystem*> m_ParticleSystem;
+    b2ParticleSystem* m_WaterParticleSystem;
     std::vector<b2ParticleGroup*> t_ParticleGroup;
+
+    std::unordered_map<EntityID, const b2ParticleHandle*> m_EntitiesToWaterParticleHandle;
+    std::unordered_map<const b2ParticleHandle*, EntityID> m_WaterParticleHandleToEntities;
 
     std::vector<std::unordered_map<EntityID, const b2ParticleHandle*>> m_EntitiesToParticleHandle;
     std::vector<std::unordered_map<const b2ParticleHandle*, EntityID>> m_ParticleHandleToEntities;
 
-    b2ParticleSystem* CreateParticleSystem(float radius, float gravityScale);
+    b2ParticleSystem* CreateParticleSystem(float radius, float gravityScale, int maxCount);
     void InitializeWater();
     void CreateParticleGroup(EntityID entity);
     void CreateParticleEmitter(EntityID entity);

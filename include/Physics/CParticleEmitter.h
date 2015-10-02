@@ -9,10 +9,11 @@ namespace Components
 
 struct ParticleEmitter : public Component
 {
-    int Amount = 10.f;
+    int NumberOfTicks = 10.f;
     float InitialSpeed = 1.f;
     double SpawnRate = 1.f;
     double TimeSinceLastSpawn = 0;
+    int MaxCount = 0;
 
     //ParticleSystem variables
     float GravityScale = 1.0f;

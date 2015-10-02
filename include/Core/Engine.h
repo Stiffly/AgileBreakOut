@@ -207,53 +207,54 @@ public:
 			m_World->CommitEntity(background);
 		}
 
-		//ParticleTest
-//		{
-//			auto Pe = m_World->CreateEntity();
-//			auto transform = m_World->AddComponent<Components::Transform>(Pe);
-//			auto particleEmitter= m_World->AddComponent<Components::ParticleEmitter>(Pe);
-//
-//			transform->Position = glm::vec3(0.f, -5.f, -10.f);
-//			particleEmitter->GravityScale = 0.0f;
-//			particleEmitter->SpawnRate = 1.0f;
-//
-//			{
-//				auto Pt = m_World->CreateEntity(Pe);
-//				auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
-//				auto PtSprite = m_World->AddComponent<Components::Sprite>(Pt);
-//				//auto PtModel = m_World->AddComponent<Components::Model>(Pt);
-//				auto PtParticle = m_World->AddComponent<Components::Particle>(Pt);
-//				auto PtTemplate = m_World->AddComponent<Components::Template>(Pt);
-//
-//				PtTransform->Velocity = glm::vec3(1.0f, 0.f, 0.f);
-//				PtTransform->Position = transform->Position;
-//				PtSprite->SpriteFile = "Textures/Ball.png";
-//
-//				//PtModel->ModelFile = "Models/Brick/Brick.obj";
-//				PtParticle->LifeTime = 1000.f;
-//				PtParticle->Flags = ParticleFlags::Type::powderParticle;
-//			}
-//			m_World->CommitEntity(Pe);
-//		}
-
-//		{
-//			auto Pt = m_World->CreateEntity();
-//			auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
-//			auto PtSprite = m_World->AddComponent<Components::Sprite>(Pt);
-//
-//			PtTransform->Position = glm::vec3(2.f, 0.f, -10.f);
-//			PtSprite->SpriteFile = "Textures/Ball.png";
-//		}
-		
 		//Water test
 		{
 			auto t_waterBody = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
 			transform->Position = glm::vec3(0.f, -5.5f, -10.f);
-			transform->Scale = glm::vec3(7.f, 1.5f, 1.f);
+			transform->Scale = glm::vec3(0.2f, 0.2f, 1.f);
 			auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
 			auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
 			m_World->CommitEntity(t_waterBody);
+		}
+
+		//ParticleTest
+		{
+			auto Pe = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(Pe);
+			auto particleEmitter= m_World->AddComponent<Components::ParticleEmitter>(Pe);
+
+			transform->Position = glm::vec3(0.f, -5.f, -10.f);
+			particleEmitter->GravityScale = 0.0f;
+			particleEmitter->SpawnRate = 1.0f;
+			particleEmitter->NumberOfTicks = 3.f;
+
+			{
+				auto Pt = m_World->CreateEntity(Pe);
+				auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
+				auto PtSprite = m_World->AddComponent<Components::Sprite>(Pt);
+				auto PtParticle = m_World->AddComponent<Components::Particle>(Pt);
+				auto PtTemplate = m_World->AddComponent<Components::Template>(Pt);
+
+				PtTransform->Velocity = glm::vec3(1.0f, 0.f, 0.f);
+				PtTransform->Position = transform->Position;
+				PtSprite->SpriteFile = "Textures/Test/Water.png";
+				PtParticle->LifeTime = 5.f;
+				PtParticle->Flags = ParticleFlags::Type::powderParticle;
+			}
+			m_World->CommitEntity(Pe);
+		}
+
+		{
+			auto Pt = m_World->CreateEntity();
+			auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
+			auto PtSprite = m_World->AddComponent<Components::Sprite>(Pt);
+			auto PtParticle = m_World->AddComponent<Components::Particle>(Pt);
+
+			PtTransform->Velocity = glm::vec3(1.0f, 0.f, 0.f);
+			PtTransform->Position = glm::vec3(0.f, 0.f, -10.f);
+			PtSprite->SpriteFile = "Textures/Ball.png";
+			//PtModel->ModelFile = "Models/Brick/Brick.obj";
 		}
 
 		//TODO: Why does the ball not collide with these bricks?
@@ -261,7 +262,7 @@ public:
 		{
 			auto topWall = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(topWall);
-			transform->Position = glm::vec3(0.f, -6.f, -9.9f);
+			transform->Position = glm::vec3(0.f, -7.f, -9.9f);
 			transform->Scale = glm::vec3(10.f, 0.5f, 1.f);
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";

@@ -31,7 +31,14 @@ void dd::Systems::PhysicsSystem::InitializeWater()
 {
     float radius = 0.13f;
     float gravityScale = 1.0f;
-    CreateParticleSystem(radius, gravityScale);
+
+    b2ParticleSystemDef m_ParticleSystemDef;
+    m_ParticleSystemDef.radius = radius;
+    m_ParticleSystemDef.gravityScale = gravityScale;
+
+    m_WaterParticleSystem = m_PhysicsWorld->CreateParticleSystem(&m_ParticleSystemDef);
+
+
 }
 
 bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
@@ -76,7 +83,6 @@ void dd::Systems::PhysicsSystem::Update(double dt) {
                 continue;
                 LOG_ERROR("RigidBody with no PhysicsComponent");
             }
-
 
             if (body == nullptr) {
                 LOG_ERROR("This body should not exist");
@@ -146,8 +152,32 @@ void dd::Systems::PhysicsSystem::Update(double dt) {
             }
         }
 
+
+
+        //water
+        b2Vec2 *positionBuffer = m_WaterParticleSystem->GetPositionBuffer();
+        for (auto i : m_EntitiesToWaterParticleHandle){
+            EntityID entity = i.first;
+            b2ParticleHandle *particleH = i.second;
+
+
+            b2Vec2 positionB2 = positionBuffer[particleH->GetIndex()];
+            glm::vec2 position = glm::vec2(positionB2.x, positionB2.y);
+
+            EntityID entityParent = m_World->GetEntityParent(entity);
+            glm::vec3 parentTransform = glm::vec3(0.f);
+            if(entityParent) {
+                auto tp = m_World->GetComponent<Components::Transform>(entityParent);
+                parentTransform = tp->Position;
+            }
+            auto transform = m_World->GetComponent<Components::Transform>(entity);
+
+            transform->Position = glm::vec3(position.x, position.y, -10);
+        }
+
+        //Normal particles
         for ( int e = 0; e < m_EntitiesToParticleHandle.size(); e++) {
-            b2Vec2 *positionBuffer = m_ParticleSystem[e]->GetPositionBuffer();
+            b2Vec2 *positionBuffer = m_ParticleEmitters.ParticleSystem[e]->GetPositionBuffer();
             for (auto i : m_EntitiesToParticleHandle[e]){
                 EntityID entity = i.first;
                 b2ParticleHandle *particleH = i.second;
@@ -163,8 +193,7 @@ void dd::Systems::PhysicsSystem::Update(double dt) {
                 }
                 auto transform = m_World->GetComponent<Components::Transform>(entity);
 
-                transform->Position = glm::vec3(position.x, position.y, -10) - parentTransform;
-
+                transform->Position = glm::vec3(position.x, position.y, -10);
             }
         }
 
@@ -280,7 +309,7 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
 
 
     if(physicsComponent->Static) {
-        body->CreateFixture(&fixtureDef); //Density kanske ska vara 0 på statiska kroppar
+        body->CreateFixture(&fixtureDef); //Density kanske ska vara 0 pï¿½ statiska kroppar
     }
     else {
         fixtureDef.shape = pShape;
@@ -314,19 +343,19 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
         pd.shape = &shape;
         pd.flags = b2_tensileParticle;
         pd.position.Set(transform->Position.x, transform->Position.y);
-        t_ParticleGroup.push_back(m_ParticleSystem[0]->CreateParticleGroup(pd));
-        b2Vec2* t_ParticlePositions = m_ParticleSystem[0]->GetPositionBuffer();
-        for(int i = 0; i < m_ParticleSystem[0]->GetParticleCount(); i++){
+        t_ParticleGroup.push_back(m_WaterParticleSystem->CreateParticleGroup(pd));
+        b2Vec2* t_ParticlePositions = m_WaterParticleSystem->GetPositionBuffer();
+        for(int i = 0; i < m_WaterParticleSystem->GetParticleCount(); i++){
             {
                 auto t_waterparticle = m_World->CreateEntity(e);
                 auto transformChild = m_World->AddComponent<Components::Transform>(t_waterparticle);
 
                 transformChild->Position = glm::vec3(t_ParticlePositions[i].x - transform->Position.x, t_ParticlePositions[i].y - transform->Position.y, -9.5f);
-                transformChild->Scale = glm::vec3(m_ParticleSystem[0]->GetRadius())/transform->Scale;
+                transformChild->Scale = glm::vec3(m_WaterParticleSystem->GetRadius())/transform->Scale;
                 m_World->CommitEntity(t_waterparticle);
 
-                m_EntitiesToParticleHandle[0].insert(std::make_pair(t_waterparticle, m_ParticleSystem[0]->GetParticleHandleFromIndex(i)));
-                m_ParticleHandleToEntities[0].insert(std::make_pair( m_ParticleSystem[0]->GetParticleHandleFromIndex(i), t_waterparticle));
+                m_EntitiesToWaterParticleHandle.insert(std::make_pair(t_waterparticle, m_WaterParticleSystem->GetParticleHandleFromIndex(i)));
+                m_WaterParticleHandleToEntities.insert(std::make_pair(m_WaterParticleSystem->GetParticleHandleFromIndex(i), t_waterparticle));
             }
 
         }
@@ -336,6 +365,7 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
 
 void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 {
+    //TODO: ParticleEmitters system are more than one? Wtf?
     for (int i = 0; i < m_ParticleEmitters.ParticleSystem.size(); i++) {
         auto e = m_ParticleEmitters.ParticleEmitter[i];
         auto pt = m_ParticleEmitters.ParticleTemplate[i];
@@ -344,10 +374,21 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 
         auto emitter = m_World->GetComponent<Components::ParticleEmitter>(e);
         auto particleTemplate = m_World->GetComponent<Components::Particle>(pt);
-        emitter->TimeSinceLastSpawn += dt;
-        if(emitter->TimeSinceLastSpawn < emitter->SpawnRate) {
+        if(!emitter) {
+            LOG_INFO("ParticleEmitter Component is nil");
             continue;
         }
+        if(!particleTemplate) {
+            LOG_INFO("ParticleTemplate Component is nil.");
+            continue;
+        }
+
+
+        emitter->TimeSinceLastSpawn += dt;
+        if(emitter->TimeSinceLastSpawn < emitter->SpawnRate || emitter->NumberOfTicks < 1) {
+            continue;
+        }
+        emitter->NumberOfTicks--;
         emitter->TimeSinceLastSpawn -= emitter->SpawnRate;
         auto templateTransform = m_World->GetComponent<Components::Transform>(pt);
 
@@ -358,21 +399,16 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
         particleDef.velocity = b2Vec2(templateTransform->Velocity.x, templateTransform->Velocity.y);
         particleDef.position = b2Vec2(templateTransform->Position.x, templateTransform->Position.y);
 
+
         auto particle = m_World->CloneEntity(pt, 0);
         m_World->RemoveComponent<Components::Template>(particle);
+        auto transform = m_World->GetComponent<Components::Transform>(particle);
+        transform->Scale = glm::vec3 (particleTemplate->Radius * 2.f, particleTemplate->Radius * 2.f, 1);
 
         auto b2Particle = ps->CreateParticle(particleDef);
         auto b2ParticleHandle = ps->GetParticleHandleFromIndex(b2Particle);
         m_EntitiesToParticleHandle[i].insert(std::make_pair(particle, b2ParticleHandle));
         m_ParticleHandleToEntities[i].insert(std::make_pair(b2ParticleHandle, particle));
-
-        //TODO: Ta bort detta
-        int particles = 0;
-        for (auto i : m_EntitiesToParticleHandle)
-        {
-            particles += i.size();
-        }
-        LOG_INFO("--I have %i particles.", particles);
     }
 }
 
@@ -406,13 +442,14 @@ void dd::Systems::PhysicsSystem::CreateParticleEmitter(EntityID entity)
         pf++;
     }
     //TODO: Skicka med fler flaggor till particlesystemet;
-    m_ParticleEmitters.ParticleSystem.push_back(CreateParticleSystem(particle->Radius, 0.f));
+
+    m_ParticleEmitters.ParticleSystem.push_back(CreateParticleSystem(particle->Radius, 0.f, 0));
     m_ParticleEmitters.ParticleEmitter.push_back(entity);
     m_ParticleEmitters.ParticleTemplate.push_back(childEntity);
 }
 
 
-b2ParticleSystem* dd::Systems::PhysicsSystem::CreateParticleSystem(float radius, float gravityScale)
+b2ParticleSystem* dd::Systems::PhysicsSystem::CreateParticleSystem(float radius, float gravityScale, int maxCount)
 {
     std::unordered_map<EntityID, const b2ParticleHandle*> m1;
     std::unordered_map<const b2ParticleHandle*, EntityID> m2;
@@ -420,12 +457,11 @@ b2ParticleSystem* dd::Systems::PhysicsSystem::CreateParticleSystem(float radius,
     m_ParticleHandleToEntities.push_back(m2);
 
     b2ParticleSystemDef m_ParticleSystemDef;
+    m_ParticleSystemDef.maxCount = maxCount;
     m_ParticleSystemDef.radius = radius;
     m_ParticleSystemDef.gravityScale = gravityScale;
 
-    m_ParticleSystem.push_back(m_PhysicsWorld->CreateParticleSystem(&m_ParticleSystemDef));
-
-    return m_ParticleSystem.back();
+    return m_PhysicsWorld->CreateParticleSystem(&m_ParticleSystemDef);
 }
 
 dd::Systems::PhysicsSystem::~PhysicsSystem()
