@@ -174,7 +174,7 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     std::shared_ptr<Components::Brick> cBrick = m_World->AddComponent<Components::Brick>(brick);
     std::shared_ptr<Components::RectangleShape> cRec = m_World->AddComponent<Components::RectangleShape>(brick);
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(brick);
-    cPhys->Static = false;
+    cPhys->CollisionType = CollisionType::Type::Dynamic;
     cPhys->GravityScale = 0.f;
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = CollisionLayer::Type::Ball;
@@ -331,7 +331,7 @@ bool dd::Systems::LevelSystem::OnCreatePowerUp(const dd::Events::CreatePowerUp &
     auto model = m_World->AddComponent<Components::Model>(powerUp);
     std::shared_ptr<Components::CircleShape> cRec = m_World->AddComponent<Components::CircleShape>(powerUp);
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(powerUp);
-    cPhys->Static = false;
+    cPhys->CollisionType = CollisionType::Type::Dynamic;
     cPhys->Category = CollisionLayer::Type::PowerUp;
     cPhys->Mask = CollisionLayer::Type::Pad;
 

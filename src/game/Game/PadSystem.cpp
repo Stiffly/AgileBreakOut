@@ -108,7 +108,7 @@ EntityID dd::Systems::PadSystem::CreateBall()
     std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
     std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
     std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-    physics->Static = false;
+    physics->CollisionType = CollisionType::Type::Dynamic;
     physics->Category = CollisionLayer::Type::Ball;
     physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
     physics->Calculate = true;

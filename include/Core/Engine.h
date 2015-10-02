@@ -145,7 +145,7 @@ public:
 			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
 			ball->Speed = 5.f;
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-			physics->Static = false;
+			physics->CollisionType = CollisionType::Type::Dynamic;
 			physics->Category = CollisionLayer::Type::Ball;
 			physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
 			physics->Calculate = true;
@@ -225,7 +225,7 @@ public:
 			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
 					topWall);
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
-			physics->Static = true;
+			physics->CollisionType = CollisionType::Type::Static;
 			m_World->CommitEntity(topWall);
 		}
 		//SideBox
@@ -271,7 +271,7 @@ public:
 					topWall);
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
-			physics->Static = true;
+			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Type::Wall;
 			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
 
@@ -292,7 +292,7 @@ public:
 					leftWall);
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(leftWall);
-			physics->Static = true;
+			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Type::Wall;
 			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
 
@@ -313,7 +313,7 @@ public:
 					rightWall);
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(rightWall);
-			physics->Static = true;
+			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Type::Wall;
 			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
 
@@ -328,7 +328,7 @@ public:
 			ctransform->Scale = glm::vec3(1.0f, 1.0f, 1.f);
 			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
 			auto physics = m_World->AddComponent<Components::Physics>(ent);
-			physics->Static = false;
+			physics->CollisionType = CollisionType::Type::Kinematic;
 			physics->Category = CollisionLayer::Type::Pad;
 			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::PowerUp;
 			physics->Calculate = true;

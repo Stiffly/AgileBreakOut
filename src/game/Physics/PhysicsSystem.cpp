@@ -240,11 +240,12 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
     bodyDef.position.Set(absoluteTransform.Position.x, absoluteTransform.Position.y);
     bodyDef.angle = -glm::eulerAngles(absoluteTransform.Orientation).z;
 
-    if (physicsComponent->Static) {
+    if (physicsComponent->CollisionType == CollisionType::Type::Static) {
         bodyDef.type = b2_staticBody;
-    } else {
+    } else if (physicsComponent->CollisionType == CollisionType::Type::Dynamic) {
         bodyDef.type = b2_dynamicBody;
-
+    } else if (physicsComponent->CollisionType == CollisionType::Type::Kinematic) {
+        bodyDef.type = b2_dynamicBody;
     }
 
     b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
@@ -284,11 +285,11 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
 
     delete pShape;
 
-    if(physicsComponent->Static) {
+  /*  if(physicsComponent->Static) {
         body->SetType(b2BodyType::b2_staticBody);
     } else if (! physicsComponent->Static) {
         body->SetType(b2BodyType::b2_dynamicBody);
-    }
+    }*/
 
     body->SetGravityScale(physicsComponent->GravityScale);
     m_EntitiesToBodies.insert(std::make_pair(entity, body));
