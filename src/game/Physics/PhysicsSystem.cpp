@@ -121,7 +121,7 @@ void dd::Systems::PhysicsSystem::SyncBodiesWithEntities()
             auto physicsComponent = m_World->GetComponent<Components::Physics>(entity);
 
             if (physicsComponent->Calculate) { //TODO: REPLACE THIS WITH PARTICLE COLLISION FILTERS
-                transformComponent->Position.x = transformComponent->Position.x + (transformComponent->Velocity.x * m_TimeStep);
+                //transformComponent->Position.x = transformComponent->Position.x + (transformComponent->Velocity.x * m_TimeStep);
                 transformComponent->Position.y = transformComponent->Position.y + (transformComponent->Velocity.y * m_TimeStep);
             } else {
                 b2Vec2 position = body->GetPosition();
@@ -149,6 +149,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
     while(m_Accumulator >= m_TimeStep)
     {
+
         UpdateParticleEmitters(dt);
         SyncEntitiesWithBodies();
 

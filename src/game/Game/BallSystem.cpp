@@ -344,6 +344,8 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
 
     transform1->Velocity = glm::normalize(glm::vec3(5, 5 ,0.f)) * ball1->Speed;
     transform2->Velocity = glm::normalize(glm::vec3(-5, 5 ,0.f)) * ball2->Speed;
+    //std::cout << "1: " <<transform1->Velocity.x << " " << transform1->Velocity.y << std::endl;
+    //std::cout << "2: " <<transform2->Velocity.x << " " << transform2->Velocity.y << std::endl;
 
     SetMultiBalls(MultiBalls() + 2);
 

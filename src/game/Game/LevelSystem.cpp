@@ -265,14 +265,14 @@ bool dd::Systems::LevelSystem::OnScoreEvent(const dd::Events::ScoreEvent &event)
 bool dd::Systems::LevelSystem::OnMultiBall(const dd::Events::MultiBall &event)
 {
     SetMultiBalls(MultiBalls()+2);
-    std::cout << MultiBalls() << std::endl;
+    //std::cout << MultiBalls() << std::endl;
     return true;
 }
 
 bool dd::Systems::LevelSystem::OnMultiBallLost(const dd::Events::MultiBallLost &event)
 {
     SetMultiBalls(MultiBalls()-1);
-    std::cout << MultiBalls() << std::endl;
+    //std::cout << MultiBalls() << std::endl;
     return true;
 }
 

@@ -16,7 +16,6 @@ void dd::Systems::HitLagSystem::Update(double dt)
     if (IsPaused()) {
         if (HitLag()) {
             SetHitLagTimer(HitLagTimer() += dt);
-            std::cout << HitLagTimer() << std::endl;
             if (HitLagDuration() < HitLagTimer()) {
                 SetHitLagTimer(0);
                 SetHitLag(false);
