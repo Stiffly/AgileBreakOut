@@ -73,9 +73,11 @@ private:
     glm::vec3 m_Acceleration = glm::vec3(0.f, 0.f, 0.f);
     bool m_Left = false;
     bool m_Right = false;
+    bool m_ReplaceBall = false;
+    bool m_MultiBall = false;
     float m_Edge = 2.8f;
-    Components::Transform* m_Transform;
-    Components::Pad* m_Pad;
+    Components::Transform* m_Transform = nullptr;
+    Components::Pad* m_Pad = nullptr;
 
     bool m_Pause = false;
 
