@@ -9,6 +9,7 @@
 #include "Core/System.h"
 #include "Core/Component.h"
 #include "Core/CTransform.h"
+#include "Core/CTemplate.h"
 #include "Core/EventBroker.h"
 #include "Core/EKeyDown.h"
 #include "Core/EKeyUp.h"
@@ -45,8 +46,6 @@ public:
     void Update(double dt) override;
     void UpdateEntity(double dt, EntityID entity, EntityID parent) override;
 
-    EntityID CreateBall();
-
     EntityID& Entity() { return m_Entity; }
     void SetEntity(const EntityID& ent) { m_Entity = ent; }
     glm::vec3 Acceleration() const { return m_Acceleration; }
@@ -56,10 +55,8 @@ public:
     void SetLeft(const bool& left) { m_Left = left; }
     bool Right() const { return m_Right; }
     void SetRight(const bool& right) { m_Right = right; }
-    bool ReplaceBall() const { return m_ReplaceBall; }
-    void SetReplaceBall(const bool& replaceBall) { m_ReplaceBall = replaceBall; }
-    bool MultiBall() const { return m_MultiBall; }
-    void SetMultiBall(const bool& multiBall) { m_MultiBall = multiBall; }
+    float Edge() const { return m_Edge; }
+    void SetEdge(const float& edge) { m_Edge = edge; }
 
     Components::Transform* Transform() const { return m_Transform; }
     void SetTransform(Components::Transform* transform) { m_Transform = transform; }
@@ -69,16 +66,18 @@ public:
 private:
     EntityID m_Entity = 0;
     glm::vec3 m_Acceleration = glm::vec3(0.f, 0.f, 0.f);
-    bool m_Left = false, m_Right = false, m_ReplaceBall = false, m_MultiBall = false;
-    Components::Transform* m_Transform;
-    Components::Pad* m_Pad;
+    bool m_Left = false;
+    bool m_Right = false;
+    bool m_ReplaceBall = false;
+    bool m_MultiBall = false;
+    float m_Edge = 2.8f;
+    Components::Transform* m_Transform = nullptr;
+    Components::Pad* m_Pad = nullptr;
 
     dd::EventRelay<PadSystem, dd::Events::KeyDown> m_EKeyDown;
     dd::EventRelay<PadSystem, dd::Events::KeyUp> m_EKeyUp;
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContactPowerUp;
-    dd::EventRelay<PadSystem, dd::Events::ResetBall> m_EResetBall;
-    dd::EventRelay<PadSystem, dd::Events::MultiBall> m_EMultiBall;
     dd::EventRelay<PadSystem, dd::Events::StageCleared> m_EStageCleared;
 
     bool OnKeyDown(const dd::Events::KeyDown &event);
@@ -86,8 +85,6 @@ private:
 
     bool OnContact(const dd::Events::Contact &event);
     bool OnContactPowerUp(const dd::Events::Contact &event);
-    bool OnResetBall(const dd::Events::ResetBall &event);
-    bool OnMultiBall(const dd::Events::MultiBall &event);
     bool OnStageCleared(const dd::Events::StageCleared &event);
 
     class PadSteeringInputController;

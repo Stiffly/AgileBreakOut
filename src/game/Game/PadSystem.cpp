@@ -26,23 +26,35 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, &PadSystem::OnKeyUp);
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &PadSystem::OnContact);
     EVENT_SUBSCRIBE_MEMBER(m_EContactPowerUp, &PadSystem::OnContactPowerUp);
-    EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &PadSystem::OnResetBall);
-    EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &PadSystem::OnMultiBall);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PadSystem::OnStageCleared);
+
+    {
+        auto ent = m_World->CreateEntity();
+        m_World->SetProperty(ent, "Name", "Pad");
+        auto ctransform = m_World->AddComponent<Components::Transform>(ent);
+        ctransform->Position = glm::vec3(0.f, -3.5f, -10.f);
+        ctransform->Scale = glm::vec3(1.0f, 1.0f, 1.f);
+        auto rectangleShape = m_World->AddComponent<Components::RectangleShape>(ent);
+        rectangleShape->Dimensions = glm::vec3(1.f, 0.5f);
+        auto physics = m_World->AddComponent<Components::Physics>(ent);
+        physics->CollisionType = CollisionType::Type::Dynamic;
+        physics->Category = CollisionLayer::Type::Pad;
+        physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::PowerUp;
+        physics->Calculate = true;
+        auto cModel = m_World->AddComponent<Components::Model>(ent);
+        cModel->ModelFile = "Models/Submarine2.obj";
+
+        auto pad = m_World->AddComponent<Components::Pad>(ent);
+        m_World->CommitEntity(ent);
+
+        SetEdge(3.2 - (ctransform->Scale.x / 2));
+    }
 }
 
 void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
-    auto ball = m_World->GetComponent<Components::Ball>(entity);
-    if (ball != nullptr) {
-        if (ReplaceBall() == true) {
-            SetReplaceBall(false);
-
-            auto transform = m_World->GetComponent<Components::Transform>(entity);
-            transform->Position = glm::vec3(0.0f, 0.26f, -10.f);
-            transform->Velocity = glm::vec3(0.0f, -ball->Speed, 0.f);
-        }
-    }
+    auto templateCheck = m_World->GetComponent<Components::Template>(entity);
+    if (templateCheck != nullptr){ return; }
 }
 
 void dd::Systems::PadSystem::Update(double dt)
@@ -69,9 +81,15 @@ void dd::Systems::PadSystem::Update(double dt)
         transform->Velocity.x = pad->MaxSpeed;
     }
     transform->Position += transform->Velocity * (float)dt;
+    if (transform->Position.x > Edge()) {
+        transform->Position.x = Edge();
+    } else if (transform->Position.x < -Edge()) {
+        transform->Position.x = -Edge();
+    }
     transform->Velocity += acceleration  * (float)dt;
-    transform->Velocity -= transform->Velocity * pad->SlowdownModifier * (float)dt;
-
+    if (glm::abs(transform->Velocity.x) > 1 || (!Left() && !Right())) {
+        transform->Velocity -= transform->Velocity * pad->SlowdownModifier * (float) dt;
+    }
 
     if (Left()) {
         acceleration.x = -pad->AccelerationSpeed;
@@ -85,38 +103,7 @@ void dd::Systems::PadSystem::Update(double dt)
     SetPad(pad);
     SetAcceleration(acceleration);
 
-    if (MultiBall() == true) {
-        SetMultiBall(false);
-
-        Events::MultiBall e;
-        e.padTransform = transform;
-        EventBroker->Publish(e);
-    }
-
     return;
-}
-
-EntityID dd::Systems::PadSystem::CreateBall()
-{
-    auto ent = m_World->CreateEntity();
-    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-    transform->Position = glm::vec3(0.5f, 0.26f, -10.f);
-    transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
-    auto model = m_World->AddComponent<Components::Model>(ent);
-    model->ModelFile = "Models/Test/Ball/Ballopus.obj";
-    //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
-    std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-    std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
-    std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-    physics->CollisionType = CollisionType::Type::Dynamic;
-    physics->Category = CollisionLayer::Type::Ball;
-    physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
-    physics->Calculate = true;
-    cball->Speed = 5.f;
-
-    m_World->CommitEntity(ent);
-
-    return ent;
 }
 
 bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
@@ -135,9 +122,12 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
         //acceleration.x = 0.01f;
         SetRight(true);
     } else if (val == GLFW_KEY_R) {
-        SetReplaceBall(true);
+        Events::ResetBall e;
+        EventBroker->Publish(e);
     } else if (val == GLFW_KEY_M) {
-        SetMultiBall(true);
+        Events::MultiBall e;
+        e.padTransform = Transform();
+        EventBroker->Publish(e);
     } else if (val == GLFW_KEY_D) {
         return false;
     }
@@ -251,40 +241,9 @@ bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
     return true;
 }
 
-bool dd::Systems::PadSystem::OnResetBall(const dd::Events::ResetBall &event)
-{
-    SetReplaceBall(true);
-    return true;
-}
-
-bool dd::Systems::PadSystem::OnMultiBall(const dd::Events::MultiBall &event)
-{
-    auto ent1 = CreateBall();
-    auto ent2 = CreateBall();
-    auto transform1 = m_World->GetComponent<Components::Transform>(ent1);
-    auto transform2 = m_World->GetComponent<Components::Transform>(ent2);
-    auto ball1 = m_World->GetComponent<Components::Ball>(ent1);
-    auto ball2 = m_World->GetComponent<Components::Ball>(ent2);
-    auto padTransform = event.padTransform;
-    float x1 = padTransform->Position.x - 2, x2 = padTransform->Position.x + 2;
-    if (x1 < -3.1) {
-        x1 = 3;
-    }
-    if (x2 > 3.1) {
-        x2 = -3;
-    }
-    transform1->Position = glm::vec3(x1, -5.5, -10);
-    transform2->Position = glm::vec3(x2, -5.5, -10);
-
-    transform1->Velocity = glm::normalize(glm::vec3(5, 5 ,0.f)) * ball1->Speed;
-    transform2->Velocity = glm::normalize(glm::vec3(-5, 5 ,0.f)) * ball2->Speed;
-
-    return true;
-}
-
 bool dd::Systems::PadSystem::OnStageCleared(const dd::Events::StageCleared &event)
 {
-    auto entity = CreateBall();
+    //auto entity = CreateBall();
     return true;
 }
 

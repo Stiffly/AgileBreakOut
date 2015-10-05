@@ -61,9 +61,9 @@ void main()
     sum += texture(WaterTexture, vec2(tc.x + 3.0*blur*hstep, tc.y + 3.0*blur*vstep)) * 0.0540540541;
     sum += texture(WaterTexture, vec2(tc.x + 4.0*blur*hstep, tc.y + 4.0*blur*vstep)) * 0.0162162162;
 
-    frag_Diffuse = vec4(sum.rgb, 1.0) * vec4(0.0, 0.6, 1.5, 1.0);
-    float avgColor = frag_Diffuse.r + frag_Diffuse.g + frag_Diffuse.b;
+    float avgColor = sum.r + sum.g + sum.b;
     avgColor = avgColor/3;
+    frag_Diffuse = vec4(sum.r, sum.g, sum.b, 1.0);
     if ( avgColor*dir.y > Threshhold ){
     		frag_Diffuse = vec4(0.0, 0.3, 1.0, 1.0);
     }
