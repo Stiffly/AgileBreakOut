@@ -65,10 +65,7 @@ public:
     void Initialize() override;
 
     void CreateBasicLevel(int, int, glm::vec2, float);
-    void SaveLevel(int, int, glm::vec2, int); // Shouldn't be here, but I'm experimenting.
-    void LoadLevel(char[20]);
     void CreateBrick(int, int, glm::vec2, float, int);
-    void ProcessCollision();
 
     void OnEntityRemoved(EntityID entity);
 

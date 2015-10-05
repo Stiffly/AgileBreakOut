@@ -38,25 +38,17 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     if (templateCheck != nullptr){ return; }
 
     auto ball = m_World->GetComponent<Components::Ball>(entity);
-    SetNotResettingTheStage(NotResettingTheStage() + 0.01 * dt);
 
     if (NumberOfBricks() <= 0 && Restarting() == false) {
-        if (MultiBalls() <= 0 && PowerUps() <= 0) {
-            if (NotResettingTheStage() > 5) {
-                SetRestarting(true);
-                Events::ResetBall e;
-                EventBroker->Publish(e);
-                Events::ScoreEvent es;
-                es.Score = 500;
-                EventBroker->Publish(es);
-                Events::StageCleared ec;
-                EventBroker->Publish(ec);
-                SetNotResettingTheStage(0);
-                //CreateBasicLevel(Rows(), Lines(), SpaceBetweenBricks(), SpaceToEdge());
-            }
+        /*if (MultiBalls() <= 0 && PowerUps() <= 0) {
+            //Events::StageCleared ec;
+            //EventBroker->Publish(ec);
         } else {
             if (ball != nullptr && MultiBalls() > 0) {
+                auto transformBall = m_World->GetComponent<Components::Transform>(entity);
                 SetMultiBalls(MultiBalls()-1);
+                transformBall->Velocity = glm::vec3(0, 0, 0);
+                ball->SavedSpeed = glm::vec3(0, 0, 0);
                 m_World->RemoveEntity(entity);
             } else {
                 auto powerUp = m_World->GetComponent<Components::PowerUp>(entity);
@@ -65,7 +57,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
                     m_World->RemoveEntity(entity);
                 }
             }
-        }
+        }*/
     }
 }
 
@@ -86,7 +78,6 @@ bool dd::Systems::LevelSystem::OnPause(const dd::Events::Pause &event)
 void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 spacesBetweenBricks, float spaceToEdge)
 {
     SetNumberOfBricks(rows * lines);
-    //std::cout << "You're only doing this once, right?" << std::endl;
     int num = Lines();
     for (int i = 0; i < rows; i++) {
         num--;
@@ -115,10 +106,6 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = CollisionLayer::Type::Ball;
 
-    /*std::string fileName = "Textures/Bricks/";
-    fileName.append(std::to_string(num));
-    fileName.append(".png");*/
-    //sprite->SpriteFile =  fileName;
     model->ModelFile = "Models/Test/Brick/Brick.obj";
     if ((line == 1 && row == 4) || (line == 3 && row == 2) || (line == 5 && row == 2)) {
         std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
@@ -137,25 +124,9 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     return;
 }
 
-void dd::Systems::LevelSystem::ProcessCollision()
-{
-    // Like, go into brick component and check what it does upon collision. Maybe not done here?
-    return;
-}
-
 void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
 {
-    /*auto brick = m_World->GetComponent<Components::Brick>(entity);
-    if (brick != nullptr) {
-        SetNumberOfBricks(NumberOfBricks() - 1);
-        Events::ScoreEvent es;
-        es.Score = brick->Score;
-        EventBroker->Publish(es);
-        if (numberOfBricks < 1) {
-            EndLevel();
-        }
-    }
-    return;*/
+
 }
 
 bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
@@ -164,6 +135,8 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
     EntityID entityBall;
     auto ball = m_World->GetComponent<Components::Ball>(event.Entity2);
     auto brick = m_World->GetComponent<Components::Brick>(event.Entity1);
+
+    //This code ensures that it is a brick and a ball that has come into contact.
     if (brick != nullptr) {
         entityBrick = event.Entity1;
     } else {
@@ -227,9 +200,6 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 
 
         SetNumberOfBricks(NumberOfBricks() - 1);
-        if (NumberOfBricks() <= 0) {
-            //SetMultiBalls(MultiBalls() + 1);
-        }
         Events::ScoreEvent es;
         es.Score = brick->Score * ball->Combo;
         EventBroker->Publish(es);
@@ -245,7 +215,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 
 bool dd::Systems::LevelSystem::OnScoreEvent(const dd::Events::ScoreEvent &event)
 {
-    //SetScore(Score() += event.Score);
+    SetScore(Score() += event.Score);
 
     return true;
 }
@@ -298,6 +268,12 @@ bool dd::Systems::LevelSystem::OnPowerUpTaken(const dd::Events::PowerUpTaken &ev
 
 bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &event)
 {
+    SetRestarting(true);
+    Events::ResetBall e;
+    EventBroker->Publish(e);
+    Events::ScoreEvent es;
+    es.Score = 500;
+    EventBroker->Publish(es);
     return true;
 }
 

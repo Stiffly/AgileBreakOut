@@ -177,47 +177,7 @@ bool dd::Systems::PadSystem::OnKeyUp(const dd::Events::KeyUp &event)
 
 bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
 {
-    /*
-    EntityID entityBall = event.Entity2;
-    auto ball = m_World->GetComponent<Components::Ball>(entityBall);
-    if (ball == NULL) {
-        return false;
-    }
-    EntityID entityPad = event.Entity1;
-    auto pad = m_World->GetComponent<Components::Pad>(entityPad);
-    if (pad == NULL) {
-        return false;
-    }
-    auto transformBall = m_World->GetComponent<Components::Transform>(entityBall);
-    auto transformPad = m_World->GetComponent<Components::Transform>(entityPad);
 
-    float movementMultiplier = 0.5f;
-
-    //float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
-    //float movementY = glm::cos((abs(movementX) / (3.2f * movementMultiplier)) * 3.14159265359f / 2) * 2.f;
-    if (whatX > 0) {
-        movementX = movementMultiplier * whatX;
-        //std::cout << "Right!" << std::endl;
-    } else {
-        movementX = movementMultiplier * whatX;
-        //std::cout << "Left!" << std::endl;
-    }
-
-   // std::cout << movementX << " " << movementY << std::endl;
-
-    //float movementX = (event.ContactPoint.x - transformPad->Position.x) * movementMultiplier;
-    float movementY = glm::cos((abs(movementX) / ((1.6f) * movementMultiplier)) * 3.14159265359f / 2)+ 0.2;
-    //std::cout << movementX << " " << movementY << std::endl;
-    float len = glm::length<float>(transformBall->Velocity);
-    //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
-
-
-    transformBall->Velocity += glm::vec3(transformPad->Velocity.x, 0, 0);
-    transformBall->Velocity = glm::normalize(transformBall->Velocity) * len;
-
-
-    //transform->Velocity = glm::vec3(movementX, movementY, 0.f);
-     */
 }
 
 bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
@@ -252,9 +212,6 @@ bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
         return false;
     }
 
-//    m_World->RemoveComponent<Components::PowerUp>(entityPower);
-//    m_World->RemoveComponent<Components::CircleShape>(entityPower);
-//    m_World->RemoveComponent<Components::Physics>(entityPower);
     m_World->RemoveEntity(entityPower);
     Events::PowerUpTaken ep;
     ep.Name = "Something";

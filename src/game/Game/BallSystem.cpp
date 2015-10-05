@@ -120,6 +120,8 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 //                m_World->RemoveComponent<Components::Transform>(entity);
 //                m_World->RemoveComponent<Components::CircleShape>(entity);
 //                m_World->RemoveComponent<Components::Physics>(entity);
+                transformBall->Velocity = glm::vec3(0, 0, 0);
+                ballComponent->SavedSpeed = glm::vec3(0, 0, 0);
                 m_World->RemoveEntity(entity);
                 Events::MultiBallLost e;
                 EventBroker->Publish(e);
