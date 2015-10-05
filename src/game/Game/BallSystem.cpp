@@ -116,10 +116,6 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
         }
         if (transformBall->Position.y < -EdgeY() - 4) {
             if (MultiBalls() != 0) {
-//                m_World->RemoveComponent<Components::Ball>(entity);
-//                m_World->RemoveComponent<Components::Transform>(entity);
-//                m_World->RemoveComponent<Components::CircleShape>(entity);
-//                m_World->RemoveComponent<Components::Physics>(entity);
                 m_World->RemoveEntity(entity);
                 Events::MultiBallLost e;
                 EventBroker->Publish(e);
@@ -153,8 +149,6 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
         auto life = m_World->GetComponent<Components::Life>(entity);
         if (life != nullptr) {
             if (life->Number + 1 == PastLives()) {
-                m_World->RemoveComponent<Components::Life>(entity);
-                m_World->RemoveComponent<Components::Transform>(entity);
                 m_World->RemoveEntity(entity);
                 SetPastLives(Lives());
             }
@@ -236,6 +230,9 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
     glm::vec2 ballVelocity = glm::vec2(ballTransform->Velocity.x, ballTransform->Velocity.y);
 
     if (m_World->GetProperty<std::string>(otherEntitiy, "Name") == "Pad"){
+        Events::HitPad e;
+        EventBroker->Publish(e);
+
         auto padTransform = m_World->GetComponent<Components::Transform>(otherEntitiy);
         float x = (ballTransform->Position.x - padTransform->Position.x) * XMovementMultiplier();
 
@@ -262,25 +259,6 @@ EntityID dd::Systems::BallSystem::CreateBall()
     auto ent = m_World->CloneEntity(Ball());
 
     m_World->RemoveComponent<Components::Template>(ent);
-
-   /* auto ent = m_World->CreateEntity();
-    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-    transform->Position = glm::vec3(0.5f, 0.26f, -10.f);
-    transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
-    auto model = m_World->AddComponent<Components::Model>(ent);
-    model->ModelFile = "Models/Test/Ball/Ballopus.obj";
-    //auto pointlight = m_World->AddComponent<Components::PointLight>(ent);
-    std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-    std::shared_ptr<Components::Ball> cball = m_World->AddComponent<Components::Ball>(ent);
-    std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-    physics->Static = false;
-    physics->Category = CollisionLayer::Type::Ball;
-    physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
-    physics->Calculate = true;
-    cball->Speed = 5.f;
-
-    auto plight = m_World->AddComponent<Components::PointLight>(ent);
-    plight->Radius = 2.f;*/
 
     m_World->CommitEntity(ent);
 

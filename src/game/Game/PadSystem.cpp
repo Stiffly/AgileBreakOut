@@ -252,9 +252,6 @@ bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
         return false;
     }
 
-//    m_World->RemoveComponent<Components::PowerUp>(entityPower);
-//    m_World->RemoveComponent<Components::CircleShape>(entityPower);
-//    m_World->RemoveComponent<Components::Physics>(entityPower);
     m_World->RemoveEntity(entityPower);
     Events::PowerUpTaken ep;
     ep.Name = "Something";

@@ -21,6 +21,7 @@
 #include "Game/EMultiBallLost.h"
 #include "Game/EGameOver.h"
 #include "Game/EPause.h"
+#include "Game/EHitPad.h"
 
 namespace dd
 {
