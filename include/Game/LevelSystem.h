@@ -107,6 +107,7 @@ private:
     bool m_Restarting = false;
     bool m_Initialized = false;
     bool m_Pause = false;
+    int m_LooseBricks = 0;
     int m_CurrentCluster = 2;
     int m_CurrentLevel = 1;
     int m_MultiBalls = 0;
@@ -118,6 +119,8 @@ private:
     float m_SpaceToEdge = 0.25f;
     glm::vec2 m_SpaceBetweenBricks = glm::vec2(1, 0.4);
     float m_NotResettingTheStage = 5.f;
+
+    EntityID m_BrickTemplate;
 
     std::array<int, 42> m_Bricks;
 

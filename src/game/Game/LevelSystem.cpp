@@ -19,6 +19,32 @@ void dd::Systems::LevelSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &LevelSystem::OnPause);
     EVENT_SUBSCRIBE_MEMBER(m_EHitPad, &LevelSystem::OnHitPad);
 
+    m_BrickTemplate = m_World->CreateEntity();
+    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(m_BrickTemplate);
+    auto model = m_World->AddComponent<Components::Model>(m_BrickTemplate);
+    std::shared_ptr<Components::Brick> cBrick = m_World->AddComponent<Components::Brick>(m_BrickTemplate);
+    std::shared_ptr<Components::RectangleShape> cRec = m_World->AddComponent<Components::RectangleShape>(m_BrickTemplate);
+    std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(m_BrickTemplate);
+    std::shared_ptr<Components::Template> cTemplate = m_World->AddComponent<Components::Template>(m_BrickTemplate);
+    cPhys->Static = false;
+    cPhys->GravityScale = 0.f;
+    cPhys->Category = CollisionLayer::Type::Brick;
+    cPhys->Mask = CollisionLayer::Type::Ball;
+
+    model->ModelFile = "Models/Test/Brick/Brick.obj";
+    /*if ((line == 1 && row == 4) || (line == 3 && row == 2) || (line == 5 && row == 2)) {
+        std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
+    }*/
+
+    transform->Scale = glm::vec3(0.8, 0.2, 0.2);
+    transform->Position = glm::vec3(50, 50, -10);
+
+    //sound
+    auto collisionSound = m_World->AddComponent<Components::CollisionSound>(m_BrickTemplate);
+    collisionSound->FilePath = "Sounds/Brick/shortbrickbreak.wav";
+
+    m_World->CommitEntity(m_BrickTemplate);
+
     return;
 }
 
@@ -40,9 +66,20 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
 
+    auto brick = m_World->GetComponent<Components::Brick>(entity);
+    if (brick != nullptr) {
+        auto transform = m_World->GetComponent<Components::Transform>(entity);
+        //Removes bricks that falls out of the stage.
+        if (transform->Position.y < -10) {
+            m_LooseBricks--;
+            std::cout << m_LooseBricks << std::endl;
+            m_World->RemoveEntity(entity);
+        }
+    }
+
     auto ball = m_World->GetComponent<Components::Ball>(entity);
 
-    if (NumberOfBricks() <= 0 && !Restarting()) {
+    if (NumberOfBricks() <= 0 && m_LooseBricks <= 0 && !Restarting()) {
         if (MultiBalls() <= 0 && PowerUps() <= 0) {
             Events::StageCleared ec;
             EventBroker->Publish(ec);
@@ -56,6 +93,12 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
                 if (powerUp != nullptr) {
                     SetPowerUps(PowerUps() - 1);
                     m_World->RemoveEntity(entity);
+                } else {
+                    if (brick != nullptr) {
+                        m_LooseBricks--;
+                        std::cout << m_LooseBricks << std::endl;
+                        m_World->RemoveEntity(entity);
+                    }
                 }
             }
         }
@@ -111,6 +154,7 @@ void dd::Systems::LevelSystem::CreateLevel()
         if (num == 1)
             num = Lines();
     }
+    m_LooseBricks = NumberOfBricks();
     SetRestarting(false);
 }
 
@@ -120,12 +164,18 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
         SetNumberOfBricks(NumberOfBricks() - 1);
         return;
     }
+    //auto brick = m_World->CloneEntity(m_BrickTemplate);
+    //m_World->RemoveComponent<Components::Template>(brick);
+    //auto transform = m_World->GetComponent<Components::Transform>(brick);
+    //auto cBrick = m_World->GetComponent<Components::Brick>(brick);
+    //auto cPhys = m_World->GetComponent<Components::Physics>(brick);
     auto brick = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(brick);
     auto model = m_World->AddComponent<Components::Model>(brick);
     std::shared_ptr<Components::Brick> cBrick = m_World->AddComponent<Components::Brick>(brick);
     std::shared_ptr<Components::RectangleShape> cRec = m_World->AddComponent<Components::RectangleShape>(brick);
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(brick);
+    //std::shared_ptr<Components::Template> cTemplate = m_World->AddComponent<Components::Template>(brick);
     cPhys->Static = false;
     cPhys->GravityScale = 0.f;
     cPhys->Category = CollisionLayer::Type::Brick;
@@ -135,6 +185,8 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     /*if ((line == 1 && row == 4) || (line == 3 && row == 2) || (line == 5 && row == 2)) {
         std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
     }*/
+
+    transform->Scale = glm::vec3(0.8, 0.2, 0.2);
     if (typeInt == 2) {
         std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
     }
@@ -143,10 +195,6 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     transform->Scale = glm::vec3(0.8, 0.2, 0.2);
     transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y , -10.f);
     cBrick->Score = 10 * num;
-
-    //sound
-    auto collisionSound = m_World->AddComponent<Components::CollisionSound>(brick);
-    collisionSound->FilePath = "Sounds/Brick/shortbrickbreak.wav";
 
     m_World->CommitEntity(brick);
     return;
@@ -356,12 +404,12 @@ void dd::Systems::LevelSystem::GetNextLevel()
     } else if (m_CurrentCluster == 2) {
         if (m_CurrentLevel == 1) {
             level =
-                    {1, 1, 0, 0, 0, 1, 1,
-                     1, 1, 1, 0, 1, 1, 1,
+                    {1, 1, 0, 1, 0, 1, 1,
+                     1, 1, 1, 1, 1, 1, 1,
                      1, 1, 1, 1, 1, 1, 1,
                      1, 2, 1, 2, 1, 2, 1,
-                     1, 1, 0, 0, 0, 1, 1,
-                     1, 0, 0, 0, 0, 0, 1};
+                     1, 1, 0, 1, 0, 1, 1,
+                     1, 0, 0, 1, 0, 0, 1};
         } else if (m_CurrentLevel == 2) {
             level =
                     {1, 0, 0, 0, 0, 0, 1,
