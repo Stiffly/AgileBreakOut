@@ -186,10 +186,11 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     model->ModelFile = "Models/Test/Brick/Brick.obj";
     if ((line == 1 && row == 4) || (line == 3 && row == 2) || (line == 6 && row == 6)) {
         std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
+        model->ModelFile = "Models/Brick/IceBrick.obj";
     }
     float x = line * spacesBetweenBricks.x;
     float y = row * spacesBetweenBricks.y;
-    transform->Scale = glm::vec3(0.8, 0.2, 0.2);
+    //transform->Scale = glm::vec3(0.8, 0.2, 0.2);
     transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y , -10.f);
     cBrick->Score = 10 * num;
 

@@ -252,20 +252,16 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
 
     b2Shape* pShape;
 
-    auto boxComponent = m_World->GetComponent<Components::RectangleShape>(entity);
-    if (boxComponent) {
+    auto rectangleComponent = m_World->GetComponent<Components::RectangleShape>(entity);
+    if (rectangleComponent) {
         b2PolygonShape* bShape = new b2PolygonShape();
-        bShape->SetAsBox(absoluteTransform.Scale.x/2, absoluteTransform.Scale.y/2);
+        bShape->SetAsBox(rectangleComponent->Dimensions.x/2.f, rectangleComponent->Dimensions.y/2.f);
         pShape = bShape;
     } else {
         auto circleComponent = m_World->GetComponent<Components::CircleShape>(entity);
         if (circleComponent) {
             pShape = new b2CircleShape();
-            pShape->m_radius = absoluteTransform.Scale.x/2;
-
-            if (absoluteTransform.Scale.x != absoluteTransform.Scale.y &&  absoluteTransform.Scale.y != absoluteTransform.Scale.z) {
-                LOG_WARNING("Circles has to be of uniform scale. xScale has been used for radius");
-            }
+            pShape->m_radius = circleComponent->Radius;
         }
     }
 
