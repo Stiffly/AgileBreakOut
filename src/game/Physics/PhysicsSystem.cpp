@@ -27,9 +27,8 @@ void dd::Systems::PhysicsSystem::InitializeWater()
 
 bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
 {
-    b2Body* body = m_EntitiesToBodies[event.Entity];
-
-    if (body == nullptr) {
+    auto it = m_EntitiesToBodies.find(event.Entity);
+    if(it == m_EntitiesToBodies.end()) {
         LOG_ERROR("Entity: %i, Tried to set an impulse on a body that does not exsist", event.Entity);
         return false;
     }
@@ -43,7 +42,7 @@ bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
     point.y = event.Point.y;
 
     Impulse i;
-    i.Body = body;
+    i.Body = it->second;
     i.Impulse = impulse;
     i.Point = point;
 
@@ -244,21 +243,21 @@ void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)
 
 void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
 {
-    auto physics = m_World->GetComponent<Components::Physics>(entity);
+   /* auto physics = m_World->GetComponent<Components::Physics>(entity);
     if (physics == nullptr) {
         return;
-    }
+    }*/
 
-    b2Body* body = m_EntitiesToBodies[entity];
-    if (body == nullptr) {
+    auto it = m_EntitiesToBodies.find(entity);
+    if(it == m_EntitiesToBodies.end()) {
         LOG_ERROR("Trying to remove non-exsisting body, Entity: %i", entity);
         return;
     }
 
+    LOG_INFO("Removing entity %i", entity);
+    it->second->GetWorld()->DestroyBody(it->second);
+    m_BodiesToEntities.erase(it->second);
     m_EntitiesToBodies.erase(entity);
-    m_BodiesToEntities.erase(body);
-
-    body->GetWorld()->DestroyBody(body);
     //delete body;
 }
 

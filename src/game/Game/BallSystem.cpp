@@ -72,6 +72,8 @@ void dd::Systems::BallSystem::Update(double dt)
 
 void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
+    //TODO: When the ball collides with 2 bricks on the same frame it is reflected and then reflected again, make it reflect only once like a list or something?
+
     auto ballComponent = m_World->GetComponent<Components::Ball>(entity);
     if (IsPaused()) {
         if (ballComponent != nullptr) {
@@ -128,7 +130,8 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 EventBroker->Publish(e);
                 return;
             }
-        } else if (transformBall->Position.x > EdgeX()) {
+        } //Removing this made the wall collisions work again
+         /*else if (transformBall->Position.x > EdgeX()) {
             if (transformBall->Velocity.x > 0) {
                 glm::vec2 reflectedVelocity = glm::reflect(glm::vec2(transformBall->Velocity.x, transformBall->Velocity.y), glm::vec2(1, 0));
                 transformBall->Velocity = glm::vec3(reflectedVelocity, 0.f);
@@ -143,7 +146,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 glm::vec2 reflectedVelocity = glm::reflect(glm::vec2(transformBall->Velocity.x, transformBall->Velocity.y), glm::vec2(0, 1));
                 transformBall->Velocity = glm::vec3(reflectedVelocity, 0.f);
             }
-        }
+        }*/
     }
 
     if (Lives() != PastLives()) {
@@ -250,10 +253,10 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
     if (m_World->GetProperty<std::string>(otherEntitiy, "Name") == "Pad"){
         Events::HitPad e;
         EventBroker->Publish(e);
-        Events::HitLag el;
-        el.Time = 0.1f;
-        el.Type = "All";
-        EventBroker->Publish(el);
+       // Events::HitLag el;
+       // el.Time = 0.1f;
+        //el.Type = "All";
+       // EventBroker->Publish(el);
 
         auto padTransform = m_World->GetComponent<Components::Transform>(otherEntitiy);
         float x = (ballTransform->Position.x - padTransform->Position.x) * XMovementMultiplier();

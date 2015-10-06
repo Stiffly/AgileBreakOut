@@ -237,51 +237,22 @@ public:
 		//TODO: Why does the ball not collide with these bricks?
 		//BottomBox
 		{
-			auto topWall = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(topWall);
-			transform->Position = glm::vec3(0.f, -6.f, -9.9f);
-			transform->Scale = glm::vec3(10.f, 0.5f, 1.f);
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+			auto BottomWall = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(BottomWall);
+			transform->Position = glm::vec3(0.f, -6.f, -10.f);
+			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
-			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(topWall);
-			rectangleShape->Dimensions = glm::vec2(10.f, 0.5f);
-			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
+			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(BottomWall);
+			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
 			physics->CollisionType = CollisionType::Type::Static;
-			m_World->CommitEntity(topWall);
+			m_World->CommitEntity(BottomWall);
 		}
-		//SideBox
-//		{
-//			auto topWall = m_World->CreateEntity();
-//			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
-//			transform->Position = glm::vec3(3.f, -3.0f, -9.9f);
-//			transform->Scale = glm::vec3(0.5f, 3.f, 1.f);
-//			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
-//			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
-//			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
-//					topWall);
-//			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
-//			physics->Static = true;
-//			m_World->CommitEntity(topWall);
-//		}
-//		//OtherSideBox
-//		{
-//			auto topWall = m_World->CreateEntity();
-//			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
-//			transform->Position = glm::vec3(-4.f, -3.0f, -9.9f);
-//			transform->Scale = glm::vec3(0.5f, 3.0f, 1.f);
-//			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
-//			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
-//			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
-//					topWall);
-//			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
-//			physics->Static = true;
-//			m_World->CommitEntity(topWall);
-//		}
 
 		{
 			auto topWall = m_World->CreateEntity();
-			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
-					topWall);
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
 			transform->Position = glm::vec3(0.f, 6.f, -10.f);
 			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
 
