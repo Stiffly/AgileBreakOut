@@ -40,8 +40,7 @@ public:
 
     ~BallSystem();
 
-    EventRelay<BallSystem, Events::Contact> m_Contact;
-    bool Contact(const Events::Contact &event);
+
 
     void RegisterComponents(ComponentFactory *cf) override;
 
@@ -100,12 +99,17 @@ private:
 
     EntityID m_Ball;
 
+    std::unordered_map<EntityID, std::list<glm::vec2>> m_Contacts;
+    void ResolveContacts();
+
     dd::EventRelay<BallSystem, dd::Events::LifeLost> m_ELifeLost;
     dd::EventRelay<BallSystem, dd::Events::MultiBallLost> m_EMultiBallLost;
     dd::EventRelay<BallSystem, dd::Events::ResetBall> m_EResetBall;
     dd::EventRelay<BallSystem, dd::Events::MultiBall> m_EMultiBall;
     dd::EventRelay<BallSystem, dd::Events::Pause> m_EPause;
+    EventRelay<BallSystem, Events::Contact> m_Contact;
 
+    bool Contact(const Events::Contact &event);
     bool OnLifeLost(const dd::Events::LifeLost &event);
     bool OnMultiBallLost(const dd::Events::MultiBallLost &event);
     bool OnResetBall(const dd::Events::ResetBall &event);

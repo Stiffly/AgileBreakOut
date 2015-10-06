@@ -254,7 +254,7 @@ void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
         return;
     }
 
-    LOG_INFO("Removing entity %i", entity);
+    //LOG_INFO("Removing entity %i", entity);
     it->second->GetWorld()->DestroyBody(it->second);
     m_BodiesToEntities.erase(it->second);
     m_EntitiesToBodies.erase(entity);

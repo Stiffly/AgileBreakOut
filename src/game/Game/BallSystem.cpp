@@ -25,12 +25,12 @@ void dd::Systems::BallSystem::Initialize()
         auto ent = m_World->CreateEntity();
         std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
         transform->Position = glm::vec3(-0.f, 50.26f, -10.f);
-        transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
+        transform->Scale = glm::vec3(0.2f, 0.2f, 0.2f);
         transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
         auto model = m_World->AddComponent<Components::Model>(ent);
-        model->ModelFile = "Models/Test/Ball/Ballopus.obj";
+        model->ModelFile = "Models/Test/Ball/Sid.obj";
         std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-        circleShape->Radius = 0.5f;
+        circleShape->Radius = 0.2f;
         std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
         ball->Speed = 5.f;
         std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
@@ -68,6 +68,7 @@ void dd::Systems::BallSystem::Update(double dt)
         Events::GameOver e;
         EventBroker->Publish(e);
     }
+    ResolveContacts();
 }
 
 void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
@@ -272,11 +273,52 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         //std::cout << "Combo: " << ballComponent->Combo << std::endl;
     }
     else {
-        glm::vec2 reflectedVelocity = glm::reflect(ballVelocity, event.Normal);
-        ballTransform->Velocity = glm::vec3(reflectedVelocity, 0.f);
+        auto it = m_Contacts.find(ballEntity);
+        if (it == m_Contacts.end()) {
+            std::list<glm::vec2> normalList;
+            normalList.push_back(event.Normal);
+            m_Contacts[ballEntity] = normalList;
+        } else {
+            std::list<glm::vec2> normalList = it->second;
+            normalList.push_back(event.Normal);
+            m_Contacts[ballEntity] = normalList;
+        }
+
+        //glm::vec2 reflectedVelocity = glm::reflect(ballVelocity, event.Normal);
+        //ballTransform->Velocity = glm::vec3(reflectedVelocity, 0.f);
     }
 
     return true;
+}
+
+
+void dd::Systems::BallSystem::ResolveContacts()
+{
+
+    for (auto c : m_Contacts) {
+        int count = 0;
+        EntityID entity = c.first;
+        std::list<glm::vec2> contactNormals = c.second;
+        glm::vec2 finalNormal = glm::vec2(0.f);
+        for (auto it = contactNormals.begin(); it != contactNormals.end(); it++) {
+            finalNormal = finalNormal + (*it);
+            count++;
+        }
+        finalNormal = glm::normalize(finalNormal);
+
+        if (count > 1) {
+            LOG_INFO("MultiCollision %i", count);
+        }
+
+        auto transform = m_World->GetComponent<Components::Transform>(entity);
+        glm::vec2 velocity = glm::vec2(transform->Velocity.x, transform->Velocity.y);
+        glm::vec2 reflectedVelocity = glm::reflect(velocity, finalNormal);
+        transform->Velocity = glm::vec3(reflectedVelocity, 0.f);
+
+    }
+
+
+    m_Contacts.clear();
 }
 
 EntityID dd::Systems::BallSystem::CreateBall()
@@ -352,3 +394,4 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
 
     return true;
 }
+
