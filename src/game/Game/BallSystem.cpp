@@ -278,9 +278,7 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 EntityID dd::Systems::BallSystem::CreateBall()
 {
     auto ent = m_World->CloneEntity(Ball());
-
     m_World->RemoveComponent<Components::Template>(ent);
-
     //m_World->CommitEntity(ent);
 
     return ent;
@@ -332,11 +330,11 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
     auto ball2 = m_World->GetComponent<Components::Ball>(ent2);
     auto padTransform = event.padTransform;
     float x1 = padTransform->Position.x - 2, x2 = padTransform->Position.x + 2;
-    if (x1 < -3.1) {
-        x1 = 3;
+    if (x1 < -m_EdgeX) {
+        x1 = m_EdgeX - 0.2;
     }
-    if (x2 > 3.1) {
-        x2 = -3;
+    if (x2 > m_EdgeX) {
+        x2 = -m_EdgeX + 0.2;
     }
     transform1->Position = glm::vec3(x1, -5.5, -10);
     transform2->Position = glm::vec3(x2, -5.5, -10);

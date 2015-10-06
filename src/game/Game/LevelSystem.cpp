@@ -87,16 +87,18 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
         } else {
             if (ball != nullptr && MultiBalls() > 0) {
                 SetMultiBalls(MultiBalls()-1);
+                //std::cout << "Multi Balls: " << MultiBalls() << std::endl;
                 m_World->RemoveEntity(entity);
             } else {
                 auto powerUp = m_World->GetComponent<Components::PowerUp>(entity);
                 if (powerUp != nullptr) {
                     SetPowerUps(PowerUps() - 1);
+                    //std::cout << "Power Ups: " << PowerUps() << std::endl;
                     m_World->RemoveEntity(entity);
                 } else {
                     if (brick != nullptr) {
                         m_LooseBricks--;
-                        //std::cout << m_LooseBricks << std::endl;
+                        //std::cout << "Loose Bricks: " << m_LooseBricks << std::endl;
                         m_World->RemoveEntity(entity);
                     }
                 }
@@ -151,8 +153,9 @@ void dd::Systems::LevelSystem::CreateLevel()
             CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), num, m_Bricks[getter]);
             getter++;
         }
-        if (num == 1)
+        if (num == 1) {
             num = Lines();
+        }
     }
     m_LooseBricks = NumberOfBricks();
     SetRestarting(false);

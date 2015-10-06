@@ -222,8 +222,8 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
 
 bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
 {
-    EntityID entityPower;
-    EntityID entityPad;
+    EntityID entityPower = 0;
+    EntityID entityPad = 0;
     auto powerUp = m_World->GetComponent<Components::PowerUp>(event.Entity1);
     auto pad = m_World->GetComponent<Components::Pad>(event.Entity2);
     if (powerUp != nullptr) {
@@ -243,7 +243,7 @@ bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
         }
     }
 
-    if (entityPower == NULL || entityPad == NULL) {
+    if (entityPower == 0 || entityPad == 0) {
         return false;
     }
 
