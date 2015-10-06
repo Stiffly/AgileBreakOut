@@ -19,6 +19,7 @@
 #ifndef DD_RENDERER_H__
 #define DD_RENDERER_H__
 
+#include "Rendering/BaseRenderer.h"
 #include "Core/Util/Rectangle.h"
 #include "Rendering/Camera.h"
 #include "Rendering/RenderQueue.h"
@@ -33,39 +34,16 @@
 namespace dd
 {
 
-class Renderer
+class Renderer : public BaseRenderer
 {
 public:
-	GLFWwindow* Window() const { return m_Window; }
-	Rectangle Resolution() const { return m_Resolution; }
-	void SetResolution(const Rectangle& resolution) { m_Resolution = resolution; }
-	bool Fullscreen() { return m_Fullscreen; }
-	void SetFullscreen(bool fullscreen) { m_Fullscreen = fullscreen; }
-	bool VSYNC() const { return m_VSYNC; }
-	void SetVSYNC(bool vsync) { m_VSYNC = vsync; }
-	const dd::Camera* Camera() const { return m_Camera; }
-	void SetCamera(const dd::Camera* camera)
-	{
-		if (camera == nullptr) {
-			m_Camera = m_DefaultCamera.get();
-		} else {
-			m_Camera = camera;
-		}
-	}
-	void Initialize();
-	void Draw(RenderQueueCollection& rq);
+	void Initialize() override;
+	void Draw(RenderQueueCollection& rq) override;
 	void PlaceCamera(glm::vec3 position);
 
 private:
-	Rectangle m_Resolution = Rectangle(1280, 720);
-	bool m_Fullscreen = false;
-	bool m_VSYNC = false;
-	std::unique_ptr<dd::Camera> m_DefaultCamera = nullptr;
-	const dd::Camera* m_Camera = nullptr;
-
 	int m_GLVersion[2];
 	std::string m_GLVendor;
-	GLFWwindow* m_Window = nullptr;
 
 	ShaderProgram* m_SpDeferred1;
 	ShaderProgram* m_SpDeferred2;
