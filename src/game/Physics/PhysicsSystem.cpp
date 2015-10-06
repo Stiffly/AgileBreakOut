@@ -254,6 +254,7 @@ void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
         return;
     }
 
+    //It told me I was removing a lot of objects, and I didn't need that information, so I commented it out.
     //LOG_INFO("Removing entity %i", entity);
     it->second->GetWorld()->DestroyBody(it->second);
     m_BodiesToEntities.erase(it->second);

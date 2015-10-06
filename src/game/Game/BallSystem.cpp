@@ -25,12 +25,12 @@ void dd::Systems::BallSystem::Initialize()
         auto ent = m_World->CreateEntity();
         std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
         transform->Position = glm::vec3(-0.f, 50.26f, -10.f);
-        transform->Scale = glm::vec3(0.2f, 0.2f, 0.2f);
+        transform->Scale = glm::vec3(0.3f, 0.3f, 0.3f);
         transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
         auto model = m_World->AddComponent<Components::Model>(ent);
         model->ModelFile = "Models/Test/Ball/Sid.obj";
         std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-        circleShape->Radius = 0.2f;
+        circleShape->Radius = 0.4f;
         std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
         ball->Speed = 5.f;
         std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
@@ -51,8 +51,6 @@ void dd::Systems::BallSystem::Initialize()
         auto transform2 = m_World->GetComponent<Components::Transform>(ent2);
         transform2->Position = glm::vec3(-0.f, 0.26f, -10.f);
         transform2->Velocity = glm::vec3(0.0f, -10.f, 0.f);
-
-        m_World->CommitEntity(ent2);
     }
 
     for (int i = 0; i < Lives(); i++) {
@@ -237,15 +235,6 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         int hey = 5;
     }
 
-    /*if (otherEntitiy == m_LastCollision) {
-
-        if (brick != nullptr) {
-            return false;
-        }
-    } else {
-        m_LastCollision = otherEntitiy;
-    }*/
-
     //if this is a brick thats dead do not collide :)
 
     auto ballTransform = m_World->GetComponent<Components::Transform>(ballEntity);
@@ -324,10 +313,7 @@ void dd::Systems::BallSystem::ResolveContacts()
 EntityID dd::Systems::BallSystem::CreateBall()
 {
     auto ent = m_World->CloneEntity(Ball());
-
     m_World->RemoveComponent<Components::Template>(ent);
-
-    //m_World->CommitEntity(ent);
 
     return ent;
 }
@@ -343,7 +329,7 @@ void dd::Systems::BallSystem::CreateLife(int number)
     lifeNr->Number = number;
 
     auto model = m_World->AddComponent<Components::Model>(life);
-    model->ModelFile = "Models/Test/Ball/Ballopus.obj";
+    model->ModelFile = "Models/Test/Ball/Sid.obj";
 
 
     m_World->CommitEntity(life);
@@ -358,7 +344,12 @@ bool dd::Systems::BallSystem::OnLifeLost(const dd::Events::LifeLost &event)
 
 bool dd::Systems::BallSystem::OnMultiBallLost(const dd::Events::MultiBallLost &event)
 {
-    SetMultiBalls(MultiBalls()-1);
+    SetMultiBalls(MultiBalls() - 1);
+    //std::cout << MultiBalls() << std::endl;
+    if (MultiBalls() < 0) {
+        auto ent = CreateBall();
+        SetMultiBalls(0);
+    }
     return true;
 }
 
@@ -378,11 +369,11 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
     auto ball2 = m_World->GetComponent<Components::Ball>(ent2);
     auto padTransform = event.padTransform;
     float x1 = padTransform->Position.x - 2, x2 = padTransform->Position.x + 2;
-    if (x1 < -3.1) {
-        x1 = 3;
+    if (x1 < -m_EdgeX) {
+        x1 = m_EdgeX - 0.2;
     }
-    if (x2 > 3.1) {
-        x2 = -3;
+    if (x2 > m_EdgeX) {
+        x2 = -m_EdgeX + 0.2;
     }
     transform1->Position = glm::vec3(x1, -5.5, -10);
     transform2->Position = glm::vec3(x2, -5.5, -10);
@@ -391,7 +382,7 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
     transform2->Velocity = glm::normalize(glm::vec3(-5, 5 ,0.f)) * ball2->Speed;
 
     SetMultiBalls(MultiBalls() + 2);
-
+    //std::cout << MultiBalls() << std::endl;
     return true;
 }
 

@@ -47,7 +47,6 @@ void dd::Systems::LevelSystem::Initialize()
 void dd::Systems::LevelSystem::Update(double dt)
 {
     if (!m_Initialized) {
-        //CreateBasicLevel(Rows(), Lines(), SpaceBetweenBricks(), SpaceToEdge());
         GetNextLevel();
         CreateLevel();
         m_Initialized = true;
@@ -67,8 +66,12 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
         auto transform = m_World->GetComponent<Components::Transform>(entity);
         //Removes bricks that falls out of the stage.
         if (transform->Position.y < -10) {
+            if (brick->Type == MultiBallBrick) {
+                Events::MultiBall e;
+                e.padTransform = transform;
+                EventBroker->Publish(e);
+            }
             m_LooseBricks--;
-            std::cout << m_LooseBricks << std::endl;
             m_World->RemoveEntity(entity);
         }
     }
@@ -79,10 +82,10 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
         if (MultiBalls() <= 0 && PowerUps() <= 0) {
             Events::StageCleared ec;
             EventBroker->Publish(ec);
-            //CreateBasicLevel(Rows(), Lines(), SpaceBetweenBricks(), SpaceToEdge());
         } else {
             if (ball != nullptr && MultiBalls() > 0) {
-                SetMultiBalls(MultiBalls()-1);
+                Events::MultiBallLost e;
+                EventBroker->Publish(e);
                 m_World->RemoveEntity(entity);
             } else {
                 auto powerUp = m_World->GetComponent<Components::PowerUp>(entity);
@@ -92,7 +95,6 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
                 } else {
                     if (brick != nullptr) {
                         m_LooseBricks--;
-                        std::cout << m_LooseBricks << std::endl;
                         m_World->RemoveEntity(entity);
                     }
                 }
@@ -147,8 +149,9 @@ void dd::Systems::LevelSystem::CreateLevel()
             CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), num, m_Bricks[getter]);
             getter++;
         }
-        if (num == 1)
+        if (num == 1) {
             num = Lines();
+        }
     }
     m_LooseBricks = NumberOfBricks();
     SetRestarting(false);
@@ -156,7 +159,7 @@ void dd::Systems::LevelSystem::CreateLevel()
 
 void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBetweenBricks, float spaceToEdge, int num, int typeInt)
 {
-    if (typeInt == 0) {
+    if (typeInt == EmptyBrickSpace) {
         SetNumberOfBricks(NumberOfBricks() - 1);
         return;
     }
@@ -164,9 +167,10 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     m_World->RemoveComponent<Components::Template>(brick);
     auto transform = m_World->GetComponent<Components::Transform>(brick);
     auto cBrick = m_World->GetComponent<Components::Brick>(brick);
-    auto cPhys = m_World->GetComponent<Components::Physics>(brick);
 
-    if (typeInt == 2) {
+    if (typeInt == StandardBrick) {
+    } else if (typeInt == MultiBallBrick) {
+        cBrick->Type = MultiBallBrick;
         std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
         auto model = m_World->GetComponent<Components::Model>(brick);
         model->ModelFile = "Models/Brick/IceBrick.obj";
@@ -175,8 +179,6 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     float y = row * spacesBetweenBricks.y;
     transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y , -10.f);
     cBrick->Score = 10 * num;
-
-    m_World->CommitEntity(brick);
     return;
 }
 
@@ -217,13 +219,13 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         return false;
     }
 
-    auto power = m_World->GetComponent<Components::PowerUpBrick>(entityBrick);
+    /*auto power = m_World->GetComponent<Components::PowerUpBrick>(entityBrick);
     if (power != nullptr && NumberOfBricks() > 1) {
         Events::CreatePowerUp e;
         auto transform = m_World->GetComponent<Components::Transform>(entityBrick);
         e.Position = transform->Position;
         EventBroker->Publish(e);
-    }
+    }*/
 
     if (!Restarting() && !brick->Removed) {
         brick->Removed = true;
@@ -285,6 +287,9 @@ bool dd::Systems::LevelSystem::OnMultiBall(const dd::Events::MultiBall &event)
 bool dd::Systems::LevelSystem::OnMultiBallLost(const dd::Events::MultiBallLost &event)
 {
     SetMultiBalls(MultiBalls()-1);
+    if (MultiBalls() < 0) {
+        SetMultiBalls(0);
+    }
     return true;
 }
 
@@ -341,6 +346,9 @@ bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &ev
 void dd::Systems::LevelSystem::GetNextLevel()
 {
     std::array<int, 42> level;
+    // 0 is empty space.
+    // 1 is standard brick.
+    // 2 is multiball brick.
     if (m_CurrentCluster == 1) {
         if (m_CurrentLevel == 1) {
             level =

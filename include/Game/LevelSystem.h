@@ -120,6 +120,10 @@ private:
     glm::vec2 m_SpaceBetweenBricks = glm::vec2(1, 0.4);
     float m_NotResettingTheStage = 5.f;
 
+    const int EmptyBrickSpace = 0;
+    const int StandardBrick = 1;
+    const int MultiBallBrick = 2;
+
     EntityID m_BrickTemplate;
 
     std::array<int, 42> m_Bricks;

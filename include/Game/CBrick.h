@@ -16,6 +16,7 @@ namespace Components
 struct Brick : Component
 {
     int Score = 50;
+    int Type = 0;
     bool Removed = false;
 };
 
