@@ -18,26 +18,41 @@ enum Type
     Wall = 1 << 6
 };
 }
-namespace Components
-{
 
-struct Physics: public Component
+namespace CollisionType
 {
-    bool Static = true;
-    bool Calculate = false;
-    float GravityScale = 0.f;
-    CollisionLayer::Type Category = CollisionLayer::Type::Other;
-    CollisionLayer::Type Mask =
-            CollisionLayer::Type::Pad |
-            CollisionLayer::Type::Ball |
-            CollisionLayer::Type::Brick |
-            CollisionLayer::Type::Water |
-            CollisionLayer::Type::PowerUp |
-            CollisionLayer::Type::Wall |
-            CollisionLayer::Type::Other;
+enum Type
+{
+    Static = 0,
+    Kinematic = 1,
+    Dynamic = 2,
 };
-
 }
+
+
+    namespace Components
+    {
+
+        struct Physics: public Component
+        {
+            CollisionType::Type CollisionType = CollisionType::Type::Static;
+
+            bool Calculate = false;
+            float GravityScale = 0.f;
+
+
+            CollisionLayer::Type Category = CollisionLayer::Type::Other;
+            CollisionLayer::Type Mask =
+                    CollisionLayer::Type::Pad |
+                    CollisionLayer::Type::Ball |
+                    CollisionLayer::Type::Brick |
+                    CollisionLayer::Type::Water |
+                    CollisionLayer::Type::PowerUp |
+                    CollisionLayer::Type::Wall |
+                    CollisionLayer::Type::Other;
+        };
+
+    }
 }
 
 #endif //DAYDREAM_CPHYSICS_H

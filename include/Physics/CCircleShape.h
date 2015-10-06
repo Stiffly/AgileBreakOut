@@ -10,7 +10,7 @@ namespace Components
 
 struct CircleShape : public Component
 {
-    // Circles are circles
+    float Radius = 1.f;
 };
 
 }

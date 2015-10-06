@@ -34,10 +34,10 @@ void dd::Systems::PadSystem::Initialize()
         m_World->SetProperty(ent, "Name", "Pad");
         auto ctransform = m_World->AddComponent<Components::Transform>(ent);
         ctransform->Position = glm::vec3(0.f, -3.5f, -10.f);
-        ctransform->Scale = glm::vec3(1.0f, 1.0f, 1.f);
-        auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
+        auto rectangleShape = m_World->AddComponent<Components::RectangleShape>(ent);
+        rectangleShape->Dimensions = glm::vec2(1.f, 0.5f);
         auto physics = m_World->AddComponent<Components::Physics>(ent);
-        physics->Static = false;
+        physics->CollisionType = CollisionType::Type::Dynamic;
         physics->Category = CollisionLayer::Type::Pad;
         physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::PowerUp;
         physics->Calculate = true;

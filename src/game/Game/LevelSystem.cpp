@@ -24,19 +24,15 @@ void dd::Systems::LevelSystem::Initialize()
     auto model = m_World->AddComponent<Components::Model>(m_BrickTemplate);
     std::shared_ptr<Components::Brick> cBrick = m_World->AddComponent<Components::Brick>(m_BrickTemplate);
     std::shared_ptr<Components::RectangleShape> cRec = m_World->AddComponent<Components::RectangleShape>(m_BrickTemplate);
+    cRec->Dimensions = glm::vec2(0.9f, 0.35f);
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(m_BrickTemplate);
     std::shared_ptr<Components::Template> cTemplate = m_World->AddComponent<Components::Template>(m_BrickTemplate);
-    cPhys->Static = false;
+    cPhys->CollisionType = CollisionType::Type::Dynamic;
     cPhys->GravityScale = 0.f;
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = CollisionLayer::Type::Ball;
 
-    model->ModelFile = "Models/Test/Brick/Brick.obj";
-    /*if ((line == 1 && row == 4) || (line == 3 && row == 2) || (line == 5 && row == 2)) {
-        std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
-    }*/
-
-    transform->Scale = glm::vec3(0.8, 0.2, 0.2);
+    model->ModelFile = "Models/Brick/TurquoiseBrick.obj";
     transform->Position = glm::vec3(50, 50, -10);
 
     //sound
@@ -173,30 +169,13 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     auto cBrick = m_World->GetComponent<Components::Brick>(brick);
     auto cPhys = m_World->GetComponent<Components::Physics>(brick);
 
-    /*auto brick = m_World->CreateEntity();
-    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(brick);
-    auto model = m_World->AddComponent<Components::Model>(brick);
-    std::shared_ptr<Components::Brick> cBrick = m_World->AddComponent<Components::Brick>(brick);
-    std::shared_ptr<Components::RectangleShape> cRec = m_World->AddComponent<Components::RectangleShape>(brick);
-    std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(brick);*/
-    //std::shared_ptr<Components::Template> cTemplate = m_World->AddComponent<Components::Template>(brick);
-    cPhys->Static = false;
-    cPhys->GravityScale = 0.f;
-    cPhys->Category = CollisionLayer::Type::Brick;
-    cPhys->Mask = CollisionLayer::Type::Ball;
-
-    //model->ModelFile = "Models/Test/Brick/Brick.obj";
-    /*if ((line == 1 && row == 4) || (line == 3 && row == 2) || (line == 5 && row == 2)) {
+    if (typeInt == 2) {
         std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
-    }*/
-
-    //transform->Scale = glm::vec3(0.8, 0.2, 0.2);
-    /*if (typeInt == 2) {
-        std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
-    }*/
+        auto model = m_World->GetComponent<Components::Model>(brick);
+        model->ModelFile = "Models/Brick/IceBrick.obj";
+    }
     float x = line * spacesBetweenBricks.x;
     float y = row * spacesBetweenBricks.y;
-    transform->Scale = glm::vec3(0.8, 0.2, 0.2);
     transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y , -10.f);
     cBrick->Score = 10 * num;
 
@@ -320,7 +299,7 @@ bool dd::Systems::LevelSystem::OnCreatePowerUp(const dd::Events::CreatePowerUp &
     auto model = m_World->AddComponent<Components::Model>(powerUp);
     std::shared_ptr<Components::CircleShape> cRec = m_World->AddComponent<Components::CircleShape>(powerUp);
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(powerUp);
-    cPhys->Static = false;
+    cPhys->CollisionType = CollisionType::Type::Dynamic;
     cPhys->Category = CollisionLayer::Type::PowerUp;
     cPhys->Mask = CollisionLayer::Type::Pad;
 
