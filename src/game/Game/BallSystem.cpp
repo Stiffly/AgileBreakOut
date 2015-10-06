@@ -303,7 +303,7 @@ bool dd::Systems::BallSystem::OnLifeLost(const dd::Events::LifeLost &event)
 bool dd::Systems::BallSystem::OnMultiBallLost(const dd::Events::MultiBallLost &event)
 {
     SetMultiBalls(MultiBalls() - 1);
-    std::cout << MultiBalls() << std::endl;
+    //std::cout << MultiBalls() << std::endl;
     if (MultiBalls() < 0) {
         auto ent = CreateBall();
         SetMultiBalls(0);
@@ -340,6 +340,6 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
     transform2->Velocity = glm::normalize(glm::vec3(-5, 5 ,0.f)) * ball2->Speed;
 
     SetMultiBalls(MultiBalls() + 2);
-    std::cout << MultiBalls() << std::endl;
+    //std::cout << MultiBalls() << std::endl;
     return true;
 }
