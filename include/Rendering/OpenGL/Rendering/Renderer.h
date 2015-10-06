@@ -78,6 +78,7 @@ private:
 	GLuint m_ScreenQuad = 0;
 	Model* m_UnitSphere = nullptr;
 	Model* m_UnitQuad = nullptr;
+	Texture* m_ErrorTexture;
 	Texture* m_StandardNormal;
 	Texture* m_StandardSpecular;
 	Texture* m_WhiteSphereTexture;

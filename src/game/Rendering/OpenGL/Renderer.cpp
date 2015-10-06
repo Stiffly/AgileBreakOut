@@ -121,6 +121,7 @@ void dd::Renderer::CreateBuffers()
 	m_ScreenQuad = CreateQuad();
 	m_UnitQuad = ResourceManager::Load<Model>("Models/Core/UnitQuad.obj");
 	m_UnitSphere = ResourceManager::Load<Model>("Models/Core/UnitSphere.obj");
+	m_ErrorTexture = ResourceManager::Load<Texture>("Textures/Core/ErrorTexture.png");
 	m_StandardNormal = ResourceManager::Load<Texture>("Textures/Core/NeutralNormalMap.png");
 	m_StandardSpecular = ResourceManager::Load<Texture>("Textures/Core/NeutralSpecularMap.png");
 	m_WhiteSphereTexture = ResourceManager::Load<Texture>("Textures/Test/Water.png");
@@ -413,19 +414,25 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 			glUniform1f(glGetUniformLocation(shaderProgramHandle, "LightRadius"), 40.0f);
 			glUniform1f(glGetUniformLocation(shaderProgramHandle, "MaterialShininess"), modelJob->Shininess);
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, modelJob->DiffuseTexture);
-			if (modelJob->NormalTexture != 0) {
+			if (modelJob->DiffuseTexture != nullptr) {
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, *modelJob->DiffuseTexture);
+			} else {
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, *m_ErrorTexture);
+			}
+
+			if (modelJob->NormalTexture != nullptr) {
 				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, modelJob->NormalTexture);
+				glBindTexture(GL_TEXTURE_2D, *modelJob->NormalTexture);
 			} else {
 				glActiveTexture(GL_TEXTURE1);
 				glBindTexture(GL_TEXTURE_2D, *m_StandardNormal);
 			}
 
-			if (modelJob->SpecularTexture != 0) {
+			if (modelJob->SpecularTexture != nullptr) {
 				glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_2D, modelJob->SpecularTexture);
+				glBindTexture(GL_TEXTURE_2D, *modelJob->SpecularTexture);
 			} else {
 				glActiveTexture(GL_TEXTURE2);
 				glBindTexture(GL_TEXTURE_2D, *m_StandardSpecular);
@@ -445,8 +452,8 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 				}
 			}
 
-			glBindVertexArray(modelJob->VAO);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, modelJob->ElementBuffer);
+			glBindVertexArray(modelJob->Model->VAO);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, modelJob->Model->ElementBuffer);
 			glDrawElementsBaseVertex(GL_TRIANGLES, modelJob->EndIndex - modelJob->StartIndex + 1, GL_UNSIGNED_INT, 0, modelJob->StartIndex);
 
 			continue;
@@ -463,11 +470,11 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 			glUniform4fv(glGetUniformLocation(shaderProgramHandle, "Color"), 1, glm::value_ptr(spriteJob->Color));
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, spriteJob->DiffuseTexture);
+			glBindTexture(GL_TEXTURE_2D, *spriteJob->DiffuseTexture);
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, spriteJob->NormalTexture);
+			glBindTexture(GL_TEXTURE_2D, *spriteJob->NormalTexture);
 			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, spriteJob->SpecularTexture);
+			glBindTexture(GL_TEXTURE_2D, *spriteJob->SpecularTexture);
 
 			glBindVertexArray(m_UnitQuad->VAO);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_UnitQuad->ElementBuffer);
@@ -688,7 +695,7 @@ void dd::Renderer::DrawGUI(dd::RenderQueue& rq)
 			glUniform4fv(glGetUniformLocation(*m_SpScreen, "Color"), 1, glm::value_ptr(frameJob->Color));
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, frameJob->DiffuseTexture);
+			glBindTexture(GL_TEXTURE_2D, *frameJob->DiffuseTexture);
 			//glActiveTexture(GL_TEXTURE1);
 			//glBindTexture(GL_TEXTURE_2D, frameJob->NormalTexture);
 			//glActiveTexture(GL_TEXTURE2);

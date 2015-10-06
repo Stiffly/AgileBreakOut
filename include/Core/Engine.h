@@ -533,11 +533,10 @@ public:
 		{
 			ModelJob job;
 			job.TextureID = (texGroup.Texture) ? texGroup.Texture->ResourceID : 0;
-			job.DiffuseTexture = (texGroup.Texture) ? *texGroup.Texture : 0;
-			job.NormalTexture = (texGroup.NormalMap) ? *texGroup.NormalMap : 0;
-			job.SpecularTexture = (texGroup.SpecularMap) ? *texGroup.SpecularMap : 0;
-			job.VAO = model->VAO;
-			job.ElementBuffer = model->ElementBuffer;
+			job.DiffuseTexture = texGroup.Texture.get();
+			job.NormalTexture = texGroup.NormalMap.get();
+			job.SpecularTexture = texGroup.SpecularMap.get();
+			job.Model = model;
 			job.StartIndex = texGroup.StartIndex;
 			job.EndIndex = texGroup.EndIndex;
 			job.ModelMatrix = modelMatrix * model->m_Matrix;
@@ -561,13 +560,12 @@ public:
 	{
 		SpriteJob job;
 		job.TextureID = texture->ResourceID;
-		job.DiffuseTexture = *texture;
-		job.NormalTexture = *normalTexture;
-		job.SpecularTexture = *specularTexture;
+		job.DiffuseTexture = texture;
+		job.NormalTexture = normalTexture;
+		job.SpecularTexture = specularTexture;
 		job.ModelMatrix = modelMatrix;
 		job.Color = color;
 		job.Depth = depth;
-
 
 		m_RendererQueue.Forward.Add(job);
 	}

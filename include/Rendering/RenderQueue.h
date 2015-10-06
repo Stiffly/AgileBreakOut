@@ -56,13 +56,12 @@ struct ModelJob : RenderJob
 	glm::mat4 ProjectionMatrix;
 	glm::mat4 ViewMatrix;
 	glm::mat4 ModelMatrix;
-	GLuint DiffuseTexture;
-	GLuint NormalTexture;
-	GLuint SpecularTexture;
+	const Texture* DiffuseTexture;
+	const Texture* NormalTexture;
+	const Texture* SpecularTexture;
 	float Shininess;
 	glm::vec4 Color;
-	GLuint VAO;
-	GLuint ElementBuffer;
+	const dd::Model* Model;
 	unsigned int StartIndex;
 	unsigned int EndIndex;
 
@@ -70,20 +69,6 @@ struct ModelJob : RenderJob
 	{
 		Hash = TextureID;
 	}
-};
-
-struct BlendMapModelJob : ModelJob
-{
-	GLuint BlendMapTextureRed;
-	GLuint BlendMapTextureRedNormal;
-	GLuint BlendMapTextureRedSpecular;
-	GLuint BlendMapTextureGreen;
-	GLuint BlendMapTextureGreenNormal;
-	GLuint BlendMapTextureGreenSpecular;
-	GLuint BlendMapTextureBlue;
-	GLuint BlendMapTextureBlueNormal;
-	GLuint BlendMapTextureBlueSpecular;
-	float TextureRepeat;
 };
 
 struct SpriteJob : RenderJob
@@ -94,9 +79,9 @@ struct SpriteJob : RenderJob
 	glm::mat4 ProjectionMatrix;
 	glm::mat4 ViewMatrix;
 	glm::mat4 ModelMatrix;
-	GLuint DiffuseTexture;
-	GLuint NormalTexture;
-	GLuint SpecularTexture;
+	const Texture* DiffuseTexture;
+	const Texture* NormalTexture;
+	const Texture* SpecularTexture;
 	glm::vec4 Color;
 
 	void CalculateHash() override
