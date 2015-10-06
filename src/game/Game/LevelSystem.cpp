@@ -97,7 +97,7 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     auto model = m_World->AddComponent<Components::Model>(brick);
     std::shared_ptr<Components::Brick> cBrick = m_World->AddComponent<Components::Brick>(brick);
     std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(brick);
-    rectangleShape->Dimensions = glm::vec2(1.f, 0.4f);
+    rectangleShape->Dimensions = glm::vec2(0.95f, 0.35f);
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(brick);
     cPhys->CollisionType = CollisionType::Type::Dynamic;
     cPhys->GravityScale = 0.f;

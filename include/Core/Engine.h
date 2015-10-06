@@ -140,12 +140,12 @@ public:
           	auto ent = m_World->CreateEntity();
         	std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
 			transform->Position = glm::vec3(-0.f, 0.26f, -10.f);
-			transform->Scale = glm::vec3(0.35f, 0.35f, 0.2f);
+			transform->Scale = glm::vec3(0.25f, 0.25f, 0.25f);
 			transform->Velocity = glm::vec3(0.0f, -10.f, 0.f);
           	auto model = m_World->AddComponent<Components::Model>(ent);
 			model->ModelFile = "Models/Test/Ball/Sid.obj";
           	std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-			circleShape->Radius = 0.35f;
+			circleShape->Radius = 0.25f;
 
 			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
 			ball->Speed = 5.f;
