@@ -18,15 +18,30 @@ enum Type
     Wall = 1 << 6
 };
 }
-namespace Components
-{
 
-struct Physics: public Component
+namespace CollisionType
 {
-    bool Static = true;
-    bool Calculate = false;
-    float GravityScale = 0.f;
-    CollisionLayer::Type Category = CollisionLayer::Type::Other;
+enum Type
+{
+    Static = 0,
+    Kinematic = 1,
+    Dynamic = 2,
+};
+}
+
+
+    namespace Components
+    {
+
+        struct Physics: public Component
+        {
+            CollisionType::Type CollisionType = CollisionType::Type::Static;
+
+            bool Calculate = false;
+            float GravityScale = 0.f;
+
+
+            CollisionLayer::Type Category = CollisionLayer::Type::Other;
 	CollisionLayer::Type Mask =	static_cast<CollisionLayer::Type>(
 		CollisionLayer::Pad
 		| CollisionLayer::Ball
@@ -36,7 +51,7 @@ struct Physics: public Component
 		| CollisionLayer::Wall
 		| CollisionLayer::Other
 	);
-};
+        };
 
 }
 }

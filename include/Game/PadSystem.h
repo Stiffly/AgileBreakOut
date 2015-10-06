@@ -28,6 +28,8 @@
 #include "Game/EMultiBall.h"
 #include "Game/EPowerUpTaken.h"
 #include "Game/EStageCleared.h"
+#include "Game/EPause.h"
+#include "Game/EHitLag.h"
 
 
 namespace dd
@@ -63,6 +65,9 @@ public:
     Components::Pad* Pad() const { return m_Pad; }
     void SetPad(Components::Pad* pad) { m_Pad = pad; }
 
+    bool IsPaused() const { return m_Pause; }
+    void SetPause(const bool& pause) { m_Pause = pause; }
+
 private:
     EntityID m_Entity = 0;
     glm::vec3 m_Acceleration = glm::vec3(0.f, 0.f, 0.f);
@@ -74,18 +79,21 @@ private:
     Components::Transform* m_Transform = nullptr;
     Components::Pad* m_Pad = nullptr;
 
+    bool m_Pause = false;
+
     dd::EventRelay<PadSystem, dd::Events::KeyDown> m_EKeyDown;
     dd::EventRelay<PadSystem, dd::Events::KeyUp> m_EKeyUp;
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContactPowerUp;
     dd::EventRelay<PadSystem, dd::Events::StageCleared> m_EStageCleared;
+    dd::EventRelay<PadSystem, dd::Events::Pause> m_EPause;
 
     bool OnKeyDown(const dd::Events::KeyDown &event);
     bool OnKeyUp(const dd::Events::KeyUp &event);
-
     bool OnContact(const dd::Events::Contact &event);
     bool OnContactPowerUp(const dd::Events::Contact &event);
     bool OnStageCleared(const dd::Events::StageCleared &event);
+    bool OnPause(const dd::Events::Pause &event);
 
     class PadSteeringInputController;
     std::array<std::shared_ptr<PadSteeringInputController>, 4> m_PadInputControllers;

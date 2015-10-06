@@ -8,18 +8,23 @@
 #include "Core/CTemplate.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
+#include "Physics/CRectangleShape.h"
 #include "Physics/EContact.h"
 #include "Rendering/CModel.h"
 #include "Rendering/CPointLight.h"
 #include "Game/CBall.h"
 #include "Game/CPowerUp.h"
 #include "Game/CLife.h"
+#include "Game/CBrick.h"
 #include "Game/ELifeLost.h"
 #include "Game/EComboEvent.h"
 #include "Game/EResetBall.h"
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
 #include "Game/EGameOver.h"
+#include "Game/EPause.h"
+#include "Game/EHitPad.h"
+#include "Game/EHitLag.h"
 
 namespace dd
 {
@@ -35,8 +40,7 @@ public:
 
     ~BallSystem();
 
-    EventRelay<BallSystem, Events::Contact> m_Contact;
-    bool Contact(const Events::Contact &event);
+
 
     void RegisterComponents(ComponentFactory *cf) override;
 
@@ -75,6 +79,8 @@ public:
     void SetReplaceBall(const bool& replaceBall) { m_ReplaceBall = replaceBall; }
     bool MultiBall() const { return m_MultiBall; }
     void SetMultiBall(const bool& multiBall) { m_MultiBall = multiBall; }
+    bool IsPaused() const { return m_Pause; }
+    void SetPause(const bool& pause) { m_Pause = pause; }
 
 private:
     float m_XMovementMultiplier = 2.f;
@@ -85,18 +91,30 @@ private:
     int m_PastLives = 3;
     bool m_ReplaceBall = false;
     bool m_MultiBall = false;
+    bool m_Pause = false;
+    EntityID m_LastCollision = 999999;
+
+    glm::vec3 m_SavedSpeed;
+    bool m_InitializePause = false;
 
     EntityID m_Ball;
+
+    std::unordered_map<EntityID, std::list<glm::vec2>> m_Contacts;
+    void ResolveContacts();
 
     dd::EventRelay<BallSystem, dd::Events::LifeLost> m_ELifeLost;
     dd::EventRelay<BallSystem, dd::Events::MultiBallLost> m_EMultiBallLost;
     dd::EventRelay<BallSystem, dd::Events::ResetBall> m_EResetBall;
     dd::EventRelay<BallSystem, dd::Events::MultiBall> m_EMultiBall;
+    dd::EventRelay<BallSystem, dd::Events::Pause> m_EPause;
+    EventRelay<BallSystem, Events::Contact> m_Contact;
 
+    bool Contact(const Events::Contact &event);
     bool OnLifeLost(const dd::Events::LifeLost &event);
     bool OnMultiBallLost(const dd::Events::MultiBallLost &event);
     bool OnResetBall(const dd::Events::ResetBall &event);
     bool OnMultiBall(const dd::Events::MultiBall &event);
+    bool OnPause(const dd::Events::Pause &event);
 };
 
 }

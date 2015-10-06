@@ -17,9 +17,6 @@ namespace Components
 
 struct Pad : Component
 {
-    int Lives;
-    int Points;
-
     float SlowdownModifier = 5.f;
     float AccelerationSpeed = 40.f;
     float MaxSpeed = 5.f;

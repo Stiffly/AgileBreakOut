@@ -27,16 +27,17 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &PadSystem::OnContact);
     EVENT_SUBSCRIBE_MEMBER(m_EContactPowerUp, &PadSystem::OnContactPowerUp);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PadSystem::OnStageCleared);
+    EVENT_SUBSCRIBE_MEMBER(m_EPause, &PadSystem::OnPause);
 
     {
         auto ent = m_World->CreateEntity();
         m_World->SetProperty(ent, "Name", "Pad");
         auto ctransform = m_World->AddComponent<Components::Transform>(ent);
         ctransform->Position = glm::vec3(0.f, -3.5f, -10.f);
-        ctransform->Scale = glm::vec3(1.0f, 1.0f, 1.f);
-        auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
+        auto rectangleShape = m_World->AddComponent<Components::RectangleShape>(ent);
+        rectangleShape->Dimensions = glm::vec2(1.f, 0.5f);
         auto physics = m_World->AddComponent<Components::Physics>(ent);
-        physics->Static = false;
+        physics->CollisionType = CollisionType::Type::Dynamic;
         physics->Category = CollisionLayer::Type::Pad;
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::PowerUp);
         physics->Calculate = true;
@@ -58,6 +59,9 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 
 void dd::Systems::PadSystem::Update(double dt)
 {
+    if (IsPaused()) {
+        return;
+    }
     if (Entity() == 0) {
         for (auto it = m_World->GetEntities()->begin(); it != m_World->GetEntities()->end(); it++) {
             if (m_World->GetProperty<std::string>(it->first, "Name") == "Pad") {
@@ -105,6 +109,20 @@ void dd::Systems::PadSystem::Update(double dt)
     return;
 }
 
+bool dd::Systems::PadSystem::OnPause(const dd::Events::Pause &event)
+{
+    if (event.Type != "PadSystem" && event.Type != "All") {
+        return false;
+    }
+
+    if (IsPaused()) {
+        SetPause(false);
+    } else {
+        SetPause(true);
+    }
+    return true;
+}
+
 bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
 {
     int val = event.KeyCode;
@@ -126,6 +144,15 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
     } else if (val == GLFW_KEY_M) {
         Events::MultiBall e;
         e.padTransform = Transform();
+        EventBroker->Publish(e);
+    } else if (val == GLFW_KEY_P) {
+        Events::Pause e;
+        e.Type = "All";
+        EventBroker->Publish(e);
+    } else if (val == GLFW_KEY_H) {
+        Events::HitLag e;
+        e.Time = 0.2;
+        e.Type = "All";
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_D) {
         return false;
@@ -226,9 +253,6 @@ bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
         return false;
     }
 
-//    m_World->RemoveComponent<Components::PowerUp>(entityPower);
-//    m_World->RemoveComponent<Components::CircleShape>(entityPower);
-//    m_World->RemoveComponent<Components::Physics>(entityPower);
     m_World->RemoveEntity(entityPower);
     Events::PowerUpTaken ep;
     ep.Name = "Something";
