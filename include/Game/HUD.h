@@ -59,6 +59,7 @@ private:
 	bool OnScore(const Events::ScoreEvent& event)
 	{
 		m_ScoreNumberFrame->SetNumber(m_ScoreNumberFrame->Number() + event.Score);
+		return true;
 	}
 };
 

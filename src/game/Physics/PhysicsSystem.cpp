@@ -49,7 +49,7 @@ bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
 
     Impulse i;
     i.Body = body;
-    i.Impulse = impulse;
+    i.Vector = impulse;
     i.Point = point;
 
     m_Impulses.push_back(i);
@@ -102,7 +102,7 @@ void dd::Systems::PhysicsSystem::Update(double dt) {
         UpdateParticleEmitters(dt);
 
         for (auto i : m_Impulses) {
-            i.Body->ApplyLinearImpulse(i.Impulse, i.Point, true);
+            i.Body->ApplyLinearImpulse(i.Vector, i.Point, true);
         }
         m_Impulses.clear();
 
@@ -150,7 +150,7 @@ void dd::Systems::PhysicsSystem::Update(double dt) {
             b2Vec2 *positionBuffer = m_ParticleSystem[e]->GetPositionBuffer();
             for (auto i : m_EntitiesToParticleHandle[e]){
                 EntityID entity = i.first;
-                b2ParticleHandle *particleH = i.second;
+                const b2ParticleHandle *particleH = i.second;
 
                 b2Vec2 positionB2 = positionBuffer[particleH->GetIndex()];
                 glm::vec2 position = glm::vec2(positionB2.x, positionB2.y);
@@ -337,7 +337,7 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
 void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 {
     for (int i = 0; i < m_ParticleEmitters.ParticleSystem.size(); i++) {
-        auto e = m_ParticleEmitters.ParticleEmitter[i];
+        auto e = m_ParticleEmitters.Emitter[i];
         auto pt = m_ParticleEmitters.ParticleTemplate[i];
         auto ps = m_ParticleEmitters.ParticleSystem[i];
 
@@ -407,7 +407,7 @@ void dd::Systems::PhysicsSystem::CreateParticleEmitter(EntityID entity)
     }
     //TODO: Skicka med fler flaggor till particlesystemet;
     m_ParticleEmitters.ParticleSystem.push_back(CreateParticleSystem(particle->Radius, 0.f));
-    m_ParticleEmitters.ParticleEmitter.push_back(entity);
+    m_ParticleEmitters.Emitter.push_back(entity);
     m_ParticleEmitters.ParticleTemplate.push_back(childEntity);
 }
 

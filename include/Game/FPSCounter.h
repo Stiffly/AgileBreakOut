@@ -1,6 +1,8 @@
 #ifndef GUI_FPSCOUNTER_H__
 #define GUI_FPSCOUNTER_H__
 
+#include <numeric>
+
 #include "GUI/Frame.h"
 #include "GUI/NumberFrame.h"
 

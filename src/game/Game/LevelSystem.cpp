@@ -203,7 +203,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 
         auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
         physicsComponent->GravityScale = 1.f;
-        physicsComponent->Mask = CollisionLayer::Type::Water | CollisionLayer::Type::Wall;
+        physicsComponent->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Water | CollisionLayer::Wall);
 
         auto transformComponentBrick = m_World->GetComponent<Components::Transform>(entityBrick);
         auto transformComponentBall = m_World->GetComponent<Components::Transform>(entityBall);

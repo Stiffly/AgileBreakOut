@@ -86,7 +86,7 @@ private:
     struct ParticleEmitter
     {
         std::vector<b2ParticleSystem*> ParticleSystem;
-        std::vector<EntityID> ParticleEmitter;
+        std::vector<EntityID> Emitter;
         std::vector<EntityID> ParticleTemplate;
     };
     ParticleEmitter m_ParticleEmitters;
@@ -95,7 +95,7 @@ private:
     struct Impulse
     {
         b2Body* Body;
-        b2Vec2 Impulse;
+        b2Vec2 Vector;
         b2Vec2 Point;
     };
     std::list<Impulse> m_Impulses;

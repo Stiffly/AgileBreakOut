@@ -33,7 +33,7 @@ void dd::Systems::BallSystem::Initialize()
     std::shared_ptr<Components::Template> ballTemplate = m_World->AddComponent<Components::Template>(ent);
     physics->Static = false;
     physics->Category = CollisionLayer::Type::Ball;
-    physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
+    physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Pad | CollisionLayer::Brick | CollisionLayer::Wall);
     physics->Calculate = true;
     m_World->CommitEntity(ent);
 

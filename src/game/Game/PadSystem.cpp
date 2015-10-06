@@ -38,7 +38,7 @@ void dd::Systems::PadSystem::Initialize()
         auto physics = m_World->AddComponent<Components::Physics>(ent);
         physics->Static = false;
         physics->Category = CollisionLayer::Type::Pad;
-        physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::PowerUp;
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::PowerUp);
         physics->Calculate = true;
         auto cModel = m_World->AddComponent<Components::Model>(ent);
         cModel->ModelFile = "Models/Submarine2.obj";
@@ -191,6 +191,7 @@ bool dd::Systems::PadSystem::OnContact(const dd::Events::Contact &event)
 
     //transform->Velocity = glm::vec3(movementX, movementY, 0.f);
      */
+	return false;
 }
 
 bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)

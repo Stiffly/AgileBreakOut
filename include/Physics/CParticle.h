@@ -7,24 +7,24 @@ namespace dd {
 namespace ParticleFlags {
 
 enum Type {
-    waterParticle = 0,
-    zombieParticle = 1 << 1,
-    wallParticle = 1 << 2,
-    springParticle = 1 << 3,
-    elasticParticle = 1 << 4,
-    viscousParticle = 1 << 5,
-    powderParticle = 1 << 6,
-    tensileParticle = 1 << 7,
-    colorMixingParticle = 1 << 8,
-    destructionListenerParticle = 1 << 9,
-    barrierParticle = 1 << 10,
-    staticPressureParticle = 1 << 11,
-    reactiveParticle = 1 << 12,
-    repulsiveParticle = 1 << 13,
-    fixtureContactListenerParticle = 1 << 14,
-    particleContactListenerParticle = 1 << 15,
-    fixtureContactFilterParticle = 1 << 16,
-    particleContactFilterParticle = 1 << 17
+    Water = 0,
+    Zombie = 1 << 1,
+    Wall = 1 << 2,
+    Spring = 1 << 3,
+    Elastic = 1 << 4,
+    Viscous = 1 << 5,
+    Powder = 1 << 6,
+    Tensile = 1 << 7,
+    ColorMixing = 1 << 8,
+    DestructionListener = 1 << 9,
+    Barrier = 1 << 10,
+    StaticPressure = 1 << 11,
+    Reactive = 1 << 12,
+    Repulsive = 1 << 13,
+    FixtureContactListener = 1 << 14,
+    ParticleContactListener = 1 << 15,
+    FixtureContactFilter = 1 << 16,
+    ParticleContactFilter = 1 << 17
 };
 }
 
@@ -36,26 +36,26 @@ struct Particle : public Component
     float Radius = 0.5f;
     float LifeTime = 5.0f;
 
-    ParticleFlags::Type Flags =
-            ParticleFlags::Type::waterParticle |
-            ParticleFlags::Type::zombieParticle |
-            ParticleFlags::Type::wallParticle |
-            ParticleFlags::Type::springParticle |
-            ParticleFlags::Type::elasticParticle |
-            ParticleFlags::Type::viscousParticle |
-            ParticleFlags::Type::powderParticle |
-            ParticleFlags::Type::tensileParticle |
-            ParticleFlags::Type::colorMixingParticle |
-            ParticleFlags::Type::destructionListenerParticle |
-            ParticleFlags::Type::barrierParticle |
-            ParticleFlags::Type::staticPressureParticle |
-            ParticleFlags::Type::reactiveParticle |
-            ParticleFlags::Type::repulsiveParticle |
-            ParticleFlags::Type::fixtureContactListenerParticle |
-            ParticleFlags::Type::particleContactListenerParticle |
-            ParticleFlags::Type::fixtureContactFilterParticle |
-            ParticleFlags::Type::particleContactFilterParticle;
-
+	ParticleFlags::Type Flags = static_cast<ParticleFlags::Type>(
+			ParticleFlags::Water
+			| ParticleFlags::Zombie
+			| ParticleFlags::Wall
+			| ParticleFlags::Spring
+			| ParticleFlags::Elastic
+			| ParticleFlags::Viscous
+			| ParticleFlags::Powder
+			| ParticleFlags::Tensile
+			| ParticleFlags::ColorMixing
+			| ParticleFlags::DestructionListener
+			| ParticleFlags::Barrier
+			| ParticleFlags::StaticPressure
+			| ParticleFlags::Reactive
+			| ParticleFlags::Repulsive
+			| ParticleFlags::FixtureContactListener
+			| ParticleFlags::ParticleContactListener
+			| ParticleFlags::FixtureContactFilter
+            | ParticleFlags::ParticleContactFilter
+	);
 };
 
 }

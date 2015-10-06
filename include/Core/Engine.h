@@ -150,7 +150,7 @@ public:
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
 			physics->Static = false;
 			physics->Category = CollisionLayer::Type::Ball;
-			physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Pad | CollisionLayer::Brick | CollisionLayer::Wall);
 			physics->Calculate = true;
 
 			//auto plight = m_World->AddComponent<Components::PointLight>(ent);
@@ -314,8 +314,8 @@ public:
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
 			physics->Static = true;
-			physics->Category = CollisionLayer::Type::Wall;
-			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
+			physics->Category = CollisionLayer::Wall;
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
 
 			m_World->CommitEntity(topWall);
 		}
@@ -335,8 +335,8 @@ public:
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(leftWall);
 			physics->Static = true;
-			physics->Category = CollisionLayer::Type::Wall;
-			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
+			physics->Category = CollisionLayer::Wall;
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
 
 			m_World->CommitEntity(leftWall);
 		}
@@ -356,8 +356,8 @@ public:
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(rightWall);
 			physics->Static = true;
-			physics->Category = CollisionLayer::Type::Wall;
-			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
+			physics->Category = CollisionLayer::Wall;
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
 
 			m_World->CommitEntity(rightWall);
 		}
@@ -584,6 +584,8 @@ private:
 			e.IsAmbient = true;
 			m_EventBroker->Publish(e);
 		}
+
+		return true;
 	};
 	double m_LastTime;
 };

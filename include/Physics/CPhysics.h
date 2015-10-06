@@ -27,14 +27,15 @@ struct Physics: public Component
     bool Calculate = false;
     float GravityScale = 0.f;
     CollisionLayer::Type Category = CollisionLayer::Type::Other;
-    CollisionLayer::Type Mask =
-            CollisionLayer::Type::Pad |
-            CollisionLayer::Type::Ball |
-            CollisionLayer::Type::Brick |
-            CollisionLayer::Type::Water |
-            CollisionLayer::Type::PowerUp |
-            CollisionLayer::Type::Wall |
-            CollisionLayer::Type::Other;
+	CollisionLayer::Type Mask =	static_cast<CollisionLayer::Type>(
+		CollisionLayer::Pad
+		| CollisionLayer::Ball
+		| CollisionLayer::Brick
+		| CollisionLayer::Water
+		| CollisionLayer::PowerUp
+		| CollisionLayer::Wall
+		| CollisionLayer::Other
+	);
 };
 
 }
