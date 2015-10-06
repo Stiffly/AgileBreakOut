@@ -267,7 +267,7 @@ public:
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(topWall);
-			rectangleShape->Dimensions = glm::vec3(10.f, 0.5f);
+			rectangleShape->Dimensions = glm::vec2(10.f, 0.5f);
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
 			physics->CollisionType = CollisionType::Type::Static;
 			m_World->CommitEntity(topWall);
@@ -312,7 +312,7 @@ public:
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
 			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(topWall);
-			rectangleShape->Dimensions = glm::vec3(20.f, 0.5f);
+			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
 			physics->CollisionType = CollisionType::Type::Static;
@@ -333,7 +333,7 @@ public:
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
 			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(leftWall);
-			rectangleShape->Dimensions = glm::vec3(0.5f, 20.f);
+			rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(leftWall);
 			physics->CollisionType = CollisionType::Type::Static;
@@ -354,7 +354,7 @@ public:
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
 			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(rightWall);
-			rectangleShape->Dimensions = glm::vec3(0.5f, 20.f);
+			rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(rightWall);
 			physics->CollisionType = CollisionType::Type::Static;

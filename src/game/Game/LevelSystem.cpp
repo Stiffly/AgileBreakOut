@@ -96,7 +96,8 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(brick);
     auto model = m_World->AddComponent<Components::Model>(brick);
     std::shared_ptr<Components::Brick> cBrick = m_World->AddComponent<Components::Brick>(brick);
-    std::shared_ptr<Components::RectangleShape> cRec = m_World->AddComponent<Components::RectangleShape>(brick);
+    std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(brick);
+    rectangleShape->Dimensions = glm::vec2(1.f, 0.4f);
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(brick);
     cPhys->CollisionType = CollisionType::Type::Dynamic;
     cPhys->GravityScale = 0.f;
@@ -107,14 +108,13 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     fileName.append(std::to_string(num));
     fileName.append(".png");*/
     //sprite->SpriteFile =  fileName;
-    model->ModelFile = "Models/Test/Brick/Brick.obj";
+    model->ModelFile = "Models/Brick/TurquoiseBrick.obj";
     if ((line == 1 && row == 4) || (line == 3 && row == 2) || (line == 5 && row == 2)) {
         std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
         model->ModelFile = "Models/Brick/IceBrick.obj";
     }
     float x = line * spacesBetweenBricks.x;
     float y = row * spacesBetweenBricks.y;
-    //transform->Scale = glm::vec3(0.8, 0.2, 0.2);
     transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y , -10.f);
     cBrick->Score = 10 * num;
 

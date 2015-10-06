@@ -35,7 +35,7 @@ void dd::Systems::PadSystem::Initialize()
         ctransform->Position = glm::vec3(0.f, -3.5f, -10.f);
         ctransform->Scale = glm::vec3(1.0f, 1.0f, 1.f);
         auto rectangleShape = m_World->AddComponent<Components::RectangleShape>(ent);
-        rectangleShape->Dimensions = glm::vec3(1.f, 0.5f);
+        rectangleShape->Dimensions = glm::vec2(1.f, 0.5f);
         auto physics = m_World->AddComponent<Components::Physics>(ent);
         physics->CollisionType = CollisionType::Type::Dynamic;
         physics->Category = CollisionLayer::Type::Pad;
