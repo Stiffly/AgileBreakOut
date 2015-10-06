@@ -15,6 +15,7 @@ void dd::Systems::PhysicsSystem::Initialize()
     m_PhysicsWorld->SetContactListener(m_ContactListener);
     InitializeWater();
     EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, PhysicsSystem::SetImpulse);
+    EVENT_SUBSCRIBE_MEMBER(m_EPause, &PhysicsSystem::OnPause);
 }
 
 void dd::Systems::PhysicsSystem::InitializeWater()
@@ -197,6 +198,20 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 
 }
 
+bool dd::Systems::PhysicsSystem::OnPause(const dd::Events::Pause &event)
+{
+    if (event.Type != "PhysicsSystem" && event.Type != "All") {
+        return false;
+    }
+
+    if (m_Pause) {
+        m_Pause = false;
+    } else {
+        m_Pause = true;
+    }
+    return true;
+}
+
 void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)
 {
     auto physicsComponent = m_World->GetComponent<Components::Physics>(entity);
@@ -213,7 +228,12 @@ void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)
     }
 
     if (physicsComponent) {
-        CreateBody(entity);
+        auto it = m_EntitiesToBodies.find(entity);
+        if(it == m_EntitiesToBodies.end()) {
+            CreateBody(entity);
+        } else {
+            LOG_ERROR("Tried to commit a body that already exists");
+        }
     } else if (waterComponent) {
         CreateParticleGroup(entity);
     } else if (particleEmitterComponent) {

@@ -29,6 +29,7 @@
 #include "Transform/TransformSystem.h"
 #include "Rendering/CSprite.h"
 #include "Core/CTemplate.h"
+#include "Game/EPause.h"
 
 namespace dd
 {
@@ -92,6 +93,8 @@ namespace dd
 
             EventRelay<PhysicsSystem, Events::SetImpulse> m_SetImpulse;
             bool SetImpulse(const Events::SetImpulse &event);
+            dd::EventRelay<PhysicsSystem, dd::Events::Pause> m_EPause;
+            bool OnPause(const dd::Events::Pause &event);
 
             //TODO: Fill struct with info needed.
             struct ParticleEmitter

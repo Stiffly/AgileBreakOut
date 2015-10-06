@@ -45,6 +45,7 @@
 #include "Game/CPad.h"
 #include "Game/CBrick.h"
 #include "Game/BallSystem.h"
+#include "Game/HitLagSystem.h"
 #include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Physics/PhysicsSystem.h"
@@ -122,6 +123,9 @@ public:
 		m_World->SystemFactory.Register<Systems::BallSystem>(
 				[this]() { return new Systems::BallSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::BallSystem>();
+		m_World->SystemFactory.Register<Systems::HitLagSystem>(
+				[this]() { return new Systems::HitLagSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::HitLagSystem>();
 		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
 				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::PhysicsSystem>();
@@ -133,33 +137,6 @@ public:
 		m_World->ComponentFactory.Register<Components::Particle>();
 		m_World->ComponentFactory.Register<Components::ParticleEmitter>();
 		m_World->Initialize();
-
-
-		//OctoBall
-		{
-          	auto ent = m_World->CreateEntity();
-        	std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-			transform->Position = glm::vec3(-0.f, 0.26f, -10.f);
-			transform->Scale = glm::vec3(0.25f, 0.25f, 0.25f);
-			transform->Velocity = glm::vec3(0.0f, -10.f, 0.f);
-          	auto model = m_World->AddComponent<Components::Model>(ent);
-			model->ModelFile = "Models/Test/Ball/Sid.obj";
-          	std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-			circleShape->Radius = 0.25f;
-
-			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
-			ball->Speed = 5.f;
-			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-			physics->CollisionType = CollisionType::Type::Dynamic;
-			physics->Category = CollisionLayer::Type::Ball;
-			physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
-			physics->Calculate = true;
-
-			//auto plight = m_World->AddComponent<Components::PointLight>(ent);
-			//plight->Radius = 2.f;
-
-			m_World->CommitEntity(ent);
-		}
 
 		//PointLightTest
 		{

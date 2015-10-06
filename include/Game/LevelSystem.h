@@ -21,8 +21,10 @@
 #include "Game/EResetBall.h"
 #include "Game/EScoreEvent.h"
 #include "Game/EComboEvent.h"
+#include "Game/EHitPad.h"
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
+#include "Game/EPause.h"
 #include "Game/EGameOver.h"
 #include "Game/ECreatePowerUp.h"
 #include "Game/EPowerUpTaken.h"
@@ -44,15 +46,15 @@ namespace Systems
 {
 
     // Me trying things out.
-class Level
+/*class Level
 {
 public:
-    int levelRows;
-    int levelLines;
-    int levelSpaceBetweenBricks;
-    int levelSpaceToEdge;
-    int bricks[];
-};
+    int levelRows = 6;
+    int levelLines = 7;
+    glm::vec2 levelSpaceBetweenBricks = glm::vec2(1, 0.4);
+    float levelSpaceToEdge = 0.25f;
+    std::array<int, 42> bricks;
+};*/
 
 class LevelSystem : public System
 {
@@ -64,10 +66,8 @@ public:
     void Initialize() override;
 
     void CreateBasicLevel(int, int, glm::vec2, float);
-    void SaveLevel(int, int, glm::vec2, int); // Shouldn't be here, but I'm experimenting.
-    void LoadLevel(char[20]);
-    void CreateBrick(int, int, glm::vec2, float, int);
-    void ProcessCollision();
+    void CreateLevel();
+    void CreateBrick(int, int, glm::vec2, float, int, int);
 
     void OnEntityRemoved(EntityID entity);
 
@@ -80,6 +80,8 @@ public:
     void SetRestarting(const bool& restarting) { m_Restarting = restarting; }
     bool Initialized() const { return m_Initialized; }
     void SetInitialized(const bool& initialized) { m_Initialized = initialized; }
+    bool IsPaused() const { return m_Pause; }
+    void SetPause(const bool& pause) { m_Pause = pause; }
     int& MultiBalls() { return m_MultiBalls; }
     void SetMultiBalls(const int& multiBalls) { m_MultiBalls = multiBalls; }
     int& PowerUps() { return m_PowerUps; }
@@ -101,8 +103,13 @@ public:
     void SetNotResettingTheStage(const float& notResettingTheStage) { m_NotResettingTheStage = notResettingTheStage; }
 
 private:
+    bool m_Cleared = false;
     bool m_Restarting = false;
     bool m_Initialized = false;
+    bool m_Pause = false;
+    int m_LooseBricks = 0;
+    int m_CurrentCluster = 2;
+    int m_CurrentLevel = 1;
     int m_MultiBalls = 0;
     int m_PowerUps = 0;
     int m_Score = 0;
@@ -113,6 +120,10 @@ private:
     glm::vec2 m_SpaceBetweenBricks = glm::vec2(1, 0.4);
     float m_NotResettingTheStage = 5.f;
 
+    EntityID m_BrickTemplate;
+
+    std::array<int, 42> m_Bricks;
+
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::ScoreEvent> m_EScoreEvent;
     dd::EventRelay<LevelSystem, dd::Events::MultiBall> m_EMultiBall;
@@ -120,6 +131,8 @@ private:
     dd::EventRelay<LevelSystem, dd::Events::CreatePowerUp> m_ECreatePowerUp;
     dd::EventRelay<LevelSystem, dd::Events::PowerUpTaken> m_EPowerUpTaken;
     dd::EventRelay<LevelSystem, dd::Events::StageCleared> m_EStageCleared;
+    dd::EventRelay<LevelSystem, dd::Events::Pause> m_EPause;
+    dd::EventRelay<LevelSystem, dd::Events::HitPad> m_EHitPad;
 
     bool OnContact(const dd::Events::Contact &event);
     bool OnScoreEvent(const dd::Events::ScoreEvent &event);
@@ -128,6 +141,10 @@ private:
     bool OnCreatePowerUp(const dd::Events::CreatePowerUp &event);
     bool OnPowerUpTaken(const dd::Events::PowerUpTaken &event);
     bool OnStageCleared(const dd::Events::StageCleared &event);
+    bool OnPause(const dd::Events::Pause &event);
+    bool OnHitPad(const dd::Events::HitPad &event);
+
+    void GetNextLevel();
 };
 
 }

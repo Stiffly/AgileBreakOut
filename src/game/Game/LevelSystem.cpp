@@ -16,6 +16,30 @@ void dd::Systems::LevelSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &LevelSystem::OnMultiBallLost);
     EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, &LevelSystem::OnPowerUpTaken);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &LevelSystem::OnStageCleared);
+    EVENT_SUBSCRIBE_MEMBER(m_EPause, &LevelSystem::OnPause);
+    EVENT_SUBSCRIBE_MEMBER(m_EHitPad, &LevelSystem::OnHitPad);
+
+    m_BrickTemplate = m_World->CreateEntity();
+    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(m_BrickTemplate);
+    auto model = m_World->AddComponent<Components::Model>(m_BrickTemplate);
+    std::shared_ptr<Components::Brick> cBrick = m_World->AddComponent<Components::Brick>(m_BrickTemplate);
+    std::shared_ptr<Components::RectangleShape> cRec = m_World->AddComponent<Components::RectangleShape>(m_BrickTemplate);
+    cRec->Dimensions = glm::vec2(0.9f, 0.35f);
+    std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(m_BrickTemplate);
+    std::shared_ptr<Components::Template> cTemplate = m_World->AddComponent<Components::Template>(m_BrickTemplate);
+    cPhys->CollisionType = CollisionType::Type::Dynamic;
+    cPhys->GravityScale = 0.f;
+    cPhys->Category = CollisionLayer::Type::Brick;
+    cPhys->Mask = CollisionLayer::Type::Ball;
+
+    model->ModelFile = "Models/Brick/TurquoiseBrick.obj";
+    transform->Position = glm::vec3(50, 50, -10);
+
+    //sound
+    auto collisionSound = m_World->AddComponent<Components::CollisionSound>(m_BrickTemplate);
+    collisionSound->FilePath = "Sounds/Brick/shortbrickbreak.wav";
+
+    m_World->CommitEntity(m_BrickTemplate);
 
     return;
 }
@@ -23,52 +47,72 @@ void dd::Systems::LevelSystem::Initialize()
 void dd::Systems::LevelSystem::Update(double dt)
 {
     if (!m_Initialized) {
-        CreateBasicLevel(Rows(), Lines(), SpaceBetweenBricks(), SpaceToEdge());
+        //CreateBasicLevel(Rows(), Lines(), SpaceBetweenBricks(), SpaceToEdge());
+        GetNextLevel();
+        CreateLevel();
         m_Initialized = true;
     }
 }
 
 void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
+    if (IsPaused()) {
+        return;
+    }
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
 
-    auto ball = m_World->GetComponent<Components::Ball>(entity);
-    SetNotResettingTheStage(NotResettingTheStage() + 0.01 * dt);
+    auto brick = m_World->GetComponent<Components::Brick>(entity);
+    if (brick != nullptr) {
+        auto transform = m_World->GetComponent<Components::Transform>(entity);
+        //Removes bricks that falls out of the stage.
+        if (transform->Position.y < -10) {
+            m_LooseBricks--;
+            std::cout << m_LooseBricks << std::endl;
+            m_World->RemoveEntity(entity);
+        }
+    }
 
-    if (NumberOfBricks() <= 0 && Restarting() == false) {
+    auto ball = m_World->GetComponent<Components::Ball>(entity);
+
+    if (NumberOfBricks() <= 0 && m_LooseBricks <= 0 && !Restarting()) {
         if (MultiBalls() <= 0 && PowerUps() <= 0) {
-            if (NotResettingTheStage() > 5) {
-                SetRestarting(true);
-                Events::ResetBall e;
-                EventBroker->Publish(e);
-                Events::ScoreEvent es;
-                es.Score = 500;
-                EventBroker->Publish(es);
-                Events::StageCleared ec;
-                EventBroker->Publish(ec);
-                SetNotResettingTheStage(0);
-                //CreateBasicLevel(Rows(), Lines(), SpaceBetweenBricks(), SpaceToEdge());
-            }
+            Events::StageCleared ec;
+            EventBroker->Publish(ec);
+            //CreateBasicLevel(Rows(), Lines(), SpaceBetweenBricks(), SpaceToEdge());
         } else {
             if (ball != nullptr && MultiBalls() > 0) {
                 SetMultiBalls(MultiBalls()-1);
-                m_World->RemoveComponent<Components::Ball>(entity);
-                m_World->RemoveComponent<Components::Transform>(entity);
-                m_World->RemoveComponent<Components::CircleShape>(entity);
-                m_World->RemoveComponent<Components::Physics>(entity);
                 m_World->RemoveEntity(entity);
             } else {
                 auto powerUp = m_World->GetComponent<Components::PowerUp>(entity);
                 if (powerUp != nullptr) {
                     SetPowerUps(PowerUps() - 1);
-                    m_World->RemoveComponent<Components::PowerUp>(entity);
-                    m_World->RemoveComponent<Components::Transform>(entity);
                     m_World->RemoveEntity(entity);
+                } else {
+                    if (brick != nullptr) {
+                        m_LooseBricks--;
+                        std::cout << m_LooseBricks << std::endl;
+                        m_World->RemoveEntity(entity);
+                    }
                 }
             }
         }
     }
+}
+
+bool dd::Systems::LevelSystem::OnPause(const dd::Events::Pause &event)
+{
+    if (event.Type != "LevelSystem" && event.Type != "All") {
+        return false;
+    }
+
+    if (IsPaused()) {
+        SetPause(false);
+    } else {
+        SetPause(true);
+    }
+    return true;
 }
 
 void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 spacesBetweenBricks, float spaceToEdge)
@@ -79,7 +123,7 @@ void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 s
     for (int i = 0; i < rows; i++) {
         num--;
         for (int j = 0; j < Lines(); j++) {
-            CreateBrick(i, j, spacesBetweenBricks, spaceToEdge, num);
+            CreateBrick(i, j, spacesBetweenBricks, spaceToEdge, num, 1);
         }
         if (num == 1)
             num = Lines();
@@ -90,27 +134,41 @@ void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 s
     return;
 }
 
-void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBetweenBricks, float spaceToEdge, int num)
+void dd::Systems::LevelSystem::CreateLevel()
 {
-    auto brick = m_World->CreateEntity();
-    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(brick);
-    auto model = m_World->AddComponent<Components::Model>(brick);
-    std::shared_ptr<Components::Brick> cBrick = m_World->AddComponent<Components::Brick>(brick);
-    std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(brick);
-    rectangleShape->Dimensions = glm::vec2(0.95f, 0.35f);
-    std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(brick);
-    cPhys->CollisionType = CollisionType::Type::Dynamic;
-    cPhys->GravityScale = 0.f;
-    cPhys->Category = CollisionLayer::Type::Brick;
-    cPhys->Mask = CollisionLayer::Type::Ball;
+    std::cout << "Loading level: " << m_CurrentLevel << std::endl;
+    SetNumberOfBricks(Rows() * Lines());
+    int num = Lines();
+    int getter = 0;
 
-    /*std::string fileName = "Textures/Bricks/";
-    fileName.append(std::to_string(num));
-    fileName.append(".png");*/
-    //sprite->SpriteFile =  fileName;
-    model->ModelFile = "Models/Brick/TurquoiseBrick.obj";
-    if ((line == 1 && row == 4) || (line == 3 && row == 2) || (line == 5 && row == 2)) {
+    for (int i = 0; i < Rows(); i++) {
+        num--;
+        for (int j = 0; j < Lines(); j++) {
+            CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), num, m_Bricks[getter]);
+            getter++;
+        }
+        if (num == 1)
+            num = Lines();
+    }
+    m_LooseBricks = NumberOfBricks();
+    SetRestarting(false);
+}
+
+void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBetweenBricks, float spaceToEdge, int num, int typeInt)
+{
+    if (typeInt == 0) {
+        SetNumberOfBricks(NumberOfBricks() - 1);
+        return;
+    }
+    auto brick = m_World->CloneEntity(m_BrickTemplate);
+    m_World->RemoveComponent<Components::Template>(brick);
+    auto transform = m_World->GetComponent<Components::Transform>(brick);
+    auto cBrick = m_World->GetComponent<Components::Brick>(brick);
+    auto cPhys = m_World->GetComponent<Components::Physics>(brick);
+
+    if (typeInt == 2) {
         std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
+        auto model = m_World->GetComponent<Components::Model>(brick);
         model->ModelFile = "Models/Brick/IceBrick.obj";
     }
     float x = line * spacesBetweenBricks.x;
@@ -118,33 +176,13 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y , -10.f);
     cBrick->Score = 10 * num;
 
-    //sound
-    auto collisionSound = m_World->AddComponent<Components::CollisionSound>(brick);
-    collisionSound->FilePath = "Sounds/Brick/shortbrickbreak.wav";
-
     m_World->CommitEntity(brick);
-    return;
-}
-
-void dd::Systems::LevelSystem::ProcessCollision()
-{
-    // Like, go into brick component and check what it does upon collision. Maybe not done here?
     return;
 }
 
 void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
 {
-    /*auto brick = m_World->GetComponent<Components::Brick>(entity);
-    if (brick != nullptr) {
-        SetNumberOfBricks(NumberOfBricks() - 1);
-        Events::ScoreEvent es;
-        es.Score = brick->Score;
-        EventBroker->Publish(es);
-        if (numberOfBricks < 1) {
-            EndLevel();
-        }
-    }
-    return;*/
+
 }
 
 bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
@@ -187,7 +225,9 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         EventBroker->Publish(e);
     }
 
-    if (ball != nullptr && Restarting() == false) {
+    if (!Restarting() && !brick->Removed) {
+        brick->Removed = true;
+        // Hit brick with ball code.
         ball->Combo += 1;
         Events::ComboEvent ec;
         ec.Combo = ball->Combo;
@@ -195,12 +235,6 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         EventBroker->Publish(ec);
 
         auto ballTransform = m_World->GetComponent<Components::Transform>(entityBall);
-
-//        m_World->RemoveComponent<Components::Brick>(entityBrick);
-//        m_World->RemoveComponent<Components::Transform>(entityBrick);
-//        m_World->RemoveComponent<Components::RectangleShape>(entityBrick);
-//        m_World->RemoveComponent<Components::Physics>(entityBrick);
-//        m_World->RemoveEntity(entityBrick);
 
         auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
         physicsComponent->GravityScale = 1.f;
@@ -222,17 +256,14 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 
 
         SetNumberOfBricks(NumberOfBricks() - 1);
-        if (NumberOfBricks() <= 0) {
-            //SetMultiBalls(MultiBalls() + 1);
-        }
         Events::ScoreEvent es;
         es.Score = brick->Score * ball->Combo;
         EventBroker->Publish(es);
 
-        std::cout << "Combo: " << ball->Combo << std::endl;
+        //std::cout << "Combo: " << ball->Combo << std::endl;
         //std::cout << NumberOfBricks() << std::endl;
         //std::cout << "Brick Score: " << brick->Score  << std::endl;
-        std::cout << "Score: " << Score() << std::endl;
+        //std::cout << "Score: " << Score() << std::endl;
     }
 
     return true;
@@ -248,14 +279,12 @@ bool dd::Systems::LevelSystem::OnScoreEvent(const dd::Events::ScoreEvent &event)
 bool dd::Systems::LevelSystem::OnMultiBall(const dd::Events::MultiBall &event)
 {
     SetMultiBalls(MultiBalls()+2);
-    std::cout << MultiBalls() << std::endl;
     return true;
 }
 
 bool dd::Systems::LevelSystem::OnMultiBallLost(const dd::Events::MultiBallLost &event)
 {
     SetMultiBalls(MultiBalls()-1);
-    std::cout << MultiBalls() << std::endl;
     return true;
 }
 
@@ -272,7 +301,6 @@ bool dd::Systems::LevelSystem::OnCreatePowerUp(const dd::Events::CreatePowerUp &
     cPhys->Mask = CollisionLayer::Type::Pad;
 
     std::shared_ptr<Components::PowerUp> cPow = m_World->AddComponent<Components::PowerUp>(powerUp);
-
 
     transform->Position = event.Position;
     transform->Scale = glm::vec3(0.2, 0.2, 0.2);
@@ -293,13 +321,119 @@ bool dd::Systems::LevelSystem::OnPowerUpTaken(const dd::Events::PowerUpTaken &ev
 
 bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &event)
 {
+    if (!m_Cleared) {
+        m_Cleared = true;
+        SetRestarting(true);
+        Events::ResetBall e;
+        EventBroker->Publish(e);
+        Events::ScoreEvent es;
+        es.Score = 500;
+        EventBroker->Publish(es);
+        m_CurrentLevel++;
+        if (m_CurrentLevel < 6) {
+            GetNextLevel();
+            CreateLevel();
+        }
+    }
     return true;
 }
 
-void dd::Systems::LevelSystem::EndLevel()
+void dd::Systems::LevelSystem::GetNextLevel()
 {
-    Events::StageCleared e;
-    EventBroker->Publish(e);
-    return;
+    std::array<int, 42> level;
+    if (m_CurrentCluster == 1) {
+        if (m_CurrentLevel == 1) {
+            level =
+                    {0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 1, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0};
+        } else if (m_CurrentLevel == 2) {
+            level =
+                    {1, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0};
+        } else if (m_CurrentLevel == 3) {
+            level =
+                    {0, 0, 0, 0, 0, 0, 1,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0};
+        } else if (m_CurrentLevel == 4) {
+            level =
+                    {0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     1, 0, 0, 0, 0, 0, 0};
+        } else if (m_CurrentLevel == 5) {
+            level =
+                    {0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 1};
+        }
+    } else if (m_CurrentCluster == 2) {
+        if (m_CurrentLevel == 1) {
+            level =
+                    {1, 1, 0, 1, 0, 1, 1,
+                     1, 1, 1, 1, 1, 1, 1,
+                     1, 1, 1, 1, 1, 1, 1,
+                     1, 2, 1, 2, 1, 2, 1,
+                     1, 1, 0, 1, 0, 1, 1,
+                     1, 0, 0, 1, 0, 0, 1};
+        } else if (m_CurrentLevel == 2) {
+            level =
+                    {1, 0, 0, 0, 0, 0, 1,
+                     0, 1, 0, 0, 0, 1, 0,
+                     0, 0, 2, 2, 2, 0, 0,
+                     0, 0, 0, 1, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0};
+        } else if (m_CurrentLevel == 3) {
+            level =
+                    {2, 0, 0, 0, 0, 0, 2,
+                     0, 1, 0, 0, 0, 1, 0,
+                     1, 2, 1, 1, 1, 2, 1,
+                     1, 0, 1, 1, 1, 0, 1,
+                     1, 0, 1, 1, 1, 0, 1,
+                     1, 0, 1, 1, 1, 0, 1};
+        } else if (m_CurrentLevel == 4) {
+            level =
+                    {1, 2, 1, 1, 1, 2, 1,
+                     1, 0, 1, 1, 1, 0, 1,
+                     1, 2, 1, 1, 1, 2, 1,
+                     1, 0, 1, 1, 1, 0, 1,
+                     1, 0, 0, 0, 0, 0, 1,
+                     0, 1, 1, 0, 1, 1, 0};
+        } else if (m_CurrentLevel == 5) {
+            level =
+                    {1, 0, 1, 0, 1, 0, 1,
+                     0, 1, 0, 1, 0, 1, 0,
+                     2, 0, 1, 0, 1, 0, 2,
+                     0, 1, 0, 2, 0, 1, 0,
+                     1, 0, 1, 0, 1, 0, 1,
+                     0, 1, 0, 1, 0, 1, 0};
+        }
+    } else if (m_CurrentCluster == 3) {
+
+    }
+
+    std::copy(std::begin(level), std::end(level), std::begin(m_Bricks));
 }
 
+bool dd::Systems::LevelSystem::OnHitPad(const dd::Events::HitPad &event)
+{
+    m_Cleared = false;
+    return true;
+}
