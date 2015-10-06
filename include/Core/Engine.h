@@ -227,9 +227,10 @@ public:
 
 			transform->Position = glm::vec3(0.f, 0.f, -10.f);
 			particleEmitter->GravityScale = 0.0f;
-			particleEmitter->SpawnRate = 0.1f;
+			particleEmitter->SpawnRate = 1.1f;
 			particleEmitter->NumberOfTicks = 1000;
 			particleEmitter->Speed = 2.f;
+			particleEmitter->ParticlesPerTick = 5;
 			particleEmitter->Spread = glm::pi<float>()/2;
 			particleEmitter->EmittingAngle = glm::pi<float>();
 
@@ -242,23 +243,11 @@ public:
 
 				//PtTransform->Velocity = glm::vec3(1.0f, 0.f, 0.f);
 				PtTransform->Position = transform->Position;
-				PtSprite->SpriteFile = "Textures/Test/Water.png";
-				PtParticle->LifeTime = 5.f;
-				PtParticle->Flags = ParticleFlags::Type::staticPressureParticle;
+				PtSprite->SpriteFile = "Textures/Background.png";
+				PtParticle->LifeTime = 1.f;
+				PtParticle->Flags = ParticleFlags::Type::powderParticle | ParticleFlags::Type::particleContactFilterParticle | ParticleFlags::Type::fixtureContactFilterParticle;
 			}
 			m_World->CommitEntity(Pe);
-		}
-
-		{
-			auto Pt = m_World->CreateEntity();
-			auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
-			auto PtSprite = m_World->AddComponent<Components::Sprite>(Pt);
-			auto PtParticle = m_World->AddComponent<Components::Particle>(Pt);
-
-			PtTransform->Velocity = glm::vec3(1.0f, 0.f, 0.f);
-			PtTransform->Position = glm::vec3(0.f, 0.f, -10.f);
-			PtSprite->SpriteFile = "Textures/Ball.png";
-			//PtModel->ModelFile = "Models/Brick/Brick.obj";
 		}
 
 		//TODO: Why does the ball not collide with these bricks?

@@ -12,6 +12,7 @@ struct ParticleEmitter : public Component
     int NumberOfTicks = 10.f;
     float InitialSpeed = 1.f;
     double SpawnRate = 1;
+    int ParticlesPerTick = 1;
     double TimeSinceLastSpawn = 0;
     int MaxCount = 0;
     float EmittingAngle = 0.f;
