@@ -137,6 +137,7 @@ public:
 
 
 		//OctoBall
+		/*
 		{
           	auto ent = m_World->CreateEntity();
         	std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
@@ -158,7 +159,7 @@ public:
 			plight->Radius = 2.f;
 
 			m_World->CommitEntity(ent);
-		}
+		}*/
 
 		//PointLightTest
 		{
@@ -224,10 +225,13 @@ public:
 			auto transform = m_World->AddComponent<Components::Transform>(Pe);
 			auto particleEmitter= m_World->AddComponent<Components::ParticleEmitter>(Pe);
 
-			transform->Position = glm::vec3(0.f, -5.f, -10.f);
+			transform->Position = glm::vec3(0.f, 0.f, -10.f);
 			particleEmitter->GravityScale = 0.0f;
-			particleEmitter->SpawnRate = 1.0f;
-			particleEmitter->NumberOfTicks = 3.f;
+			particleEmitter->SpawnRate = 0.1f;
+			particleEmitter->NumberOfTicks = 1000;
+			particleEmitter->Speed = 2.f;
+			particleEmitter->Spread = glm::pi<float>()/2;
+			particleEmitter->EmittingAngle = glm::pi<float>();
 
 			{
 				auto Pt = m_World->CreateEntity(Pe);
@@ -236,11 +240,11 @@ public:
 				auto PtParticle = m_World->AddComponent<Components::Particle>(Pt);
 				auto PtTemplate = m_World->AddComponent<Components::Template>(Pt);
 
-				PtTransform->Velocity = glm::vec3(1.0f, 0.f, 0.f);
+				//PtTransform->Velocity = glm::vec3(1.0f, 0.f, 0.f);
 				PtTransform->Position = transform->Position;
 				PtSprite->SpriteFile = "Textures/Test/Water.png";
 				PtParticle->LifeTime = 5.f;
-				PtParticle->Flags = ParticleFlags::Type::powderParticle;
+				PtParticle->Flags = ParticleFlags::Type::staticPressureParticle;
 			}
 			m_World->CommitEntity(Pe);
 		}
@@ -368,7 +372,7 @@ public:
 			auto ent = m_World->CreateEntity();
 			m_World->SetProperty(ent, "Name", "Pad");
 			auto ctransform = m_World->AddComponent<Components::Transform>(ent);
-			ctransform->Position = glm::vec3(0.f, -3.5f, -10.f);
+			ctransform->Position = glm::vec3(0.f, -13.5f, -10.f);
 			ctransform->Scale = glm::vec3(1.0f, 1.0f, 1.f);
 			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
 			auto physics = m_World->AddComponent<Components::Physics>(ent);

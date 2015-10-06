@@ -10,6 +10,9 @@ void dd::Systems::PhysicsSystem::RegisterComponents(ComponentFactory* cf)
 
 void dd::Systems::PhysicsSystem::Initialize()
 {
+    std::random_device rd;
+    gen = std::mt19937(rd());
+
     m_ContactListener = new ContactListener(this);
 
     m_Gravity = b2Vec2(0.f, -9.82f);
@@ -23,6 +26,8 @@ void dd::Systems::PhysicsSystem::Initialize()
     m_PhysicsWorld->SetContactListener(m_ContactListener);
 
     InitializeWater();
+
+
 
     EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, PhysicsSystem::SetImpulse);
 }
@@ -382,7 +387,8 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
             LOG_INFO("ParticleTemplate Component is nil.");
             continue;
         }
-
+        auto TempTransform = m_World->GetComponent<Components::Transform>(e);
+        TempTransform->Orientation = glm::rotate(glm::quat(), 3.f, glm::vec3(0.f, 0.f, -1.f));
 
         emitter->TimeSinceLastSpawn += dt;
         if(emitter->TimeSinceLastSpawn < emitter->SpawnRate || emitter->NumberOfTicks < 1) {
@@ -396,7 +402,15 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
         particleDef.flags = particleTemplate->Flags;
         //particleDef.color TODO: Implement this if we want color mixing and shit.
         particleDef.lifetime = particleTemplate->LifeTime;
-        particleDef.velocity = b2Vec2(templateTransform->Velocity.x, templateTransform->Velocity.y);
+        float eAngle = emitter->EmittingAngle;
+        float halfSpread = emitter->Spread / 2;
+
+        std::uniform_real_distribution<float> dis(eAngle-halfSpread, eAngle+halfSpread);
+        float pAngle = dis(gen);
+        LOG_INFO("Radian angle: %f", pAngle);
+        glm::vec2 unitVec = glm::normalize(glm::vec2(glm::cos(pAngle), glm::sin(pAngle)));
+        glm::vec2 vel = unitVec * emitter->Speed;
+        particleDef.velocity = b2Vec2(vel.x, vel.y);
         particleDef.position = b2Vec2(templateTransform->Position.x, templateTransform->Position.y);
 
 
@@ -405,7 +419,9 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
         auto transform = m_World->GetComponent<Components::Transform>(particle);
         transform->Scale = glm::vec3 (particleTemplate->Radius * 2.f, particleTemplate->Radius * 2.f, 1);
 
+
         auto b2Particle = ps->CreateParticle(particleDef);
+
         auto b2ParticleHandle = ps->GetParticleHandleFromIndex(b2Particle);
         m_EntitiesToParticleHandle[i].insert(std::make_pair(particle, b2ParticleHandle));
         m_ParticleHandleToEntities[i].insert(std::make_pair(b2ParticleHandle, particle));

@@ -2,6 +2,9 @@
 #define DAYDREAM_PHYSICSSYSTEM_H
 
 #include <unordered_map>
+#include <random>
+
+#include <glm/gtc/quaternion.hpp>
 
 #include "Core/System.h"
 #include "Core/World.h"
@@ -64,6 +67,8 @@ private:
     float m_Accumulator;
 
     int m_VelocityIterations, m_PositionIterations;
+
+    std::mt19937 gen;
 
     std::unordered_map<EntityID, b2Body*> m_EntitiesToBodies;
     std::unordered_map<b2Body*, EntityID> m_BodiesToEntities;
