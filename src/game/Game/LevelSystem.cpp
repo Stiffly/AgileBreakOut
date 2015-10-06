@@ -72,7 +72,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
         //Removes bricks that falls out of the stage.
         if (transform->Position.y < -10) {
             m_LooseBricks--;
-            std::cout << m_LooseBricks << std::endl;
+            //std::cout << m_LooseBricks << std::endl;
             m_World->RemoveEntity(entity);
         }
     }
@@ -96,7 +96,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
                 } else {
                     if (brick != nullptr) {
                         m_LooseBricks--;
-                        std::cout << m_LooseBricks << std::endl;
+                        //std::cout << m_LooseBricks << std::endl;
                         m_World->RemoveEntity(entity);
                     }
                 }
