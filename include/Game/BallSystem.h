@@ -8,12 +8,14 @@
 #include "Core/CTemplate.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
+#include "Physics/CRectangleShape.h"
 #include "Physics/EContact.h"
 #include "Rendering/CModel.h"
 #include "Rendering/CPointLight.h"
 #include "Game/CBall.h"
 #include "Game/CPowerUp.h"
 #include "Game/CLife.h"
+#include "Game/CBrick.h"
 #include "Game/ELifeLost.h"
 #include "Game/EComboEvent.h"
 #include "Game/EResetBall.h"
@@ -22,6 +24,7 @@
 #include "Game/EGameOver.h"
 #include "Game/EPause.h"
 #include "Game/EHitPad.h"
+#include "Game/EHitLag.h"
 
 namespace dd
 {
@@ -90,6 +93,7 @@ private:
     bool m_ReplaceBall = false;
     bool m_MultiBall = false;
     bool m_Pause = false;
+    EntityID m_LastCollision = 999999;
 
     glm::vec3 m_SavedSpeed;
     bool m_InitializePause = false;

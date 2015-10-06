@@ -212,7 +212,10 @@ void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)
     }
 
     if (physicsComponent) {
-        CreateBody(entity);
+        auto it = m_EntitiesToBodies.find(entity);
+        if(it == m_EntitiesToBodies.end()) {
+            CreateBody(entity);
+        }
     } else if (waterComponent) {
         CreateParticleGroup(entity);
     } else if (particleEmitterComponent) {

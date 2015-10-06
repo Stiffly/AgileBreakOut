@@ -224,6 +224,23 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         //TODO: Add support for power-up collisions
     }
 
+    auto brick = m_World->GetComponent<Components::Brick>(otherEntitiy);
+    if (brick != nullptr) {
+        auto transform = m_World->GetComponent<Components::Transform>(otherEntitiy);
+        auto physics = m_World->GetComponent<Components::Physics>(otherEntitiy);
+        auto rectangle = m_World->GetComponent<Components::RectangleShape>(otherEntitiy);
+        int hey = 5;
+    }
+
+    /*if (otherEntitiy == m_LastCollision) {
+
+        if (brick != nullptr) {
+            return false;
+        }
+    } else {
+        m_LastCollision = otherEntitiy;
+    }*/
+
     //if this is a brick thats dead do not collide :)
 
     auto ballTransform = m_World->GetComponent<Components::Transform>(ballEntity);
@@ -232,6 +249,10 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
     if (m_World->GetProperty<std::string>(otherEntitiy, "Name") == "Pad"){
         Events::HitPad e;
         EventBroker->Publish(e);
+        Events::HitLag el;
+        el.Time = 0.1f;
+        el.Type = "All";
+        EventBroker->Publish(el);
 
         auto padTransform = m_World->GetComponent<Components::Transform>(otherEntitiy);
         float x = (ballTransform->Position.x - padTransform->Position.x) * XMovementMultiplier();
@@ -260,7 +281,7 @@ EntityID dd::Systems::BallSystem::CreateBall()
 
     m_World->RemoveComponent<Components::Template>(ent);
 
-    m_World->CommitEntity(ent);
+    //m_World->CommitEntity(ent);
 
     return ent;
 }

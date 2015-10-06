@@ -164,32 +164,33 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
         SetNumberOfBricks(NumberOfBricks() - 1);
         return;
     }
-    //auto brick = m_World->CloneEntity(m_BrickTemplate);
-    //m_World->RemoveComponent<Components::Template>(brick);
-    //auto transform = m_World->GetComponent<Components::Transform>(brick);
-    //auto cBrick = m_World->GetComponent<Components::Brick>(brick);
-    //auto cPhys = m_World->GetComponent<Components::Physics>(brick);
-    auto brick = m_World->CreateEntity();
+    auto brick = m_World->CloneEntity(m_BrickTemplate);
+    m_World->RemoveComponent<Components::Template>(brick);
+    auto transform = m_World->GetComponent<Components::Transform>(brick);
+    auto cBrick = m_World->GetComponent<Components::Brick>(brick);
+    auto cPhys = m_World->GetComponent<Components::Physics>(brick);
+
+    /*auto brick = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(brick);
     auto model = m_World->AddComponent<Components::Model>(brick);
     std::shared_ptr<Components::Brick> cBrick = m_World->AddComponent<Components::Brick>(brick);
     std::shared_ptr<Components::RectangleShape> cRec = m_World->AddComponent<Components::RectangleShape>(brick);
-    std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(brick);
+    std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(brick);*/
     //std::shared_ptr<Components::Template> cTemplate = m_World->AddComponent<Components::Template>(brick);
     cPhys->Static = false;
     cPhys->GravityScale = 0.f;
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = CollisionLayer::Type::Ball;
 
-    model->ModelFile = "Models/Test/Brick/Brick.obj";
+    //model->ModelFile = "Models/Test/Brick/Brick.obj";
     /*if ((line == 1 && row == 4) || (line == 3 && row == 2) || (line == 5 && row == 2)) {
         std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
     }*/
 
-    transform->Scale = glm::vec3(0.8, 0.2, 0.2);
-    if (typeInt == 2) {
+    //transform->Scale = glm::vec3(0.8, 0.2, 0.2);
+    /*if (typeInt == 2) {
         std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
-    }
+    }*/
     float x = line * spacesBetweenBricks.x;
     float y = row * spacesBetweenBricks.y;
     transform->Scale = glm::vec3(0.8, 0.2, 0.2);
@@ -245,7 +246,9 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         EventBroker->Publish(e);
     }
 
-    if (!Restarting()) {
+    if (!Restarting() && !brick->Removed) {
+        brick->Removed = true;
+        // Hit brick with ball code.
         ball->Combo += 1;
         Events::ComboEvent ec;
         ec.Combo = ball->Combo;
