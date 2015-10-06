@@ -51,8 +51,6 @@ void dd::Systems::BallSystem::Initialize()
         auto transform2 = m_World->GetComponent<Components::Transform>(ent2);
         transform2->Position = glm::vec3(-0.f, 0.26f, -10.f);
         transform2->Velocity = glm::vec3(0.0f, -10.f, 0.f);
-
-        m_World->CommitEntity(ent2);
     }
 
     for (int i = 0; i < Lives(); i++) {
@@ -236,15 +234,6 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         int hey = 5;
     }
 
-    /*if (otherEntitiy == m_LastCollision) {
-
-        if (brick != nullptr) {
-            return false;
-        }
-    } else {
-        m_LastCollision = otherEntitiy;
-    }*/
-
     //if this is a brick thats dead do not collide :)
 
     auto ballTransform = m_World->GetComponent<Components::Transform>(ballEntity);
@@ -283,7 +272,6 @@ EntityID dd::Systems::BallSystem::CreateBall()
 {
     auto ent = m_World->CloneEntity(Ball());
     m_World->RemoveComponent<Components::Template>(ent);
-    //m_World->CommitEntity(ent);
 
     return ent;
 }
@@ -314,7 +302,12 @@ bool dd::Systems::BallSystem::OnLifeLost(const dd::Events::LifeLost &event)
 
 bool dd::Systems::BallSystem::OnMultiBallLost(const dd::Events::MultiBallLost &event)
 {
-    SetMultiBalls(MultiBalls()-1);
+    SetMultiBalls(MultiBalls() - 1);
+    std::cout << MultiBalls() << std::endl;
+    if (MultiBalls() < 0) {
+        auto ent = CreateBall();
+        SetMultiBalls(0);
+    }
     return true;
 }
 
@@ -347,6 +340,6 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
     transform2->Velocity = glm::normalize(glm::vec3(-5, 5 ,0.f)) * ball2->Speed;
 
     SetMultiBalls(MultiBalls() + 2);
-
+    std::cout << MultiBalls() << std::endl;
     return true;
 }

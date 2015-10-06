@@ -78,8 +78,6 @@ public:
     void SetPastLives(const int& pastLives) { m_PastLives = pastLives; }
     bool ReplaceBall() const { return m_ReplaceBall; }
     void SetReplaceBall(const bool& replaceBall) { m_ReplaceBall = replaceBall; }
-    bool MultiBall() const { return m_MultiBall; }
-    void SetMultiBall(const bool& multiBall) { m_MultiBall = multiBall; }
     bool IsPaused() const { return m_Pause; }
     void SetPause(const bool& pause) { m_Pause = pause; }
 
@@ -91,7 +89,6 @@ private:
     int m_Lives = 3;
     int m_PastLives = 3;
     bool m_ReplaceBall = false;
-    bool m_MultiBall = false;
     bool m_Pause = false;
     EntityID m_LastCollision = 999999;
 
