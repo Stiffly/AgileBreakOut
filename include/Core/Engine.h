@@ -21,12 +21,12 @@
 #include <Sound/CCollisionSound.h>
 
 #include "ResourceManager.h"
-#include "OBJ.h"
-#include "Model.h"
-#include "Texture.h"
+#include "Rendering/OBJ.h"
+#include "Rendering/Model.h"
+#include "Rendering/Texture.h"
 #include "EventBroker.h"
-#include "RenderQueue.h"
-#include "Renderer.h"
+#include "Rendering/RenderQueue.h"
+#include "Rendering/Renderer.h"
 #include "InputManager.h"
 //TODO: Remove includes that are only here for the temporary draw solution.
 #include "World.h"

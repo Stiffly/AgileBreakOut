@@ -17,7 +17,7 @@
 */
 
 #include "PrecompiledHeader.h"
-#include "Core/Texture.h"
+#include "Rendering/Texture.h"
 
 dd::Texture::Texture(std::string path)
 {

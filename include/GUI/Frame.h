@@ -9,9 +9,9 @@
 #include "Core/EKeyDown.h"
 #include "Core/EKeyUp.h"
 #include "Core/ResourceManager.h"
-#include "Core/Renderer.h"
-#include "Core/RenderQueue.h"
-#include "Core/Texture.h"
+#include "Rendering/Renderer.h"
+#include "Rendering/RenderQueue.h"
+#include "Rendering/Texture.h"
 #include "Input/EInputCommand.h"
 
 namespace dd

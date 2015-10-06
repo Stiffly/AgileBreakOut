@@ -17,7 +17,7 @@
 */
 
 #include "PrecompiledHeader.h"
-#include "Core/OBJ.h"
+#include "Rendering/OBJ.h"
 
 bool dd::OBJ::LoadFromFile(std::string filename)
 {

@@ -53,6 +53,16 @@ file(GLOB SOURCE_FILES_Rendering
     "Rendering/*.cpp"
 )
 source_group(Rendering FILES ${SOURCE_FILES_Rendering})
+file(GLOB SOURCE_FILES_Rendering_OpenGL
+    "${INCLUDE_PATH}/Rendering/OpenGL/Rendering/*.h"
+    "Rendering/OpenGL/*.cpp"
+)
+source_group(Rendering\\OpenGL FILES ${SOURCE_FILES_Rendering_OpenGL})
+file(GLOB SOURCE_FILES_Rendering_DirectX
+    "${INCLUDE_PATH}/Rendering/DirectX/Rendering/*.h"
+    "Rendering/DirectX/*.cpp"
+)
+source_group(Rendering\\DirectX FILES ${SOURCE_FILES_Rendering_DirectX})
 
 file(GLOB SOURCE_FILES_Transform
     "${INCLUDE_PATH}/Transform/*.h"
@@ -61,8 +71,8 @@ file(GLOB SOURCE_FILES_Transform
 source_group(Transform FILES ${SOURCE_FILES_Transform})
 
 file(GLOB SOURCE_FILES_Physics
-        "${INCLUDE_PATH}/Physics/*.h"
-        "Physics/*.cpp"
+    "${INCLUDE_PATH}/Physics/*.h"
+    "Physics/*.cpp"
 )
 source_group(Physics FILES ${SOURCE_FILES_Physics})
 
@@ -94,6 +104,8 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Core_Util}
     ${SOURCE_FILES_Input}
     ${SOURCE_FILES_Rendering}
+    ${SOURCE_FILES_Rendering_OpenGL}
+    ${SOURCE_FILES_Rendering_DirectX}
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Physics}
     ${SOURCE_FILES_Game}

@@ -27,7 +27,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
 
-#include "ResourceManager.h"
+#include "Core/ResourceManager.h"
 
 namespace dd
 {

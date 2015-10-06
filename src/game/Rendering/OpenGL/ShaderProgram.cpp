@@ -17,7 +17,7 @@
 */
 
 #include "PrecompiledHeader.h"
-#include "Core/ShaderProgram.h"
+#include "Rendering/ShaderProgram.h"
 
 void dd::Shader::Compile()
 {

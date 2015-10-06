@@ -23,8 +23,8 @@
 #include <unordered_map>
 #include <cstdio>
 
-#include "ResourceManager.h"
-#include "PNG.h"
+#include "Core/ResourceManager.h"
+#include "Rendering/PNG.h"
 
 namespace dd
 {

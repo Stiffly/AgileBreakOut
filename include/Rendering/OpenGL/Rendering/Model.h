@@ -34,8 +34,8 @@
 #include <boost/filesystem/path.hpp>
 
 #include "Core/ResourceManager.h"
-#include "Core/Texture.h"
-#include "Core/Skeleton.h"
+#include "Rendering/Texture.h"
+#include "Rendering/Skeleton.h"
 
 namespace dd
 {

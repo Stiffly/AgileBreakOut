@@ -19,16 +19,16 @@
 #ifndef DD_RENDERER_H__
 #define DD_RENDERER_H__
 
-#include "Util/Rectangle.h"
+#include "Core/Util/Rectangle.h"
+#include "Rendering/Camera.h"
+#include "Rendering/RenderQueue.h"
+#include "Rendering/ShaderProgram.h"
 #include "Core/System.h"
 #include "Core/CTransform.h"
 #include "Core/CTemplate.h"
 #include "Core/EventBroker.h"
 #include "Core/World.h"
 #include "Game/EScreenShake.h"
-#include "Camera.h"
-#include "RenderQueue.h"
-#include "ShaderProgram.h"
 
 namespace dd
 {

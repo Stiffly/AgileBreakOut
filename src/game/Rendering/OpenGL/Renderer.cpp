@@ -17,7 +17,7 @@
 */
 
 #include "PrecompiledHeader.h"
-#include "Core/Renderer.h"
+#include "Rendering/Renderer.h"
 
 void dd::Renderer::Initialize()
 {

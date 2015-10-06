@@ -2,7 +2,7 @@
 #define GUI_TextureFrame_h__
 
 #include "GUI/Frame.h"
-#include "Core/Texture.h"
+#include "Rendering/Texture.h"
 
 namespace dd
 {

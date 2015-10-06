@@ -30,7 +30,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
-#include "ResourceManager.h"
+#include "Core/ResourceManager.h"
 
 namespace dd
 {

@@ -17,7 +17,7 @@
 */
 
 #include "PrecompiledHeader.h"
-#include "Core/Camera.h"
+#include "Rendering/Camera.h"
 
 dd::Camera::Camera(float aspectRatio, float yFOV, float nearClip, float farClip)
 {

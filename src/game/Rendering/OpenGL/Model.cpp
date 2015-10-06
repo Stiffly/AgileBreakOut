@@ -17,7 +17,7 @@
 */
 
 #include "PrecompiledHeader.h"
-#include "Core/Model.h"
+#include "Rendering/Model.h"
 
 dd::Model::Model(std::string fileName)
 {

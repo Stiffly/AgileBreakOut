@@ -17,7 +17,7 @@
 */
 
 #include "PrecompiledHeader.h"
-#include "Core/PNG.h"
+#include "Rendering/PNG.h"
 
 dd::PNG::PNG(std::string path)
 {
