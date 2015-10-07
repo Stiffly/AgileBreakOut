@@ -19,6 +19,7 @@ struct Ball : Component
     float Speed = 5.f;
     int Combo = 0;
     bool Paused = false;
+    bool Waiting = true;
     glm::vec3 SavedSpeed = glm::vec3(0, 0, 0);
 };
 

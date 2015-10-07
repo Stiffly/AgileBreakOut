@@ -13,7 +13,8 @@ namespace Events
 {
 struct StageCleared : Event
 {
-
+    int StageCleared = 0;
+    int StageCluster = 0;
 };
 }
 }

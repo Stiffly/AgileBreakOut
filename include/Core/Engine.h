@@ -168,11 +168,22 @@ public:
 			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
 			transform->Position = glm::vec3(0.f, 0.f, -15.f);
 			transform->Scale = glm::vec3(6.f, 6.f, 10.f);
+			transform->Sticky = false;
 			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
 			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
 			model->Color = glm::vec4(1.f, 0.f, 0.f, 0.3f);
 			m_World->CommitEntity(t_halfPipe);
 		}
+		/*{
+			auto t_halfPipe = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
+			transform->Position = glm::vec3(0.f, 6.f, -15.f);
+			transform->Scale = glm::vec3(6.f, 6.f, 10.f);
+			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
+			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
+			model->Color = glm::vec4(1.f, 0.f, 0.f, 0.3f);
+			m_World->CommitEntity(t_halfPipe);
+		}*/
 
 		//Background
 		{
@@ -247,6 +258,7 @@ public:
 			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
 			physics->CollisionType = CollisionType::Type::Static;
+			transform->Sticky = true;
 			m_World->CommitEntity(BottomWall);
 		}
 
@@ -266,6 +278,7 @@ public:
 			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Wall;
 			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
+			transform->Sticky = true;
 
 			m_World->CommitEntity(topWall);
 		}
@@ -287,6 +300,7 @@ public:
 			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Wall;
 			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
+			transform->Sticky = true;
 
 			m_World->CommitEntity(leftWall);
 		}
@@ -308,6 +322,8 @@ public:
 			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Wall;
 			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
+			transform->Sticky = true;
+
 			m_World->CommitEntity(rightWall);
 		}
 

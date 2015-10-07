@@ -31,6 +31,7 @@ void dd::Systems::LevelSystem::Initialize()
     cPhys->GravityScale = 0.f;
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = CollisionLayer::Type::Ball;
+    transform->Sticky = false;
 
     model->ModelFile = "Models/Brick/TurquoiseBrick.obj";
     transform->Position = glm::vec3(50, 50, -10);
@@ -61,6 +62,17 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
 
+    // Check the background.
+    auto model = m_World->GetComponent<Components::Model>(entity);
+    if (model != nullptr) {
+        if (model->ModelFile == "Models/Test/halfpipe/Halfpipe.obj") {
+            auto transform = m_World->GetComponent<Components::Transform>(entity);
+            if (transform->Position.y <= -12) {
+                transform->Position.y = 12;
+            }
+        }
+    }
+
     auto brick = m_World->GetComponent<Components::Brick>(entity);
     if (brick != nullptr) {
         auto transform = m_World->GetComponent<Components::Transform>(entity);
@@ -81,6 +93,8 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     if (NumberOfBricks() <= 0 && m_LooseBricks <= 0 && !Restarting()) {
         if (MultiBalls() <= 0 && PowerUps() <= 0) {
             Events::StageCleared ec;
+            ec.StageCleared = m_CurrentLevel;
+            ec.StageCluster = m_CurrentCluster;
             EventBroker->Publish(ec);
         } else {
             if (ball != nullptr && MultiBalls() > 0) {
@@ -304,6 +318,7 @@ bool dd::Systems::LevelSystem::OnCreatePowerUp(const dd::Events::CreatePowerUp &
     cPhys->CollisionType = CollisionType::Type::Dynamic;
     cPhys->Category = CollisionLayer::Type::PowerUp;
     cPhys->Mask = CollisionLayer::Type::Pad;
+    transform->Sticky = false;
 
     std::shared_ptr<Components::PowerUp> cPow = m_World->AddComponent<Components::PowerUp>(powerUp);
 

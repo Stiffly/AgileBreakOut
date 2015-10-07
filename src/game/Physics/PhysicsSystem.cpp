@@ -194,7 +194,13 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
 void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
-
+    auto transform = m_World->GetComponent<Components::Transform>(entity);
+    if (transform != nullptr) {
+        if (transform->Sticky == true) {
+            return;
+        }
+        transform->Position.y -= 1.0f * dt;
+    }
 }
 
 bool dd::Systems::PhysicsSystem::OnPause(const dd::Events::Pause &event)
