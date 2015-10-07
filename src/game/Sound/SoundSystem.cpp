@@ -175,21 +175,6 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
         EventBroker->Publish(e);
     }
 
-    {
-        Events::CreateParticleSequence e;
-        e.Position = glm::vec3(0.f, 0.f, -10.f);
-        e.SpriteFile = "Textures/Background.png";
-        e.GravityScale = 0.0f;
-        e.SpawnRate = 1.f;
-        e.NumberOfTicks = 2;
-        e.Speed = 1.f;
-        e.ParticlesPerTick = 5;
-        e.Spread = glm::pi<float>() * 2;
-        e.EmittingAngle = glm::pi<float>();
-        e.EmitterLifeTime = 50;
-        e.ParticleLifeTime = 3.f;
-        EventBroker->Publish(e);
-    }
     return true;
 }
 

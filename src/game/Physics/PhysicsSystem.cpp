@@ -199,7 +199,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             }
             auto transform = m_World->GetComponent<Components::Transform>(entity);
 
-            transform->Position = glm::vec3(position.x, position.y, -10.f);
+            transform->Position = glm::vec3(position.x - parentTransform.x, position.y - parentTransform.y, 0);
         }
 
         //Normal particles
