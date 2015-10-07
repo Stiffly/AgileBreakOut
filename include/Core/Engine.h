@@ -45,6 +45,7 @@
 #include "Game/CPad.h"
 #include "Game/CBrick.h"
 #include "Game/BallSystem.h"
+#include "Game/HitLagSystem.h"
 #include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Physics/PhysicsSystem.h"
@@ -113,10 +114,6 @@ public:
 		m_World->ComponentFactory.Register<Components::PowerUp>();
 		m_World->ComponentFactory.Register<Components::PowerUpBrick>();
 
-		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
-				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
-		m_World->AddSystem<Systems::PhysicsSystem>();
-
 		m_World->SystemFactory.Register<Systems::LevelSystem>(
 				[this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LevelSystem>();
@@ -126,6 +123,12 @@ public:
 		m_World->SystemFactory.Register<Systems::BallSystem>(
 				[this]() { return new Systems::BallSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::BallSystem>();
+		m_World->SystemFactory.Register<Systems::HitLagSystem>(
+				[this]() { return new Systems::HitLagSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::HitLagSystem>();
+		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
+				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::PhysicsSystem>();
 
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
@@ -134,31 +137,6 @@ public:
 		m_World->ComponentFactory.Register<Components::Particle>();
 		m_World->ComponentFactory.Register<Components::ParticleEmitter>();
 		m_World->Initialize();
-
-
-		//OctoBall
-		{
-          	auto ent = m_World->CreateEntity();
-        	std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-			transform->Position = glm::vec3(-0.f, 0.26f, -9.f);
-			transform->Scale = glm::vec3(0.5f, 0.5f, 0.5f);
-			transform->Velocity = glm::vec3(0.0f, -10.f, 0.f);
-          	auto model = m_World->AddComponent<Components::Model>(ent);
-			model->ModelFile = "Models/Test/Ball/Ballopus.obj";
-          	std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
-			std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
-			ball->Speed = 5.f;
-			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
-			physics->Static = false;
-			physics->Category = CollisionLayer::Type::Ball;
-			physics->Mask = CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall;
-			physics->Calculate = true;
-
-			auto plight = m_World->AddComponent<Components::PointLight>(ent);
-			plight->Radius = 2.f;
-
-			m_World->CommitEntity(ent);
-		}
 
 		//PointLightTest
 		{
@@ -207,6 +185,7 @@ public:
 			m_World->CommitEntity(background);
 		}
 
+//			auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
 		//Water test
 		{
 			auto t_waterBody = m_World->CreateEntity();
@@ -271,64 +250,35 @@ public:
 		//TODO: Why does the ball not collide with these bricks?
 		//BottomBox
 		{
-			auto topWall = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(topWall);
-			transform->Position = glm::vec3(0.f, -7.f, -9.9f);
-			transform->Scale = glm::vec3(10.f, 0.5f, 1.f);
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+			auto BottomWall = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(BottomWall);
+			transform->Position = glm::vec3(0.f, -6.f, -10.f);
+			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
-			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
-					topWall);
-			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
-			physics->Static = true;
-			m_World->CommitEntity(topWall);
+			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(BottomWall);
+			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
+			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
+			physics->CollisionType = CollisionType::Type::Static;
+			m_World->CommitEntity(BottomWall);
 		}
-		//SideBox
-//		{
-//			auto topWall = m_World->CreateEntity();
-//			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
-//			transform->Position = glm::vec3(3.f, -3.0f, -9.9f);
-//			transform->Scale = glm::vec3(0.5f, 3.f, 1.f);
-//			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
-//			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
-//			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
-//					topWall);
-//			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
-//			physics->Static = true;
-//			m_World->CommitEntity(topWall);
-//		}
-//		//OtherSideBox
-//		{
-//			auto topWall = m_World->CreateEntity();
-//			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
-//			transform->Position = glm::vec3(-4.f, -3.0f, -9.9f);
-//			transform->Scale = glm::vec3(0.5f, 3.0f, 1.f);
-//			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
-//			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
-//			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
-//					topWall);
-//			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
-//			physics->Static = true;
-//			m_World->CommitEntity(topWall);
-//		}
 
 		{
 			auto topWall = m_World->CreateEntity();
-			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
-					topWall);
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
 			transform->Position = glm::vec3(0.f, 6.f, -10.f);
 			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
 
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
-			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
-					topWall);
+			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(topWall);
+			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
-			physics->Static = true;
-			physics->Category = CollisionLayer::Type::Wall;
-			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
+			physics->CollisionType = CollisionType::Type::Static;
+			physics->Category = CollisionLayer::Wall;
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
 
 			m_World->CommitEntity(topWall);
 		}
@@ -343,13 +293,13 @@ public:
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
-			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
-					leftWall);
+			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(leftWall);
+			rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(leftWall);
-			physics->Static = true;
-			physics->Category = CollisionLayer::Type::Wall;
-			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
+			physics->CollisionType = CollisionType::Type::Static;
+			physics->Category = CollisionLayer::Wall;
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
 
 			m_World->CommitEntity(leftWall);
 		}
@@ -364,36 +314,15 @@ public:
 			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
 			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
-			std::shared_ptr<Components::RectangleShape> boxShape = m_World->AddComponent<Components::RectangleShape>(
-					rightWall);
+			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(rightWall);
+			rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
 
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(rightWall);
-			physics->Static = true;
-			physics->Category = CollisionLayer::Type::Wall;
-			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::Brick;
-
+			physics->CollisionType = CollisionType::Type::Static;
+			physics->Category = CollisionLayer::Wall;
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
 			m_World->CommitEntity(rightWall);
 		}
-
-		{
-			auto ent = m_World->CreateEntity();
-			m_World->SetProperty(ent, "Name", "Pad");
-			auto ctransform = m_World->AddComponent<Components::Transform>(ent);
-			ctransform->Position = glm::vec3(0.f, -3.5f, -10.f);
-			ctransform->Scale = glm::vec3(1.0f, 1.0f, 1.f);
-			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
-			auto physics = m_World->AddComponent<Components::Physics>(ent);
-			physics->Static = false;
-			physics->Category = CollisionLayer::Type::Pad;
-			physics->Mask = CollisionLayer::Type::Ball | CollisionLayer::Type::PowerUp;
-			physics->Calculate = true;
-			auto cModel = m_World->AddComponent<Components::Model>(ent);
-			cModel->ModelFile = "Models/Submarine2.obj";
-
-			auto pad = m_World->AddComponent<Components::Pad>(ent);
-			m_World->CommitEntity(ent);
-		}
-
 
 		//EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &Engine::OnGameStart);
 		m_EGameStart = decltype(m_EGameStart)(std::bind(&Engine::OnGameStart, this, std::placeholders::_1));
@@ -605,17 +534,19 @@ private:
 		//Todo: Move this
 		{
 			dd::Events::PlaySound e;
-			e.path = "Sounds/BGM/under-the-sea-instrumental.wav";
-			e.isAmbient = true;
+			e.FilePath = "Sounds/BGM/under-the-sea-instrumental.wav";
+			e.IsAmbient = true;
 			m_EventBroker->Publish(e);
 		}
 		{
 			dd::Events::PlaySound e;
-			e.path = "Sounds/BGM/water-flowing.wav";
-			e.volume = 0.3f;
-			e.isAmbient = true;
+			e.FilePath = "Sounds/BGM/water-flowing.wav";
+			e.Gain = 0.3f;
+			e.IsAmbient = true;
 			m_EventBroker->Publish(e);
 		}
+
+		return true;
 	};
 	double m_LastTime;
 };

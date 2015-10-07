@@ -29,32 +29,26 @@ dd::BaseEventRelay::~BaseEventRelay()
 
 void dd::EventBroker::Unsubscribe(BaseEventRelay &relay) // ?
 {
-	auto contextIt = m_ContextRelays.find(relay.m_ContextTypeName);
-	if (contextIt == m_ContextRelays.end())
-		return;
-
-	auto eventRelays = contextIt->second;
-
-	auto itpair = eventRelays.equal_range(relay.m_EventTypeName);
-	for (auto it = itpair.first; it != itpair.second; ++it)
-	{
-		if (it->second == &relay)
-		{
-			relay.m_Broker = nullptr;
-			eventRelays.erase(it);
-			break;
-		}
+	if (m_IsProcessing) {
+		m_RelaysToUnsubscribe.push_back(&relay);
+	} else {
+		unsubscribeImmediate(relay);
 	}
 }
 
 void dd::EventBroker::Subscribe(BaseEventRelay &relay)
 {
-	relay.m_Broker = this;
-	m_ContextRelays[relay.m_ContextTypeName].insert(std::make_pair(relay.m_EventTypeName, &relay));
+	if (m_IsProcessing) {
+		m_RelaysToSubscribe.push_back(&relay);
+	} else {
+		subscribeImmediate(relay);
+	}
 }
 
 int dd::EventBroker::Process(std::string contextTypeName)
 {
+	m_IsProcessing = true;
+
 	auto it = m_ContextRelays.find(contextTypeName);
 	if (it == m_ContextRelays.end())
 		return 0;
@@ -68,13 +62,28 @@ int dd::EventBroker::Process(std::string contextTypeName)
 		std::shared_ptr<Event> event = pair.second;
 
 		auto itpair = relays.equal_range(eventTypeName);
-		for (auto it2 = itpair.first; it2 != itpair.second; ++it2)
+		for (auto it2 = itpair.first; it2 != itpair.second; it2++)
 		{
-			auto relay = it2->second;
+			std::string name = it2->first;
+			BaseEventRelay* relay = it2->second;
 			relay->Receive(event);
 			eventsProcessed++;
 		}
 	}
+
+	m_IsProcessing = false;
+
+	// Process pending subscriptions
+	for (auto& r : m_RelaysToSubscribe) {
+		subscribeImmediate(*r);
+	}
+	m_RelaysToSubscribe.clear();
+
+	// Process pending unsubscriptions
+	for (auto& r : m_RelaysToUnsubscribe) {
+		unsubscribeImmediate(*r);
+	}
+	m_RelaysToUnsubscribe.clear();
 
 	return eventsProcessed;
 }
@@ -83,4 +92,29 @@ void dd::EventBroker::Swap()
 {
 	std::swap(m_EventQueueRead, m_EventQueueWrite);
 	m_EventQueueWrite->clear();
+
+}
+
+void dd::EventBroker::subscribeImmediate(dd::BaseEventRelay& relay)
+{
+	relay.m_Broker = this;
+	m_ContextRelays[relay.m_ContextTypeName].insert(std::make_pair(relay.m_EventTypeName, &relay));
+}
+
+void dd::EventBroker::unsubscribeImmediate(dd::BaseEventRelay& relay)
+{
+	auto contextIt = m_ContextRelays.find(relay.m_ContextTypeName);
+	if (contextIt == m_ContextRelays.end()) {
+		return;
+	}
+
+	auto eventRelays = contextIt->second;
+	auto itpair = eventRelays.equal_range(relay.m_EventTypeName);
+	for (auto it = itpair.first; it != itpair.second; ++it) {
+		if (it->second == &relay) {
+			relay.m_Broker = nullptr;
+			eventRelays.erase(it);
+			break;
+		}
+	}
 }

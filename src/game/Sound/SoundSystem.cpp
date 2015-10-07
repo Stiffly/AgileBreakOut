@@ -19,15 +19,7 @@ void dd::Systems::SoundSystem::Initialize()
     else {
         LOG_ERROR("OpenAL failed to initialize.");
     }
-
     alGetError();
-
-    //Probably unnecessary. vec3(0) probably default.
-    const ALfloat pos[3] = {0, 0, 0};
-    //alListenerfv(AL_POSITION, pos);
-
-    m_SFXMasterVolume = 1.f;
-    m_BGMMasterVolume = 1.f;
 
     //Subscribe to events
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &SoundSystem::OnContact);
@@ -35,6 +27,20 @@ void dd::Systems::SoundSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EStopSound, &SoundSystem::OnStopSound);
     EVENT_SUBSCRIBE_MEMBER(m_EMasterVolume, &SoundSystem::OnMasterVolume);
 
+    //Todo: Move this
+    {
+        dd::Events::PlaySound e;
+        e.FilePath = "Sounds/BGM/under-the-sea-instrumental.wav";
+        e.IsAmbient = true;
+        EventBroker->Publish(e);
+    }
+    {
+        dd::Events::PlaySound e;
+        e.FilePath = "Sounds/BGM/water-flowing.wav";
+        e.Gain = 0.3f;
+        e.IsAmbient = true;
+        EventBroker->Publish(e);
+    }
 
 
 }
@@ -44,7 +50,7 @@ void dd::Systems::SoundSystem::Update(double dt)
     //Clean up none-active sources
     //Only used for SFX's. BGM's are handled on stop sound.
     std::vector<ALuint> deleteList;
-    for (auto item : m_SFXSourcesToBuffers) {
+    for (auto& item : m_SFXSourcesToBuffers) {
         ALint sourceState;
         alGetSourcei(item.first, AL_SOURCE_STATE, &sourceState);
         if (sourceState == AL_STOPPED) {
@@ -70,32 +76,32 @@ ALuint dd::Systems::SoundSystem::CreateSource()
 bool dd::Systems::SoundSystem::OnPlaySound(const dd::Events::PlaySound &event)
 {
     //Loading and binding sound buffer to source
-    Sound *sound = ResourceManager::Load<Sound>(event.path);
+    Sound *sound = ResourceManager::Load<Sound>(event.FilePath);
     if (sound == nullptr) {
        return false;
     }
     ALuint source = CreateSource();
     ALuint buffer = sound->Buffer();
     alSourcei(source, AL_BUFFER, buffer);
+    sound->SetGain(event.Gain);
 
     //Sound settings
     float relativeVolume = 1.f;
-    if (event.isAmbient) {
+    if (event.IsAmbient) {
         alSourcei(source, AL_LOOPING, AL_TRUE);
         relativeVolume = m_BGMMasterVolume;
         m_BGMSourcesToBuffers[source] = sound;
 
     }
-    else if (!event.isAmbient)
+    else if (!event.IsAmbient)
     {
         m_SFXSourcesToBuffers[source] = sound;
         alSourcei(source, AL_LOOPING, AL_FALSE);
         relativeVolume = m_SFXMasterVolume;
     }
 
-    alSourcef(source, AL_GAIN, (event.volume * relativeVolume));
-    alSourcef(source, AL_PITCH, event.pitch);
-
+    alSourcef(source, AL_GAIN, (sound->Gain() * relativeVolume));
+    alSourcef(source, AL_PITCH, event.Pitch);
 
     //Play
     alSourcePlay(source);
@@ -104,53 +110,50 @@ bool dd::Systems::SoundSystem::OnPlaySound(const dd::Events::PlaySound &event)
 
 bool dd::Systems::SoundSystem::OnStopSound(const dd::Events::StopSound &event)
 {
-
-    //TODO: Delete sources for bgms
-    ALuint itemToDelete;
-    for (auto item : m_BGMSourcesToBuffers)
+    ALuint itemToDeleted;
+    for (auto& item : m_BGMSourcesToBuffers)
     {
-        if (item.second->Path() == event.path) {
-            itemToDelete = item.first;
+        if (item.second->Path() == event.FilePath) {
+            itemToDeleted = item.first;
             break;
         }
     }
-    alSourceStop(itemToDelete);
-    alDeleteSources(1, &itemToDelete);
-    m_BGMSourcesToBuffers.erase(itemToDelete);
+    alSourceStop(itemToDeleted);
+    alDeleteSources(1, &itemToDeleted);
+    m_BGMSourcesToBuffers.erase(itemToDeleted);
 
-    //Should not because SFX's should be very short.
+    //Should not happen because SFX's should be very short.
     for (auto item : m_SFXSourcesToBuffers)
     {
-        if (item.second->Path() == event.path) {
+        if (item.second->Path() == event.FilePath) {
             alSourceStop(item.first);
             return true;
         }
     }
-
     return false;
 }
 
 bool dd::Systems::SoundSystem::OnMasterVolume(const dd::Events::MasterVolume &event)
 {
-    //TODO: Make the volume depend on the value given when stored.
-    //TODO: .. now it ONLY uses the master volume
-    if (event.isAmbient) {
-        m_BGMMasterVolume = event.gain;
-        for (auto item : m_BGMSourcesToBuffers)
+    if (event.IsAmbient) {
+        m_BGMMasterVolume = event.Gain;
+        for (auto& item : m_BGMSourcesToBuffers)
         {
-            alSourcef(item.first, AL_GAIN, event.gain);
+            alSourcef(item.first, AL_GAIN, (item.second->Gain() * m_BGMMasterVolume));
         }
+        return true;
     }
-    else if (!event.isAmbient) {
-        m_SFXMasterVolume = event.gain;
-        for (auto item : m_SFXSourcesToBuffers)
+    else if (!event.IsAmbient) {
+        m_SFXMasterVolume = event.Gain;
+        for (auto& item : m_SFXSourcesToBuffers)
         {
-            alSourcef(item.first, AL_GAIN, event.gain);
+            alSourcef(item.first, AL_GAIN, (item.second->Gain() * m_SFXMasterVolume));
         }
+        return true;
     }
+    return false;
 }
 
-//On contact: play the sound given in the CCOllisionSound.
 bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
 {
     //Check which entity has the collisionSound component.
@@ -167,8 +170,8 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
 
     {
         dd::Events::PlaySound e;
-        e.path = collisionSound->filePath;
-        e.isAmbient = false;
+        e.FilePath = collisionSound->FilePath;
+        e.IsAmbient = false;
         EventBroker->Publish(e);
     }
 
@@ -187,7 +190,8 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
         e.ParticleLifeTime = 3.f;
         EventBroker->Publish(e);
     }
-    //return true;
+    return true;
 }
+
 
 

@@ -2,37 +2,26 @@
 #include "Physics/PhysicsSystem.h"
 
 
-
 void dd::Systems::PhysicsSystem::RegisterComponents(ComponentFactory* cf)
 {
     cf->Register<Components::CircleShape>();
+    //TODO: REGISTER PHYSICS COMPONENTS HERE
 }
 
 void dd::Systems::PhysicsSystem::Initialize()
 {
     std::random_device rd;
     gen = std::mt19937(rd());
-
     m_DestructionListener = new DestructionListener(this);
     m_ContactListener = new ContactListener(this);
-
-    m_Gravity = b2Vec2(0.f, -9.82f);
     m_PhysicsWorld = new b2World(m_Gravity);
-
-    m_TimeStep = 1.f/60.f;
-    m_VelocityIterations = 6;
-    m_PositionIterations = 2;
-    m_Accumulator = 0.f;
-
     m_PhysicsWorld->SetContactListener(m_ContactListener);
-    m_PhysicsWorld->SetContactFilter(&m_ParticleContactDisabler);
+     m_PhysicsWorld->SetContactFilter(&m_ParticleContactDisabler);
     m_PhysicsWorld->SetDestructionListener(m_DestructionListener);
 
     InitializeWater();
-
-
-
-    EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, PhysicsSystem::SetImpulse);
+    EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, &PhysicsSystem::SetImpulse);
+    EVENT_SUBSCRIBE_MEMBER(m_EPause, &PhysicsSystem::OnPause);
     EVENT_SUBSCRIBE_MEMBER(m_ECreateParticleSequence, &PhysicsSystem::CreateParticleSequence);
 
 }
@@ -53,7 +42,11 @@ void dd::Systems::PhysicsSystem::InitializeWater()
 
 bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
 {
-    b2Body* body = m_EntitiesToBodies[event.Entity];
+    auto it = m_EntitiesToBodies.find(event.Entity);
+    if(it == m_EntitiesToBodies.end()) {
+        LOG_ERROR("Entity: %i, Tried to set an impulse on a body that does not exsist", event.Entity);
+        return false;
+    }
 
     b2Vec2 impulse;
     impulse.x = event.Impulse.x;
@@ -63,112 +56,136 @@ bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
     point.x = event.Point.x;
     point.y = event.Point.y;
 
-
     Impulse i;
-    i.Body = body;
-    i.Impulse = impulse;
+    i.Body = it->second;
+    i.Vector = impulse;
     i.Point = point;
 
     m_Impulses.push_back(i);
-
     return true;
 }
 
-void dd::Systems::PhysicsSystem::Update(double dt) {
+void dd::Systems::PhysicsSystem::SyncEntitiesWithBodies()
+{
 
-    m_Accumulator += dt;
-    while (m_Accumulator >= m_TimeStep) {
+    for (auto i : m_EntitiesToBodies) {
+        EntityID entity = i.first;
+        b2Body* body = i.second;
 
-        for (auto i : m_EntitiesToBodies) {
-            EntityID entity = i.first;
-            b2Body *body = i.second;
-
-            auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
-            if (!transformComponent) {
-                continue;
-                LOG_ERROR("RigidBody with no TransformComponent");
-            }
-            auto physicsComponent = m_World->GetComponent<Components::Physics>(entity);
-            if (!physicsComponent) {
-                continue;
-                LOG_ERROR("RigidBody with no PhysicsComponent");
-            }
-
-            if (body == nullptr) {
-                LOG_ERROR("This body should not exist");
-                continue;
-            }
-
-            if (m_World->GetEntityParent(entity) == 0) { //TODO: Make this work with childs too
-                b2Vec2 position;
-                position.x = transformComponent->Position.x;
-                position.y = transformComponent->Position.y;
-                float angle = glm::eulerAngles(transformComponent->Orientation).z;
-                body->SetTransform(position, angle);
-                body->SetLinearVelocity(b2Vec2(transformComponent->Velocity.x, transformComponent->Velocity.y));
-                body->SetGravityScale(physicsComponent->GravityScale);
-
-                b2Filter filter;
-                filter.categoryBits = physicsComponent->Category;
-                filter.maskBits = physicsComponent->Mask;
-                body->GetFixtureList()->SetFilterData(filter);
-            }
+        if (body == nullptr) {
+            LOG_ERROR("This body should not exist, please fix this");
+            continue;
         }
 
-        UpdateParticleEmitters(dt);
+        auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
+        if (! transformComponent) {
+            continue;
+            LOG_ERROR("RigidBody with no TransformComponent");
+        }
 
+        auto physicsComponent = m_World->GetComponent<Components::Physics>(entity);
+        if (! physicsComponent) {
+            continue;
+            LOG_ERROR("RigidBody with no PhysicsComponent");
+        }
+
+
+
+        if (m_World->GetEntityParent(entity) == 0) { //TODO: Make this work with childs too
+            b2Vec2 position;
+            position.x = transformComponent->Position.x;
+            position.y = transformComponent->Position.y;
+            float angle = glm::eulerAngles(transformComponent->Orientation).z;
+            body->SetTransform(position, angle);
+            body->SetLinearVelocity(b2Vec2(transformComponent->Velocity.x, transformComponent->Velocity.y));
+            body->SetGravityScale(physicsComponent->GravityScale);
+
+            b2Filter filter;
+            filter.categoryBits = physicsComponent->Category;
+            filter.maskBits = physicsComponent->Mask;
+            body->GetFixtureList()->SetFilterData(filter);
+        }
+    }
+}
+
+void dd::Systems::PhysicsSystem::SyncBodiesWithEntities()
+{
+    for (auto i : m_BodiesToEntities) {
+        b2Body* body = i.first;
+        EntityID entity = i.second;
+
+        if (body == nullptr) {
+            LOG_ERROR("This body should not exist, please fix this");
+            continue;
+        }
+
+        auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
+        if (! transformComponent) {
+            continue;
+            LOG_ERROR("RigidBody with no TransformComponent");
+        }
+
+        auto physicsComponent = m_World->GetComponent<Components::Physics>(entity);
+        if (! physicsComponent) {
+            continue;
+            LOG_ERROR("RigidBody with no PhysicsComponent");
+        }
+
+        auto parent = m_World->GetEntityParent(entity);
+        if (parent == 0) {
+            auto physicsComponent = m_World->GetComponent<Components::Physics>(entity);
+
+            if (physicsComponent->Calculate) { //TODO: REPLACE THIS WITH PARTICLE COLLISION FILTERS
+                transformComponent->Position.x = transformComponent->Position.x + (transformComponent->Velocity.x * m_TimeStep);
+                transformComponent->Position.y = transformComponent->Position.y + (transformComponent->Velocity.y * m_TimeStep);
+            } else {
+                b2Vec2 position = body->GetPosition();
+                transformComponent->Position.x = position.x;
+                transformComponent->Position.y = position.y;
+
+                float angle = body->GetAngle();
+                transformComponent->Orientation =  glm::quat(glm::vec3(0, 0, angle));
+
+                b2Vec2 velocity = body->GetLinearVelocity();
+                transformComponent->Velocity.x = velocity.x;
+                transformComponent->Velocity.y = velocity.y;
+            }
+        }
+    }
+}
+
+void dd::Systems::PhysicsSystem::Update(double dt)
+{
+    if (m_Pause) {
+        return;
+    }
+
+    m_Accumulator += dt;
+
+    while(m_Accumulator >= m_TimeStep)
+    {
+
+        UpdateParticleEmitters(dt);
+        SyncEntitiesWithBodies();
+
+        //Apply Impulses Must be done after SyncEntitiesWithBodies
         for (auto i : m_Impulses) {
-            i.Body->ApplyLinearImpulse(i.Impulse, i.Point, true);
+            i.Body->ApplyLinearImpulse(i.Vector, i.Point, true);
         }
         m_Impulses.clear();
 
+
+        //Update the PhysicsWorld
         m_PhysicsWorld->Step(m_TimeStep, m_VelocityIterations, m_PositionIterations);
 
-
-        for (auto i : m_EntitiesToBodies) {
-            EntityID entity = i.first;
-            b2Body *body = i.second;
-
-            if (body == nullptr) {
-                LOG_ERROR("This body should not exist");
-                continue;
-            }
-
-            auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
-            if (!transformComponent)
-                continue;
-            auto parent = m_World->GetEntityParent(entity);
-            if (parent == 0) {
-
-                auto physicsComponent = m_World->GetComponent<Components::Physics>(entity);
-                if (physicsComponent->Calculate) { //TODO: REPLACE THIS WITH PARTICLE COLLISION FILTERS
-                    transformComponent->Position.x =
-                            transformComponent->Position.x + (transformComponent->Velocity.x * m_TimeStep);
-                    transformComponent->Position.y =
-                            transformComponent->Position.y + (transformComponent->Velocity.y * m_TimeStep);
-                }
-                else {
-                    b2Vec2 position = body->GetPosition();
-                    transformComponent->Position.x = position.x;
-                    transformComponent->Position.y = position.y;
-
-                    float angle = body->GetAngle();
-                    transformComponent->Orientation = glm::quat(glm::vec3(0, 0, angle));
-
-                    b2Vec2 velocity = body->GetLinearVelocity();
-                    transformComponent->Velocity.x = velocity.x;
-                    transformComponent->Velocity.y = velocity.y;
-                }
-            }
-        }
-
+        SyncBodiesWithEntities();
 
 
         //water
         b2Vec2 *positionBuffer = m_WaterParticleSystem->GetPositionBuffer();
         for (auto i : m_EntitiesToWaterParticleHandle){
             EntityID entity = i.first;
-            b2ParticleHandle *particleH = i.second;
+            const b2ParticleHandle *particleH = i.second;
 
 
             b2Vec2 positionB2 = positionBuffer[particleH->GetIndex()];
@@ -182,7 +199,7 @@ void dd::Systems::PhysicsSystem::Update(double dt) {
             }
             auto transform = m_World->GetComponent<Components::Transform>(entity);
 
-            transform->Position = glm::vec3(position.x, position.y, -10);
+            transform->Position = glm::vec3(position.x, position.y, -10.f);
         }
 
         //Normal particles
@@ -193,7 +210,7 @@ void dd::Systems::PhysicsSystem::Update(double dt) {
             }
             for (auto i : m_EntitiesToParticleHandle[e]){
                 EntityID entity = i.first;
-                b2ParticleHandle *particleH = i.second;
+                const b2ParticleHandle *particleH = i.second;
 
                 b2Vec2 positionB2 = positionBuffer[particleH->GetIndex()];
                 glm::vec2 position = glm::vec2(positionB2.x, positionB2.y);
@@ -214,16 +231,15 @@ void dd::Systems::PhysicsSystem::Update(double dt) {
     }
 }
 
-
 void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
-{
-    auto particle = m_World->GetComponent<Components::Particle>(entity);
+{    
+auto particle = m_World->GetComponent<Components::Particle>(entity);
     auto pTemplate = m_World->GetComponent<Components::Template>(entity);
     if (particle && !pTemplate) {
         particle->LifeTime -= dt;
         if (particle->LifeTime <= 0) {
             for (int i = 0; i < m_EntitiesToParticleHandle.size(); i++) {
-                b2ParticleHandle* handle = m_EntitiesToParticleHandle[i][entity];
+                const b2ParticleHandle* handle = m_EntitiesToParticleHandle[i][entity];
                 std::unordered_map<EntityID, const b2ParticleHandle*>::iterator iter1;
                 std::unordered_map<const b2ParticleHandle*,EntityID>::iterator iter2;
                 iter1 = m_EntitiesToParticleHandle[i].find(entity);
@@ -239,6 +255,20 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 
         }
     }
+}
+
+bool dd::Systems::PhysicsSystem::OnPause(const dd::Events::Pause &event)
+{
+    if (event.Type != "PhysicsSystem" && event.Type != "All") {
+        return false;
+    }
+
+    if (m_Pause) {
+        m_Pause = false;
+    } else {
+        m_Pause = true;
+    }
+    return true;
 }
 
 void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)
@@ -257,7 +287,12 @@ void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)
     }
 
     if (physicsComponent) {
-        CreateBody(entity);
+        auto it = m_EntitiesToBodies.find(entity);
+        if(it == m_EntitiesToBodies.end()) {
+            CreateBody(entity);
+        } else {
+            LOG_ERROR("Tried to commit a body that already exists");
+        }
     } else if (waterComponent) {
         CreateParticleGroup(entity);
     } else if (particleEmitterComponent) {
@@ -268,21 +303,25 @@ void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)
 
 void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
 {
-    auto physics = m_World->GetComponent<Components::Physics>(entity);
+   /* auto physics = m_World->GetComponent<Components::Physics>(entity);
     if (physics == nullptr) {
+        return;
+    }*/
+
+    auto it = m_EntitiesToBodies.find(entity);
+    if(it == m_EntitiesToBodies.end()) {
+        LOG_ERROR("Trying to remove non-exsisting body, Entity: %i", entity);
         return;
     }
 
-    b2Body* body = m_EntitiesToBodies[entity];
-
-    if (body != nullptr) {
-        m_EntitiesToBodies.erase(entity);
-        m_BodiesToEntities.erase(body);
-
-        m_PhysicsWorld->DestroyBody(body);
-    }
-
+    //It told me I was removing a lot of objects, and I didn't need that information, so I commented it out.
+    //LOG_INFO("Removing entity %i", entity);
+    it->second->GetWorld()->DestroyBody(it->second);
+    m_BodiesToEntities.erase(it->second);
+    m_EntitiesToBodies.erase(entity);
+    //delete body;
 }
+
 
 void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
 {
@@ -291,7 +330,6 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
         LOG_ERROR("No PhysicsComponent in CreateBody");
         return;
     }
-
 
     auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
     if(!transformComponent) {
@@ -305,34 +343,28 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
     bodyDef.position.Set(absoluteTransform.Position.x, absoluteTransform.Position.y);
     bodyDef.angle = -glm::eulerAngles(absoluteTransform.Orientation).z;
 
-    if (physicsComponent->Static) {
+    if (physicsComponent->CollisionType == CollisionType::Type::Static) {
         bodyDef.type = b2_staticBody;
-    } else {
+    } else if (physicsComponent->CollisionType == CollisionType::Type::Dynamic) {
         bodyDef.type = b2_dynamicBody;
-
+    } else if (physicsComponent->CollisionType == CollisionType::Type::Kinematic) {
+        bodyDef.type = b2_dynamicBody;
     }
 
     b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
 
     b2Shape* pShape;
 
-    auto boxComponent = m_World->GetComponent<Components::RectangleShape>(entity);
-    if (boxComponent) {
+    auto rectangleComponent = m_World->GetComponent<Components::RectangleShape>(entity);
+    if (rectangleComponent) {
         b2PolygonShape* bShape = new b2PolygonShape();
-        bShape->SetAsBox(absoluteTransform.Scale.x/2, absoluteTransform.Scale.y/2);
+        bShape->SetAsBox(rectangleComponent->Dimensions.x/2.f, rectangleComponent->Dimensions.y/2.f);
         pShape = bShape;
     } else {
         auto circleComponent = m_World->GetComponent<Components::CircleShape>(entity);
         if (circleComponent) {
             pShape = new b2CircleShape();
-            pShape->m_radius = absoluteTransform.Scale.x;
-
-
-            if (absoluteTransform.Scale.x != absoluteTransform.Scale.y &&  absoluteTransform.Scale.y != absoluteTransform.Scale.z) {
-                LOG_WARNING("Circles has to be of uniform scale.");
-            }
-            pShape->m_radius = absoluteTransform.Scale.x/2;
-
+            pShape->m_radius = circleComponent->Radius;
         }
     }
 
@@ -342,25 +374,27 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
     fixtureDef.filter.maskBits = physicsComponent->Mask;
 
 
-    if(physicsComponent->Static) {
-        body->CreateFixture(&fixtureDef); //Density kanske ska vara 0 p� statiska kroppar
-    }
-    else {
-        fixtureDef.shape = pShape;
-        fixtureDef.density = 10.f;
-        fixtureDef.restitution = 1.0f;
-        fixtureDef.friction = 0.0f;
-        body->CreateFixture(&fixtureDef);
 
-    }
+    fixtureDef.shape = pShape;
+    fixtureDef.density = 10.f;
+    fixtureDef.restitution = 1.0f;
+    fixtureDef.friction = 0.0f;
+    body->CreateFixture(&fixtureDef);
+
 
     delete pShape;
 
+  /*  if(physicsComponent->Static) {
+        body->SetType(b2BodyType::b2_staticBody);
+    } else if (! physicsComponent->Static) {
+        body->SetType(b2BodyType::b2_dynamicBody);
+    }*/
 
     body->SetGravityScale(physicsComponent->GravityScale);
     m_EntitiesToBodies.insert(std::make_pair(entity, body));
     m_BodiesToEntities.insert(std::make_pair(body, entity));
 }
+
 
 void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
 {
@@ -396,6 +430,7 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
 
     }
 }
+
 
 void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 {
@@ -584,10 +619,28 @@ b2ParticleSystem* dd::Systems::PhysicsSystem::CreateParticleSystem(float radius,
     return m_PhysicsWorld->CreateParticleSystem(&m_ParticleSystemDef);
 }
 
+
+
 dd::Systems::PhysicsSystem::~PhysicsSystem()
 {
+    for (auto i = m_BodiesToEntities.begin(); i != m_BodiesToEntities.end(); i++) {
+        b2Body* body = i->first;
+        body->GetWorld()->DestroyBody(body);
+        //delete body;
+    }
+    m_BodiesToEntities.clear();
+    m_EntitiesToBodies.clear();
+    m_Impulses.clear();
+
+    //TODO:REMOVE PARTICLE SYSTEMS
+
     if (m_ContactListener != nullptr) {
         delete m_ContactListener;
         m_ContactListener = nullptr;
+    }
+
+    if (m_PhysicsWorld != nullptr) {
+        delete m_PhysicsWorld;
+        m_PhysicsWorld = nullptr;
     }
 }

@@ -17,6 +17,9 @@ struct Ball : Component
 {
     int Number = 0;
     float Speed = 5.f;
+    int Combo = 0;
+    bool Paused = false;
+    glm::vec3 SavedSpeed = glm::vec3(0, 0, 0);
 };
 
 }

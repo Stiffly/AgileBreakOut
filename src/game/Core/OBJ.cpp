@@ -263,7 +263,7 @@ void dd::OBJ::ParseMaterial()
 				ParseColorMap(currentLine, ss, prefix, arg, colorMap);
 			}
 
-			// HACK: Should we really have to specify the full path here?
+			// HACK: Should we really have to specify the full FilePath here?
 			colorMap.FileName = (m_MaterialPath.branch_path() / colorMap.FileName).string();
 			currentMaterial->DiffuseTexture = colorMap;
 			continue;
@@ -280,7 +280,7 @@ void dd::OBJ::ParseMaterial()
 				ParseColorMap(currentLine, ss, prefix, arg, colorMap);
 			}
 
-			// HACK: Should we really have to specify the full path here?
+			// HACK: Should we really have to specify the full FilePath here?
 			colorMap.FileName = (m_MaterialPath.branch_path() / colorMap.FileName).string();
 			currentMaterial->SpecularMap = colorMap;
 			continue;
@@ -297,7 +297,7 @@ void dd::OBJ::ParseMaterial()
 				ParseBumpMap(currentLine, ss, prefix, arg, bumpMap);
 			}
 
-			// HACK: Should we really have to specify the full path here?
+			// HACK: Should we really have to specify the full FilePath here?
 			bumpMap.FileName = (m_MaterialPath.branch_path() / bumpMap.FileName).string();
 			currentMaterial->NormalMap = bumpMap;
 			continue;

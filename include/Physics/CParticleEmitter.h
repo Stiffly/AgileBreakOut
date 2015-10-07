@@ -20,7 +20,7 @@ struct ParticleEmitter : public Component
     float Speed = 2.f;
     double LifeTime = 100;
 
-    //ParticleSystem variables
+    //System variables
     float GravityScale = 1.0f;
 };
 

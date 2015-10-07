@@ -163,7 +163,7 @@ void dd::World::Initialize()
 	}
 }
 
-int dd::World::CommitEntity(EntityID entity)
+void dd::World::CommitEntity(EntityID entity)
 {
 	for (auto pair : m_Systems)
 	{

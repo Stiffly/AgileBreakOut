@@ -10,7 +10,7 @@ struct EventFixture
 	EventFixture()
 	{
 		this->EventBroker = new dd::EventBroker();
-		m_EEventType = decltype(m_EEventType)(std::bind(&OnEvent, this, std::placeholders::_1));
+		m_EEventType = decltype(m_EEventType)(std::bind(&EventFixture::OnEvent, this, std::placeholders::_1));
 		this->EventBroker->Subscribe(m_EEventType);
 		Run();
 		Check();
@@ -40,7 +40,7 @@ struct EventFixture
 		// Publish the event
 		this->EventBroker->Publish(Before);
 		// Clear to swap buffers
-		this->EventBroker->Clear();
+		this->EventBroker->Swap();
 		// Process the event
 		this->EventBroker->template Process<EventFixture>();
 	}

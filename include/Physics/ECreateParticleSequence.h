@@ -26,7 +26,7 @@ struct CreateParticleSequence : public Event
     //Particle
     std::string SpriteFile = "Texures/Core/ErrorTexture.png";
     double ParticleLifeTime = 3.f;
-    ParticleFlags::Type Flags = ParticleFlags::Type::powderParticle | ParticleFlags::Type::particleContactFilterParticle | ParticleFlags::Type::fixtureContactFilterParticle;
+    ParticleFlags::Type Flags = static_cast<ParticleFlags::Type>(ParticleFlags::Powder | ParticleFlags::ParticleContactFilter | ParticleFlags::FixtureContactFilter);
     float Radius = 1.f;
 };
 

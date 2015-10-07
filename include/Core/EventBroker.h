@@ -24,6 +24,7 @@
 #include <map>
 #include <unordered_map>
 #include <list>
+#include <tuple>
 
 #define EVENT_SUBSCRIBE_MEMBER(relay, handler) \
 	relay = decltype(relay)(std::bind(handler, this, std::placeholders::_1)); \
@@ -123,16 +124,23 @@ public:
 	void Unsubscribe(BaseEventRelay &relay);
 
 private:
+	bool m_IsProcessing = false;
+
 	typedef std::string ContextTypeName_t; // typeid(ContextType).name()
 	typedef std::string EventTypeName_t; // typeid(EventType).name()
 
 	typedef std::unordered_multimap<EventTypeName_t, BaseEventRelay*> EventRelays_t;
 	typedef std::unordered_map<ContextTypeName_t, EventRelays_t> ContextRelays_t;
 	ContextRelays_t m_ContextRelays;
+	std::vector<BaseEventRelay*> m_RelaysToSubscribe;
+	std::vector<BaseEventRelay*> m_RelaysToUnsubscribe;
 
 	typedef std::list<std::pair<EventTypeName_t, std::shared_ptr<Event>>> EventQueue_t;
 	std::shared_ptr<EventQueue_t> m_EventQueueRead;
 	std::shared_ptr<EventQueue_t> m_EventQueueWrite;
+
+	void subscribeImmediate(BaseEventRelay& relay);
+	void unsubscribeImmediate(BaseEventRelay& relay);
 };
 
 template <typename EventType>
