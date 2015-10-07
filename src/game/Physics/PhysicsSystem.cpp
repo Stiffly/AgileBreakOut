@@ -371,10 +371,10 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
 
 void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 {
-    for (int i = 0; i < m_ParticleEmitters.ParticleSystem.size(); i++) {
-        auto e = m_ParticleEmitters.ParticleEmitter[i];
-        auto pt = m_ParticleEmitters.ParticleTemplate[i];
-        auto ps = m_ParticleEmitters.ParticleSystem[i];
+    for (int i = 0; i < m_ParticleEmitters.System.size(); i++) {
+        auto e = m_ParticleEmitters.Emitter[i];
+        auto pt = m_ParticleEmitters.Template[i];
+        auto ps = m_ParticleEmitters.System[i];
 
 
         auto emitter = m_World->GetComponent<Components::ParticleEmitter>(e);
@@ -426,14 +426,14 @@ void dd::Systems::PhysicsSystem::CreateParticleEmitter(EntityID entity)
         auto particleTemplate = m_World->GetComponent<Components::Template>(c);
         if (!p) {
             continue;
-            LOG_WARNING("--ParticleEmitter's Child is not a particle.");
+            LOG_WARNING("--Emitter's Child is not a particle.");
         }
         if(!particleTemplate) {
-            LOG_ERROR("ParticleEmitter's particleChild is not a template.");
+            LOG_ERROR("Emitter's particleChild is not a template.");
             continue;
         }
         if (pf != 0) {
-            LOG_WARNING("ParticleEmitter has more than one child that is a particleTemplate, only the first one is used.");
+            LOG_WARNING("Emitter has more than one child that is a particleTemplate, only the first one is used.");
             break;
         }
         childEntity = c;
@@ -441,9 +441,9 @@ void dd::Systems::PhysicsSystem::CreateParticleEmitter(EntityID entity)
         pf++;
     }
     //TODO: Skicka med fler flaggor till particlesystemet;
-    m_ParticleEmitters.ParticleSystem.push_back(CreateParticleSystem(particle->Radius, 0.f));
-    m_ParticleEmitters.ParticleEmitter.push_back(entity);
-    m_ParticleEmitters.ParticleTemplate.push_back(childEntity);
+    m_ParticleEmitters.System.push_back(CreateParticleSystem(particle->Radius, 0.f));
+    m_ParticleEmitters.Emitter.push_back(entity);
+    m_ParticleEmitters.Template.push_back(childEntity);
 }
 
 

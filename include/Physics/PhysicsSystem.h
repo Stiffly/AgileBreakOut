@@ -99,9 +99,9 @@ namespace dd
             //TODO: Fill struct with info needed.
             struct ParticleEmitter
             {
-                std::vector<b2ParticleSystem*> ParticleSystem;
-                std::vector<EntityID> ParticleEmitter;
-                std::vector<EntityID> ParticleTemplate;
+                std::vector<b2ParticleSystem*> System;
+                std::vector<EntityID> Emitter;
+                std::vector<EntityID> Template;
             };
             ParticleEmitter m_ParticleEmitters;
 
