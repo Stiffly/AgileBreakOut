@@ -58,7 +58,7 @@ namespace dd
             struct Impulse
             {
                 b2Body* Body;
-                b2Vec2 Impulse;
+                b2Vec2 Vector;
                 b2Vec2 Point;
             };
             bool m_Pause = false;
@@ -99,9 +99,9 @@ namespace dd
             //TODO: Fill struct with info needed.
             struct ParticleEmitter
             {
-                std::vector<b2ParticleSystem*> ParticleSystem;
-                std::vector<EntityID> ParticleEmitter;
-                std::vector<EntityID> ParticleTemplate;
+                std::vector<b2ParticleSystem*> System;
+                std::vector<EntityID> Emitter;
+                std::vector<EntityID> Template;
             };
             ParticleEmitter m_ParticleEmitters;
 
