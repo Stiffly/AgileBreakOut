@@ -14,7 +14,7 @@ void dd::Systems::PhysicsSystem::Initialize()
     m_PhysicsWorld = new b2World(m_Gravity);
     m_PhysicsWorld->SetContactListener(m_ContactListener);
     InitializeWater();
-    EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, PhysicsSystem::SetImpulse);
+    EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, &PhysicsSystem::SetImpulse);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PhysicsSystem::OnPause);
 }
 
@@ -170,7 +170,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             b2Vec2 *positionBuffer = m_ParticleSystem[e]->GetPositionBuffer();
             for (auto i : m_EntitiesToParticleHandle[e]) {
                 EntityID entity = i.first;
-                b2ParticleHandle *particleH = i.second;
+                const b2ParticleHandle *particleH = i.second;
 
                 b2Vec2 positionB2 = positionBuffer[particleH->GetIndex()];
                 glm::vec2 position = glm::vec2(positionB2.x, positionB2.y);
