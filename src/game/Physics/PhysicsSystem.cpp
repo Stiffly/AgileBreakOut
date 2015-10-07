@@ -14,7 +14,7 @@ void dd::Systems::PhysicsSystem::Initialize()
     m_PhysicsWorld = new b2World(m_Gravity);
     m_PhysicsWorld->SetContactListener(m_ContactListener);
     InitializeWater();
-    EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, PhysicsSystem::SetImpulse);
+    EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, &PhysicsSystem::SetImpulse);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PhysicsSystem::OnPause);
 }
 
@@ -43,7 +43,7 @@ bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
 
     Impulse i;
     i.Body = it->second;
-    i.Impulse = impulse;
+    i.Vector = impulse;
     i.Point = point;
 
     m_Impulses.push_back(i);
@@ -155,7 +155,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
         //Apply Impulses Must be done after SyncEntitiesWithBodies
         for (auto i : m_Impulses) {
-            i.Body->ApplyLinearImpulse(i.Impulse, i.Point, true);
+            i.Body->ApplyLinearImpulse(i.Vector, i.Point, true);
         }
         m_Impulses.clear();
 
@@ -170,7 +170,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             b2Vec2 *positionBuffer = m_ParticleSystem[e]->GetPositionBuffer();
             for (auto i : m_EntitiesToParticleHandle[e]) {
                 EntityID entity = i.first;
-                b2ParticleHandle *particleH = i.second;
+                const b2ParticleHandle *particleH = i.second;
 
                 b2Vec2 positionB2 = positionBuffer[particleH->GetIndex()];
                 glm::vec2 position = glm::vec2(positionB2.x, positionB2.y);
@@ -377,10 +377,10 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
 
 void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 {
-    for (int i = 0; i < m_ParticleEmitters.ParticleSystem.size(); i++) {
-        auto e = m_ParticleEmitters.ParticleEmitter[i];
-        auto pt = m_ParticleEmitters.ParticleTemplate[i];
-        auto ps = m_ParticleEmitters.ParticleSystem[i];
+    for (int i = 0; i < m_ParticleEmitters.System.size(); i++) {
+        auto e = m_ParticleEmitters.Emitter[i];
+        auto pt = m_ParticleEmitters.Template[i];
+        auto ps = m_ParticleEmitters.System[i];
 
 
         auto emitter = m_World->GetComponent<Components::ParticleEmitter>(e);
@@ -432,14 +432,14 @@ void dd::Systems::PhysicsSystem::CreateParticleEmitter(EntityID entity)
         auto particleTemplate = m_World->GetComponent<Components::Template>(c);
         if (!p) {
             continue;
-            LOG_WARNING("--ParticleEmitter's Child is not a particle.");
+            LOG_WARNING("--Emitter's Child is not a particle.");
         }
         if(!particleTemplate) {
-            LOG_ERROR("ParticleEmitter's particleChild is not a template.");
+            LOG_ERROR("Emitter's particleChild is not a template.");
             continue;
         }
         if (pf != 0) {
-            LOG_WARNING("ParticleEmitter has more than one child that is a particleTemplate, only the first one is used.");
+            LOG_WARNING("Emitter has more than one child that is a particleTemplate, only the first one is used.");
             break;
         }
         childEntity = c;
@@ -447,9 +447,9 @@ void dd::Systems::PhysicsSystem::CreateParticleEmitter(EntityID entity)
         pf++;
     }
     //TODO: Skicka med fler flaggor till particlesystemet;
-    m_ParticleEmitters.ParticleSystem.push_back(CreateParticleSystem(particle->Radius, 0.f));
-    m_ParticleEmitters.ParticleEmitter.push_back(entity);
-    m_ParticleEmitters.ParticleTemplate.push_back(childEntity);
+    m_ParticleEmitters.System.push_back(CreateParticleSystem(particle->Radius, 0.f));
+    m_ParticleEmitters.Emitter.push_back(entity);
+    m_ParticleEmitters.Template.push_back(childEntity);
 }
 
 

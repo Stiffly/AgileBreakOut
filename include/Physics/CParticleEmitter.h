@@ -14,7 +14,7 @@ struct ParticleEmitter : public Component
     double SpawnRate = 1.f;
     double TimeSinceLastSpawn = 0;
 
-    //ParticleSystem variables
+    //System variables
     float GravityScale = 1.0f;
 };
 

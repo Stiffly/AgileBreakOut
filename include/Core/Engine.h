@@ -200,7 +200,7 @@ public:
 //		{
 //			auto Pe = m_World->CreateEntity();
 //			auto transform = m_World->AddComponent<Components::Transform>(Pe);
-//			auto particleEmitter= m_World->AddComponent<Components::ParticleEmitter>(Pe);
+//			auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
 //
 //			transform->Position = glm::vec3(0.f, -5.f, -10.f);
 //			particleEmitter->GravityScale = 0.0f;
