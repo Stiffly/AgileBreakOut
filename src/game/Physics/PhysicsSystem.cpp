@@ -16,6 +16,7 @@ void dd::Systems::PhysicsSystem::Initialize()
     InitializeWater();
     EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, &PhysicsSystem::SetImpulse);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PhysicsSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PhysicsSystem::OnStageCleared);
 }
 
 void dd::Systems::PhysicsSystem::InitializeWater()
@@ -141,10 +142,17 @@ void dd::Systems::PhysicsSystem::SyncBodiesWithEntities()
 
 void dd::Systems::PhysicsSystem::Update(double dt)
 {
-    if (m_Pause) {
-        return;
-    }
+	if (m_Pause) {
+		return;
+	}
 
+	if (m_Travelling) {
+		m_Timer += dt;
+		if (m_Timer >= 2) {
+			m_Timer = 0;
+			m_Travelling = false;
+		}
+	}
     m_Accumulator += dt;
 
     while(m_Accumulator >= m_TimeStep)
@@ -194,13 +202,19 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
 void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
-    auto transform = m_World->GetComponent<Components::Transform>(entity);
-    if (transform != nullptr) {
-        if (transform->Sticky == true) {
-            return;
-        }
-        transform->Position.y -= 1.0f * dt;
-    }
+	if (m_Travelling) {
+		auto transform = m_World->GetComponent<Components::Transform>(entity);
+		if (transform != nullptr) {
+			if (transform->Sticky == true) {
+				return;
+			}
+			transform->Position.y -= 6.0f * dt;
+			/*auto brick = m_World->GetComponent<Components::Brick>(entity);
+			if (brick != nullptr) {
+				
+			}*/
+		}
+	}
 }
 
 bool dd::Systems::PhysicsSystem::OnPause(const dd::Events::Pause &event)
@@ -266,6 +280,13 @@ void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
     m_BodiesToEntities.erase(it->second);
     m_EntitiesToBodies.erase(entity);
     //delete body;
+}
+
+
+bool dd::Systems::PhysicsSystem::OnStageCleared(const dd::Events::StageCleared &event) 
+{
+	m_Travelling = true;
+	return true;
 }
 
 

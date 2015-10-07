@@ -9,27 +9,33 @@
 #include "Core/World.h"
 #include "Core/EventBroker.h"
 #include "Core/CTemplate.h"
+#include "Core/CTransform.h"
+#include "Core/CTemplate.h"
 
+#include "Physics/EContact.h"
+#include "Physics/ESetImpulse.h"
 #include "Physics/CRectangleShape.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CWaterVolume.h"
-#include "Core/CTransform.h"
-#include "Transform/TransformSystem.h"
-#include "CRectangleShape.h"
 #include "Physics/CPhysics.h"
-#include "Physics/EContact.h"
-#include "Physics/ESetImpulse.h"
 #include "Physics/CParticle.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/CParticleEmitter.h"
-#include "Game/CPad.h"
-#include "Game/CPad.h"
-#include "Game/CBall.h"
+
 #include "Transform/TransformSystem.h"
-#include "Rendering/CSprite.h"
-#include "Core/CTemplate.h"
+#include "Transform/TransformSystem.h"
+
+#include "CRectangleShape.h"
+
+#include "Game/EStageCleared.h"
 #include "Game/EPause.h"
+#include "Game/CPad.h"
+#include "Game/CBrick.h"
+#include "Game/CBall.h"
+
+#include "Rendering/CSprite.h"
+
 
 namespace dd
 {
@@ -95,6 +101,10 @@ namespace dd
             bool SetImpulse(const Events::SetImpulse &event);
             dd::EventRelay<PhysicsSystem, dd::Events::Pause> m_EPause;
             bool OnPause(const dd::Events::Pause &event);
+			dd::EventRelay<PhysicsSystem, dd::Events::StageCleared> m_EStageCleared;
+			bool OnStageCleared(const dd::Events::StageCleared &event);
+			bool m_Travelling = false;
+			float m_Timer = 0;
 
             //TODO: Fill struct with info needed.
             struct ParticleEmitter
