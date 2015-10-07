@@ -58,7 +58,7 @@ namespace dd
             struct Impulse
             {
                 b2Body* Body;
-                b2Vec2 Impulse;
+                b2Vec2 Vector;
                 b2Vec2 Point;
             };
             bool m_Pause = false;

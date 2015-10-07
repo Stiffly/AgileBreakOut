@@ -43,7 +43,7 @@ bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
 
     Impulse i;
     i.Body = it->second;
-    i.Impulse = impulse;
+    i.Vector = impulse;
     i.Point = point;
 
     m_Impulses.push_back(i);
@@ -155,7 +155,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
         //Apply Impulses Must be done after SyncEntitiesWithBodies
         for (auto i : m_Impulses) {
-            i.Body->ApplyLinearImpulse(i.Impulse, i.Point, true);
+            i.Body->ApplyLinearImpulse(i.Vector, i.Point, true);
         }
         m_Impulses.clear();
 
