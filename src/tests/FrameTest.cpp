@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(FrameTest)
 	BOOST_CHECK(f2.X == 100); BOOST_CHECK(f2.X == f1.X + f1.Width);
 	BOOST_CHECK(f2.Left() == 200); BOOST_CHECK(f2.Left() == f1.Right());
 	BOOST_CHECK(f2.Y == 100); BOOST_CHECK(f2.Y == f1.Y + f1.Height);
-	BOOST_CHECK(f2.Top() == 150); BOOST_CHECK(f2.Top() == f1.Bottom());
+	BOOST_CHECK(f2.Top() == 200); BOOST_CHECK(f2.Top() == f1.Bottom());
 	BOOST_CHECK(f2.Right() == 250); BOOST_CHECK(f2.Right() == f1.Right() + f2.Width);
-	BOOST_CHECK(f2.Bottom() == 200); BOOST_CHECK(f2.Bottom() == f1.Bottom() + f2.Height);
+	BOOST_CHECK(f2.Bottom() == 250); BOOST_CHECK(f2.Bottom() == f1.Bottom() + f2.Height);
 }
