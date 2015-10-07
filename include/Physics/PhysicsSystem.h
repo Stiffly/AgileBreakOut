@@ -15,6 +15,7 @@
 #include "Transform/TransformSystem.h"
 #include "Physics/EContact.h"
 #include "Physics/ESetImpulse.h"
+#include "Physics/ECreateParticleSequence.h"
 #include "Physics/CCircleShape.h"
 #include "Core/EventBroker.h"
 #include "Game/CPad.h"
@@ -46,6 +47,9 @@ public:
 
     EventRelay<PhysicsSystem, Events::SetImpulse> m_SetImpulse;
     bool SetImpulse(const Events::SetImpulse &event);
+
+    EventRelay<PhysicsSystem, Events::CreateParticleSequence> m_ECreateParticleSequence;
+    bool CreateParticleSequence(const Events::CreateParticleSequence &event);
 
     void RegisterComponents(ComponentFactory* cf) override;
     void Initialize() override;

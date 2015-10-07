@@ -18,6 +18,8 @@
 #include "Sound/CCollisionSound.h"
 #include "Core/ResourceManager.h"
 
+#include "Physics/ECreateParticleSequence.h"
+
 
 namespace dd
 {

@@ -137,7 +137,6 @@ public:
 
 
 		//OctoBall
-		/*
 		{
           	auto ent = m_World->CreateEntity();
         	std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
@@ -159,7 +158,7 @@ public:
 			plight->Radius = 2.f;
 
 			m_World->CommitEntity(ent);
-		}*/
+		}
 
 		//PointLightTest
 		{
@@ -212,8 +211,8 @@ public:
 		{
 			auto t_waterBody = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
-			transform->Position = glm::vec3(0.f, -5.5f, -10.f);
-			transform->Scale = glm::vec3(0.2f, 0.2f, 1.f);
+			transform->Position = glm::vec3(0.f, -3.5f, -10.f);
+			transform->Scale = glm::vec3(7.0f, 1.5f, 1.f);
 			auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
 			auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
 			m_World->CommitEntity(t_waterBody);
@@ -221,18 +220,37 @@ public:
 
 		//ParticleTest
 		{
+			Events::CreateParticleSequence e;
+			e.Position = glm::vec3(0.f, 0.f, -10.f);
+			e.SpriteFile = "Textures/Background.png";
+			e.GravityScale = 0.0f;
+			e.SpawnRate = 1.f;
+			e.NumberOfTicks = 2;
+			e.Speed = 1.f;
+			e.ParticlesPerTick = 5;
+			e.Spread = glm::pi<float>() * 2;
+			e.EmittingAngle = glm::pi<float>();
+			e.EmitterLifeTime = 50;
+			e.ParticleLifeTime = 3.f;
+			m_EventBroker->Publish(e);
+		}
+
+		/*{
 			auto Pe = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(Pe);
 			auto particleEmitter= m_World->AddComponent<Components::ParticleEmitter>(Pe);
+			auto emitteSprite = m_World->AddComponent<Components::Sprite>(Pe);
 
 			transform->Position = glm::vec3(0.f, 0.f, -10.f);
+			emitteSprite->SpriteFile = "Textures/Test/Brick_Normal.png";
 			particleEmitter->GravityScale = 0.0f;
-			particleEmitter->SpawnRate = 1.1f;
-			particleEmitter->NumberOfTicks = 1000;
-			particleEmitter->Speed = 2.f;
+			particleEmitter->SpawnRate = 1.f;
+			particleEmitter->NumberOfTicks = 2;
+			particleEmitter->Speed = 1.f;
 			particleEmitter->ParticlesPerTick = 5;
-			particleEmitter->Spread = glm::pi<float>()/2;
+			particleEmitter->Spread = glm::pi<float>()*2;
 			particleEmitter->EmittingAngle = glm::pi<float>();
+			particleEmitter->LifeTime = 50;
 
 			{
 				auto Pt = m_World->CreateEntity(Pe);
@@ -244,11 +262,11 @@ public:
 				//PtTransform->Velocity = glm::vec3(1.0f, 0.f, 0.f);
 				PtTransform->Position = transform->Position;
 				PtSprite->SpriteFile = "Textures/Background.png";
-				PtParticle->LifeTime = 1.f;
+				PtParticle->LifeTime = 3.f;
 				PtParticle->Flags = ParticleFlags::Type::powderParticle | ParticleFlags::Type::particleContactFilterParticle | ParticleFlags::Type::fixtureContactFilterParticle;
 			}
 			m_World->CommitEntity(Pe);
-		}
+		}*/
 
 		//TODO: Why does the ball not collide with these bricks?
 		//BottomBox
@@ -361,7 +379,7 @@ public:
 			auto ent = m_World->CreateEntity();
 			m_World->SetProperty(ent, "Name", "Pad");
 			auto ctransform = m_World->AddComponent<Components::Transform>(ent);
-			ctransform->Position = glm::vec3(0.f, -13.5f, -10.f);
+			ctransform->Position = glm::vec3(0.f, -3.5f, -10.f);
 			ctransform->Scale = glm::vec3(1.0f, 1.0f, 1.f);
 			auto rectangle = m_World->AddComponent<Components::RectangleShape>(ent);
 			auto physics = m_World->AddComponent<Components::Physics>(ent);

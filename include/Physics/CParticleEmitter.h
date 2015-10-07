@@ -18,6 +18,7 @@ struct ParticleEmitter : public Component
     float EmittingAngle = 0.f;
     float Spread = 0.f;
     float Speed = 2.f;
+    double LifeTime = 100;
 
     //ParticleSystem variables
     float GravityScale = 1.0f;
