@@ -31,7 +31,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 #set(GLFW_INCLUDE_DIR ${daydream_SOURCE_DIR}/libs/glfw-3.0.4/include)
 #set(GLFW_LIBRARY ${daydream_SOURCE_DIR}/libs/glfw-3.0.4/lib/Release/glfw3dll.lib)
 
-set(Boost_DEBUG ON)
+#set(Boost_DEBUG ON)
 set(Boost_USE_STATIC_LIBS on)
 add_definitions(-DBOOST_ALL_NO_LIB)
 #set(BOOST_INCLUDEDIR ${BOOST_ROOT}/boost)
