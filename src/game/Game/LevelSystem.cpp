@@ -31,6 +31,7 @@ void dd::Systems::LevelSystem::Initialize()
     cPhys->GravityScale = 0.f;
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = CollisionLayer::Type::Ball;
+    transform->Sticky = false;
 
     model->ModelFile = "Models/Brick/TurquoiseBrick.obj";
     transform->Position = glm::vec3(50, 50, -10);
@@ -48,7 +49,7 @@ void dd::Systems::LevelSystem::Update(double dt)
 {
     if (!m_Initialized) {
         GetNextLevel();
-        CreateLevel();
+        CreateLevel(0);
         m_Initialized = true;
     }
 }
@@ -60,6 +61,17 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     }
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
+
+    // Check the background.
+    auto model = m_World->GetComponent<Components::Model>(entity);
+    if (model != nullptr) {
+        if (model->ModelFile == "Models/Test/halfpipe/Halfpipe.obj") {
+            auto transform = m_World->GetComponent<Components::Transform>(entity);
+            if (transform->Position.y <= -34.6) {
+                transform->Position.y = 34.6;
+            }
+        }
+    }
 
     auto brick = m_World->GetComponent<Components::Brick>(entity);
     if (brick != nullptr) {
@@ -81,6 +93,8 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     if (NumberOfBricks() <= 0 && m_LooseBricks <= 0 && !Restarting()) {
         if (MultiBalls() <= 0 && PowerUps() <= 0) {
             Events::StageCleared ec;
+            ec.ClearedStage = m_CurrentLevel;
+            ec.StageCluster = m_CurrentCluster;
             EventBroker->Publish(ec);
         } else {
             if (ball != nullptr && MultiBalls() > 0) {
@@ -125,7 +139,7 @@ void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 s
     for (int i = 0; i < rows; i++) {
         num--;
         for (int j = 0; j < Lines(); j++) {
-            CreateBrick(i, j, spacesBetweenBricks, spaceToEdge, num, 1);
+            CreateBrick(i, j, spacesBetweenBricks, spaceToEdge, 0, num, 1);
         }
         if (num == 1)
             num = Lines();
@@ -136,7 +150,7 @@ void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 s
     return;
 }
 
-void dd::Systems::LevelSystem::CreateLevel()
+void dd::Systems::LevelSystem::CreateLevel(int aboveBasicLevel)
 {
     std::cout << "Loading level: " << m_CurrentLevel << std::endl;
     SetNumberOfBricks(Rows() * Lines());
@@ -146,7 +160,7 @@ void dd::Systems::LevelSystem::CreateLevel()
     for (int i = 0; i < Rows(); i++) {
         num--;
         for (int j = 0; j < Lines(); j++) {
-            CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), num, m_Bricks[getter]);
+            CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), aboveBasicLevel, num, m_Bricks[getter]);
             getter++;
         }
         if (num == 1) {
@@ -157,7 +171,7 @@ void dd::Systems::LevelSystem::CreateLevel()
     SetRestarting(false);
 }
 
-void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBetweenBricks, float spaceToEdge, int num, int typeInt)
+void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBetweenBricks, float spaceToEdge, int aboveLevel, int num, int typeInt)
 {
     if (typeInt == EmptyBrickSpace) {
         SetNumberOfBricks(NumberOfBricks() - 1);
@@ -177,7 +191,7 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     }
     float x = line * spacesBetweenBricks.x;
     float y = row * spacesBetweenBricks.y;
-    transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y , -10.f);
+    transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y + aboveLevel, -10.f);
     cBrick->Score = 10 * num;
     return;
 }
@@ -304,6 +318,7 @@ bool dd::Systems::LevelSystem::OnCreatePowerUp(const dd::Events::CreatePowerUp &
     cPhys->CollisionType = CollisionType::Type::Dynamic;
     cPhys->Category = CollisionLayer::Type::PowerUp;
     cPhys->Mask = CollisionLayer::Type::Pad;
+    transform->Sticky = false;
 
     std::shared_ptr<Components::PowerUp> cPow = m_World->AddComponent<Components::PowerUp>(powerUp);
 
@@ -337,7 +352,7 @@ bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &ev
         m_CurrentLevel++;
         if (m_CurrentLevel < 6) {
             GetNextLevel();
-            CreateLevel();
+            CreateLevel(12);
         }
     }
     return true;

@@ -143,6 +143,7 @@ public:
 			auto t_Light = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_Light);
 			transform->Position = glm::vec3(-3.f, 6.f, -5.f);
+			transform->Sticky = true;
 			auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
 			pl->Radius = 20.f;
 			pl->Diffuse = glm::vec3(0.8f, 0.7f, 0.05f);
@@ -154,6 +155,7 @@ public:
 			auto t_Light = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_Light);
 			transform->Position = glm::vec3(3.f, -5.f, -5.f);
+			transform->Sticky = true;
 			auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
 			pl->Radius = 15.f;
 			pl->Diffuse = glm::vec3(0.1f, 0.5f, 0.8f);
@@ -168,9 +170,20 @@ public:
 			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
 			transform->Position = glm::vec3(0.f, 0.f, -15.f);
 			transform->Scale = glm::vec3(6.f, 6.f, 10.f);
+			transform->Sticky = false;
 			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
 			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
-			model->Color = glm::vec4(1.f, 0.f, 0.f, 0.3f);
+			model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 0.3f);
+			m_World->CommitEntity(t_halfPipe);
+		}
+		{
+			auto t_halfPipe = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
+			transform->Position = glm::vec3(0.f, 34.6f, -15.f);
+			transform->Scale = glm::vec3(6.f, 6.f, 10.f);
+			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
+			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
+			model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 0.3f);
 			m_World->CommitEntity(t_halfPipe);
 		}
 
@@ -192,6 +205,7 @@ public:
 			auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
 			transform->Position = glm::vec3(0.f, -3.5f, -10.f);
 			transform->Scale = glm::vec3(7.0f, 1.5f, 1.f);
+			transform->Sticky = true;
 			auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
 			auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
 			m_World->CommitEntity(t_waterBody);
@@ -246,6 +260,7 @@ public:
 			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
 			physics->CollisionType = CollisionType::Type::Static;
+			transform->Sticky = true;
 			m_World->CommitEntity(BottomWall);
 		}
 
@@ -265,6 +280,7 @@ public:
 			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Wall;
 			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
+			transform->Sticky = true;
 
 			m_World->CommitEntity(topWall);
 		}
@@ -286,6 +302,7 @@ public:
 			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Wall;
 			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
+			transform->Sticky = true;
 
 			m_World->CommitEntity(leftWall);
 		}
@@ -307,6 +324,8 @@ public:
 			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Wall;
 			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
+			transform->Sticky = true;
+
 			m_World->CommitEntity(rightWall);
 		}
 

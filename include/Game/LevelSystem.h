@@ -66,8 +66,8 @@ public:
     void Initialize() override;
 
     void CreateBasicLevel(int, int, glm::vec2, float);
-    void CreateLevel();
-    void CreateBrick(int, int, glm::vec2, float, int, int);
+    void CreateLevel(int);
+    void CreateBrick(int, int, glm::vec2, float, int, int, int);
 
     void OnEntityRemoved(EntityID entity);
 
