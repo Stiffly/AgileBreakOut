@@ -326,19 +326,13 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
 
 
     fixtureDef.shape = pShape;
-    fixtureDef.density = 10.f;
+    fixtureDef.density = physicsComponent->Density;
     fixtureDef.restitution = 1.0f;
     fixtureDef.friction = 0.0f;
     body->CreateFixture(&fixtureDef);
 
 
     delete pShape;
-
-  /*  if(physicsComponent->Static) {
-        body->SetType(b2BodyType::b2_staticBody);
-    } else if (! physicsComponent->Static) {
-        body->SetType(b2BodyType::b2_dynamicBody);
-    }*/
 
     body->SetGravityScale(physicsComponent->GravityScale);
     m_EntitiesToBodies.insert(std::make_pair(entity, body));
