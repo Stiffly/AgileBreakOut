@@ -30,6 +30,7 @@ uniform vec3 LightPosition;
 uniform float LightRadius;
 uniform vec3 LightSpecular;
 uniform vec3 LightDiffuse;
+uniform vec4 Color;
 
 in VertexData
 {
@@ -86,5 +87,5 @@ void main()
 	vec4 La = vec4(0.3, 0.3, 0.3, 1.0);
 	vec4 light = phong(Input.Position, normalize(normal), specularTexel.rgb, specularTexel.a);
 	//frag_Diffuse = light;
-	frag_Diffuse = diffuseTexel;
+	frag_Diffuse = diffuseTexel * Color;
 }

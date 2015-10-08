@@ -654,7 +654,7 @@ int32 b2ParticleSystem::CreateParticle(const b2ParticleDef& def)
 		// If the oldest particle should be destroyed...
 		if (m_def.destroyByAge)
 		{
-			DestroyOldestParticle(0, false);
+			DestroyOldestParticle(0, true);
 			// Need to destroy this particle *now* so that it's possible to
 			// create a new particle.
 			SolveZombie();

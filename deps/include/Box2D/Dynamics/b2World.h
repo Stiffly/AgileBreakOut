@@ -53,7 +53,8 @@ public:
 
 	/// Register a destruction listener. The listener is owned by you and must
 	/// remain in scope.
-	void SetDestructionListener(b2DestructionListener* listener);
+	void
+			SetDestructionListener(b2DestructionListener* listener);
 
 	/// Register a contact filter to provide specific control over collision.
 	/// Otherwise the default filter is used (b2_defaultFilter). The listener is

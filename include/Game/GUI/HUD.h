@@ -7,6 +7,8 @@
 #include "Core/EKeyUp.h"
 #include "Game/EScoreEvent.h"
 #include "Game/GUI/FPSCounter.h"
+#include "Game/EGameOver.h"
+#include "Game/EClusterClear.h"
 
 namespace dd
 {
@@ -44,6 +46,8 @@ public:
 		m_FPSCounter = new GUI::FPSCounter(this, "FPSCounter");
 
 		EVENT_SUBSCRIBE_MEMBER(m_EScore, &HUD::OnScore);
+		EVENT_SUBSCRIBE_MEMBER(m_EGameOver, &HUD::OnGameOver);
+		EVENT_SUBSCRIBE_MEMBER(m_ClusterClear, &HUD::OnClusterClear);
 	}
 
 private:
@@ -53,12 +57,30 @@ private:
 	NumberFrame* m_StageNumberFrame = nullptr;
 	NumberFrame* m_ScoreNumberFrame = nullptr;
 	FPSCounter* m_FPSCounter = nullptr;
+	TextureFrame* m_GameOverFrame = nullptr;
+	TextureFrame* m_ClusterClearFrame = nullptr;
 
 	EventRelay<Frame, Events::ScoreEvent> m_EScore;
+	EventRelay<Frame, Events::GameOver> m_EGameOver;
+	EventRelay<Frame, Events::ClusterClear> m_ClusterClear;
 
 	bool OnScore(const Events::ScoreEvent& event)
 	{
 		m_ScoreNumberFrame->SetNumber(m_ScoreNumberFrame->Number() + event.Score);
+		return true;
+	}
+
+	bool OnGameOver(const Events::GameOver& event)
+	{
+		m_GameOverFrame = new GUI::TextureFrame(this, "HUDGameOverFrame");
+		m_GameOverFrame->SetTexture("Textures/GUI/HUD/GameOverScreen.png");
+		return true;
+	}
+
+	bool OnClusterClear(const Events::ClusterClear& event)
+	{
+		m_ClusterClearFrame = new GUI::TextureFrame(this, "HUDGameOverFrame");
+		m_ClusterClearFrame->SetTexture("Textures/GUI/HUD/WinScreen.png");
 		return true;
 	}
 };

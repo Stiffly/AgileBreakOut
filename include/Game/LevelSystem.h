@@ -15,6 +15,7 @@
 #include "Game/CBrick.h"
 #include "Game/CBall.h"
 #include "Game/CLife.h"
+#include "Game/CProjectile.h"
 #include "Game/CPowerUp.h"
 #include "Game/EStageCleared.h"
 #include "Game/ELifeLost.h"
@@ -22,13 +23,17 @@
 #include "Game/EScoreEvent.h"
 #include "Game/EComboEvent.h"
 #include "Game/EHitPad.h"
+#include "Game/ELifebuoy.h"
+#include "Game/EStickyPad.h"
+#include "Game/EInkBlaster.h"
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
 #include "Game/EPause.h"
 #include "Game/EGameOver.h"
+#include "Game/EClusterClear.h"
 #include "Game/ECreatePowerUp.h"
 #include "Game/EPowerUpTaken.h"
-#include "Game/Bricks/CPowerUpBrick.h"
+//#include "Game/Bricks/CPowerUpBrick.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/CRectangleShape.h"
@@ -38,6 +43,8 @@
 #include "Game/PadSystem.h"
 #include <fstream>
 #include <iostream>
+
+#include "Physics/ECreateParticleSequence.h"
 
 namespace dd
 {
@@ -66,8 +73,8 @@ public:
     void Initialize() override;
 
     void CreateBasicLevel(int, int, glm::vec2, float);
-    void CreateLevel();
-    void CreateBrick(int, int, glm::vec2, float, int, int);
+    void CreateLevel(int);
+    void CreateBrick(int, int, glm::vec2, float, int, int, int, glm::vec4);
 
     void OnEntityRemoved(EntityID entity);
 
@@ -108,7 +115,7 @@ private:
     bool m_Initialized = false;
     bool m_Pause = false;
     int m_LooseBricks = 0;
-    int m_CurrentCluster = 2;
+    int m_CurrentCluster = 1;
     int m_CurrentLevel = 1;
     int m_MultiBalls = 0;
     int m_PowerUps = 0;
@@ -123,10 +130,14 @@ private:
     const int EmptyBrickSpace = 0;
     const int StandardBrick = 1;
     const int MultiBallBrick = 2;
+	const int LifebuoyBrick = 3;
+	const int StickyBrick = 4;
+	const int InkBlasterBrick = 5;
 
     EntityID m_BrickTemplate;
 
     std::array<int, 42> m_Bricks;
+	std::array<glm::vec4, 42> m_Colors;
 
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::ScoreEvent> m_EScoreEvent;

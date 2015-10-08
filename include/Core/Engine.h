@@ -43,9 +43,13 @@
 #include "Game/PadSystem.h"
 #include "Game/CBall.h"
 #include "Game/CPad.h"
+#include "Game/CLifebuoy.h"
+#include "Game/CProjectile.h"
 #include "Game/CBrick.h"
 #include "Game/BallSystem.h"
 #include "Game/HitLagSystem.h"
+#include "Game/LifebuoySystem.h"
+#include "Game/ProjectileSystem.h"
 #include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Physics/PhysicsSystem.h"
@@ -110,6 +114,8 @@ public:
 		m_World->ComponentFactory.Register<Components::Brick>();
 		m_World->ComponentFactory.Register<Components::Pad>();
 		m_World->ComponentFactory.Register<Components::Life>();
+		m_World->ComponentFactory.Register<Components::Lifebuoy>();
+		m_World->ComponentFactory.Register<Components::Projectile>();
 
 		m_World->ComponentFactory.Register<Components::PowerUp>();
 		m_World->ComponentFactory.Register<Components::PowerUpBrick>();
@@ -126,6 +132,12 @@ public:
 		m_World->SystemFactory.Register<Systems::HitLagSystem>(
 				[this]() { return new Systems::HitLagSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::HitLagSystem>();
+		m_World->SystemFactory.Register<Systems::LifebuoySystem>(
+			[this]() { return new Systems::LifebuoySystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::LifebuoySystem>();
+		m_World->SystemFactory.Register<Systems::ProjectileSystem>(
+			[this]() { return new Systems::ProjectileSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::ProjectileSystem>();
 		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
 				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::PhysicsSystem>();
@@ -143,6 +155,7 @@ public:
 			auto t_Light = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_Light);
 			transform->Position = glm::vec3(-3.f, 6.f, -5.f);
+			transform->Sticky = true;
 			auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
 			pl->Radius = 20.f;
 			pl->Diffuse = glm::vec3(0.8f, 0.7f, 0.05f);
@@ -154,6 +167,7 @@ public:
 			auto t_Light = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_Light);
 			transform->Position = glm::vec3(3.f, -5.f, -5.f);
+			transform->Sticky = true;
 			auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
 			pl->Radius = 15.f;
 			pl->Diffuse = glm::vec3(0.1f, 0.5f, 0.8f);
@@ -168,13 +182,26 @@ public:
 			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
 			transform->Position = glm::vec3(0.f, 0.f, -15.f);
 			transform->Scale = glm::vec3(6.f, 6.f, 10.f);
+			transform->Sticky = false;
 			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
 			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
-			model->Color = glm::vec4(1.f, 0.f, 0.f, 0.3f);
+			model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 0.3f);
+			m_World->CommitEntity(t_halfPipe);
+		}
+		{
+			auto t_halfPipe = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
+			transform->Position = glm::vec3(0.f, 34.6f, -15.f);
+			transform->Scale = glm::vec3(6.f, 6.f, 10.f);
+			transform->Sticky = false;
+			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
+			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
+			model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 0.3f);
 			m_World->CommitEntity(t_halfPipe);
 		}
 
 		//Background
+		
 		{
 			auto background = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(background);
@@ -185,54 +212,54 @@ public:
 			m_World->CommitEntity(background);
 		}
 
-		//ParticleTest
-//		{
-//			auto Pe = m_World->CreateEntity();
-//			auto transform = m_World->AddComponent<Components::Transform>(Pe);
 //			auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
-//
-//			transform->Position = glm::vec3(0.f, -5.f, -10.f);
-//			particleEmitter->GravityScale = 0.0f;
-//			particleEmitter->SpawnRate = 1.0f;
-//
-//			{
-//				auto Pt = m_World->CreateEntity(Pe);
-//				auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
-//				auto PtSprite = m_World->AddComponent<Components::Sprite>(Pt);
-//				//auto PtModel = m_World->AddComponent<Components::Model>(Pt);
-//				auto PtParticle = m_World->AddComponent<Components::Particle>(Pt);
-//				auto PtTemplate = m_World->AddComponent<Components::Template>(Pt);
-//
-//				PtTransform->Velocity = glm::vec3(1.0f, 0.f, 0.f);
-//				PtTransform->Position = transform->Position;
-//				PtSprite->SpriteFile = "Textures/Ball.png";
-//
-//				//PtModel->ModelFile = "Models/Brick/Brick.obj";
-//				PtParticle->LifeTime = 1000.f;
-//				PtParticle->Flags = ParticleFlags::Type::powderParticle;
-//			}
-//			m_World->CommitEntity(Pe);
-//		}
-
-//		{
-//			auto Pt = m_World->CreateEntity();
-//			auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
-//			auto PtSprite = m_World->AddComponent<Components::Sprite>(Pt);
-//
-//			PtTransform->Position = glm::vec3(2.f, 0.f, -10.f);
-//			PtSprite->SpriteFile = "Textures/Ball.png";
-//		}
-		
 		//Water test
 		{
 			auto t_waterBody = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
-			transform->Position = glm::vec3(0.f, -5.5f, -10.f);
-			transform->Scale = glm::vec3(7.f, 1.5f, 1.f);
+			transform->Position = glm::vec3(0.f, -3.5f, -10.f);
+			transform->Scale = glm::vec3(7.0f, 1.5f, 1.f);
+			transform->Sticky = true;
 			auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
 			auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
 			m_World->CommitEntity(t_waterBody);
 		}
+
+		//ParticleTest
+
+
+		/*{
+			auto Pe = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(Pe);
+			auto particleEmitter= m_World->AddComponent<Components::ParticleEmitter>(Pe);
+			auto emitteSprite = m_World->AddComponent<Components::Sprite>(Pe);
+
+			transform->Position = glm::vec3(0.f, 0.f, -10.f);
+			emitteSprite->SpriteFile = "Textures/Test/Brick_Normal.png";
+			particleEmitter->GravityScale = 0.0f;
+			particleEmitter->SpawnRate = 1.f;
+			particleEmitter->NumberOfTicks = 2;
+			particleEmitter->Speed = 1.f;
+			particleEmitter->ParticlesPerTick = 5;
+			particleEmitter->Spread = glm::pi<float>()*2;
+			particleEmitter->EmittingAngle = glm::pi<float>();
+			particleEmitter->LifeTime = 50;
+
+			{
+				auto Pt = m_World->CreateEntity(Pe);
+				auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
+				auto PtSprite = m_World->AddComponent<Components::Sprite>(Pt);
+				auto PtParticle = m_World->AddComponent<Components::Particle>(Pt);
+				auto PtTemplate = m_World->AddComponent<Components::Template>(Pt);
+
+				//PtTransform->Velocity = glm::vec3(1.0f, 0.f, 0.f);
+				PtTransform->Position = transform->Position;
+				PtSprite->SpriteFile = "Textures/Background.png";
+				PtParticle->LifeTime = 3.f;
+				PtParticle->Flags = static_cast<ParticleFlags::Type>(ParticleFlags::Type::Powder | ParticleFlags::Type::ParticleContactFilter | ParticleFlags::Type::FixtureContactFilter);
+			}
+			m_World->CommitEntity(Pe);
+		}*/
 
 		//TODO: Why does the ball not collide with these bricks?
 		//BottomBox
@@ -247,6 +274,9 @@ public:
 			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
 			physics->CollisionType = CollisionType::Type::Static;
+			physics->Category = CollisionLayer::Wall;
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy);
+			transform->Sticky = true;
 			m_World->CommitEntity(BottomWall);
 		}
 
@@ -266,6 +296,7 @@ public:
 			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Wall;
 			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
+			transform->Sticky = true;
 
 			m_World->CommitEntity(topWall);
 		}
@@ -287,6 +318,7 @@ public:
 			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Wall;
 			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
+			transform->Sticky = true;
 
 			m_World->CommitEntity(leftWall);
 		}
@@ -308,10 +340,10 @@ public:
 			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Wall;
 			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
+			transform->Sticky = true;
+
 			m_World->CommitEntity(rightWall);
 		}
-
-
 
 		//EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &Engine::OnGameStart);
 		m_EGameStart = decltype(m_EGameStart)(std::bind(&Engine::OnGameStart, this, std::placeholders::_1));

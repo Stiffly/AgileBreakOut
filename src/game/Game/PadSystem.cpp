@@ -28,21 +28,23 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EContactPowerUp, &PadSystem::OnContactPowerUp);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PadSystem::OnStageCleared);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PadSystem::OnPause);
+    //EVENT_SUBSCRIBE_MEMBER(m_EBindKey, &PadSystem::OnBindKey);
 
     {
         auto ent = m_World->CreateEntity();
         m_World->SetProperty(ent, "Name", "Pad");
         auto ctransform = m_World->AddComponent<Components::Transform>(ent);
-        ctransform->Position = glm::vec3(0.f, -3.5f, -10.f);
+        ctransform->Position = glm::vec3(0.f, -4.8f, -10.f);
         auto rectangleShape = m_World->AddComponent<Components::RectangleShape>(ent);
-        rectangleShape->Dimensions = glm::vec2(1.f, 0.5f);
+        rectangleShape->Dimensions = glm::vec2(1.f, 0.1f);
         auto physics = m_World->AddComponent<Components::Physics>(ent);
-        physics->CollisionType = CollisionType::Type::Dynamic;
+        physics->CollisionType = CollisionType::Type::Kinematic;
         physics->Category = CollisionLayer::Type::Pad;
-		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::PowerUp);
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::PowerUp | CollisionLayer::LifeBuoy);
         physics->Calculate = true;
+        ctransform->Sticky = true;
         auto cModel = m_World->AddComponent<Components::Model>(ent);
-        cModel->ModelFile = "Models/Submarine2.obj";
+        cModel->ModelFile = "Models/Ship/Ship.obj";
 
         auto pad = m_World->AddComponent<Components::Pad>(ent);
         m_World->CommitEntity(ent);
@@ -55,6 +57,15 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 {
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
+
+	auto ball = m_World->GetComponent<Components::Ball>(entity);
+	if (ball != nullptr) {
+		if (ball->Sticky) {
+			auto transform = m_World->GetComponent<Components::Transform>(entity);
+			transform->Position = Transform()->Position;
+			transform->Position += ball->StickyPlacement;
+		}
+	}
 }
 
 void dd::Systems::PadSystem::Update(double dt)
@@ -123,8 +134,7 @@ bool dd::Systems::PadSystem::OnPause(const dd::Events::Pause &event)
     return true;
 }
 
-bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
-{
+bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
     int val = event.KeyCode;
     if (val == GLFW_KEY_UP) {
         //std::cout << "Up!" << std::endl;
@@ -153,6 +163,13 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
         Events::HitLag e;
         e.Time = 0.2;
         e.Type = "All";
+        EventBroker->Publish(e);
+    } else if (val == GLFW_KEY_S) {
+		Events::StageCleared e;
+		EventBroker->Publish(e);
+	} else if (val == GLFW_KEY_SPACE) {
+        Events::ActionButton e;
+		e.Position = Transform()->Position;
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_D) {
         return false;

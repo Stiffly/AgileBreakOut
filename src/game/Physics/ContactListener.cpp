@@ -12,8 +12,11 @@ void dd::Systems::PhysicsSystem::ContactListener::BeginContact(b2Contact* contac
     e.Entity2 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureB()->GetBody()];
     e.Normal = glm::normalize(glm::vec2(contact->GetManifold()->localNormal.x, contact->GetManifold()->localNormal.y));
     e.SignificantNormal = glm::normalize((glm::abs(e.Normal.x) > glm::abs(e.Normal.y)) ? glm::vec2(e.Normal.x, 0) : glm::vec2(0, e.Normal.y));
-
-    m_PhysicsSystem->EventBroker->Publish(e);
+	//contact->GetManifold()->points
+	b2Vec2 pos = worldManifold.points[0];
+	glm::vec2 glmPos = glm::vec2(pos.x, pos.y);
+	e.IntersectionPoint = glmPos;
+	m_PhysicsSystem->EventBroker->Publish(e);
 }
 
 void dd::Systems::PhysicsSystem::ContactListener::EndContact(b2Contact* contact)
@@ -29,10 +32,17 @@ void dd::Systems::PhysicsSystem::ContactListener::PreSolve(b2Contact* contact, c
     auto physicsComponentA = m_PhysicsSystem->m_World->GetComponent<Components::Physics>(entityA);
     auto physicsComponentB = m_PhysicsSystem->m_World->GetComponent<Components::Physics>(entityB);
 
+
+	std::string propertyA = m_PhysicsSystem->m_World->GetProperty<std::string>(entityA, "Name");
+	std::string propertyB = m_PhysicsSystem->m_World->GetProperty<std::string>(entityB, "Name");
+
     if (physicsComponentA != nullptr && physicsComponentB != nullptr) {
         if (physicsComponentA->Calculate || physicsComponentB->Calculate) {
             // Turn of collisions
-            contact->SetEnabled(false);
+			if ((propertyA != "Lifebuoy" && propertyB != "Pad") || (propertyA != "Pad" && propertyB != "Lifebuoy")) {
+				contact->SetEnabled(false);
+			}
+			
         }
     }
 

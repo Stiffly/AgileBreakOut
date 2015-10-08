@@ -21,10 +21,16 @@
 #include "Game/EResetBall.h"
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
+#include "Game/EStickyPad.h"
+#include "Game/EInkBlaster.h"
+#include "Game/EInkBlasterOver.h"
 #include "Game/EGameOver.h"
 #include "Game/EPause.h"
 #include "Game/EHitPad.h"
 #include "Game/EHitLag.h"
+#include "Game/EActionButton.h"
+#include "Game/CLifebuoy.h"
+#include "Game/ELifebuoyHit.h"
 
 namespace dd
 {
@@ -89,7 +95,12 @@ private:
     int m_PastLives = 3;
     bool m_ReplaceBall = false;
     bool m_Pause = false;
-    EntityID m_LastCollision = 999999;
+    bool m_Waiting = true;
+	bool m_Sticky = false;
+	bool m_InkBlaster = false;
+	bool m_InkAttached = false;
+	bool m_BlockedWaiting = false;
+	int m_StickyCounter = 5;
 
     glm::vec3 m_SavedSpeed;
     bool m_InitializePause = false;
@@ -103,15 +114,23 @@ private:
     dd::EventRelay<BallSystem, dd::Events::MultiBallLost> m_EMultiBallLost;
     dd::EventRelay<BallSystem, dd::Events::ResetBall> m_EResetBall;
     dd::EventRelay<BallSystem, dd::Events::MultiBall> m_EMultiBall;
+	dd::EventRelay<BallSystem, dd::Events::StickyPad> m_EStickyPad;
+	dd::EventRelay<BallSystem, dd::Events::InkBlaster> m_EInkBlaster;
+	dd::EventRelay<BallSystem, dd::Events::InkBlasterOver> m_EInkBlasterOver;
     dd::EventRelay<BallSystem, dd::Events::Pause> m_EPause;
-    EventRelay<BallSystem, Events::Contact> m_Contact;
+    dd::EventRelay<BallSystem, dd::Events::Contact> m_Contact;
+    dd::EventRelay<BallSystem, dd::Events::ActionButton> m_EActionButton;
 
     bool Contact(const Events::Contact &event);
     bool OnLifeLost(const dd::Events::LifeLost &event);
     bool OnMultiBallLost(const dd::Events::MultiBallLost &event);
     bool OnResetBall(const dd::Events::ResetBall &event);
     bool OnMultiBall(const dd::Events::MultiBall &event);
+	bool OnStickyPad(const dd::Events::StickyPad &event);
+	bool OnInkBlaster(const dd::Events::InkBlaster &event);
+	bool OnInkBlasterOver(const dd::Events::InkBlasterOver &event);
     bool OnPause(const dd::Events::Pause &event);
+    bool OnActionButton(const dd::Events::ActionButton &event);
 };
 
 }

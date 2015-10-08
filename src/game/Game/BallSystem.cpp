@@ -18,7 +18,11 @@ void dd::Systems::BallSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &BallSystem::OnMultiBallLost);
     EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &BallSystem::OnResetBall);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &BallSystem::OnMultiBall);
+	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &BallSystem::OnStickyPad);
+	EVENT_SUBSCRIBE_MEMBER(m_EInkBlaster, &BallSystem::OnInkBlaster);
+	EVENT_SUBSCRIBE_MEMBER(m_EInkBlasterOver, &BallSystem::OnInkBlasterOver);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &BallSystem::OnPause);
+    EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &BallSystem::OnActionButton);
 
     //OctoBall
     {
@@ -33,15 +37,14 @@ void dd::Systems::BallSystem::Initialize()
         circleShape->Radius = 0.4f;
         std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
         ball->Speed = 5.f;
+        ball->Waiting = true;
         std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
         std::shared_ptr<Components::Template> ballTemplate = m_World->AddComponent<Components::Template>(ent);
-    physics->CollisionType = CollisionType::Type::Dynamic;
+        physics->CollisionType = CollisionType::Type::Dynamic;
         physics->Category = CollisionLayer::Type::Ball;
-        physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall);
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
         physics->Calculate = true;
-
-        //auto plight = m_World->AddComponent<Components::PointLight>(ent);
-        //plight->Radius = 2.f;
+        transform->Sticky = true;
 
         m_World->CommitEntity(ent);
 
@@ -60,11 +63,17 @@ void dd::Systems::BallSystem::Initialize()
 
 void dd::Systems::BallSystem::Update(double dt)
 {
-    if (Lives() < 0)
+    if (Lives() == 0)
     {
-        SetLives(3);
         Events::GameOver e;
         EventBroker->Publish(e);
+
+		Events::Pause p;
+		p.Type = "All";
+		EventBroker->Publish(p);
+
+		//TODO: Make this not so ugly
+		SetLives(-1);
     }
     ResolveContacts();
 }
@@ -100,14 +109,38 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
     if (templateCheck != nullptr){ return; }
 
     if (ballComponent != nullptr) {
-        if (ReplaceBall()) {
-            SetReplaceBall(false);
+		if (ReplaceBall()) {
+			SetReplaceBall(false);
+			m_Waiting = true;
+			ballComponent->Waiting = true;
+		}
 
-            auto transform = m_World->GetComponent<Components::Transform>(entity);
-            transform->Position = glm::vec3(0.0f, 0.26f, -10.f);
-            transform->Velocity = glm::vec3(0.0f, -ballComponent->Speed, 0.f);
+        if (ballComponent->Waiting) {
+            if (!m_Waiting) {
+                ballComponent->Waiting = false;
+				auto transform = m_World->GetComponent<Components::Transform>(entity);
+                transform->Velocity = glm::normalize(glm::vec3(0.5f, 1, 0.f)) * ballComponent->Speed;
+            } else if (!ballComponent->Sticky) {
+                auto transform = m_World->GetComponent<Components::Transform>(entity);
+                transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
+                transform->Position = glm::vec3(0.0f, -3.f, -10.f);
+                transform->Orientation = glm::quat();
+                return;
+            }
         }
-
+		if (ballComponent->Sticky) {
+			if (!m_Waiting)
+			{
+				auto transform = m_World->GetComponent<Components::Transform>(entity);
+				transform->Velocity = ballComponent->SavedSpeed;
+				m_StickyCounter--;
+				if (m_StickyCounter > 0) {
+					m_Sticky = true;
+				}
+				ballComponent->Sticky = false;
+			}
+		}
+        
         auto transformBall = m_World->GetComponent<Components::Transform>(entity);
         if (glm::abs(transformBall->Velocity.y) < 2) {
             if (transformBall->Velocity.y > 0) {
@@ -116,7 +149,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 transformBall->Velocity.y = -2;
             }
         }
-        if (transformBall->Position.y < -EdgeY() - 4) {
+		if (transformBall->Position.y < -EdgeY() - 4 || transformBall->Position.y > EdgeY() + 4) {
             if (MultiBalls() != 0) {
                 m_World->RemoveEntity(entity);
                 Events::MultiBallLost e;
@@ -224,44 +257,64 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
     }
     else {
         return false;
-        //TODO: Add support for power-up collisions
     }
 
-    auto brick = m_World->GetComponent<Components::Brick>(otherEntitiy);
-    if (brick != nullptr) {
-        auto transform = m_World->GetComponent<Components::Transform>(otherEntitiy);
-        auto physics = m_World->GetComponent<Components::Physics>(otherEntitiy);
-        auto rectangle = m_World->GetComponent<Components::RectangleShape>(otherEntitiy);
-        int hey = 5;
-    }
-
-    //if this is a brick thats dead do not collide :)
-
+	
     auto ballTransform = m_World->GetComponent<Components::Transform>(ballEntity);
     glm::vec2 ballVelocity = glm::vec2(ballTransform->Velocity.x, ballTransform->Velocity.y);
 
-    if (m_World->GetProperty<std::string>(otherEntitiy, "Name") == "Pad"){
+
+    if (m_World->GetProperty<std::string>(otherEntitiy, "Name") == "Pad") {
+		auto padTransform = m_World->GetComponent<Components::Transform>(otherEntitiy);
+
         Events::HitPad e;
+		e.Ball = ballEntity;
+		e.Pad = otherEntitiy;
         EventBroker->Publish(e);
        // Events::HitLag el;
        // el.Time = 0.1f;
         //el.Type = "All";
        // EventBroker->Publish(el);
 
-        auto padTransform = m_World->GetComponent<Components::Transform>(otherEntitiy);
-        float x = (ballTransform->Position.x - padTransform->Position.x) * XMovementMultiplier();
-
+        
+		float x = (ballTransform->Position.x - padTransform->Position.x) * XMovementMultiplier();
         float y = glm::cos((abs(x) / (1.6f)) * glm::pi<float>() / 2.f) + 1.f;
 
+		ballComponent->Combo = 0;
+
+		if (m_InkBlaster) {
+			if (!m_InkAttached) {
+				m_InkAttached = true;
+				m_Waiting = true;
+				m_BlockedWaiting = true;
+				ballComponent->Sticky = true;
+				ballComponent->StickyPlacement = glm::vec3(0, 0.5f, 0);
+				ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
+				ballTransform->Velocity = glm::vec3(0.f, 0.f, 0.f);
+			}
+		} else if (m_Sticky) {
+			m_Sticky = false;
+			m_Waiting = true;
+			ballComponent->Sticky = true;
+			ballComponent->StickyPlacement = ballTransform->Position - padTransform->Position;
+			ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
+			ballTransform->Velocity *= -1;
+			return true;
+		}
+
         ballTransform->Velocity = glm::normalize(glm::vec3(x, y ,0.f)) * ballComponent->Speed;
-        ballComponent->Combo = 0;
         Events::ComboEvent ec;
         ec.Combo = ballComponent->Combo;
         ec.Ball = ballEntity;
         EventBroker->Publish(ec);
         //std::cout << "Combo: " << ballComponent->Combo << std::endl;
-    }
-    else {
+	}	// Lifebuoy should always reflect the ball upwards
+	else if (m_World->GetProperty<std::string>(otherEntitiy, "Name") == "Lifebuoy"){
+		ballTransform->Velocity = glm::vec3(ballTransform->Velocity.x,  abs(ballTransform->Velocity.y), ballTransform->Velocity.z);
+		Events::LifebuoyHit e;
+		e.Lifebuoy = otherEntitiy;
+		EventBroker->Publish(e);
+	} else {
         auto it = m_Contacts.find(ballEntity);
         if (it == m_Contacts.end()) {
             std::list<glm::vec2> normalList;
@@ -272,9 +325,6 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
             normalList.push_back(event.Normal);
             m_Contacts[ballEntity] = normalList;
         }
-
-        //glm::vec2 reflectedVelocity = glm::reflect(ballVelocity, event.Normal);
-        //ballTransform->Velocity = glm::vec3(reflectedVelocity, 0.f);
     }
 
     return true;
@@ -285,23 +335,18 @@ void dd::Systems::BallSystem::ResolveContacts()
 {
 
     for (auto c : m_Contacts) {
-        int count = 0;
         EntityID entity = c.first;
         std::list<glm::vec2> contactNormals = c.second;
         glm::vec2 finalNormal = glm::vec2(0.f);
         for (auto it = contactNormals.begin(); it != contactNormals.end(); it++) {
             finalNormal = finalNormal + (*it);
-            count++;
         }
         finalNormal = glm::normalize(finalNormal);
-
-        if (count > 1) {
-            LOG_INFO("MultiCollision %i", count);
-        }
-
         auto transform = m_World->GetComponent<Components::Transform>(entity);
         glm::vec2 velocity = glm::vec2(transform->Velocity.x, transform->Velocity.y);
         glm::vec2 reflectedVelocity = glm::reflect(velocity, finalNormal);
+		auto ballComponent = m_World->GetComponent<Components::Ball>(entity);
+		reflectedVelocity = glm::normalize(reflectedVelocity) * ballComponent->Speed;
         transform->Velocity = glm::vec3(reflectedVelocity, 0.f);
 
     }
@@ -324,6 +369,7 @@ void dd::Systems::BallSystem::CreateLife(int number)
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(life);
     transform->Position = glm::vec3(-1.5f + number * 0.15f, -2.f, -5.f);
     transform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
+    transform->Sticky = true;
 
     std::shared_ptr<Components::Life> lifeNr = m_World->AddComponent<Components::Life>(life);
     lifeNr->Number = number;
@@ -367,8 +413,10 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
     auto transform2 = m_World->GetComponent<Components::Transform>(ent2);
     auto ball1 = m_World->GetComponent<Components::Ball>(ent1);
     auto ball2 = m_World->GetComponent<Components::Ball>(ent2);
+    ball1->Waiting = false;
+    ball2->Waiting = false;
     auto padTransform = event.padTransform;
-    float x1 = padTransform->Position.x - 2, x2 = padTransform->Position.x + 2;
+    float x1 = padTransform->Position.x/* - 2*/, x2 = padTransform->Position.x/* + 2*/;
     if (x1 < -m_EdgeX) {
         x1 = m_EdgeX - 0.2;
     }
@@ -383,6 +431,42 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
 
     SetMultiBalls(MultiBalls() + 2);
     //std::cout << MultiBalls() << std::endl;
+    return true;
+}
+
+bool dd::Systems::BallSystem::OnStickyPad(const dd::Events::StickyPad &event) 
+{
+	m_Sticky = true;
+	m_StickyCounter = 5;
+	return true;
+}
+
+bool dd::Systems::BallSystem::OnInkBlaster(const dd::Events::InkBlaster &event)
+{
+	m_InkBlaster = true;
+	return true;
+}
+
+bool dd::Systems::BallSystem::OnInkBlasterOver(const dd::Events::InkBlasterOver &event)
+{
+	auto ballComponent = m_World->GetComponent<Components::Ball>(event.Ball);
+	auto transform = m_World->GetComponent<Components::Transform>(event.Ball);
+
+	m_InkBlaster = false;
+	m_InkAttached = false;
+	m_BlockedWaiting = false;
+	m_Sticky = true;
+	ballComponent->SavedSpeed = glm::normalize(glm::vec3(0.f, 1.f, 0.f)) * ballComponent->Speed;
+	m_Waiting = false;
+	transform->Velocity = glm::normalize(glm::vec3(0.f, 1, 0.f)) * ballComponent->Speed;
+	return true;
+}
+
+bool dd::Systems::BallSystem::OnActionButton(const dd::Events::ActionButton &event)
+{
+	if (!m_BlockedWaiting) {
+		m_Waiting = false;
+	}
     return true;
 }
 
