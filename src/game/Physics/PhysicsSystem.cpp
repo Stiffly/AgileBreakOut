@@ -257,6 +257,8 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 			if (!transform->Sticky) {
 				transform->Position.y -= 6.0f * dt;
 			}
+		} else {
+			transform->Position.y -= 6.0f * dt;
 		}
 	}
     auto particle = m_World->GetComponent<Components::Particle>(entity);

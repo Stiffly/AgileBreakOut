@@ -65,7 +65,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     // Check the background.
     auto model = m_World->GetComponent<Components::Model>(entity);
     if (model != nullptr) {
-        if (model->ModelFile == "Models/Test/halfpipe/Halfpipe.obj") {
+		if (model->ModelFile == "Models/Test/halfpipe/Halfpipe.obj") {
             auto transform = m_World->GetComponent<Components::Transform>(entity);
             if (transform->Position.y <= -34.6) {
                 transform->Position.y = 34.6;

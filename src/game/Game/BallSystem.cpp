@@ -104,6 +104,12 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
     if (templateCheck != nullptr){ return; }
 
     if (ballComponent != nullptr) {
+		if (ReplaceBall()) {
+			SetReplaceBall(false);
+			m_Waiting = true;
+			ballComponent->Waiting = true;
+		}
+
         if (ballComponent->Waiting) {
             if (m_Waiting == false) {
                 ballComponent->Waiting = false;
@@ -126,12 +132,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 return;
             }
         }
-        if (ReplaceBall()) {
-            SetReplaceBall(false);
-            m_Waiting = true;
-            ballComponent->Waiting = true;
-        }
-
+        
         auto transformBall = m_World->GetComponent<Components::Transform>(entity);
         if (glm::abs(transformBall->Velocity.y) < 2) {
             if (transformBall->Velocity.y > 0) {

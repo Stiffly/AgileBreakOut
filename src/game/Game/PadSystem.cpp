@@ -165,7 +165,10 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
         e.Time = 0.2;
         e.Type = "All";
         EventBroker->Publish(e);
-    } else if (val == GLFW_KEY_SPACE) {
+    } else if (val == GLFW_KEY_S) {
+		Events::StageCleared e;
+		EventBroker->Publish(e);
+	} else if (val == GLFW_KEY_SPACE) {
         Events::ActionButton e;
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_D) {
