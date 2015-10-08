@@ -118,6 +118,17 @@ bool dd::Systems::ProjectileSystem::OnActionButton(const dd::Events::ActionButto
 			m_SquidLoaded = false;
 			ball->InkBlaster = false;
 			ball->Sticky = false;
+			ball->Waiting = true;
+			
+			{
+				Events::InkBlasterOver e;
+				e.Ball = m_AttachedSquid;
+				EventBroker->Publish(e);
+			}
+			{
+				Events::ActionButton e;
+				EventBroker->Publish(e);
+			}
 		}
 	}
 	return true;

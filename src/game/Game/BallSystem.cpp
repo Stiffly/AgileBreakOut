@@ -20,6 +20,7 @@ void dd::Systems::BallSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &BallSystem::OnMultiBall);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &BallSystem::OnStickyPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EInkBlaster, &BallSystem::OnInkBlaster);
+	EVENT_SUBSCRIBE_MEMBER(m_EInkBlasterOver, &BallSystem::OnInkBlasterOver);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &BallSystem::OnPause);
     EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &BallSystem::OnActionButton);
 
@@ -109,19 +110,10 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 		}
 
         if (ballComponent->Waiting) {
-            if (m_Waiting == false) {
+            if (!m_Waiting) {
                 ballComponent->Waiting = false;
-                auto transform = m_World->GetComponent<Components::Transform>(entity);
+				auto transform = m_World->GetComponent<Components::Transform>(entity);
                 transform->Velocity = glm::normalize(glm::vec3(0.5f, 1, 0.f)) * ballComponent->Speed;
-				if (ballComponent->Sticky) {
-					transform->Velocity = ballComponent->SavedSpeed;
-					m_StickyCounter--;
-					std::cout << m_StickyCounter << std::endl;
-					if (m_StickyCounter > 0) {
-						m_Sticky = true;
-					}
-					ballComponent->Sticky = false;
-				}
             } else if (!ballComponent->Sticky) {
                 auto transform = m_World->GetComponent<Components::Transform>(entity);
                 transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
@@ -130,6 +122,18 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 return;
             }
         }
+		if (ballComponent->Sticky) {
+			if (!m_Waiting)
+			{
+				auto transform = m_World->GetComponent<Components::Transform>(entity);
+				transform->Velocity = ballComponent->SavedSpeed;
+				m_StickyCounter--;
+				if (m_StickyCounter > 0) {
+					m_Sticky = true;
+				}
+				ballComponent->Sticky = false;
+			}
+		}
         
         auto transformBall = m_World->GetComponent<Components::Transform>(entity);
         if (glm::abs(transformBall->Velocity.y) < 2) {
@@ -273,15 +277,19 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 		ballComponent->Combo = 0;
 
 		if (m_InkBlaster) {
-			m_InkBlaster = false;
-			ballComponent->Sticky = true;
-			ballComponent->StickyPlacement = glm::vec3(0, 0.5f, 0);
-			ballTransform->Velocity = glm::vec3(0.f, 0.f, 0.f);
+			if (!m_InkAttached) {
+				m_InkAttached = true;
+				m_Waiting = true;
+				m_BlockedWaiting = true;
+				ballComponent->Sticky = true;
+				ballComponent->StickyPlacement = glm::vec3(0, 0.5f, 0);
+				ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
+				ballTransform->Velocity = glm::vec3(0.f, 0.f, 0.f);
+			}
 		} else if (m_Sticky) {
 			m_Sticky = false;
 			m_Waiting = true;
 			ballComponent->Sticky = true;
-			ballComponent->Waiting = true;
 			ballComponent->StickyPlacement = ballTransform->Position - padTransform->Position;
 			ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
 			ballTransform->Velocity *= -1;
@@ -431,9 +439,26 @@ bool dd::Systems::BallSystem::OnInkBlaster(const dd::Events::InkBlaster &event)
 	return true;
 }
 
+bool dd::Systems::BallSystem::OnInkBlasterOver(const dd::Events::InkBlasterOver &event)
+{
+	auto ballComponent = m_World->GetComponent<Components::Ball>(event.Ball);
+	auto transform = m_World->GetComponent<Components::Transform>(event.Ball);
+
+	m_InkBlaster = false;
+	m_InkAttached = false;
+	m_BlockedWaiting = false;
+	m_Sticky = true;
+	ballComponent->SavedSpeed = glm::normalize(glm::vec3(0.f, 1.f, 0.f)) * ballComponent->Speed;
+	m_Waiting = false;
+	transform->Velocity = glm::normalize(glm::vec3(0.f, 1, 0.f)) * ballComponent->Speed;
+	return true;
+}
+
 bool dd::Systems::BallSystem::OnActionButton(const dd::Events::ActionButton &event)
 {
-    m_Waiting = false;
+	if (!m_BlockedWaiting) {
+		m_Waiting = false;
+	}
     return true;
 }
 

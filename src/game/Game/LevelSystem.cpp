@@ -225,7 +225,6 @@ void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
 
 bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 {
-	LOG_DEBUG("Collision happened!");
     EntityID entityBrick;
     EntityID entityBall;
 	EntityID entityShot = 0;
@@ -250,12 +249,10 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         } else {
 			auto shot = m_World->GetComponent<Components::Projectile>(event.Entity1);
 			if (shot != nullptr) {
-				LOG_DEBUG("Entity1 is a shot!");
 				entityShot = event.Entity1;
 			} else {
 				shot = m_World->GetComponent<Components::Projectile>(event.Entity2);
 				if (shot != nullptr) {
-					LOG_DEBUG("Entity2 is a shot!");
 					entityShot = event.Entity2;
 				} else {
 					return false;
