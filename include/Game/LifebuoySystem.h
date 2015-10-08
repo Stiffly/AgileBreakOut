@@ -16,6 +16,7 @@
 #include "Physics/CRectangleShape.h"
 #include "Game/EPause.h"
 #include "Game/ELifebuoy.h"
+#include "Game/ELifebuoyHit.h"
 #include "Game/CLifebuoy.h"
 #include <fstream>
 #include <iostream>
@@ -48,19 +49,22 @@ private:
 	dd::EventRelay<LifebuoySystem, dd::Events::Contact> m_EContact;
 	dd::EventRelay<LifebuoySystem, dd::Events::Pause> m_EPause;
 	dd::EventRelay<LifebuoySystem, dd::Events::Lifebuoy> m_ELifebuoy;
+	dd::EventRelay<LifebuoySystem, dd::Events::LifebuoyHit> m_ELifebuoyHit;
 
     bool OnContact(const dd::Events::Contact &event);
 	bool OnPause(const dd::Events::Pause &event);
 	bool OnLifebuoy(const dd::Events::Lifebuoy &event);
+	bool OnLifebuoyHit(const dd::Events::LifebuoyHit &event);
 
 	struct LifebuoyInfo
 	{
 		EntityID Entity;
-		float TimeToLive = 15.f;
+		//int Hits = 4;
 	};
 
 	float m_LeftEdge = -3.8f;
 	float m_RightEdge = 3.8f;
+	float m_DownLimit = -5.3f;
 	float m_DownEdge = -9.2f;
 	std::list<LifebuoyInfo> m_Lifebuoys;
 };
