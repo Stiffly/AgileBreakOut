@@ -89,6 +89,16 @@ void dd::Systems::PhysicsSystem::SyncEntitiesWithBodies()
             filter.categoryBits = physicsComponent->Category;
             filter.maskBits = physicsComponent->Mask;
             body->GetFixtureList()->SetFilterData(filter);
+
+			if (physicsComponent->CollisionType == CollisionType::Type::Static) {
+				body->SetType(b2_staticBody);
+			}
+			else if (physicsComponent->CollisionType == CollisionType::Type::Dynamic) {
+				body->SetType(b2_dynamicBody);
+			}
+			else if (physicsComponent->CollisionType == CollisionType::Type::Kinematic) {
+				body->SetType(b2_dynamicBody);
+			}
         }
     }
 }

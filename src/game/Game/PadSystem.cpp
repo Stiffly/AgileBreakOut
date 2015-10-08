@@ -33,16 +33,16 @@ void dd::Systems::PadSystem::Initialize()
         auto ent = m_World->CreateEntity();
         m_World->SetProperty(ent, "Name", "Pad");
         auto ctransform = m_World->AddComponent<Components::Transform>(ent);
-        ctransform->Position = glm::vec3(0.f, -3.5f, -10.f);
+        ctransform->Position = glm::vec3(0.f, -4.8f, -10.f);
         auto rectangleShape = m_World->AddComponent<Components::RectangleShape>(ent);
-        rectangleShape->Dimensions = glm::vec2(1.f, 0.5f);
+        rectangleShape->Dimensions = glm::vec2(1.f, 0.1f);
         auto physics = m_World->AddComponent<Components::Physics>(ent);
         physics->CollisionType = CollisionType::Type::Dynamic;
         physics->Category = CollisionLayer::Type::Pad;
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::PowerUp);
         physics->Calculate = true;
         auto cModel = m_World->AddComponent<Components::Model>(ent);
-        cModel->ModelFile = "Models/Submarine2.obj";
+        cModel->ModelFile = "Models/Ship/Ship.obj";
 
         auto pad = m_World->AddComponent<Components::Pad>(ent);
         m_World->CommitEntity(ent);

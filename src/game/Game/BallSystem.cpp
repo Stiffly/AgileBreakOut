@@ -227,15 +227,6 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         //TODO: Add support for power-up collisions
     }
 
-    auto brick = m_World->GetComponent<Components::Brick>(otherEntitiy);
-    if (brick != nullptr) {
-        auto transform = m_World->GetComponent<Components::Transform>(otherEntitiy);
-        auto physics = m_World->GetComponent<Components::Physics>(otherEntitiy);
-        auto rectangle = m_World->GetComponent<Components::RectangleShape>(otherEntitiy);
-        int hey = 5;
-    }
-
-    //if this is a brick thats dead do not collide :)
 
     auto ballTransform = m_World->GetComponent<Components::Transform>(ballEntity);
     glm::vec2 ballVelocity = glm::vec2(ballTransform->Velocity.x, ballTransform->Velocity.y);
@@ -273,8 +264,12 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
             m_Contacts[ballEntity] = normalList;
         }
 
-        //glm::vec2 reflectedVelocity = glm::reflect(ballVelocity, event.Normal);
-        //ballTransform->Velocity = glm::vec3(reflectedVelocity, 0.f);
+		auto brick = m_World->GetComponent<Components::Brick>(otherEntitiy);
+		if (brick != nullptr) {
+			auto physicsComponent = m_World->GetComponent<Components::Physics>(otherEntitiy);
+			physicsComponent->CollisionType = CollisionType::Type::Dynamic;
+
+		}
     }
 
     return true;
@@ -302,6 +297,8 @@ void dd::Systems::BallSystem::ResolveContacts()
         auto transform = m_World->GetComponent<Components::Transform>(entity);
         glm::vec2 velocity = glm::vec2(transform->Velocity.x, transform->Velocity.y);
         glm::vec2 reflectedVelocity = glm::reflect(velocity, finalNormal);
+		auto ballComponent = m_World->GetComponent<Components::Ball>(entity);
+		reflectedVelocity = glm::normalize(reflectedVelocity) * ballComponent->Speed;
         transform->Velocity = glm::vec3(reflectedVelocity, 0.f);
 
     }
