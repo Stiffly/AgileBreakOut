@@ -53,7 +53,7 @@ private:
 	bool OnPause(const dd::Events::Pause &event);
 	bool OnLifebuoy(const dd::Events::Lifebuoy &event);
 
-	struct LifeBuoyInfo
+	struct LifebuoyInfo
 	{
 		EntityID Entity;
 		float TimeToLive = 15.f;
@@ -62,7 +62,7 @@ private:
 	float m_LeftEdge = -3.8f;
 	float m_RightEdge = 3.8f;
 	float m_DownEdge = -9.2f;
-	std::list<LifeBuoyInfo> m_LifeBuoys;
+	std::list<LifebuoyInfo> m_Lifebuoys;
 };
 
 }

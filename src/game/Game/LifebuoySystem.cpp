@@ -43,13 +43,13 @@ void dd::Systems::LifebuoySystem::Initialize()
 
 void dd::Systems::LifebuoySystem::Update(double dt)
 {
-	for (auto it = m_LifeBuoys.begin(); it != m_LifeBuoys.end();) {
+	for (auto it = m_Lifebuoys.begin(); it != m_Lifebuoys.end();) {
 		it->TimeToLive -= dt;
 		auto transformComponent = m_World->GetComponent<Components::Transform>(it->Entity);
 
 		if (transformComponent->Position.y < m_DownEdge) {
 			m_World->RemoveEntity(it->Entity);
-			m_LifeBuoys.erase(it++);
+			m_Lifebuoys.erase(it++);
 		}
 		else {
 			
@@ -110,9 +110,9 @@ bool dd::Systems::LifebuoySystem::OnLifebuoy(const dd::Events::Lifebuoy &event)
 	physics->CollisionType = CollisionType::Type::Dynamic;
 	transform->Position = glm::vec3(0.f, 0.f, -10.f);
 	transform->Velocity = glm::vec3(20.f, 3.f, 0.f);
-	LifeBuoyInfo info;
+	LifebuoyInfo info;
 	info.Entity = ent;
-	m_LifeBuoys.push_back(info);
+	m_Lifebuoys.push_back(info);
 	
 	return true;
 }
