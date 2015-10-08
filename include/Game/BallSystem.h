@@ -26,6 +26,7 @@
 #include "Game/EHitPad.h"
 #include "Game/EHitLag.h"
 #include "Game/EActionButton.h"
+#include "Game/CLifebuoy.h"
 
 namespace dd
 {

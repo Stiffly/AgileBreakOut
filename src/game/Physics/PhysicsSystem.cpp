@@ -34,10 +34,9 @@ void dd::Systems::PhysicsSystem::InitializeWater()
     b2ParticleSystemDef m_ParticleSystemDef;
     m_ParticleSystemDef.radius = radius;
     m_ParticleSystemDef.gravityScale = gravityScale;
+	m_ParticleSystemDef.density = 4.f;
 
     m_WaterParticleSystem = m_PhysicsWorld->CreateParticleSystem(&m_ParticleSystemDef);
-
-
 }
 
 bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)

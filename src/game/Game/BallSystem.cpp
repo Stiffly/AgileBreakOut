@@ -39,7 +39,7 @@ void dd::Systems::BallSystem::Initialize()
         std::shared_ptr<Components::Template> ballTemplate = m_World->AddComponent<Components::Template>(ent);
         physics->CollisionType = CollisionType::Type::Dynamic;
         physics->Category = CollisionLayer::Type::Ball;
-        physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall);
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
         physics->Calculate = true;
         transform->Sticky = true;
 
@@ -238,12 +238,12 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
     }
     else {
         return false;
-        //TODO: Add support for power-up collisions
     }
 
-
+	
     auto ballTransform = m_World->GetComponent<Components::Transform>(ballEntity);
     glm::vec2 ballVelocity = glm::vec2(ballTransform->Velocity.x, ballTransform->Velocity.y);
+
 
     if (m_World->GetProperty<std::string>(otherEntitiy, "Name") == "Pad"){
         Events::HitPad e;
@@ -265,9 +265,10 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         ec.Ball = ballEntity;
         EventBroker->Publish(ec);
         //std::cout << "Combo: " << ballComponent->Combo << std::endl;
-	}
+	}	// Lifebuoy should always reflect the ball upwards
 	else if (m_World->GetProperty<std::string>(otherEntitiy, "Name") == "Lifebuoy"){
-		LOG_INFO("Lifebuoy collision!");
+		ballTransform->Velocity = glm::vec3(ballTransform->Velocity.x,  abs(ballTransform->Velocity.y), ballTransform->Velocity.z);
+
 	} else {
         auto it = m_Contacts.find(ballEntity);
         if (it == m_Contacts.end()) {

@@ -52,6 +52,16 @@ private:
     bool OnContact(const dd::Events::Contact &event);
 	bool OnPause(const dd::Events::Pause &event);
 	bool OnLifebuoy(const dd::Events::Lifebuoy &event);
+
+	struct LifeBuoyInfo
+	{
+		EntityID Entity;
+		float TimeToLive = 20.f;
+	};
+
+	float m_LeftEdge = -4.f;
+	float m_RightEdge = 4.f;
+	std::list<LifeBuoyInfo> m_LifeBuoys;
 };
 
 }

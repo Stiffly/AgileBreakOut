@@ -267,7 +267,7 @@ public:
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
 			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Wall;
-			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Other);
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy);
 			transform->Sticky = true;
 			m_World->CommitEntity(BottomWall);
 		}
@@ -287,7 +287,7 @@ public:
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
 			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Wall;
-			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick | CollisionLayer::Other);
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
 			transform->Sticky = true;
 
 			m_World->CommitEntity(topWall);
@@ -309,7 +309,7 @@ public:
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(leftWall);
 			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Wall;
-			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick | CollisionLayer::Other);
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
 			transform->Sticky = true;
 
 			m_World->CommitEntity(leftWall);
@@ -331,7 +331,7 @@ public:
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(rightWall);
 			physics->CollisionType = CollisionType::Type::Static;
 			physics->Category = CollisionLayer::Wall;
-			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick | CollisionLayer::Other);
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
 			transform->Sticky = true;
 
 			m_World->CommitEntity(rightWall);

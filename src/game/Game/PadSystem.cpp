@@ -38,9 +38,9 @@ void dd::Systems::PadSystem::Initialize()
         auto rectangleShape = m_World->AddComponent<Components::RectangleShape>(ent);
         rectangleShape->Dimensions = glm::vec2(1.f, 0.1f);
         auto physics = m_World->AddComponent<Components::Physics>(ent);
-        physics->CollisionType = CollisionType::Type::Dynamic;
+        physics->CollisionType = CollisionType::Type::Kinematic;
         physics->Category = CollisionLayer::Type::Pad;
-		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::PowerUp);
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::PowerUp | CollisionLayer::LifeBuoy);
         physics->Calculate = true;
         ctransform->Sticky = true;
         auto cModel = m_World->AddComponent<Components::Model>(ent);
