@@ -141,7 +141,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 transformBall->Velocity.y = -2;
             }
         }
-        if (transformBall->Position.y < -EdgeY() - 4) {
+		if (transformBall->Position.y < -EdgeY() - 4 || transformBall->Position.y > EdgeY() + 4) {
             if (MultiBalls() != 0) {
                 m_World->RemoveEntity(entity);
                 Events::MultiBallLost e;
