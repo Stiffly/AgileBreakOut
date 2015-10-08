@@ -209,7 +209,7 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
 	} else if (typeInt == InkBlasterBrick) {
 		cBrick->Type = InkBlasterBrick;
 		auto model = m_World->GetComponent<Components::Model>(brick);
-		model->Color = glm::vec4(0.1f, 0.1f, 0.1f, .0f);
+		model->Color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 	}
     float x = line * spacesBetweenBricks.x;
     float y = row * spacesBetweenBricks.y;
@@ -277,6 +277,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 
 		auto transformComponentBrick = m_World->GetComponent<Components::Transform>(entityBrick);
 		auto transformComponentShot = m_World->GetComponent<Components::Transform>(entityShot);
+		auto brickModel = m_World->GetComponent<Components::Model>(entityBrick);
 
 		Events::SetImpulse e;
 		e.Entity = entityBrick;
@@ -295,6 +296,22 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 		EventBroker->Publish(es);
 
 		m_World->RemoveEntity(entityShot);
+
+		Events::CreateParticleSequence ep;
+		ep.parent = entityBrick;
+		ep.EmitterLifeTime = 1.f;
+		ep.ParticleLifeTime = 1.5f;
+		ep.ParticlesPerTick = 1;
+		ep.SpawnRate = 0.2;
+		ep.EmittingAngle = glm::half_pi<float>();
+		ep.Spread = 1.5f;
+		ep.Position = transformComponentBrick->Position;
+		ep.Radius = 0.05;
+		ep.SpriteFile = "Textures/Particles/FadeBall.png";
+		ep.Color = brickModel->Color + glm::vec4(1);
+		ep.Speed = 50;
+		EventBroker->Publish(ep);
+
 		return true;
 	}
 
@@ -486,44 +503,44 @@ void dd::Systems::LevelSystem::GetNextLevel()
     } else if (m_CurrentCluster == 1) {
         if (m_CurrentLevel == 1) {
             level =
-                    {1, 1, 0, 1, 0, 1, 1,
+                    {0, 0, 0, 0, 0, 0, 0,
                      1, 1, 1, 1, 1, 1, 1,
-                     1, 1, 1, 1, 1, 1, 1,
-                     1, 2, 1, 2, 1, 2, 1,
-                     1, 1, 0, 1, 0, 1, 1,
-                     4, 0, 0, 3, 0, 0, 5};
+                     1, 0, 1, 2, 1, 0, 1,
+                     0, 1, 0, 1, 0, 1, 0,
+                     1, 0, 1, 0, 1, 0, 1,
+                     0, 0, 0, 0, 0, 0, 0};
         } else if (m_CurrentLevel == 2) {
             level =
-                    {1, 0, 0, 0, 0, 0, 1,
-                     0, 1, 0, 0, 0, 1, 0,
-                     0, 0, 2, 2, 2, 0, 0,
-                     0, 0, 0, 1, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0};
+                    {0, 0, 0, 0, 0, 0, 0,
+                     0, 1, 0, 1, 0, 1, 0,
+                     0, 0, 1, 1, 1, 0, 0,
+                     0, 0, 0, 3, 0, 0, 0,
+                     1, 1, 1, 0, 1, 1, 1,
+                     1, 0, 0, 0, 0, 0, 1};
         } else if (m_CurrentLevel == 3) {
             level =
-                    {2, 0, 0, 0, 0, 0, 2,
-                     0, 1, 0, 0, 0, 1, 0,
-                     1, 2, 1, 1, 1, 2, 1,
-                     1, 0, 1, 1, 1, 0, 1,
-                     1, 0, 1, 1, 1, 0, 1,
-                     1, 0, 1, 1, 1, 0, 1};
+                    {0, 0, 0, 1, 0, 0, 0,
+                     0, 0, 1, 1, 1, 0, 0,
+                     0, 1, 1, 1, 1, 1, 0,
+                     1, 1, 1, 4, 1, 1, 1,
+                     0, 0, 0, 1, 0, 0, 0,
+                     0, 0, 1, 1, 1, 0, 0};
         } else if (m_CurrentLevel == 4) {
             level =
-                    {1, 2, 1, 1, 1, 2, 1,
-                     1, 0, 1, 1, 1, 0, 1,
-                     1, 2, 1, 1, 1, 2, 1,
-                     1, 0, 1, 1, 1, 0, 1,
-                     1, 0, 0, 0, 0, 0, 1,
-                     0, 1, 1, 0, 1, 1, 0};
+                    {0, 0, 1, 0, 1, 0, 0,
+                     0, 1, 1, 1, 1, 1, 0,
+                     1, 1, 1, 1, 1, 1, 1,
+                     0, 1, 1, 1, 1, 1, 0,
+                     0, 0, 1, 5, 1, 0, 0,
+                     0, 0, 0, 1, 0, 0, 0};
         } else if (m_CurrentLevel == 5) {
             level =
-                    {1, 0, 1, 0, 1, 0, 1,
+                    {0, 1, 0, 0, 0, 1, 0,
+                     1, 4, 1, 1, 1, 3, 1,
                      0, 1, 0, 1, 0, 1, 0,
-                     2, 0, 1, 0, 1, 0, 2,
-                     0, 1, 0, 2, 0, 1, 0,
-                     1, 0, 1, 0, 1, 0, 1,
-                     0, 1, 0, 1, 0, 1, 0};
+                     0, 1, 0, 1, 0, 1, 0,
+                     1, 5, 1, 1, 1, 2 , 1,
+                     0, 1, 0, 0, 0, 1, 0};
         }
     } else if (m_CurrentCluster == 3) {
 
