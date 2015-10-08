@@ -6,6 +6,7 @@
 #define DAYDREAM_EHITPAD_H
 
 #include "Core/EventBroker.h"
+#include "Core/Entity.h"
 
 namespace dd
 {
@@ -13,7 +14,8 @@ namespace Events
 {
 struct HitPad : Event
 {
-
+	EntityID Pad;
+	EntityID Ball;
 };
 }
 }

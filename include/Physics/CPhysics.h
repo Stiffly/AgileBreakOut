@@ -16,7 +16,8 @@ enum Type
 	PowerUp = 1 << 4,
 	Other = 1 << 5,
 	Wall = 1 << 6,
-	LifeBuoy = 1 << 7
+	LifeBuoy = 1 << 7,
+	Projectile = 1 << 8
 };
 }
 

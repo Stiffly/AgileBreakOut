@@ -15,6 +15,7 @@
 #include "Game/CBrick.h"
 #include "Game/CBall.h"
 #include "Game/CLife.h"
+#include "Game/CProjectile.h"
 #include "Game/CPowerUp.h"
 #include "Game/EStageCleared.h"
 #include "Game/ELifeLost.h"
@@ -24,6 +25,7 @@
 #include "Game/EHitPad.h"
 #include "Game/ELifebuoy.h"
 #include "Game/EStickyPad.h"
+#include "Game/EInkBlaster.h"
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
 #include "Game/EPause.h"
@@ -129,6 +131,7 @@ private:
     const int MultiBallBrick = 2;
 	const int LifebuoyBrick = 3;
 	const int StickyBrick = 4;
+	const int InkBlasterBrick = 5;
 
     EntityID m_BrickTemplate;
 

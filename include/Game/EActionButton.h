@@ -15,7 +15,7 @@ namespace Events
 
 struct ActionButton : Event
 {
-
+	glm::vec3 Position;
 };
 
 }
