@@ -6,7 +6,7 @@
 #include "GUI/NumberFrame.h"
 #include "Core/EKeyUp.h"
 #include "Game/EScoreEvent.h"
-#include "Game/FPSCounter.h"
+#include "Game/GUI/FPSCounter.h"
 #include "Game/EGameOver.h"
 #include "Game/EClusterClear.h"
 #include "Game/EKrakenAttack.h"

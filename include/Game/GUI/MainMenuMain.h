@@ -3,8 +3,7 @@
 
 #include "GUI/TextureFrame.h"
 #include "GUI/Button.h"
-#include "Game/EGameStart.h"
-#include "Game/HUD.h"
+#include "Game/GUI/Story1.h"
 
 namespace dd
 {
@@ -57,10 +56,8 @@ private:
 	virtual bool OnButtonRelease(const Events::ButtonRelease& event)
 	{
 		if (event.Button == m_SquidoutButton) {
-			Events::GameStart e;
-			EventBroker->Publish(e);
 			m_Parent->Hide();
-			auto hud = new GUI::HUD(BaseFrame, "HUD");
+			auto story = new GUI::Story1(BaseFrame, "Story1");
 		}
 
 		return true;

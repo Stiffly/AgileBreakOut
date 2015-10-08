@@ -20,11 +20,13 @@
 
 layout (binding=0) uniform sampler2D DiffuseTexture;
 
+uniform vec4 Color;
+
 in vec2 TextureCoord;
 
 out vec4 FragmentColor;
 
 void main()
 {
-	FragmentColor = texture(DiffuseTexture, TextureCoord);
+	FragmentColor = texture(DiffuseTexture, TextureCoord) * Color;
 }

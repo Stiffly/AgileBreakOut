@@ -665,6 +665,7 @@ void dd::Renderer::DrawGUI(dd::RenderQueue& rq)
 			glUniformMatrix4fv(glGetUniformLocation(*m_SpScreen, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 			glUniformMatrix4fv(glGetUniformLocation(*m_SpScreen, "M"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 			glUniformMatrix4fv(glGetUniformLocation(*m_SpScreen, "V"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+			glUniform4fv(glGetUniformLocation(*m_SpScreen, "Color"), 1, glm::value_ptr(frameJob->Color));
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, frameJob->DiffuseTexture);

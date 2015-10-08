@@ -212,7 +212,7 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
 		model->ModelFile = "Models/Brick/StickyBrick.obj";
 	} else if (typeInt == InkBlasterBrick) {
 		cBrick->Type = InkBlasterBrick;
-		model->Color = glm::vec4(0.1f, 0.1f, 0.1f, .0f);
+		model->Color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 	} else if (typeInt == KrakenAttackBrick) {
 		cBrick->Type = KrakenAttackBrick;
 		model->Color = glm::vec4(0.f, 0.5f, 1.0f, .0f);
@@ -285,6 +285,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 
 		auto transformComponentBrick = m_World->GetComponent<Components::Transform>(entityBrick);
 		auto transformComponentShot = m_World->GetComponent<Components::Transform>(entityShot);
+		auto brickModel = m_World->GetComponent<Components::Model>(entityBrick);
 
 		Events::SetImpulse e;
 		e.Entity = entityBrick;
@@ -303,6 +304,22 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 		EventBroker->Publish(es);
 
 		m_World->RemoveEntity(entityShot);
+
+		Events::CreateParticleSequence ep;
+		ep.parent = entityBrick;
+		ep.EmitterLifeTime = 1.f;
+		ep.ParticleLifeTime = 1.5f;
+		ep.ParticlesPerTick = 1;
+		ep.SpawnRate = 0.2;
+		ep.EmittingAngle = glm::half_pi<float>();
+		ep.Spread = 1.5f;
+		ep.Position = transformComponentBrick->Position;
+		ep.Radius = 0.05;
+		ep.SpriteFile = "Textures/Particles/FadeBall.png";
+		ep.Color = brickModel->Color + glm::vec4(0.3f);
+		ep.Speed = 50;
+		EventBroker->Publish(ep);
+
 		return true;
 	}
 
@@ -354,7 +371,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 		ep.Position = transformComponentBrick->Position;
 		ep.Radius = 0.05;
 		ep.SpriteFile = "Textures/Particles/FadeBall.png";
-		ep.Color = brickModel->Color + glm::vec4(1);
+		ep.Color = brickModel->Color + glm::vec4(0.3f);
 		ep.Speed = 50;
 		EventBroker->Publish(ep);
 
@@ -479,6 +496,23 @@ void dd::Systems::LevelSystem::GetNextLevel()
 	glm::vec4 c = glm::vec4(0, 1, 1, 0);
 	glm::vec4 m = glm::vec4(1, 0, 1, 0);
 	glm::vec4 d = glm::vec4(0, 0, 0, 0);
+
+	//glm::vec4 p4 = glm::vec4(asd.f / 255.f, asd.f / 255.f, sad.f / 255.f, 1.f);
+	glm::vec4 br = glm::vec4(143.f / 255.f, 98.f / 255.f, 0.f / 255.f, 1.f);
+
+	glm::vec4 lb1 = glm::vec4(115.f / 255.f, 232.f / 255.f, 236.f / 255.f, 1.f);
+	glm::vec4 lb2 = glm::vec4(107.f / 255.f, 214.f / 255.f, 218.f / 255.f, 1.f);
+	glm::vec4 lb3 = glm::vec4(91.f / 255.f, 183.f / 255.f, 186.f / 255.f, 1.f);
+	glm::vec4 lb4 = glm::vec4(70.f / 255.f, 153.f / 255.f, 156.f / 255.f, 1.f);
+
+	glm::vec4 p1 = glm::vec4(255.f / 255.f, 184.f / 255.f, 254.f / 255.f, 1.f);
+	glm::vec4 p2 = glm::vec4(255.f / 255.f, 81.f / 255.f, 253.f / 255.f, 1.f);
+	glm::vec4 p3 = glm::vec4(189.f / 255.f, 0.f / 255.f, 187.f / 255.f, 1.f);
+	glm::vec4 p4 = glm::vec4(125.f / 255.f, 0.f / 255.f, 147.f / 255.f, 1.f);
+
+
+
+
     if (m_CurrentCluster == 0) {
         if (m_CurrentLevel == 1) {
             level =
@@ -559,78 +593,79 @@ void dd::Systems::LevelSystem::GetNextLevel()
     } else if (m_CurrentCluster == 1) {
         if (m_CurrentLevel == 1) {
             level =
-                    {1, 1, 0, 1, 0, 1, 1,
+                    {0, 0, 0, 0, 0, 0, 0,
                      1, 1, 1, 1, 1, 1, 1,
-                     1, 1, 1, 1, 1, 1, 1,
-                     1, 2, 1, 2, 1, 2, 1,
-                     1, 1, 0, 1, 0, 1, 1,
-                     4, 0, 0, 3, 0, 0, 5};
-			color = 
-					{w, w, w, w, w, w, w,
-					 r, g, b, y, c, m, d,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w};
-        } else if (m_CurrentLevel == 2) {
-            level =
-                    {1, 0, 0, 0, 0, 0, 1,
-                     0, 1, 0, 0, 0, 1, 0,
-                     0, 0, 2, 2, 2, 0, 0,
-                     0, 0, 0, 1, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
+                     1, 0, 1, 2, 1, 0, 1,
+                     0, 1, 0, 1, 0, 1, 0,
+                     1, 0, 1, 0, 1, 0, 1,
                      0, 0, 0, 0, 0, 0, 0};
 			color = 
 					{w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
+					 lb4, lb4, lb4, lb4, lb4, lb4, lb4,
+					 lb3, lb3, lb3, lb3, lb3, lb3, lb3,
+					 lb2, lb2, lb2, lb2, lb2, lb2, lb2,
+					 lb1, lb1, lb1, lb1, lb1, lb1, lb1,
 					 w, w, w, w, w, w, w};
+        } else if (m_CurrentLevel == 2) {
+            level =
+                    {0, 0, 1, 0, 1, 0, 0,
+                     0, 1, 0, 1, 0, 1, 0,
+                     0, 0, 1, 1, 1, 0, 0,
+                     0, 0, 0, 3, 0, 0, 0,
+                     1, 1, 1, 0, 1, 1, 1,
+                     1, 0, 0, 0, 0, 0, 1};
+			color = 
+					{w, w, r, w, r, w, w,
+					 w, w, w, r, w, w, w,
+					 w, w, r, w, r, w, w,
+					 w, w, w, w, w, w, w,
+					 w, r, w, w, w, r, w,
+					 r, w, w, w, w, w, r};
         } else if (m_CurrentLevel == 3) {
             level =
-                    {2, 0, 0, 0, 0, 0, 2,
-                     0, 1, 0, 0, 0, 1, 0,
-                     1, 2, 1, 1, 1, 2, 1,
-                     1, 0, 1, 1, 1, 0, 1,
-                     1, 0, 1, 1, 1, 0, 1,
-                     1, 0, 1, 1, 1, 0, 1};
+                    {0, 0, 0, 1, 0, 0, 0,
+                     0, 0, 1, 1, 1, 0, 0,
+                     0, 1, 1, 1, 1, 1, 0,
+                     1, 1, 1, 4, 1, 1, 1,
+                     0, 0, 0, 1, 0, 0, 0,
+                     0, 0, 1, 1, 1, 0, 0};
 			color = 
-					{w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w};
+					{g, g, g, g, g, g, g,
+					 g, g, g, g, g, g, g,
+					 g, g, g, g, g, g, g,
+					 g, g, g, w, g, g, g,
+					 w, w, w, br, w, w, w,
+					 w, w, br, br, br, w, w};
+		} else if (m_CurrentLevel == 4) {
             level =
-                    {1, 2, 1, 1, 1, 2, 1,
-                     1, 0, 1, 1, 1, 0, 1,
-                     1, 2, 1, 1, 1, 2, 1,
-                     1, 0, 1, 1, 1, 0, 1,
-                     1, 0, 0, 0, 0, 0, 1,
-                     0, 1, 1, 0, 1, 1, 0};
+                    {0, 0, 1, 0, 1, 0, 0,
+                     0, 1, 1, 1, 1, 1, 0,
+                     1, 1, 1, 1, 1, 1, 1,
+                     0, 1, 1, 1, 1, 1, 0,
+                     0, 0, 1, 5, 1, 0, 0,
+                     0, 0, 0, 1, 0, 0, 0};
 			color = 
-					{w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w};
+					{w, w, p1, w, p1, w, w,
+					 w, p2, p3, p2, p3, p2, w,
+					 p1, p2, p3, p4, p3, p2, p1,
+					 w, p1, p2, p3, p2, p1, w,
+					 w, w, p1, w, p1, w, w,
+					 w, w, w, p1, w, w, w};
         } else if (m_CurrentLevel == 5) {
             level =
-                    {1, 0, 1, 0, 1, 0, 1,
+                    {0, 1, 0, 0, 0, 1, 0,
+                     1, 4, 1, 1, 1, 3, 1,
                      0, 1, 0, 1, 0, 1, 0,
-                     2, 0, 1, 0, 1, 0, 2,
-                     0, 1, 0, 2, 0, 1, 0,
-                     1, 0, 1, 0, 1, 0, 1,
-                     0, 1, 0, 1, 0, 1, 0};
+                     0, 1, 0, 1, 0, 1, 0,
+                     1, 5, 1, 1, 1, 2, 1,
+                     0, 1, 0, 0, 0, 1, 0};
 			color = 
-					{w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w};
+					{w, p3, w, w, w, r, w,
+					 p2, w, p1, g, w, w, w,
+					 w, p4, w, g, w, r, w,
+					 w, br, w, g, w, lb1, w,
+					 y, w, y, g, b, w, b,
+					 w, br, w, w, w, lb1, w};
         }
     } else if (m_CurrentCluster == 3) {
 

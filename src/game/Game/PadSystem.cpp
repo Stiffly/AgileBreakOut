@@ -94,7 +94,7 @@ void dd::Systems::PadSystem::Update(double dt)
 		Events::KrakenAttack e;
 		e.ChargeUpdate = m_KrakenCharge;
 		EventBroker->Publish(e);
-		std::cout << "Charge: " << m_KrakenCharge << std::endl;
+		//std::cout << "Charge: " << m_KrakenCharge << std::endl;
 		return;
 	}
 
