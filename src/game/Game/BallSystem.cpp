@@ -265,8 +265,10 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         ec.Ball = ballEntity;
         EventBroker->Publish(ec);
         //std::cout << "Combo: " << ballComponent->Combo << std::endl;
-    }
-    else {
+	}
+	else if (m_World->GetProperty<std::string>(otherEntitiy, "Name") == "Lifebuoy"){
+		LOG_INFO("Lifebuoy collision!");
+	} else {
         auto it = m_Contacts.find(ballEntity);
         if (it == m_Contacts.end()) {
             std::list<glm::vec2> normalList;

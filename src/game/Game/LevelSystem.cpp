@@ -30,7 +30,7 @@ void dd::Systems::LevelSystem::Initialize()
     cPhys->CollisionType = CollisionType::Type::Static;
     cPhys->GravityScale = 0.f;
     cPhys->Category = CollisionLayer::Type::Brick;
-    cPhys->Mask = CollisionLayer::Type::Ball;
+    cPhys->Mask = static_cast<CollisionLayer::Type> (CollisionLayer::Type::Ball | CollisionLayer::Type::Wall);
     transform->Sticky = false;
 
     model->ModelFile = "Models/Brick/WhiteBrick.obj";
@@ -420,7 +420,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 1, 1, 1, 1, 1, 1,
                      1, 2, 1, 2, 1, 2, 1,
                      1, 1, 0, 1, 0, 1, 1,
-                     1, 0, 0, 3, 0, 0, 1};
+                     1, 3, 3, 3, 3, 3, 1};
         } else if (m_CurrentLevel == 2) {
             level =
                     {1, 0, 0, 0, 0, 0, 1,
