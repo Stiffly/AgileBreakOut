@@ -12,8 +12,11 @@ void dd::Systems::PhysicsSystem::ContactListener::BeginContact(b2Contact* contac
     e.Entity2 = m_PhysicsSystem->m_BodiesToEntities[contact->GetFixtureB()->GetBody()];
     e.Normal = glm::normalize(glm::vec2(contact->GetManifold()->localNormal.x, contact->GetManifold()->localNormal.y));
     e.SignificantNormal = glm::normalize((glm::abs(e.Normal.x) > glm::abs(e.Normal.y)) ? glm::vec2(e.Normal.x, 0) : glm::vec2(0, e.Normal.y));
-
-    m_PhysicsSystem->EventBroker->Publish(e);
+	//contact->GetManifold()->points
+	b2Vec2 pos = worldManifold.points[0];
+	glm::vec2 glmPos = glm::vec2(pos.x, pos.y);
+	e.IntersectionPoint = glmPos;
+	m_PhysicsSystem->EventBroker->Publish(e);
 }
 
 void dd::Systems::PhysicsSystem::ContactListener::EndContact(b2Contact* contact)

@@ -13,7 +13,8 @@ struct ParticleEmitter : public Component
     float InitialSpeed = 1.f;
     double SpawnRate = 1;
     int ParticlesPerTick = 1;
-    double TimeSinceLastSpawn = 0;
+	//TODO: Refactor. Have cooldown instead of this
+    double TimeSinceLastSpawn = 100;
     int MaxCount = 0;
     float EmittingAngle = 0.f;
     float Spread = 0.f;
