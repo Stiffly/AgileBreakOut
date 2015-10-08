@@ -200,7 +200,7 @@ public:
 		//ParticleTest
 
 
-		/*{
+		{
 			auto Pe = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(Pe);
 			auto particleEmitter= m_World->AddComponent<Components::ParticleEmitter>(Pe);
@@ -228,10 +228,10 @@ public:
 				PtTransform->Position = transform->Position;
 				PtSprite->SpriteFile = "Textures/Background.png";
 				PtParticle->LifeTime = 3.f;
-				PtParticle->Flags = ParticleFlags::Type::powderParticle | ParticleFlags::Type::particleContactFilterParticle | ParticleFlags::Type::fixtureContactFilterParticle;
+				PtParticle->Flags = static_cast<ParticleFlags::Type>(ParticleFlags::Type::Powder | ParticleFlags::Type::ParticleContactFilter | ParticleFlags::Type::FixtureContactFilter);
 			}
 			m_World->CommitEntity(Pe);
-		}*/
+		}
 
 		//TODO: Why does the ball not collide with these bricks?
 		//BottomBox

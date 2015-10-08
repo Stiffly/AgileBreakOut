@@ -303,23 +303,12 @@ void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)
 
 void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
 {
-   /* auto physics = m_World->GetComponent<Components::Physics>(entity);
-    if (physics == nullptr) {
-        return;
-    }*/
-
     auto it = m_EntitiesToBodies.find(entity);
-    if(it == m_EntitiesToBodies.end()) {
-        LOG_ERROR("Trying to remove non-exsisting body, Entity: %i", entity);
-        return;
+    if(it != m_EntitiesToBodies.end()) {
+        it->second->GetWorld()->DestroyBody(it->second);
+        m_BodiesToEntities.erase(it->second);
+        m_EntitiesToBodies.erase(entity);
     }
-
-    //It told me I was removing a lot of objects, and I didn't need that information, so I commented it out.
-    //LOG_INFO("Removing entity %i", entity);
-    it->second->GetWorld()->DestroyBody(it->second);
-    m_BodiesToEntities.erase(it->second);
-    m_EntitiesToBodies.erase(entity);
-    //delete body;
 }
 
 
