@@ -187,6 +187,7 @@ public:
 			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
 			transform->Position = glm::vec3(0.f, 34.6f, -15.f);
 			transform->Scale = glm::vec3(6.f, 6.f, 10.f);
+			transform->Sticky = false;
 			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
 			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
 			model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 0.3f);

@@ -65,7 +65,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     // Check the background.
     auto model = m_World->GetComponent<Components::Model>(entity);
     if (model != nullptr) {
-        if (model->ModelFile == "Models/Test/halfpipe/Halfpipe.obj") {
+		if (model->ModelFile == "Models/Test/halfpipe/Halfpipe.obj") {
             auto transform = m_World->GetComponent<Components::Transform>(entity);
             if (transform->Position.y <= -34.6) {
                 transform->Position.y = 34.6;
@@ -86,6 +86,9 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 			} else if (brick->Type == LifebuoyBrick) {
 				Events::Lifebuoy e;
 				e.Transform = transform;
+				EventBroker->Publish(e);
+			} else if (brick->Type == StickyBrick) {
+				Events::StickyPad e;
 				EventBroker->Publish(e);
 			}
             m_LooseBricks--;
@@ -194,6 +197,12 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
         model->ModelFile = "Models/Brick/IceBrick.obj";
 	} else if (typeInt == LifebuoyBrick) {
 		cBrick->Type = LifebuoyBrick;
+		auto model = m_World->GetComponent<Components::Model>(brick);
+		model->Color = glm::vec4(1.f, 0.f, 0.f, .0f);
+	} else if (typeInt == StickyBrick) {
+		cBrick->Type = StickyBrick;
+		auto model = m_World->GetComponent<Components::Model>(brick);
+		model->Color = glm::vec4(0.f, 0.f, 1.f, .0f);
 	}
     float x = line * spacesBetweenBricks.x;
     float y = row * spacesBetweenBricks.y;
@@ -370,7 +379,9 @@ void dd::Systems::LevelSystem::GetNextLevel()
     // 0 is empty space.
     // 1 is standard brick.
     // 2 is multiball brick.
-    if (m_CurrentCluster == 1) {
+	// 3 is lifebuoy brick.
+	// 4 is sticky brick.
+    if (m_CurrentCluster == 0) {
         if (m_CurrentLevel == 1) {
             level =
                     {0, 0, 0, 0, 0, 0, 0,
@@ -412,7 +423,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 1};
         }
-    } else if (m_CurrentCluster == 2) {
+    } else if (m_CurrentCluster == 1) {
         if (m_CurrentLevel == 1) {
             level =
                     {1, 1, 0, 1, 0, 1, 1,
@@ -420,7 +431,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 1, 1, 1, 1, 1, 1,
                      1, 2, 1, 2, 1, 2, 1,
                      1, 1, 0, 1, 0, 1, 1,
-                     1, 3, 3, 3, 3, 3, 1};
+                     4, 0, 0, 3, 0, 0, 1};
         } else if (m_CurrentLevel == 2) {
             level =
                     {1, 0, 0, 0, 0, 0, 1,

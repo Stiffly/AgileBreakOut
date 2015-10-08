@@ -56,11 +56,11 @@ private:
 	struct LifeBuoyInfo
 	{
 		EntityID Entity;
-		float TimeToLive = 20.f;
+		float TimeToLive = 15.f;
 	};
 
-	float m_LeftEdge = -4.f;
-	float m_RightEdge = 4.f;
+	float m_LeftEdge = -3.8f;
+	float m_RightEdge = 3.8f;
 	std::list<LifeBuoyInfo> m_LifeBuoys;
 };
 

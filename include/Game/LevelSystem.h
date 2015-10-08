@@ -23,6 +23,7 @@
 #include "Game/EComboEvent.h"
 #include "Game/EHitPad.h"
 #include "Game/ELifebuoy.h"
+#include "Game/EStickyPad.h"
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
 #include "Game/EPause.h"
@@ -109,7 +110,7 @@ private:
     bool m_Initialized = false;
     bool m_Pause = false;
     int m_LooseBricks = 0;
-    int m_CurrentCluster = 2;
+    int m_CurrentCluster = 1;
     int m_CurrentLevel = 1;
     int m_MultiBalls = 0;
     int m_PowerUps = 0;
@@ -125,6 +126,7 @@ private:
     const int StandardBrick = 1;
     const int MultiBallBrick = 2;
 	const int LifebuoyBrick = 3;
+	const int StickyBrick = 4;
 
     EntityID m_BrickTemplate;
 

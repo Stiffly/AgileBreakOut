@@ -22,8 +22,8 @@ void dd::Systems::PhysicsSystem::Initialize()
     InitializeWater();
     EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, &PhysicsSystem::SetImpulse);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PhysicsSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PhysicsSystem::OnStageCleared);
     EVENT_SUBSCRIBE_MEMBER(m_ECreateParticleSequence, &PhysicsSystem::CreateParticleSequence);
-
 }
 
 void dd::Systems::PhysicsSystem::InitializeWater()
@@ -253,12 +253,13 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 	if (m_Travelling) {
 		auto transform = m_World->GetComponent<Components::Transform>(entity);
 		if (transform != nullptr) {
-			if (transform->Sticky == true) {
-				return;
+			if (!transform->Sticky) {
+				transform->Position.y -= 6.0f * dt;
 			}
+		} else {
 			transform->Position.y -= 6.0f * dt;
-        }
-    }
+		}
+	}
     auto particle = m_World->GetComponent<Components::Particle>(entity);
     auto pTemplate = m_World->GetComponent<Components::Template>(entity);
     if (particle && !pTemplate) {
