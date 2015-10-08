@@ -156,10 +156,17 @@ void dd::Systems::PhysicsSystem::SyncBodiesWithEntities()
 
 void dd::Systems::PhysicsSystem::Update(double dt)
 {
-    if (m_Pause) {
-        return;
-    }
+	if (m_Pause) {
+		return;
+	}
 
+	if (m_Travelling) {
+		m_Timer += dt;
+		if (m_Timer >= 2) {
+			m_Timer = 0;
+			m_Travelling = false;
+		}
+	}
     m_Accumulator += dt;
 
     while(m_Accumulator >= m_TimeStep)
@@ -233,7 +240,16 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
 void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {    
-auto particle = m_World->GetComponent<Components::Particle>(entity);
+	if (m_Travelling) {
+		auto transform = m_World->GetComponent<Components::Transform>(entity);
+		if (transform != nullptr) {
+			if (transform->Sticky == true) {
+				return;
+			}
+			transform->Position.y -= 6.0f * dt;
+        }
+    }
+    auto particle = m_World->GetComponent<Components::Particle>(entity);
     auto pTemplate = m_World->GetComponent<Components::Template>(entity);
     if (particle && !pTemplate) {
         particle->LifeTime -= dt;
@@ -252,7 +268,6 @@ auto particle = m_World->GetComponent<Components::Particle>(entity);
                 }
                 m_World->RemoveEntity(entity);
             }
-
         }
     }
 }
@@ -309,6 +324,15 @@ void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
         m_BodiesToEntities.erase(it->second);
         m_EntitiesToBodies.erase(entity);
     }
+}
+
+
+bool dd::Systems::PhysicsSystem::OnStageCleared(const dd::Events::StageCleared &event)
+{
+	if (event.ClearedStage < 5) {
+		m_Travelling = true;
+	}
+	return true;
 }
 
 

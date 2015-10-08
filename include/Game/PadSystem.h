@@ -30,6 +30,7 @@
 #include "Game/EStageCleared.h"
 #include "Game/EPause.h"
 #include "Game/EHitLag.h"
+#include "Game/EActionButton.h"
 
 
 namespace dd
