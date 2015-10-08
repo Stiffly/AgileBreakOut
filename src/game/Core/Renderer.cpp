@@ -358,12 +358,10 @@ void dd::Renderer::DrawForward(RenderQueue &objects, RenderQueue &lights)
 {
 	// Forward-render semi-transparent objects on top of the current framebuffer
 	glDisable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	//glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_FbDeferred3);
 //	glClearColor(1, 0.9, 0.8f, 1);
@@ -443,7 +441,6 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "M"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "V"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
 			glUniform4fv(glGetUniformLocation(shaderProgramHandle, "Color"), 1, glm::value_ptr(modelJob->Color));
-
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, spriteJob->DiffuseTexture);

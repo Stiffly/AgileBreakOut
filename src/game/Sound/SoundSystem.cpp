@@ -4,7 +4,7 @@
 dd::Systems::SoundSystem::~SoundSystem()
 {
     alcCloseDevice(m_Device);
-};
+}
 
 void dd::Systems::SoundSystem::Initialize()
 {
@@ -41,6 +41,8 @@ void dd::Systems::SoundSystem::Initialize()
         e.IsAmbient = true;
         EventBroker->Publish(e);
     }
+
+
 }
 
 void dd::Systems::SoundSystem::Update(double dt)
@@ -165,10 +167,14 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
     }
 
     //Send play-sound event
-    dd::Events::PlaySound e;
-    e.FilePath = collisionSound->FilePath;
-    e.IsAmbient = false;
-    EventBroker->Publish(e);
+
+    {
+        dd::Events::PlaySound e;
+        e.FilePath = collisionSound->FilePath;
+        e.IsAmbient = false;
+        EventBroker->Publish(e);
+    }
+
     return true;
 }
 

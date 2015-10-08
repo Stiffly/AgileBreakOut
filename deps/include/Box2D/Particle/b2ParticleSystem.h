@@ -299,7 +299,7 @@ public:
 	/// b2World::Step()).
 	void DestroyParticle(int32 index)
 	{
-		DestroyParticle(index, false);
+		DestroyParticle(index, true);
 	}
 
 	/// Destroy a particle.
@@ -330,7 +330,7 @@ public:
 	/// @return Number of particles destroyed.
 	int32 DestroyParticlesInShape(const b2Shape& shape, const b2Transform& xf)
 	{
-		return DestroyParticlesInShape(shape, xf, false);
+		return DestroyParticlesInShape(shape, xf, true);
 	}
 
 	/// Destroy particles inside a shape.
