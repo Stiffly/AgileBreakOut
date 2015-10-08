@@ -216,7 +216,7 @@ private:
 	bool OnKeyDown(const Events::KeyDown& event)
 	{
 		if (Hidden()) {
-			return;
+			return false;
 		}
 
 		if (event.KeyCode == GLFW_KEY_SPACE) {
