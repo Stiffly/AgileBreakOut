@@ -45,18 +45,27 @@ void dd::Systems::LifebuoySystem::Update(double dt)
 {
 	for (auto it = m_LifeBuoys.begin(); it != m_LifeBuoys.end();) {
 		it->TimeToLive -= dt;
-		if (it->TimeToLive < 0.f) {
+		auto transformComponent = m_World->GetComponent<Components::Transform>(it->Entity);
+
+		if (transformComponent->Position.y < m_DownEdge) {
 			m_World->RemoveEntity(it->Entity);
 			m_LifeBuoys.erase(it++);
+			LOG_INFO("Removed buoy");
 		}
 		else {
-			auto transformComponent = m_World->GetComponent<Components::Transform>(it->Entity);
-
+			
 			if (transformComponent->Position.x > m_RightEdge) {
 				transformComponent->Position = glm::vec3(m_LeftEdge + 0.1f, transformComponent->Position.y, transformComponent->Position.z);
-			}
-			else if (transformComponent->Position.x < m_LeftEdge) {
+			} else if (transformComponent->Position.x < m_LeftEdge) {
 				transformComponent->Position = glm::vec3(m_RightEdge - 0.1f, transformComponent->Position.y, transformComponent->Position.z);
+			} else if (it->TimeToLive < 0.f) {
+				auto physicsComponent = m_World->GetComponent<Components::Physics>(it->Entity);
+				physicsComponent->Mask = CollisionLayer::Type::LifeBuoy;
+				physicsComponent->GravityScale = 10.f;
+
+				auto modelComponent = m_World->GetComponent<Components::Model>(it->Entity);
+				modelComponent->Color = glm::vec4(0.5f, 0.5f, 0.5f, 0.f);
+				LOG_INFO("Buoy is sinking");
 			}
 			++it;
 		}
@@ -101,7 +110,7 @@ bool dd::Systems::LifebuoySystem::OnLifebuoy(const dd::Events::Lifebuoy &event)
 	auto transform = m_World->GetComponent<Components::Transform>(ent);
 	auto physics = m_World->GetComponent<Components::Physics>(ent);
 	physics->CollisionType = CollisionType::Type::Dynamic;
-	transform->Position = glm::vec3(event.Transform->Position.x, transform->Position.y + 2.f, -10.f);
+	transform->Position = glm::vec3(0.f, 0.f, -10.f);
 	transform->Velocity = glm::vec3(20.f, 3.f, 0.f);
 	LifeBuoyInfo info;
 	info.Entity = ent;

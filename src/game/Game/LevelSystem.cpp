@@ -198,11 +198,11 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
 	} else if (typeInt == LifebuoyBrick) {
 		cBrick->Type = LifebuoyBrick;
 		auto model = m_World->GetComponent<Components::Model>(brick);
-		model->Color = glm::vec4(1.f, 0.f, 0.f, .0f);
+		model->ModelFile = "Models/Brick/LifeBuoyBrick.obj";
 	} else if (typeInt == StickyBrick) {
 		cBrick->Type = StickyBrick;
 		auto model = m_World->GetComponent<Components::Model>(brick);
-		model->Color = glm::vec4(0.f, 0.f, 1.f, .0f);
+		model->ModelFile = "Models/Brick/StickyBrick.obj";
 	}
     float x = line * spacesBetweenBricks.x;
     float y = row * spacesBetweenBricks.y;

@@ -61,6 +61,7 @@ private:
 
 	float m_LeftEdge = -3.8f;
 	float m_RightEdge = 3.8f;
+	float m_DownEdge = -9.2f;
 	std::list<LifeBuoyInfo> m_LifeBuoys;
 };
 
