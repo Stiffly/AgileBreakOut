@@ -254,10 +254,9 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 	if (m_Travelling) {
 		auto transform = m_World->GetComponent<Components::Transform>(entity);
 		if (transform != nullptr) {
-			if (transform->Sticky == true) {
-				return;
+			if (!transform->Sticky) {
+				transform->Position.y -= 6.0f * dt;
 			}
-			transform->Position.y -= 6.0f * dt;
 		}
 	}
     auto particle = m_World->GetComponent<Components::Particle>(entity);
