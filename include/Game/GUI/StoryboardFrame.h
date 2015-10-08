@@ -22,7 +22,9 @@ public:
 	StoryboardFrame(Frame* parent, std::string name)
 		: TextureFrame(parent, name) 
 	{
+
 		m_TextureFrame = new TextureFrame(this, "StoryboardFrameHelper");
+
 		//m_TextureFrame->DisableScissor();
 	}
 
@@ -33,44 +35,55 @@ public:
 
 	void Play()
 	{
-		m_Playing = 1;
+		m_Playing = true;
+	}
+
+	void Skip()
+	{
+		m_Playing = false;
+		OnComplete();
 	}
 
 	void Update(double dt)
 	{
-		if (!m_Playing) {
+		if (Hidden()) {
 			return;
 		}
 
-		m_Time += (double)m_Playing * dt;
+		if (m_Playing) {
+			m_Time += dt;
 
-		if (m_NextIndex < m_Timeline.size()) {
-			if (m_Time >= m_Timeline.at(m_NextIndex).Time) {
-				m_CurrentIndex = m_NextIndex;
-				Transition& t = m_Timeline.at(m_CurrentIndex);
+			if (m_NextIndex < m_Timeline.size()) {
+				if (m_Time >= m_Timeline.at(m_NextIndex).Time) {
+					m_CurrentIndex = m_NextIndex;
+					Transition& t = m_Timeline.at(m_CurrentIndex);
 
-				m_TextureFrame->FadeToTexture(t.Texture, t.Duration);
-				//m_TextureFrame->SetTexture(t.Texture);
-				m_TextureFrame->SizeToTexture();
+					m_TextureFrame->FadeToTexture(t.Texture, t.Duration);
+					//m_TextureFrame->SetTexture(t.Texture);
+					m_TextureFrame->SizeToTexture();
 
-				if (m_StartRect == Rectangle()) {
-					m_StartRect = Rectangle(0, 0, m_TextureFrame->Width, m_TextureFrame->Height);
-				} else {
-					m_StartRect = m_TargetRect;
+					if (m_StartRect == Rectangle()) {
+						m_StartRect = Rectangle(0, 0, m_TextureFrame->Width, m_TextureFrame->Height);
+					}
+					else {
+						m_StartRect = m_TargetRect;
+					}
+
+					double wScaleParent = Width / (double)m_TextureFrame->Width;
+					double wScale = m_TextureFrame->Width / (double)t.Viewport.Width;
+					LOG_DEBUG("wScale: %f", wScale);
+					double hScaleParent = Height / (double)m_TextureFrame->Height;
+					double hScale = m_TextureFrame->Height / (double)t.Viewport.Height;
+					LOG_DEBUG("hScale: %f", hScale);
+					m_TargetRect.X = -t.Viewport.X * wScale * wScaleParent;
+					m_TargetRect.Y = -t.Viewport.Y * hScale * hScaleParent;
+					m_TargetRect.Width = m_TextureFrame->Width * wScale * wScaleParent;
+					m_TargetRect.Height = m_TextureFrame->Height * hScale * hScaleParent;
+
+					m_NextIndex++;
 				}
-
-				double wScaleParent = Width / (double)m_TextureFrame->Width;
-				double wScale = m_TextureFrame->Width / (double)t.Viewport.Width;
-				LOG_DEBUG("wScale: %f", wScale);
-				double hScaleParent = Height / (double)m_TextureFrame->Height;
-				double hScale = m_TextureFrame->Height / (double)t.Viewport.Height;
-				LOG_DEBUG("hScale: %f", hScale);
-				m_TargetRect.X = -t.Viewport.X * wScale * wScaleParent;
-				m_TargetRect.Y = -t.Viewport.Y * hScale * hScaleParent;
-				m_TargetRect.Width = m_TextureFrame->Width * wScale * wScaleParent;
-				m_TargetRect.Height = m_TextureFrame->Height * hScale * hScaleParent;
-
-				m_NextIndex++;
+			} else {
+				OnComplete();
 			}
 		}
 
@@ -82,16 +95,19 @@ public:
 		m_TextureFrame->Height = (int)easeSine(progress, m_StartRect.Height, (m_TargetRect.Height - m_StartRect.Height), 1.0);
 	}
 
-public:
-	int m_Playing = 0;
+	virtual void OnComplete() { }
+
+protected:
+	TextureFrame* m_TextureFrame = nullptr;
+
+private:
+	bool m_Playing = false;
 	double m_Time = 0;
 	int m_CurrentIndex = 0;
 	int m_NextIndex = 0;
 	std::vector<Transition> m_Timeline;
 	Rectangle m_StartRect;
 	Rectangle m_TargetRect;
-
-	TextureFrame* m_TextureFrame = nullptr;
 
 	double easeSine(double t, double b, double c, double d) 
 	{
