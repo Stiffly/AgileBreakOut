@@ -39,20 +39,20 @@ enum Type
 
             bool Calculate = false;
             float GravityScale = 0.f;
+			float Density = 10.f;
 
 
             CollisionLayer::Type Category = CollisionLayer::Type::Other;
-	CollisionLayer::Type Mask =	static_cast<CollisionLayer::Type>(
-		CollisionLayer::Pad
-		| CollisionLayer::Ball
-		| CollisionLayer::Brick
-		| CollisionLayer::Water
-		| CollisionLayer::PowerUp
-		| CollisionLayer::Wall
-		| CollisionLayer::Other
-	);
-        };
-
+			CollisionLayer::Type Mask =	static_cast<CollisionLayer::Type>(
+				CollisionLayer::Pad
+				| CollisionLayer::Ball
+				| CollisionLayer::Brick
+				| CollisionLayer::Water
+				| CollisionLayer::PowerUp
+				| CollisionLayer::Wall
+				| CollisionLayer::Other
+		);
+   };
 }
 }
 

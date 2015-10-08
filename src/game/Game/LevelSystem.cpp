@@ -27,7 +27,7 @@ void dd::Systems::LevelSystem::Initialize()
     cRec->Dimensions = glm::vec2(0.9f, 0.35f);
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(m_BrickTemplate);
     std::shared_ptr<Components::Template> cTemplate = m_World->AddComponent<Components::Template>(m_BrickTemplate);
-    cPhys->CollisionType = CollisionType::Type::Dynamic;
+    cPhys->CollisionType = CollisionType::Type::Static;
     cPhys->GravityScale = 0.f;
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = CollisionLayer::Type::Ball;
