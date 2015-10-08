@@ -70,6 +70,11 @@ file(GLOB SOURCE_FILES_Game
     "Game/*.cpp"
 )
 source_group(Game FILES ${SOURCE_FILES_Game})
+file(GLOB SOURCE_FILES_Game_GUI
+    "${INCLUDE_PATH}/Game/GUI/*.h"
+    "Game/GUI/*.cpp"
+)
+source_group(Game\\GUI FILES ${SOURCE_FILES_Game_GUI})
 
 file(GLOB SOURCE_FILES_Sound
     "${INCLUDE_PATH}/Sound/*.h"
@@ -91,8 +96,10 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Physics}
     ${SOURCE_FILES_Game}
+    ${SOURCE_FILES_Game_GUI}
     ${SOURCE_FILES_Sound}
-    ${SOURCE_FILES_GUI})
+    ${SOURCE_FILES_GUI}
+)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")

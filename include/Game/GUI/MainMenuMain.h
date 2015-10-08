@@ -4,7 +4,7 @@
 #include "GUI/TextureFrame.h"
 #include "GUI/Button.h"
 #include "Game/EGameStart.h"
-#include "Game/HUD.h"
+#include "Game/GUI/HUD.h"
 
 namespace dd
 {

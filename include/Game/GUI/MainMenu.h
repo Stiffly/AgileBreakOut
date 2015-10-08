@@ -2,8 +2,8 @@
 #define GUI_MAINMENU_H__
 
 #include "GUI/TextureFrame.h"
-#include "Game/MainMenuMain.h"
-#include "Game/MainMenuOptions.h"
+#include "Game/GUI/MainMenuMain.h"
+#include "Game/GUI/MainMenuOptions.h"
 #include "Core/EKeyUp.h"
 
 namespace dd
