@@ -50,7 +50,6 @@ void dd::Systems::LifebuoySystem::Update(double dt)
 		if (transformComponent->Position.y < m_DownEdge) {
 			m_World->RemoveEntity(it->Entity);
 			m_LifeBuoys.erase(it++);
-			LOG_INFO("Removed buoy");
 		}
 		else {
 			
@@ -65,7 +64,6 @@ void dd::Systems::LifebuoySystem::Update(double dt)
 
 				auto modelComponent = m_World->GetComponent<Components::Model>(it->Entity);
 				modelComponent->Color = glm::vec4(0.5f, 0.5f, 0.5f, 0.f);
-				LOG_INFO("Buoy is sinking");
 			}
 			++it;
 		}

@@ -63,8 +63,7 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 		if (ball->Sticky) {
 			auto transform = m_World->GetComponent<Components::Transform>(entity);
 			transform->Position = Transform()->Position;
-			transform->Position -= ball->StickyPlacement;
-			transform->Orientation = glm::quat();
+			transform->Position += ball->StickyPlacement;
 		}
 	}
 }
@@ -170,6 +169,7 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_SPACE) {
         Events::ActionButton e;
+		e.Position = Transform()->Position;
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_D) {
         return false;

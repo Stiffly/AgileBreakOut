@@ -30,7 +30,7 @@ void dd::Systems::LevelSystem::Initialize()
     cPhys->CollisionType = CollisionType::Type::Static;
     cPhys->GravityScale = 0.f;
     cPhys->Category = CollisionLayer::Type::Brick;
-	cPhys->Mask = static_cast<CollisionLayer::Type> (CollisionLayer::Type::Ball | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
+    cPhys->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Ball | CollisionLayer::Type::Projectile | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
     transform->Sticky = false;
 
     model->ModelFile = "Models/Brick/WhiteBrick.obj";
@@ -89,6 +89,9 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 				EventBroker->Publish(e);
 			} else if (brick->Type == StickyBrick) {
 				Events::StickyPad e;
+				EventBroker->Publish(e);
+			} else if (brick->Type == InkBlasterBrick) {
+				Events::InkBlaster e;
 				EventBroker->Publish(e);
 			}
             m_LooseBricks--;
@@ -203,6 +206,10 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
 		cBrick->Type = StickyBrick;
 		auto model = m_World->GetComponent<Components::Model>(brick);
 		model->ModelFile = "Models/Brick/StickyBrick.obj";
+	} else if (typeInt == InkBlasterBrick) {
+		cBrick->Type = InkBlasterBrick;
+		auto model = m_World->GetComponent<Components::Model>(brick);
+		model->Color = glm::vec4(0.1f, 0.1f, 0.1f, .0f);
 	}
     float x = line * spacesBetweenBricks.x;
     float y = row * spacesBetweenBricks.y;
@@ -218,8 +225,10 @@ void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
 
 bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 {
+	LOG_DEBUG("Collision happened!");
     EntityID entityBrick;
     EntityID entityBall;
+	EntityID entityShot = 0;
     auto ball = m_World->GetComponent<Components::Ball>(event.Entity2);
     auto brick = m_World->GetComponent<Components::Brick>(event.Entity1);
     if (brick != nullptr) {
@@ -239,7 +248,19 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         if (ball != nullptr) {
             entityBall = event.Entity1;
         } else {
-            return false;
+			auto shot = m_World->GetComponent<Components::Projectile>(event.Entity1);
+			if (shot != nullptr) {
+				LOG_DEBUG("Entity1 is a shot!");
+				entityShot = event.Entity1;
+			} else {
+				shot = m_World->GetComponent<Components::Projectile>(event.Entity2);
+				if (shot != nullptr) {
+					LOG_DEBUG("Entity2 is a shot!");
+					entityShot = event.Entity2;
+				} else {
+					return false;
+				}
+			}
         }
     }
 
@@ -248,13 +269,37 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         return false;
     }
 
-    /*auto power = m_World->GetComponent<Components::PowerUpBrick>(entityBrick);
-    if (power != nullptr && NumberOfBricks() > 1) {
-        Events::CreatePowerUp e;
-        auto transform = m_World->GetComponent<Components::Transform>(entityBrick);
-        e.Position = transform->Position;
-        EventBroker->Publish(e);
-    }*/
+	if (entityShot != 0) {
+		// For when a brick gets shot.
+		brick->Removed = true;
+
+		auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
+		physicsComponent->CollisionType = CollisionType::Type::Dynamic;
+		physicsComponent->GravityScale = 1.f;
+		physicsComponent->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Water | CollisionLayer::Wall);
+
+		auto transformComponentBrick = m_World->GetComponent<Components::Transform>(entityBrick);
+		auto transformComponentShot = m_World->GetComponent<Components::Transform>(entityShot);
+
+		Events::SetImpulse e;
+		e.Entity = entityBrick;
+
+		glm::vec2 point = glm::vec2(transformComponentBrick->Position.x + ((transformComponentShot->Position.x - transformComponentBrick->Position.x) / 4),
+			transformComponentBrick->Position.y + ((transformComponentShot->Position.y - transformComponentBrick->Position.y) / 4));
+
+		e.Impulse = glm::normalize(point)*5.f;
+		e.Point = point;
+		EventBroker->Publish(e);
+
+
+		SetNumberOfBricks(NumberOfBricks() - 1);
+		Events::ScoreEvent es;
+		es.Score = brick->Score;
+		EventBroker->Publish(es);
+
+		m_World->RemoveEntity(entityShot);
+		return true;
+	}
 
     if (!Restarting() && !brick->Removed) {
         brick->Removed = true;
@@ -268,6 +313,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         auto ballTransform = m_World->GetComponent<Components::Transform>(entityBall);
 
         auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
+		physicsComponent->CollisionType = CollisionType::Type::Dynamic;
         physicsComponent->GravityScale = 1.f;
         physicsComponent->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Water | CollisionLayer::Wall);
 
@@ -381,6 +427,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
     // 2 is multiball brick.
 	// 3 is lifebuoy brick.
 	// 4 is sticky brick.
+	// 5 is ink blaster brick.
     if (m_CurrentCluster == 0) {
         if (m_CurrentLevel == 1) {
             level =
@@ -431,7 +478,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 1, 1, 1, 1, 1, 1,
                      1, 2, 1, 2, 1, 2, 1,
                      1, 1, 0, 1, 0, 1, 1,
-                     4, 0, 0, 3, 0, 0, 1};
+                     4, 0, 0, 3, 0, 0, 5};
         } else if (m_CurrentLevel == 2) {
             level =
                     {1, 0, 0, 0, 0, 0, 1,
