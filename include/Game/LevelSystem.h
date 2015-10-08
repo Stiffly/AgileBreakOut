@@ -44,6 +44,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "Physics/ECreateParticleSequence.h"
+
 namespace dd
 {
 
@@ -72,7 +74,7 @@ public:
 
     void CreateBasicLevel(int, int, glm::vec2, float);
     void CreateLevel(int);
-    void CreateBrick(int, int, glm::vec2, float, int, int, int);
+    void CreateBrick(int, int, glm::vec2, float, int, int, int, glm::vec4);
 
     void OnEntityRemoved(EntityID entity);
 
@@ -135,6 +137,7 @@ private:
     EntityID m_BrickTemplate;
 
     std::array<int, 42> m_Bricks;
+	std::array<glm::vec4, 42> m_Colors;
 
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::ScoreEvent> m_EScoreEvent;

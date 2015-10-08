@@ -23,6 +23,7 @@
 #include "Game/EMultiBallLost.h"
 #include "Game/EStickyPad.h"
 #include "Game/EInkBlaster.h"
+#include "Game/EInkBlasterOver.h"
 #include "Game/EGameOver.h"
 #include "Game/EPause.h"
 #include "Game/EHitPad.h"
@@ -97,6 +98,8 @@ private:
     bool m_Waiting = true;
 	bool m_Sticky = false;
 	bool m_InkBlaster = false;
+	bool m_InkAttached = false;
+	bool m_BlockedWaiting = false;
 	int m_StickyCounter = 5;
 
     glm::vec3 m_SavedSpeed;
@@ -113,6 +116,7 @@ private:
     dd::EventRelay<BallSystem, dd::Events::MultiBall> m_EMultiBall;
 	dd::EventRelay<BallSystem, dd::Events::StickyPad> m_EStickyPad;
 	dd::EventRelay<BallSystem, dd::Events::InkBlaster> m_EInkBlaster;
+	dd::EventRelay<BallSystem, dd::Events::InkBlasterOver> m_EInkBlasterOver;
     dd::EventRelay<BallSystem, dd::Events::Pause> m_EPause;
     dd::EventRelay<BallSystem, dd::Events::Contact> m_Contact;
     dd::EventRelay<BallSystem, dd::Events::ActionButton> m_EActionButton;
@@ -124,6 +128,7 @@ private:
     bool OnMultiBall(const dd::Events::MultiBall &event);
 	bool OnStickyPad(const dd::Events::StickyPad &event);
 	bool OnInkBlaster(const dd::Events::InkBlaster &event);
+	bool OnInkBlasterOver(const dd::Events::InkBlasterOver &event);
     bool OnPause(const dd::Events::Pause &event);
     bool OnActionButton(const dd::Events::ActionButton &event);
 };

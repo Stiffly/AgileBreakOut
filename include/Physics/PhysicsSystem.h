@@ -37,6 +37,7 @@
 #include "Game/CBall.h"
 
 #include "Rendering/CSprite.h"
+#include "Rendering/CModel.h"
 
 
 namespace dd
@@ -113,6 +114,8 @@ namespace dd
             bool OnPause(const dd::Events::Pause &event);
 			dd::EventRelay<PhysicsSystem, dd::Events::StageCleared> m_EStageCleared;
 			bool OnStageCleared(const dd::Events::StageCleared &event);
+			dd::EventRelay<PhysicsSystem, dd::Events::Contact> m_EContact;
+			bool OnContact(const dd::Events::Contact &event);
 			bool m_Travelling = false;
 			float m_DistanceTravelled = 0;
 
@@ -173,7 +176,7 @@ namespace dd
         {
             return false;
         }
-
+		
     };
 
 
@@ -196,7 +199,7 @@ namespace dd
         };
 
         DestructionListener* m_DestructionListener;
-        ParticleContactDisabler m_ParticleContactDisabler;
+        ParticleContactDisabler* m_ParticleContactDisabler;
         ContactListener* m_ContactListener;
         };
 
