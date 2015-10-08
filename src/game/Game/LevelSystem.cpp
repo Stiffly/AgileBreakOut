@@ -657,14 +657,14 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 4, 1, 1, 1, 3, 1,
                      0, 1, 0, 1, 0, 1, 0,
                      0, 1, 0, 1, 0, 1, 0,
-                     1, 5, 1, 1, 1, 2, 1,
+                     1, 5, 1, 6, 1, 2, 1,
                      0, 1, 0, 0, 0, 1, 0};
 			color = 
 					{w, p3, w, w, w, r, w,
 					 p2, w, p1, g, w, w, w,
 					 w, p4, w, g, w, r, w,
 					 w, br, w, g, w, lb1, w,
-					 y, w, y, g, b, w, b,
+					 y, w, y, d, b, w, b,
 					 w, br, w, w, w, lb1, w};
         }
     } else if (m_CurrentCluster == 3) {
