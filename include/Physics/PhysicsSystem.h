@@ -104,7 +104,7 @@ namespace dd
 			dd::EventRelay<PhysicsSystem, dd::Events::StageCleared> m_EStageCleared;
 			bool OnStageCleared(const dd::Events::StageCleared &event);
 			bool m_Travelling = false;
-			float m_Timer = 0;
+			float m_DistanceTravelled = 0;
 
             //TODO: Fill struct with info needed.
             struct ParticleEmitter

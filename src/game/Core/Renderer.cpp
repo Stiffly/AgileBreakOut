@@ -59,7 +59,7 @@ void dd::Renderer::Initialize()
 	}
 
 	// Create default camera
-	m_DefaultCamera = std::unique_ptr<dd::Camera>(new dd::Camera((float)m_Resolution.Width / m_Resolution.Height, 45.f, 0.01f, 5000.f));
+	m_DefaultCamera = std::unique_ptr<dd::Camera>(new dd::Camera((float)m_Resolution.Width / m_Resolution.Height, /*45.f*/ 45.f, 0.01f, 5000.f));
 	m_DefaultCamera->SetPosition(glm::vec3(0, 0, 0));
 	if (m_Camera == nullptr) {
 		m_Camera = m_DefaultCamera.get();

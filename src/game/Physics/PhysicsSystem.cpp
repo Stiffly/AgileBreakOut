@@ -147,11 +147,12 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 	}
 
 	if (m_Travelling) {
-		m_Timer += dt;
-		if (m_Timer >= 2) {
-			m_Timer = 0;
+		if (m_DistanceTravelled > 12.f) {
+			m_DistanceTravelled = 0;
 			m_Travelling = false;
 		}
+
+		m_DistanceTravelled += 6.0f * dt;
 	}
     m_Accumulator += dt;
 
@@ -209,10 +210,6 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 				return;
 			}
 			transform->Position.y -= 6.0f * dt;
-			/*auto brick = m_World->GetComponent<Components::Brick>(entity);
-			if (brick != nullptr) {
-				
-			}*/
 		}
 	}
 }

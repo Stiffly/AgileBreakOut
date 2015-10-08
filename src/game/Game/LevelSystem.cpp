@@ -77,12 +77,17 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     if (brick != nullptr) {
         auto transform = m_World->GetComponent<Components::Transform>(entity);
         //Removes bricks that falls out of the stage.
-        if (transform->Position.y < -10) {
-            if (brick->Type == MultiBallBrick) {
+		if (transform->Position.y < -10) {
+			if (brick->Type == StandardBrick) {
+			} else if (brick->Type == MultiBallBrick) {
                 Events::MultiBall e;
                 e.padTransform = transform;
                 EventBroker->Publish(e);
-            }
+			} else if (brick->Type == LifebuoyBrick) {
+				Events::Lifebuoy e;
+				e.Transform = transform;
+				EventBroker->Publish(e);
+			}
             m_LooseBricks--;
             m_World->RemoveEntity(entity);
         }
@@ -185,10 +190,11 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     if (typeInt == StandardBrick) {
     } else if (typeInt == MultiBallBrick) {
         cBrick->Type = MultiBallBrick;
-        std::shared_ptr<Components::PowerUpBrick> cPow = m_World->AddComponent<Components::PowerUpBrick>(brick);
         auto model = m_World->GetComponent<Components::Model>(brick);
         model->ModelFile = "Models/Brick/IceBrick.obj";
-    }
+	} else if (typeInt == LifebuoyBrick) {
+		cBrick->Type = LifebuoyBrick;
+	}
     float x = line * spacesBetweenBricks.x;
     float y = row * spacesBetweenBricks.y;
     transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y + aboveLevel, -10.f);
