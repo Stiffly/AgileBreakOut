@@ -65,8 +65,8 @@
 
 #include "GUI/Frame.h"
 #include "GUI/Button.h"
-#include "Game/MainMenu.h"
-#include "Game/HUD.h"
+#include "Game/GUI/MainMenu.h"
+#include "Game/GUI/HUD.h"
 
 namespace dd
 {

@@ -215,6 +215,10 @@ private:
 	EventRelay<Frame, Events::KeyDown> m_EKeyDown;
 	bool OnKeyDown(const Events::KeyDown& event)
 	{
+		if (Hidden()) {
+			return;
+		}
+
 		if (event.KeyCode == GLFW_KEY_SPACE) {
 			m_LoadingFrame->CancelPreload();
 			Events::GameStart e;
