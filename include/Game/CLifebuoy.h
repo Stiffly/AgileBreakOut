@@ -15,7 +15,7 @@ namespace Components
 
 struct Lifebuoy : Component
 {
-
+	int Hits = 4;
 };
 
 }

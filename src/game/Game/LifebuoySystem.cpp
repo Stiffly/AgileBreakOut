@@ -12,6 +12,7 @@ void dd::Systems::LifebuoySystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &LifebuoySystem::OnContact);
 	EVENT_SUBSCRIBE_MEMBER(m_EPause, &LifebuoySystem::OnPause);
 	EVENT_SUBSCRIBE_MEMBER(m_ELifebuoy, &LifebuoySystem::OnLifebuoy);
+	EVENT_SUBSCRIBE_MEMBER(m_ELifebuoyHit, &LifebuoySystem::OnLifebuoyHit);
 
 	//Lifebuoy
 	{
@@ -30,7 +31,7 @@ void dd::Systems::LifebuoySystem::Initialize()
 		physics->GravityScale = 1;
 		ctransform->Sticky = true;
 		auto cModel = m_World->AddComponent<Components::Model>(ent);
-		cModel->ModelFile = "Models/Lifebuoy/Lifebuoy.obj";
+		cModel->ModelFile = "Models/Lifebuoy/Lifebuoy1.obj";
 		auto lifebuoy = m_World->AddComponent<Components::Lifebuoy>(ent);
 
 		m_World->CommitEntity(ent);
@@ -44,8 +45,9 @@ void dd::Systems::LifebuoySystem::Initialize()
 void dd::Systems::LifebuoySystem::Update(double dt)
 {
 	for (auto it = m_Lifebuoys.begin(); it != m_Lifebuoys.end();) {
-		it->TimeToLive -= dt;
+		
 		auto transformComponent = m_World->GetComponent<Components::Transform>(it->Entity);
+		auto lifebuoyComponent = m_World->GetComponent<Components::Lifebuoy>(it->Entity);
 
 		if (transformComponent->Position.y < m_DownEdge) {
 			m_World->RemoveEntity(it->Entity);
@@ -57,14 +59,20 @@ void dd::Systems::LifebuoySystem::Update(double dt)
 				transformComponent->Position = glm::vec3(m_LeftEdge + 0.1f, transformComponent->Position.y, transformComponent->Position.z);
 			} else if (transformComponent->Position.x < m_LeftEdge) {
 				transformComponent->Position = glm::vec3(m_RightEdge - 0.1f, transformComponent->Position.y, transformComponent->Position.z);
-			} else if (it->TimeToLive < 0.f) {
+			}
+			
+			if (lifebuoyComponent->Hits <= 0) {
 				auto physicsComponent = m_World->GetComponent<Components::Physics>(it->Entity);
 				physicsComponent->Mask = CollisionLayer::Type::LifeBuoy;
 				physicsComponent->GravityScale = 10.f;
-
 				auto modelComponent = m_World->GetComponent<Components::Model>(it->Entity);
 				modelComponent->Color = glm::vec4(0.5f, 0.5f, 0.5f, 0.f);
 			}
+
+			if (transformComponent->Position.y < m_DownLimit && lifebuoyComponent->Hits > 0) {
+				transformComponent->Position.y = m_DownLimit;
+			}
+
 			++it;
 		}
 	}
@@ -114,5 +122,14 @@ bool dd::Systems::LifebuoySystem::OnLifebuoy(const dd::Events::Lifebuoy &event)
 	info.Entity = ent;
 	m_Lifebuoys.push_back(info);
 	
+	return true;
+}
+
+bool dd::Systems::LifebuoySystem::OnLifebuoyHit(const dd::Events::LifebuoyHit &event)
+{
+	auto lifebuoyComponent = m_World->GetComponent<Components::Lifebuoy>(event.Lifebuoy);
+	lifebuoyComponent->Hits -= 1;
+	auto modelComponent = m_World->GetComponent<Components::Model>(event.Lifebuoy);
+	modelComponent->ModelFile = "Models/Lifebuoy/Lifebuoy" + std::to_string(5 - lifebuoyComponent->Hits) + ".obj";
 	return true;
 }

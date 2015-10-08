@@ -30,6 +30,7 @@
 #include "Game/EHitLag.h"
 #include "Game/EActionButton.h"
 #include "Game/CLifebuoy.h"
+#include "Game/ELifebuoyHit.h"
 
 namespace dd
 {

@@ -63,11 +63,17 @@ void dd::Systems::BallSystem::Initialize()
 
 void dd::Systems::BallSystem::Update(double dt)
 {
-    if (Lives() < 0)
+    if (Lives() == 0)
     {
-        SetLives(3);
         Events::GameOver e;
         EventBroker->Publish(e);
+
+		Events::Pause p;
+		p.Type = "All";
+		EventBroker->Publish(p);
+
+		//TODO: Make this not so ugly
+		SetLives(-1);
     }
     ResolveContacts();
 }
@@ -305,7 +311,9 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 	}	// Lifebuoy should always reflect the ball upwards
 	else if (m_World->GetProperty<std::string>(otherEntitiy, "Name") == "Lifebuoy"){
 		ballTransform->Velocity = glm::vec3(ballTransform->Velocity.x,  abs(ballTransform->Velocity.y), ballTransform->Velocity.z);
-
+		Events::LifebuoyHit e;
+		e.Lifebuoy = otherEntitiy;
+		EventBroker->Publish(e);
 	} else {
         auto it = m_Contacts.find(ballEntity);
         if (it == m_Contacts.end()) {
