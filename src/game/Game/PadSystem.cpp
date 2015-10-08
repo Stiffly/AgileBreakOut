@@ -57,6 +57,16 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 {
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
+
+	auto ball = m_World->GetComponent<Components::Ball>(entity);
+	if (ball != nullptr) {
+		if (ball->Sticky) {
+			auto transform = m_World->GetComponent<Components::Transform>(entity);
+			transform->Position = Transform()->Position;
+			transform->Position -= ball->StickyPlacement;
+			transform->Orientation = glm::quat();
+		}
+	}
 }
 
 void dd::Systems::PadSystem::Update(double dt)
