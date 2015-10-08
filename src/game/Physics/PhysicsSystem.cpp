@@ -713,7 +713,7 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 	e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -10);
 	e.Radius = 0.2f;
 	e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
-	e.Color = model->Color + glm::vec4(1);
+	e.Color = model->Color + glm::vec4(0.5f);
 	e.Speed = 100;
 	EventBroker->Publish(e);
 	return true;

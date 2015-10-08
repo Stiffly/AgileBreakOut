@@ -150,7 +150,7 @@ void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 s
     for (int i = 0; i < rows; i++) {
         num--;
         for (int j = 0; j < Lines(); j++) {
-            CreateBrick(i, j, spacesBetweenBricks, spaceToEdge, 0, num, 1);
+            CreateBrick(i, j, spacesBetweenBricks, spaceToEdge, 0, num, 1, glm::vec4(0, 0, 0, 0));
         }
         if (num == 1)
             num = Lines();
@@ -171,7 +171,7 @@ void dd::Systems::LevelSystem::CreateLevel(int aboveBasicLevel)
     for (int i = 0; i < Rows(); i++) {
         num--;
         for (int j = 0; j < Lines(); j++) {
-            CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), aboveBasicLevel, num, m_Bricks[getter]);
+            CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), aboveBasicLevel, num, m_Bricks[getter], m_Colors[getter]);
             getter++;
         }
         if (num == 1) {
@@ -182,7 +182,7 @@ void dd::Systems::LevelSystem::CreateLevel(int aboveBasicLevel)
     SetRestarting(false);
 }
 
-void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBetweenBricks, float spaceToEdge, int aboveLevel, int num, int typeInt)
+void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBetweenBricks, float spaceToEdge, int aboveLevel, int num, int typeInt, glm::vec4 colorVec)
 {
     if (typeInt == EmptyBrickSpace) {
         SetNumberOfBricks(NumberOfBricks() - 1);
@@ -192,25 +192,24 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     m_World->RemoveComponent<Components::Template>(brick);
     auto transform = m_World->GetComponent<Components::Transform>(brick);
     auto cBrick = m_World->GetComponent<Components::Brick>(brick);
+	auto model = m_World->GetComponent<Components::Model>(brick);
     if (typeInt == StandardBrick) {
+		model->Color = colorVec;
     } else if (typeInt == MultiBallBrick) {
         cBrick->Type = MultiBallBrick;
-        auto model = m_World->GetComponent<Components::Model>(brick);
         model->ModelFile = "Models/Brick/IceBrick.obj";
-		
 	} else if (typeInt == LifebuoyBrick) {
 		cBrick->Type = LifebuoyBrick;
-		auto model = m_World->GetComponent<Components::Model>(brick);
 		model->ModelFile = "Models/Brick/LifeBuoyBrick.obj";
 	} else if (typeInt == StickyBrick) {
 		cBrick->Type = StickyBrick;
-		auto model = m_World->GetComponent<Components::Model>(brick);
 		model->ModelFile = "Models/Brick/StickyBrick.obj";
 	} else if (typeInt == InkBlasterBrick) {
 		cBrick->Type = InkBlasterBrick;
-		auto model = m_World->GetComponent<Components::Model>(brick);
 		model->Color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 	}
+
+	
     float x = line * spacesBetweenBricks.x;
     float y = row * spacesBetweenBricks.y;
     transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y + aboveLevel, -10.f);
@@ -308,7 +307,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 		ep.Position = transformComponentBrick->Position;
 		ep.Radius = 0.05;
 		ep.SpriteFile = "Textures/Particles/FadeBall.png";
-		ep.Color = brickModel->Color + glm::vec4(1);
+		ep.Color = brickModel->Color + glm::vec4(0.3f);
 		ep.Speed = 50;
 		EventBroker->Publish(ep);
 
@@ -363,7 +362,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 		ep.Position = transformComponentBrick->Position;
 		ep.Radius = 0.05;
 		ep.SpriteFile = "Textures/Particles/FadeBall.png";
-		ep.Color = brickModel->Color + glm::vec4(1);
+		ep.Color = brickModel->Color + glm::vec4(0.3f);
 		ep.Speed = 50;
 		EventBroker->Publish(ep);
 
@@ -452,12 +451,50 @@ bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &ev
 void dd::Systems::LevelSystem::GetNextLevel()
 {
     std::array<int, 42> level;
-    // 0 is empty space.
+	std::array<glm::vec4, 42> color;
+    // Level array indicates type of brick.
+	// 0 is empty space.
     // 1 is standard brick.
     // 2 is multiball brick.
 	// 3 is lifebuoy brick.
 	// 4 is sticky brick.
 	// 5 is ink blaster brick.
+
+	// wolor array determines the color of standard bricks.
+	// w is white.
+	// r is red.
+	// g is green.
+	// b is blue.
+	// y is yellow.
+	// c is cyan.
+	// m is magenta.
+	// d is dark.
+	// Feel free to make your own.
+	glm::vec4 w = glm::vec4(1, 1, 1, 0);
+	glm::vec4 r = glm::vec4(1, 0, 0, 0);
+	glm::vec4 g = glm::vec4(0, 1, 0, 0);
+	glm::vec4 b = glm::vec4(0, 0, 1, 0);
+	glm::vec4 y = glm::vec4(1, 1, 0, 0);
+	glm::vec4 c = glm::vec4(0, 1, 1, 0);
+	glm::vec4 m = glm::vec4(1, 0, 1, 0);
+	glm::vec4 d = glm::vec4(0, 0, 0, 0);
+
+	//glm::vec4 p4 = glm::vec4(asd.f / 255.f, asd.f / 255.f, sad.f / 255.f, 1.f);
+	glm::vec4 br = glm::vec4(143.f / 255.f, 98.f / 255.f, 0.f / 255.f, 1.f);
+
+	glm::vec4 lb1 = glm::vec4(115.f / 255.f, 232.f / 255.f, 236.f / 255.f, 1.f);
+	glm::vec4 lb2 = glm::vec4(107.f / 255.f, 214.f / 255.f, 218.f / 255.f, 1.f);
+	glm::vec4 lb3 = glm::vec4(91.f / 255.f, 183.f / 255.f, 186.f / 255.f, 1.f);
+	glm::vec4 lb4 = glm::vec4(70.f / 255.f, 153.f / 255.f, 156.f / 255.f, 1.f);
+
+	glm::vec4 p1 = glm::vec4(255.f / 255.f, 184.f / 255.f, 254.f / 255.f, 1.f);
+	glm::vec4 p2 = glm::vec4(255.f / 255.f, 81.f / 255.f, 253.f / 255.f, 1.f);
+	glm::vec4 p3 = glm::vec4(189.f / 255.f, 0.f / 255.f, 187.f / 255.f, 1.f);
+	glm::vec4 p4 = glm::vec4(125.f / 255.f, 0.f / 255.f, 147.f / 255.f, 1.f);
+
+
+
+
     if (m_CurrentCluster == 0) {
         if (m_CurrentLevel == 1) {
             level =
@@ -467,6 +504,13 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0};
+			color = 
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
         } else if (m_CurrentLevel == 2) {
             level =
                     {1, 0, 0, 0, 0, 0, 0,
@@ -475,6 +519,13 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0};
+			color = 
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
         } else if (m_CurrentLevel == 3) {
             level =
                     {0, 0, 0, 0, 0, 0, 1,
@@ -483,6 +534,13 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0};
+			color = 
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
         } else if (m_CurrentLevel == 4) {
             level =
                     {0, 0, 0, 0, 0, 0, 0,
@@ -491,6 +549,13 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      1, 0, 0, 0, 0, 0, 0};
+			color = 
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
         } else if (m_CurrentLevel == 5) {
             level =
                     {0, 0, 0, 0, 0, 0, 0,
@@ -499,6 +564,13 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 1};
+			color = 
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
         }
     } else if (m_CurrentCluster == 1) {
         if (m_CurrentLevel == 1) {
@@ -509,14 +581,28 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      0, 1, 0, 1, 0, 1, 0,
                      1, 0, 1, 0, 1, 0, 1,
                      0, 0, 0, 0, 0, 0, 0};
+			color = 
+					{w, w, w, w, w, w, w,
+					 lb4, lb4, lb4, lb4, lb4, lb4, lb4,
+					 lb3, lb3, lb3, lb3, lb3, lb3, lb3,
+					 lb2, lb2, lb2, lb2, lb2, lb2, lb2,
+					 lb1, lb1, lb1, lb1, lb1, lb1, lb1,
+					 w, w, w, w, w, w, w};
         } else if (m_CurrentLevel == 2) {
             level =
-                    {0, 0, 0, 0, 0, 0, 0,
+                    {0, 0, 1, 0, 1, 0, 0,
                      0, 1, 0, 1, 0, 1, 0,
                      0, 0, 1, 1, 1, 0, 0,
                      0, 0, 0, 3, 0, 0, 0,
                      1, 1, 1, 0, 1, 1, 1,
                      1, 0, 0, 0, 0, 0, 1};
+			color = 
+					{w, w, r, w, r, w, w,
+					 w, w, w, r, w, w, w,
+					 w, w, r, w, r, w, w,
+					 w, w, w, w, w, w, w,
+					 w, r, w, w, w, r, w,
+					 r, w, w, w, w, w, r};
         } else if (m_CurrentLevel == 3) {
             level =
                     {0, 0, 0, 1, 0, 0, 0,
@@ -525,7 +611,14 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 1, 1, 4, 1, 1, 1,
                      0, 0, 0, 1, 0, 0, 0,
                      0, 0, 1, 1, 1, 0, 0};
-        } else if (m_CurrentLevel == 4) {
+			color = 
+					{g, g, g, g, g, g, g,
+					 g, g, g, g, g, g, g,
+					 g, g, g, g, g, g, g,
+					 g, g, g, w, g, g, g,
+					 w, w, w, br, w, w, w,
+					 w, w, br, br, br, w, w};
+		} else if (m_CurrentLevel == 4) {
             level =
                     {0, 0, 1, 0, 1, 0, 0,
                      0, 1, 1, 1, 1, 1, 0,
@@ -533,20 +626,35 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      0, 1, 1, 1, 1, 1, 0,
                      0, 0, 1, 5, 1, 0, 0,
                      0, 0, 0, 1, 0, 0, 0};
+			color = 
+					{w, w, p1, w, p1, w, w,
+					 w, p2, p3, p2, p3, p2, w,
+					 p1, p2, p3, p4, p3, p2, p1,
+					 w, p1, p2, p3, p2, p1, w,
+					 w, w, p1, w, p1, w, w,
+					 w, w, w, p1, w, w, w};
         } else if (m_CurrentLevel == 5) {
             level =
                     {0, 1, 0, 0, 0, 1, 0,
                      1, 4, 1, 1, 1, 3, 1,
                      0, 1, 0, 1, 0, 1, 0,
                      0, 1, 0, 1, 0, 1, 0,
-                     1, 5, 1, 1, 1, 2 , 1,
+                     1, 5, 1, 1, 1, 2, 1,
                      0, 1, 0, 0, 0, 1, 0};
+			color = 
+					{w, p3, w, w, w, r, w,
+					 p2, w, p1, g, w, w, w,
+					 w, p4, w, g, w, r, w,
+					 w, br, w, g, w, lb1, w,
+					 y, w, y, g, b, w, b,
+					 w, br, w, w, w, lb1, w};
         }
     } else if (m_CurrentCluster == 3) {
 
     }
 
-    std::copy(std::begin(level), std::end(level), std::begin(m_Bricks));
+	std::copy(std::begin(level), std::end(level), std::begin(m_Bricks));
+    std::copy(std::begin(color), std::end(color), std::begin(m_Colors));
 }
 
 bool dd::Systems::LevelSystem::OnHitPad(const dd::Events::HitPad &event)
