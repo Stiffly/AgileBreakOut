@@ -2,6 +2,7 @@
 #define DAYDREAM_PHYSICSSYSTEM_H
 
 #include <unordered_map>
+#include <random>
 
 #include <Box2D/Box2D.h>
 
@@ -116,13 +117,13 @@ namespace dd
 			float m_Timer = 0;
 
             //TODO: Fill struct with info needed.
-        struct ParticleEmitter //TODO CHANGE NAMES
+        struct EmitterHandler //TODO CHANGE NAMES
         {
             std::vector<b2ParticleSystem*> ParticleSystem;
             std::vector<EntityID> ParticleEmitter;
             std::vector<EntityID> ParticleTemplate;
         };
-            ParticleEmitter m_ParticleEmitters;
+            EmitterHandler m_ParticleEmitters;
 
             std::list<Impulse> m_Impulses;
             
@@ -134,7 +135,7 @@ namespace dd
                 : m_PhysicsSystem(physicsSystem) { }
 
         void SayGoodbye(b2Joint*) {LOG_INFO("joint körs");};
-        void SayGoodbye(b2Fixture*) {LOG_INFO("Fixture körs");};
+        void SayGoodbye(b2Fixture*) {/*LOG_INFO("Fixture körs");*/};
 
         void SayGoodbye(b2ParticleSystem* particleSystem, int32 index) override
         {
