@@ -38,6 +38,12 @@ public:
 		m_Preloading = true;
 	}
 
+	void CancelPreload()
+	{
+		m_Preloading = false;
+		m_CurrentItem = 0;
+	}
+
 	void Update(double dt) override
 	{
 		if (m_Preloading) {
