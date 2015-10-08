@@ -30,6 +30,7 @@
 #include "Game/EMultiBallLost.h"
 #include "Game/EPause.h"
 #include "Game/EGameOver.h"
+#include "Game/EClusterClear.h"
 #include "Game/ECreatePowerUp.h"
 #include "Game/EPowerUpTaken.h"
 //#include "Game/Bricks/CPowerUpBrick.h"

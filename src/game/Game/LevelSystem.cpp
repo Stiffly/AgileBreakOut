@@ -414,7 +414,11 @@ bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &ev
         if (m_CurrentLevel < 6) {
             GetNextLevel();
             CreateLevel(12);
-        }
+		} else {
+			// Win
+			Events::ClusterClear e;
+			EventBroker->Publish(e);
+		}
     }
     return true;
 }
