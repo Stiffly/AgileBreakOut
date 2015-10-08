@@ -26,6 +26,7 @@
 #include "Game/CPowerUp.h"
 #include "Game/EResetBall.h"
 #include "Game/EMultiBall.h"
+#include "Game/EKrakenAttack.h"
 #include "Game/EPowerUpTaken.h"
 #include "Game/EStageCleared.h"
 #include "Game/EPause.h"
@@ -76,6 +77,10 @@ private:
     bool m_Right = false;
     bool m_ReplaceBall = false;
     bool m_MultiBall = false;
+	bool m_KrakenAttack = false;
+	double m_KrakenCharge = 0;
+	double m_KrakenStrength = 0;
+	double m_PlayerStrength = 0;
     float m_Edge = 2.8f;
     Components::Transform* m_Transform = nullptr;
     Components::Pad* m_Pad = nullptr;
@@ -88,6 +93,8 @@ private:
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContactPowerUp;
     dd::EventRelay<PadSystem, dd::Events::StageCleared> m_EStageCleared;
     dd::EventRelay<PadSystem, dd::Events::Pause> m_EPause;
+	dd::EventRelay<PadSystem, dd::Events::KrakenAttack> m_EKrakenAttack;
+	dd::EventRelay<PadSystem, dd::Events::ActionButton> m_EActionButton;
 
     bool OnKeyDown(const dd::Events::KeyDown &event);
     bool OnKeyUp(const dd::Events::KeyUp &event);
@@ -95,6 +102,8 @@ private:
     bool OnContactPowerUp(const dd::Events::Contact &event);
     bool OnStageCleared(const dd::Events::StageCleared &event);
     bool OnPause(const dd::Events::Pause &event);
+	bool OnKrakenAttack(const dd::Events::KrakenAttack &event);
+	bool OnActionButton(const dd::Events::ActionButton &event);
 
     class PadSteeringInputController;
     std::array<std::shared_ptr<PadSteeringInputController>, 4> m_PadInputControllers;
