@@ -43,6 +43,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "Physics/ECreateParticleSequence.h"
+
 namespace dd
 {
 

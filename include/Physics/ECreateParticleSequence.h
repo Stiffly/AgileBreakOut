@@ -22,9 +22,11 @@ struct CreateParticleSequence : public Event
     float Spread = 1.f;
     float EmittingAngle = 0.f;
     float MaxCount = 0;
+	glm::vec4 Color = glm::vec4(0);
+	EntityID parent = 0;
 
     //Particle
-    std::string SpriteFile = "Texures/Core/ErrorTexture.png";
+    std::string SpriteFile = "";
     double ParticleLifeTime = 3.f;
     ParticleFlags::Type Flags = static_cast<ParticleFlags::Type>(ParticleFlags::Powder | ParticleFlags::ParticleContactFilter | ParticleFlags::FixtureContactFilter);
     float Radius = 1.f;

@@ -201,6 +201,7 @@ public:
 		}
 
 		//Background
+		
 		{
 			auto background = m_World->CreateEntity();
 			auto transform = m_World->AddComponent<Components::Transform>(background);
