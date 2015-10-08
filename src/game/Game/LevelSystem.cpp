@@ -32,7 +32,7 @@ void dd::Systems::LevelSystem::Initialize()
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = CollisionLayer::Type::Ball;
 
-    model->ModelFile = "Models/Brick/TurquoiseBrick.obj";
+    model->ModelFile = "Models/Brick/WhiteBrick.obj";
     transform->Position = glm::vec3(50, 50, -10);
 
     //sound
