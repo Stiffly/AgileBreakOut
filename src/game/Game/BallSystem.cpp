@@ -19,6 +19,7 @@ void dd::Systems::BallSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &BallSystem::OnResetBall);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &BallSystem::OnMultiBall);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &BallSystem::OnStickyPad);
+	EVENT_SUBSCRIBE_MEMBER(m_EInkBlaster, &BallSystem::OnInkBlaster);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &BallSystem::OnPause);
     EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &BallSystem::OnActionButton);
 
@@ -43,9 +44,6 @@ void dd::Systems::BallSystem::Initialize()
         physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall);
         physics->Calculate = true;
         transform->Sticky = true;
-
-        //auto plight = m_World->AddComponent<Components::PointLight>(ent);
-        //plight->Radius = 2.f;
 
         m_World->CommitEntity(ent);
 
@@ -114,7 +112,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
             if (m_Waiting == false) {
                 ballComponent->Waiting = false;
                 auto transform = m_World->GetComponent<Components::Transform>(entity);
-                transform->Velocity = glm::normalize(glm::vec3(-0.5f, 1, 0.f)) * ballComponent->Speed;
+                transform->Velocity = glm::normalize(glm::vec3(0.5f, 1, 0.f)) * ballComponent->Speed;
 				if (ballComponent->Sticky) {
 					transform->Velocity = ballComponent->SavedSpeed;
 					m_StickyCounter--;
@@ -260,6 +258,8 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 		auto padTransform = m_World->GetComponent<Components::Transform>(otherEntitiy);
 
         Events::HitPad e;
+		e.Ball = ballEntity;
+		e.Pad = otherEntitiy;
         EventBroker->Publish(e);
        // Events::HitLag el;
        // el.Time = 0.1f;
@@ -272,12 +272,17 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 
 		ballComponent->Combo = 0;
 
-		if (m_Sticky) {
+		if (m_InkBlaster) {
+			m_InkBlaster = false;
+			ballComponent->Sticky = true;
+			ballComponent->StickyPlacement = glm::vec3(0, 0.5f, 0);
+			ballTransform->Velocity = glm::vec3(0.f, 0.f, 0.f);
+		} else if (m_Sticky) {
 			m_Sticky = false;
 			m_Waiting = true;
 			ballComponent->Sticky = true;
 			ballComponent->Waiting = true;
-			ballComponent->StickyPlacement = padTransform->Position - ballTransform->Position;
+			ballComponent->StickyPlacement = ballTransform->Position - padTransform->Position;
 			ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
 			ballTransform->Velocity *= -1;
 			return true;
@@ -301,13 +306,6 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
             normalList.push_back(event.Normal);
             m_Contacts[ballEntity] = normalList;
         }
-
-		auto brick = m_World->GetComponent<Components::Brick>(otherEntitiy);
-		if (brick != nullptr) {
-			auto physicsComponent = m_World->GetComponent<Components::Physics>(otherEntitiy);
-			physicsComponent->CollisionType = CollisionType::Type::Dynamic;
-
-		}
     }
 
     return true;
@@ -428,6 +426,12 @@ bool dd::Systems::BallSystem::OnStickyPad(const dd::Events::StickyPad &event)
 {
 	m_Sticky = true;
 	m_StickyCounter = 5;
+	return true;
+}
+
+bool dd::Systems::BallSystem::OnInkBlaster(const dd::Events::InkBlaster &event)
+{
+	m_InkBlaster = true;
 	return true;
 }
 

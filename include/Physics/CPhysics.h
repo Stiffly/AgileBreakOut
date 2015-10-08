@@ -9,13 +9,15 @@ namespace CollisionLayer
 {
 enum Type
 {
-    Pad = 1 << 0,
-    Ball = 1 << 1,
-    Brick = 1 << 2,
-    Water = 1 << 3,
-    PowerUp = 1 << 4,
-    Other = 1 << 5,
-    Wall = 1 << 6
+	Pad = 1 << 0,
+	Ball = 1 << 1,
+	Brick = 1 << 2,
+	Water = 1 << 3,
+	PowerUp = 1 << 4,
+	Other = 1 << 5,
+	Wall = 1 << 6,
+
+	Projectile = 1 << 8
 };
 }
 

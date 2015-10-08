@@ -44,10 +44,12 @@
 #include "Game/CBall.h"
 #include "Game/CPad.h"
 #include "Game/CLifebuoy.h"
+#include "Game/CProjectile.h"
 #include "Game/CBrick.h"
 #include "Game/BallSystem.h"
 #include "Game/HitLagSystem.h"
 #include "Game/LifebuoySystem.h"
+#include "Game/ProjectileSystem.h"
 #include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Physics/PhysicsSystem.h"
@@ -113,6 +115,7 @@ public:
 		m_World->ComponentFactory.Register<Components::Pad>();
 		m_World->ComponentFactory.Register<Components::Life>();
 		m_World->ComponentFactory.Register<Components::Lifebuoy>();
+		m_World->ComponentFactory.Register<Components::Projectile>();
 
 		m_World->ComponentFactory.Register<Components::PowerUp>();
 		m_World->ComponentFactory.Register<Components::PowerUpBrick>();
@@ -132,6 +135,9 @@ public:
 		m_World->SystemFactory.Register<Systems::LifebuoySystem>(
 			[this]() { return new Systems::LifebuoySystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LifebuoySystem>();
+		m_World->SystemFactory.Register<Systems::ProjectileSystem>(
+			[this]() { return new Systems::ProjectileSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::ProjectileSystem>();
 		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
 				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::PhysicsSystem>();
