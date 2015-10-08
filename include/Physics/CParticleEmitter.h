@@ -9,6 +9,7 @@ namespace Components
 
 struct ParticleEmitter : public Component
 {
+	EntityID Parent = 0;
     int NumberOfTicks = 10.f;
     float InitialSpeed = 1.f;
     double SpawnRate = 1;

@@ -23,6 +23,7 @@ struct CreateParticleSequence : public Event
     float EmittingAngle = 0.f;
     float MaxCount = 0;
 	glm::vec4 Color = glm::vec4(0);
+	EntityID parent = 0;
 
     //Particle
     std::string SpriteFile = "";
