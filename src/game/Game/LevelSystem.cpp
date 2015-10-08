@@ -430,6 +430,10 @@ bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &ev
 			// Win
 			Events::ClusterClear e;
 			EventBroker->Publish(e);
+
+			Events::Pause p;
+			p.Type = "All";
+			EventBroker->Publish(p);
 		}
     }
     return true;
