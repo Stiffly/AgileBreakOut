@@ -16,7 +16,7 @@ enum Type
 	PowerUp = 1 << 4,
 	Other = 1 << 5,
 	Wall = 1 << 6,
-
+	LifeBuoy = 1 << 7,
 	Projectile = 1 << 8
 };
 }
@@ -41,7 +41,7 @@ enum Type
 
             bool Calculate = false;
             float GravityScale = 0.f;
-			float Density = 10.f;
+			float Density = 20.f;
 
 
             CollisionLayer::Type Category = CollisionLayer::Type::Other;
@@ -52,6 +52,7 @@ enum Type
 				| CollisionLayer::Water
 				| CollisionLayer::PowerUp
 				| CollisionLayer::Wall
+				| CollisionLayer::LifeBuoy
 				| CollisionLayer::Other
 		);
    };

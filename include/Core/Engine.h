@@ -273,6 +273,8 @@ public:
 			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
 			physics->CollisionType = CollisionType::Type::Static;
+			physics->Category = CollisionLayer::Wall;
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy);
 			transform->Sticky = true;
 			m_World->CommitEntity(BottomWall);
 		}

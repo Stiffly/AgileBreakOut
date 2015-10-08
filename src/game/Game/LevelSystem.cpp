@@ -30,7 +30,7 @@ void dd::Systems::LevelSystem::Initialize()
     cPhys->CollisionType = CollisionType::Type::Static;
     cPhys->GravityScale = 0.f;
     cPhys->Category = CollisionLayer::Type::Brick;
-    cPhys->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Ball | CollisionLayer::Type::Projectile);
+    cPhys->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Ball | CollisionLayer::Type::Projectile | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
     transform->Sticky = false;
 
     model->ModelFile = "Models/Brick/WhiteBrick.obj";

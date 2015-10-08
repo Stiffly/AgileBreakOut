@@ -41,7 +41,7 @@ void dd::Systems::BallSystem::Initialize()
         std::shared_ptr<Components::Template> ballTemplate = m_World->AddComponent<Components::Template>(ent);
         physics->CollisionType = CollisionType::Type::Dynamic;
         physics->Category = CollisionLayer::Type::Ball;
-        physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall);
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
         physics->Calculate = true;
         transform->Sticky = true;
 
@@ -247,12 +247,12 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
     }
     else {
         return false;
-        //TODO: Add support for power-up collisions
     }
 
-
+	
     auto ballTransform = m_World->GetComponent<Components::Transform>(ballEntity);
     glm::vec2 ballVelocity = glm::vec2(ballTransform->Velocity.x, ballTransform->Velocity.y);
+
 
     if (m_World->GetProperty<std::string>(otherEntitiy, "Name") == "Pad") {
 		auto padTransform = m_World->GetComponent<Components::Transform>(otherEntitiy);
@@ -294,8 +294,11 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         ec.Ball = ballEntity;
         EventBroker->Publish(ec);
         //std::cout << "Combo: " << ballComponent->Combo << std::endl;
-    }
-    else {
+	}	// Lifebuoy should always reflect the ball upwards
+	else if (m_World->GetProperty<std::string>(otherEntitiy, "Name") == "Lifebuoy"){
+		ballTransform->Velocity = glm::vec3(ballTransform->Velocity.x,  abs(ballTransform->Velocity.y), ballTransform->Velocity.z);
+
+	} else {
         auto it = m_Contacts.find(ballEntity);
         if (it == m_Contacts.end()) {
             std::list<glm::vec2> normalList;
@@ -316,20 +319,13 @@ void dd::Systems::BallSystem::ResolveContacts()
 {
 
     for (auto c : m_Contacts) {
-        int count = 0;
         EntityID entity = c.first;
         std::list<glm::vec2> contactNormals = c.second;
         glm::vec2 finalNormal = glm::vec2(0.f);
         for (auto it = contactNormals.begin(); it != contactNormals.end(); it++) {
             finalNormal = finalNormal + (*it);
-            count++;
         }
         finalNormal = glm::normalize(finalNormal);
-
-        if (count > 1) {
-            LOG_INFO("MultiCollision %i", count);
-        }
-
         auto transform = m_World->GetComponent<Components::Transform>(entity);
         glm::vec2 velocity = glm::vec2(transform->Velocity.x, transform->Velocity.y);
         glm::vec2 reflectedVelocity = glm::reflect(velocity, finalNormal);
