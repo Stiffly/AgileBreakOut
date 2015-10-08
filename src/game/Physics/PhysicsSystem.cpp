@@ -283,9 +283,11 @@ void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
 }
 
 
-bool dd::Systems::PhysicsSystem::OnStageCleared(const dd::Events::StageCleared &event) 
+bool dd::Systems::PhysicsSystem::OnStageCleared(const dd::Events::StageCleared &event)
 {
-	m_Travelling = true;
+	if (event.ClearedStage < 5) {
+		m_Travelling = true;
+	}
 	return true;
 }
 

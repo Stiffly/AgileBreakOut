@@ -385,7 +385,7 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
     ball1->Waiting = false;
     ball2->Waiting = false;
     auto padTransform = event.padTransform;
-    float x1 = padTransform->Position.x - 2, x2 = padTransform->Position.x + 2;
+    float x1 = padTransform->Position.x/* - 2*/, x2 = padTransform->Position.x/* + 2*/;
     if (x1 < -m_EdgeX) {
         x1 = m_EdgeX - 0.2;
     }
