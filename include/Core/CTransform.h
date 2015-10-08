@@ -41,6 +41,9 @@ struct Transform : public Component
 	glm::vec3 Velocity;
 	/** Physical scale multiplier. */
 	glm::vec3 Scale;
+
+	// Sticky is if it sticks with the player or not. True means it will follow the camera.
+	bool Sticky;
 };
 
 }

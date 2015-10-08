@@ -22,13 +22,14 @@
 #include "Game/EScoreEvent.h"
 #include "Game/EComboEvent.h"
 #include "Game/EHitPad.h"
+#include "Game/ELifebuoy.h"
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
 #include "Game/EPause.h"
 #include "Game/EGameOver.h"
 #include "Game/ECreatePowerUp.h"
 #include "Game/EPowerUpTaken.h"
-#include "Game/Bricks/CPowerUpBrick.h"
+//#include "Game/Bricks/CPowerUpBrick.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/CRectangleShape.h"
@@ -66,8 +67,8 @@ public:
     void Initialize() override;
 
     void CreateBasicLevel(int, int, glm::vec2, float);
-    void CreateLevel();
-    void CreateBrick(int, int, glm::vec2, float, int, int);
+    void CreateLevel(int);
+    void CreateBrick(int, int, glm::vec2, float, int, int, int);
 
     void OnEntityRemoved(EntityID entity);
 
@@ -123,6 +124,7 @@ private:
     const int EmptyBrickSpace = 0;
     const int StandardBrick = 1;
     const int MultiBallBrick = 2;
+	const int LifebuoyBrick = 3;
 
     EntityID m_BrickTemplate;
 

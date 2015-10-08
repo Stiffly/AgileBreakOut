@@ -19,6 +19,7 @@ void dd::Systems::BallSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &BallSystem::OnResetBall);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &BallSystem::OnMultiBall);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &BallSystem::OnPause);
+    EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &BallSystem::OnActionButton);
 
     //OctoBall
     {
@@ -33,12 +34,14 @@ void dd::Systems::BallSystem::Initialize()
         circleShape->Radius = 0.4f;
         std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
         ball->Speed = 5.f;
+        ball->Waiting = true;
         std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(ent);
         std::shared_ptr<Components::Template> ballTemplate = m_World->AddComponent<Components::Template>(ent);
-    physics->CollisionType = CollisionType::Type::Dynamic;
+        physics->CollisionType = CollisionType::Type::Dynamic;
         physics->Category = CollisionLayer::Type::Ball;
         physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall);
         physics->Calculate = true;
+        transform->Sticky = true;
 
         //auto plight = m_World->AddComponent<Components::PointLight>(ent);
         //plight->Radius = 2.f;
@@ -100,12 +103,23 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
     if (templateCheck != nullptr){ return; }
 
     if (ballComponent != nullptr) {
+        if (ballComponent->Waiting) {
+            if (m_Waiting == false) {
+                ballComponent->Waiting = false;
+                auto transform = m_World->GetComponent<Components::Transform>(entity);
+                transform->Velocity = glm::normalize(glm::vec3(0.5f, 1, 0.f)) * ballComponent->Speed;
+            } else {
+                auto transform = m_World->GetComponent<Components::Transform>(entity);
+                transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
+                transform->Position = glm::vec3(0.0f, -3.f, -10.f);
+                transform->Orientation = glm::quat();
+                return;
+            }
+        }
         if (ReplaceBall()) {
             SetReplaceBall(false);
-
-            auto transform = m_World->GetComponent<Components::Transform>(entity);
-            transform->Position = glm::vec3(0.0f, 0.26f, -10.f);
-            transform->Velocity = glm::vec3(0.0f, -ballComponent->Speed, 0.f);
+            m_Waiting = true;
+            ballComponent->Waiting = true;
         }
 
         auto transformBall = m_World->GetComponent<Components::Transform>(entity);
@@ -321,6 +335,7 @@ void dd::Systems::BallSystem::CreateLife(int number)
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(life);
     transform->Position = glm::vec3(-1.5f + number * 0.15f, -2.f, -5.f);
     transform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
+    transform->Sticky = true;
 
     std::shared_ptr<Components::Life> lifeNr = m_World->AddComponent<Components::Life>(life);
     lifeNr->Number = number;
@@ -364,8 +379,10 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
     auto transform2 = m_World->GetComponent<Components::Transform>(ent2);
     auto ball1 = m_World->GetComponent<Components::Ball>(ent1);
     auto ball2 = m_World->GetComponent<Components::Ball>(ent2);
+    ball1->Waiting = false;
+    ball2->Waiting = false;
     auto padTransform = event.padTransform;
-    float x1 = padTransform->Position.x - 2, x2 = padTransform->Position.x + 2;
+    float x1 = padTransform->Position.x/* - 2*/, x2 = padTransform->Position.x/* + 2*/;
     if (x1 < -m_EdgeX) {
         x1 = m_EdgeX - 0.2;
     }
@@ -380,6 +397,12 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
 
     SetMultiBalls(MultiBalls() + 2);
     //std::cout << MultiBalls() << std::endl;
+    return true;
+}
+
+bool dd::Systems::BallSystem::OnActionButton(const dd::Events::ActionButton &event)
+{
+    m_Waiting = false;
     return true;
 }
 

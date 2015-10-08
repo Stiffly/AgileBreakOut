@@ -28,6 +28,7 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EContactPowerUp, &PadSystem::OnContactPowerUp);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PadSystem::OnStageCleared);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PadSystem::OnPause);
+    //EVENT_SUBSCRIBE_MEMBER(m_EBindKey, &PadSystem::OnBindKey);
 
     {
         auto ent = m_World->CreateEntity();
@@ -41,6 +42,7 @@ void dd::Systems::PadSystem::Initialize()
         physics->Category = CollisionLayer::Type::Pad;
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::PowerUp);
         physics->Calculate = true;
+        ctransform->Sticky = true;
         auto cModel = m_World->AddComponent<Components::Model>(ent);
         cModel->ModelFile = "Models/Ship/Ship.obj";
 
@@ -123,8 +125,7 @@ bool dd::Systems::PadSystem::OnPause(const dd::Events::Pause &event)
     return true;
 }
 
-bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
-{
+bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
     int val = event.KeyCode;
     if (val == GLFW_KEY_UP) {
         //std::cout << "Up!" << std::endl;
@@ -153,6 +154,9 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event)
         Events::HitLag e;
         e.Time = 0.2;
         e.Type = "All";
+        EventBroker->Publish(e);
+    } else if (val == GLFW_KEY_SPACE) {
+        Events::ActionButton e;
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_D) {
         return false;

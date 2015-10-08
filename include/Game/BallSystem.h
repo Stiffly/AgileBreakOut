@@ -25,6 +25,7 @@
 #include "Game/EPause.h"
 #include "Game/EHitPad.h"
 #include "Game/EHitLag.h"
+#include "Game/EActionButton.h"
 
 namespace dd
 {
@@ -89,6 +90,7 @@ private:
     int m_PastLives = 3;
     bool m_ReplaceBall = false;
     bool m_Pause = false;
+    bool m_Waiting = true;
     EntityID m_LastCollision = 999999;
 
     glm::vec3 m_SavedSpeed;
@@ -104,7 +106,8 @@ private:
     dd::EventRelay<BallSystem, dd::Events::ResetBall> m_EResetBall;
     dd::EventRelay<BallSystem, dd::Events::MultiBall> m_EMultiBall;
     dd::EventRelay<BallSystem, dd::Events::Pause> m_EPause;
-    EventRelay<BallSystem, Events::Contact> m_Contact;
+    dd::EventRelay<BallSystem, dd::Events::Contact> m_Contact;
+    dd::EventRelay<BallSystem, dd::Events::ActionButton> m_EActionButton;
 
     bool Contact(const Events::Contact &event);
     bool OnLifeLost(const dd::Events::LifeLost &event);
@@ -112,6 +115,7 @@ private:
     bool OnResetBall(const dd::Events::ResetBall &event);
     bool OnMultiBall(const dd::Events::MultiBall &event);
     bool OnPause(const dd::Events::Pause &event);
+    bool OnActionButton(const dd::Events::ActionButton &event);
 };
 
 }
