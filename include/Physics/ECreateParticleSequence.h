@@ -19,8 +19,8 @@ struct CreateParticleSequence : public Event
     int NumberOfTicks = 100;
     float Speed = 1.f;
     int ParticlesPerTick = 1.f;
-    float Spread = glm::pi<float>();
-    float EmittingAngle = glm::two_pi<float>();
+    float Spread = 1.f;
+    float EmittingAngle = 0.f;
     float MaxCount = 0;
 
     //Particle
