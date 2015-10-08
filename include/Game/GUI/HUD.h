@@ -6,7 +6,7 @@
 #include "GUI/NumberFrame.h"
 #include "Core/EKeyUp.h"
 #include "Game/EScoreEvent.h"
-#include "Game/FPSCounter.h"
+#include "Game/GUI/FPSCounter.h"
 
 namespace dd
 {
