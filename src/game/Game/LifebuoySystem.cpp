@@ -1,0 +1,111 @@
+//
+// Created by Adniklastrator on 2015-10-08.
+//
+
+
+#include "PrecompiledHeader.h"
+#include "Game/LifebuoySystem.h"
+
+
+void dd::Systems::LifebuoySystem::Initialize()
+{
+    EVENT_SUBSCRIBE_MEMBER(m_EContact, &LifebuoySystem::OnContact);
+	EVENT_SUBSCRIBE_MEMBER(m_EPause, &LifebuoySystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_ELifebuoy, &LifebuoySystem::OnLifebuoy);
+
+	//Lifebuoy
+	{
+		auto ent = m_World->CreateEntity();
+		m_World->SetProperty(ent, "Name", "Lifebuoy");
+		std::shared_ptr<Components::Transform> ctransform = m_World->AddComponent<Components::Transform>(ent);
+		ctransform->Position = glm::vec3(50.f, -4.8f, -10.f);
+		auto rectangleShape = m_World->AddComponent<Components::RectangleShape>(ent);
+		auto lifebuoyTemplate = m_World->AddComponent<Components::Template>(ent);
+		rectangleShape->Dimensions = glm::vec2(0.9f, 0.19f);
+		auto physics = m_World->AddComponent<Components::Physics>(ent);
+		physics->CollisionType = CollisionType::Type::Static;
+		physics->Category = CollisionLayer::LifeBuoy;
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick | CollisionLayer::LifeBuoy | CollisionLayer::Pad | CollisionLayer::Water);
+		physics->Density = 1.0f;
+		physics->GravityScale = 1;
+		ctransform->Sticky = true;
+		auto cModel = m_World->AddComponent<Components::Model>(ent);
+		cModel->ModelFile = "Models/Lifebuoy/Lifebuoy.obj";
+		auto lifebuoy = m_World->AddComponent<Components::Lifebuoy>(ent);
+
+		m_World->CommitEntity(ent);
+
+		m_Template = ent;
+	}
+
+    return;
+}
+
+void dd::Systems::LifebuoySystem::Update(double dt)
+{
+	for (auto it = m_LifeBuoys.begin(); it != m_LifeBuoys.end();) {
+		it->TimeToLive -= dt;
+		if (it->TimeToLive < 0.f) {
+			m_World->RemoveEntity(it->Entity);
+			m_LifeBuoys.erase(it++);
+		}
+		else {
+			auto transformComponent = m_World->GetComponent<Components::Transform>(it->Entity);
+
+			if (transformComponent->Position.x > m_RightEdge) {
+				transformComponent->Position = glm::vec3(m_LeftEdge + 0.1f, transformComponent->Position.y, transformComponent->Position.z);
+			}
+			else if (transformComponent->Position.x < m_LeftEdge) {
+				transformComponent->Position = glm::vec3(m_RightEdge - 0.1f, transformComponent->Position.y, transformComponent->Position.z);
+			}
+			++it;
+		}
+	}
+}
+
+void dd::Systems::LifebuoySystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
+{
+    if (IsPaused()) {
+        return;
+    }
+    auto templateCheck = m_World->GetComponent<Components::Template>(entity);
+    if (templateCheck != nullptr){ return; }
+}
+
+bool dd::Systems::LifebuoySystem::OnPause(const dd::Events::Pause &event)
+{
+    if (event.Type != "LifebuoySystem" && event.Type != "All") {
+        return false;
+    }
+
+    if (IsPaused()) {
+        SetPause(false);
+    } else {
+        SetPause(true);
+    }
+    return true;
+}
+
+
+bool dd::Systems::LifebuoySystem::OnContact(const dd::Events::Contact &event)
+{
+    
+    return true;
+}
+
+bool dd::Systems::LifebuoySystem::OnLifebuoy(const dd::Events::Lifebuoy &event) 
+{
+	auto ent = m_World->CloneEntity(m_Template);
+	m_World->SetProperty(ent, "Name", "Lifebuoy");
+	m_World->RemoveComponent<Components::Template>(ent);
+	auto transform = m_World->GetComponent<Components::Transform>(ent);
+	auto physics = m_World->GetComponent<Components::Physics>(ent);
+	physics->CollisionType = CollisionType::Type::Dynamic;
+	transform->Position = glm::vec3(event.Transform->Position.x, transform->Position.y + 2.f, -10.f);
+	transform->Velocity = glm::vec3(20.f, 3.f, 0.f);
+	LifeBuoyInfo info;
+	info.Entity = ent;
+	m_LifeBuoys.push_back(info);
+	
+	return true;
+}

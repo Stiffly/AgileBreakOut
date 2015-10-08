@@ -32,10 +32,17 @@ void dd::Systems::PhysicsSystem::ContactListener::PreSolve(b2Contact* contact, c
     auto physicsComponentA = m_PhysicsSystem->m_World->GetComponent<Components::Physics>(entityA);
     auto physicsComponentB = m_PhysicsSystem->m_World->GetComponent<Components::Physics>(entityB);
 
+
+	std::string propertyA = m_PhysicsSystem->m_World->GetProperty<std::string>(entityA, "Name");
+	std::string propertyB = m_PhysicsSystem->m_World->GetProperty<std::string>(entityB, "Name");
+
     if (physicsComponentA != nullptr && physicsComponentB != nullptr) {
         if (physicsComponentA->Calculate || physicsComponentB->Calculate) {
             // Turn of collisions
-            contact->SetEnabled(false);
+			if ((propertyA != "Lifebuoy" && propertyB != "Pad") || (propertyA != "Pad" && propertyB != "Lifebuoy")) {
+				contact->SetEnabled(false);
+			}
+			
         }
     }
 

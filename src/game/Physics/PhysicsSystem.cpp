@@ -23,9 +23,9 @@ void dd::Systems::PhysicsSystem::Initialize()
     InitializeWater();
     EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, &PhysicsSystem::SetImpulse);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PhysicsSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PhysicsSystem::OnStageCleared);
     EVENT_SUBSCRIBE_MEMBER(m_ECreateParticleSequence, &PhysicsSystem::CreateParticleSequence);
 	EVENT_SUBSCRIBE_MEMBER(m_EContact, &PhysicsSystem::OnContact);
-
 }
 
 void dd::Systems::PhysicsSystem::InitializeWater()
@@ -36,10 +36,9 @@ void dd::Systems::PhysicsSystem::InitializeWater()
     b2ParticleSystemDef m_ParticleSystemDef;
     m_ParticleSystemDef.radius = radius;
     m_ParticleSystemDef.gravityScale = gravityScale;
+	m_ParticleSystemDef.density = 4.f;
 
     m_WaterParticleSystem = m_PhysicsWorld->CreateParticleSystem(&m_ParticleSystemDef);
-
-
 }
 
 bool dd::Systems::PhysicsSystem::SetImpulse(const Events::SetImpulse &event)
@@ -106,6 +105,16 @@ void dd::Systems::PhysicsSystem::SyncEntitiesWithBodies()
             filter.categoryBits = physicsComponent->Category;
             filter.maskBits = physicsComponent->Mask;
             body->GetFixtureList()->SetFilterData(filter);
+
+			if (physicsComponent->CollisionType == CollisionType::Type::Static) {
+				body->SetType(b2_staticBody);
+			}
+			else if (physicsComponent->CollisionType == CollisionType::Type::Dynamic) {
+				body->SetType(b2_dynamicBody);
+			}
+			else if (physicsComponent->CollisionType == CollisionType::Type::Kinematic) {
+				body->SetType(b2_dynamicBody);
+			}
         }
     }
 }
@@ -163,11 +172,12 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 	}
 
 	if (m_Travelling) {
-		m_Timer += dt;
-		if (m_Timer >= 2) {
-			m_Timer = 0;
+		if (m_DistanceTravelled > 12.f) {
+			m_DistanceTravelled = 0;
 			m_Travelling = false;
 		}
+
+		m_DistanceTravelled += 6.0f * dt;
 	}
     m_Accumulator += dt;
 
@@ -245,12 +255,13 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 	if (m_Travelling) {
 		auto transform = m_World->GetComponent<Components::Transform>(entity);
 		if (transform != nullptr) {
-			if (transform->Sticky == true) {
-				return;
+			if (!transform->Sticky) {
+				transform->Position.y -= 6.0f * dt;
 			}
+		} else {
 			transform->Position.y -= 6.0f * dt;
-        }
-    }
+		}
+	}
     auto particle = m_World->GetComponent<Components::Particle>(entity);
 	auto pTemplate = m_World->GetComponent<Components::Template>(entity);
 	
@@ -398,19 +409,13 @@ void dd::Systems::PhysicsSystem::CreateBody(EntityID entity)
 
 
     fixtureDef.shape = pShape;
-    fixtureDef.density = 10.f;
+    fixtureDef.density = physicsComponent->Density;
     fixtureDef.restitution = 1.0f;
     fixtureDef.friction = 0.0f;
     body->CreateFixture(&fixtureDef);
 
 
     delete pShape;
-
-  /*  if(physicsComponent->Static) {
-        body->SetType(b2BodyType::b2_staticBody);
-    } else if (! physicsComponent->Static) {
-        body->SetType(b2BodyType::b2_dynamicBody);
-    }*/
 
     body->SetGravityScale(physicsComponent->GravityScale);
     m_EntitiesToBodies.insert(std::make_pair(entity, body));
