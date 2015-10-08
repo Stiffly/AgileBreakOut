@@ -26,6 +26,7 @@
 #include "Game/ELifebuoy.h"
 #include "Game/EStickyPad.h"
 #include "Game/EInkBlaster.h"
+#include "Game/EKrakenAttack.h"
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
 #include "Game/EPause.h"
@@ -132,6 +133,7 @@ private:
 	const int LifebuoyBrick = 3;
 	const int StickyBrick = 4;
 	const int InkBlasterBrick = 5;
+	const int KrakenAttackBrick = 6;
 
     EntityID m_BrickTemplate;
 

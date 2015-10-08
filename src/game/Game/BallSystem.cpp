@@ -123,6 +123,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
             }
         }
 		if (ballComponent->Sticky) {
+			//TODO - Ball can stick to same pad just after detaching.
 			if (!m_Waiting)
 			{
 				auto transform = m_World->GetComponent<Components::Transform>(entity);

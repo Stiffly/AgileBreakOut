@@ -28,6 +28,8 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EContactPowerUp, &PadSystem::OnContactPowerUp);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PadSystem::OnStageCleared);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PadSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttack, &PadSystem::OnKrakenAttack);
+	EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &PadSystem::OnActionButton);
     //EVENT_SUBSCRIBE_MEMBER(m_EBindKey, &PadSystem::OnBindKey);
 
     {
@@ -84,9 +86,21 @@ void dd::Systems::PadSystem::Update(double dt)
         }
     }
 
-    auto transform = Transform();
-    auto pad = Pad();
-    auto acceleration = Acceleration();
+	if (m_KrakenAttack) {
+		m_KrakenCharge -= m_KrakenStrength * dt;
+		if (m_KrakenCharge < 0) {
+			m_KrakenCharge = 0;
+		}
+		Events::KrakenAttack e;
+		e.ChargeUpdate = m_KrakenCharge;
+		EventBroker->Publish(e);
+		std::cout << "Charge: " << m_KrakenCharge << std::endl;
+		return;
+	}
+
+	auto transform = Transform();
+	auto pad = Pad();
+	auto acceleration = Acceleration();
 
     if (transform->Velocity.x < -pad->MaxSpeed) {
         transform->Velocity.x = -pad->MaxSpeed;
@@ -167,7 +181,14 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
     } else if (val == GLFW_KEY_S) {
 		Events::StageCleared e;
 		EventBroker->Publish(e);
-	} else if (val == GLFW_KEY_SPACE) {
+	} else if (val == GLFW_KEY_K) {
+		Events::KrakenAttack e;
+		e.ChargeUpdate = 0;
+		e.KrakenStrength = 0.1;
+		e.PlayerStrength = 0.05;
+		EventBroker->Publish(e);
+	}
+	else if (val == GLFW_KEY_SPACE) {
         Events::ActionButton e;
 		e.Position = Transform()->Position;
         EventBroker->Publish(e);
@@ -286,6 +307,44 @@ bool dd::Systems::PadSystem::OnStageCleared(const dd::Events::StageCleared &even
 {
     //auto entity = CreateBall();
     return true;
+}
+
+bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &event)
+{
+	if (!m_KrakenAttack) {
+		m_KrakenStrength = event.KrakenStrength;
+		m_PlayerStrength = event.PlayerStrength;
+		m_KrakenCharge = event.ChargeUpdate;
+		m_KrakenAttack = true;
+		auto transform = Transform();
+		auto acceleration = Acceleration();
+
+		transform->Velocity = glm::vec3(0, 0, 0);
+		acceleration = glm::vec3(0, 0, 0);
+
+		SetTransform(transform);
+		SetAcceleration(acceleration);
+	} else if (m_KrakenCharge >= 1) {
+		m_KrakenAttack = false;
+		m_KrakenCharge = 0;
+		m_KrakenStrength = 0;
+		m_PlayerStrength = 0;
+	}
+	return true;
+}
+
+bool dd::Systems::PadSystem::OnActionButton(const dd::Events::ActionButton &event)
+{
+	if (m_KrakenAttack) {
+		m_KrakenCharge += m_PlayerStrength;
+
+		Events::KrakenAttack e;
+		e.ChargeUpdate = m_KrakenCharge;
+		e.KrakenStrength = 0;
+		e.PlayerStrength = 0;
+		EventBroker->Publish(e);
+	}
+	return true;
 }
 
 bool dd::Systems::PadSystem::PadSteeringInputController::OnCommand(const Events::InputCommand &event)

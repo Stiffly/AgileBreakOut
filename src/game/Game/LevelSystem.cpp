@@ -93,6 +93,12 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 			} else if (brick->Type == InkBlasterBrick) {
 				Events::InkBlaster e;
 				EventBroker->Publish(e);
+			} else if(brick->Type == KrakenAttackBrick) {
+				Events::KrakenAttack e;
+				e.ChargeUpdate = 0;
+				e.KrakenStrength = 0.1;
+				e.PlayerStrength = 0.05;
+				EventBroker->Publish(e);
 			}
             m_LooseBricks--;
             m_World->RemoveEntity(entity);
@@ -207,6 +213,9 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
 	} else if (typeInt == InkBlasterBrick) {
 		cBrick->Type = InkBlasterBrick;
 		model->Color = glm::vec4(0.1f, 0.1f, 0.1f, .0f);
+	} else if (typeInt == KrakenAttackBrick) {
+		cBrick->Type = KrakenAttackBrick;
+		model->Color = glm::vec4(0.f, 0.5f, 1.0f, .0f);
 	}
 
 	
@@ -442,6 +451,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
 	// 3 is lifebuoy brick.
 	// 4 is sticky brick.
 	// 5 is ink blaster brick.
+	// 6 is kraken attack brick.
 
 	// wolor array determines the color of standard bricks.
 	// w is white.
