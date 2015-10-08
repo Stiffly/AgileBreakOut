@@ -44,6 +44,8 @@ public:
 		: m_Name(name)
 	{
 		SetParent(parent);
+		Width = parent->Width;
+		Height = parent->Height;
 		EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, &Frame::OnKeyDown);
 		EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, &Frame::OnKeyUp);
 		EVENT_SUBSCRIBE_MEMBER(m_EInputCommand, &Frame::OnCommand);
