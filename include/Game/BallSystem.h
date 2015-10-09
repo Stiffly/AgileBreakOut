@@ -24,6 +24,7 @@
 #include "Game/EStickyPad.h"
 #include "Game/EInkBlaster.h"
 #include "Game/EInkBlasterOver.h"
+#include "Game/EStageCleared.h"
 #include "Game/EGameOver.h"
 #include "Game/EPause.h"
 #include "Game/EHitPad.h"
@@ -100,6 +101,7 @@ private:
 	bool m_InkBlaster = false;
 	bool m_InkAttached = false;
 	bool m_BlockedWaiting = false;
+	bool m_Restarting = false;
 	int m_StickyCounter = 5;
 
     glm::vec3 m_SavedSpeed;
@@ -120,6 +122,7 @@ private:
     dd::EventRelay<BallSystem, dd::Events::Pause> m_EPause;
     dd::EventRelay<BallSystem, dd::Events::Contact> m_Contact;
     dd::EventRelay<BallSystem, dd::Events::ActionButton> m_EActionButton;
+	dd::EventRelay<BallSystem, dd::Events::StageCleared> m_EStageCleared;
 
     bool Contact(const Events::Contact &event);
     bool OnLifeLost(const dd::Events::LifeLost &event);
@@ -131,6 +134,7 @@ private:
 	bool OnInkBlasterOver(const dd::Events::InkBlasterOver &event);
     bool OnPause(const dd::Events::Pause &event);
     bool OnActionButton(const dd::Events::ActionButton &event);
+	bool OnStageCleared(const dd::Events::StageCleared &event);
 };
 
 }

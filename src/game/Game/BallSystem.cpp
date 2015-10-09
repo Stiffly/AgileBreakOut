@@ -23,12 +23,13 @@ void dd::Systems::BallSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EInkBlasterOver, &BallSystem::OnInkBlasterOver);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &BallSystem::OnPause);
     EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &BallSystem::OnActionButton);
+	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &BallSystem::OnStageCleared);
 
     //OctoBall
     {
         auto ent = m_World->CreateEntity();
         std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-        transform->Position = glm::vec3(-0.f, 50.26f, -10.f);
+        transform->Position = glm::vec3(0.f, 0.26f, -10.f);
         transform->Scale = glm::vec3(0.3f, 0.3f, 0.3f);
         transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
         auto model = m_World->AddComponent<Components::Model>(ent);
@@ -117,6 +118,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 
         if (ballComponent->Waiting) {
             if (!m_Waiting) {
+				m_Restarting = false;
                 ballComponent->Waiting = false;
 				auto transform = m_World->GetComponent<Components::Transform>(entity);
                 transform->Velocity = glm::normalize(glm::vec3(0.5f, 1, 0.f)) * ballComponent->Speed;
@@ -155,7 +157,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 m_World->RemoveEntity(entity);
                 Events::MultiBallLost e;
                 EventBroker->Publish(e);
-            } else if (Lives() == PastLives()) {
+            } else if (Lives() == PastLives() && !m_Restarting) {
                 Events::ResetBall be;
                 EventBroker->Publish(be);
                 Events::LifeLost e;
@@ -469,5 +471,11 @@ bool dd::Systems::BallSystem::OnActionButton(const dd::Events::ActionButton &eve
 		m_Waiting = false;
 	}
     return true;
+}
+
+bool dd::Systems::BallSystem::OnStageCleared(const dd::Events::StageCleared &event)
+{
+	m_Restarting = true;
+	return true;
 }
 
