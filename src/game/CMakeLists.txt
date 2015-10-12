@@ -104,7 +104,7 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Core_Util}
     ${SOURCE_FILES_Input}
     ${SOURCE_FILES_Rendering}
-    ${SOURCE_FILES_Rendering_OpenGL}
+    #${SOURCE_FILES_Rendering_OpenGL}
     ${SOURCE_FILES_Rendering_DirectX}
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Physics}
@@ -131,6 +131,7 @@ target_link_libraries(game
     ${X11_LIBRARIES}
     ${OPENAL_LIBRARY}
 	${liquidfun_LIBRARIES}
+    ${CMAKE_LIBRARY_PATH}/DirectXTK.lib
 )
 
 add_executable(breakout 
@@ -147,5 +148,6 @@ target_link_libraries(breakout
 	${X11_LIBRARIES}
     ${OPENAL_LIBRARY}
     ${liquidfun_LIBRARIES}
+    ${CMAKE_LIBRARY_PATH}/DirectXTK.lib
 )
 

@@ -29,6 +29,8 @@
 namespace dd
 {
 
+class Model;
+class Texture;
 class RenderQueue;
 
 struct RenderJob

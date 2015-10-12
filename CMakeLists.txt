@@ -24,9 +24,9 @@ endif()
 set(BUILD_SHARED_LIBS FALSE)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 # Compiling for OpenGL target
-include_directories(${PROJECT_SOURCE_DIR}/include/Rendering/OpenGL)
+#include_directories(${PROJECT_SOURCE_DIR}/include/Rendering/OpenGL)
 # Compiling for DirectX target
-#include_directories(${PROJECT_SOURCE_DIR}/include/Rendering/DirectX)
+include_directories(${PROJECT_SOURCE_DIR}/include/Rendering/DirectX)
 
 #set(GLEW_INCLUDE_DIR ${daydream_SOURCE_DIR}/libs/glew-1.11.0/include)
 #set(GLEW_LIBRARY ${daydream_SOURCE_DIR}/libs/glew-1.11.0/lib/Release/glew32.lib)

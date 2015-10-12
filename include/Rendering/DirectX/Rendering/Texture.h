@@ -16,34 +16,34 @@
 	along with Daydream Engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// TODO: Get rid of precompiled headers
+#ifndef Texture_h__
+#define Texture_h__
 
-#include <memory>
 #include <string>
-#include <vector>
-#include <map>
 #include <unordered_map>
+#include <cstdio>
 
-// OpenGL
-#include <GL/glew.h>
-#define GLFW_INCLUDE_GLU
-#define NOMINMAX
-#include <GLFW/glfw3.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#define GLFW_EXPOSE_NATIVE_WGL
-#include <GLFW/glfw3native.h>
-#include <glext.h>
-#include "Core/Util/GLError.h"
+#include "Core/ResourceManager.h"
+#include "Rendering/PNG.h"
 
-// GLM
-#define GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-#include <glm/common.hpp>
-#include <glm/gtc/constants.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/rotate_vector.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtc/type_ptr.hpp>
+namespace dd
+{
 
-#include "Core/Util/Logging.h"
+class Texture : public Resource
+{
+	friend class ResourceManager;
+
+private:
+	Texture(std::string path);
+
+public:
+	~Texture();
+
+	unsigned int Width = 0;
+	unsigned int Height = 0;
+};
+
+
+}
+
+#endif // Texture_h__
