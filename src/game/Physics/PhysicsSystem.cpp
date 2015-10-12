@@ -702,21 +702,51 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 	else {
 		model = m_World->GetComponent<Components::Model>(event.Entity1);
 	}
+
+	//Spawn a particle when a brick collides with somthing
 	Events::CreateParticleSequence e;
-	e.EmitterLifeTime = 4;
-	//- glm::atan(event.Normal.x, event.Normal.y
+	
+	
+	e.EmitterLifeTime = 3;
 	e.EmittingAngle = glm::half_pi<float>();
-	e.Spread = 0.5f;
+	e.Spread = 0.f;
 	e.NumberOfTicks = 1;
 	e.ParticleLifeTime = 1.f;
-	e.ParticlesPerTick = 15;
-	e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -10);
-	e.Radius = 0.2f;
-	e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
-	e.Color = model->Color + glm::vec4(0.5f);
-	e.Speed = 100;
+	e.ParticlesPerTick = 1;
+	e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -7);
+	e.Color = glm::vec4(1.f);
+	e.Radius = 1.f;
+	e.Speed = 0;
+	
+	if (brick->Type == 1 || brick->Type == 0)
+	{
+		e.EmitterLifeTime = 4;
+		e.EmittingAngle = glm::half_pi<float>();
+		e.Spread = 0.5f;
+		e.NumberOfTicks = 1;
+		e.ParticleLifeTime = 1.f;
+		e.ParticlesPerTick = 15;
+		e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -10);
+		e.Radius = 0.2f;
+		e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
+		e.Color = model->Color + glm::vec4(0.5f);
+		e.Speed = 100;
+	} else if (brick->Type == 2) {
+		e.SpriteFile = "Textures/PowerUps/Friends.png";
+	} else if (brick->Type == 3) {
+		e.SpriteFile = "Textures/PowerUps/Saviour.png";
+	} else if (brick->Type == 4) {
+		e.SpriteFile = "Textures/PowerUps/Sticky.png";
+	} else if (brick->Type == 5) {
+		e.SpriteFile = "Textures/PowerUps/InkBlaster.png";
+	} else if (brick->Type == 6) {
+		e.SpriteFile = "Textures/PowerUps/RealeaseTheKraken.png";
+	}
+	
 	EventBroker->Publish(e);
 	return true;
+
+	
 }
 
 

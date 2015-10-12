@@ -598,7 +598,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 0, 1, 2, 1, 0, 1,
                      0, 1, 0, 1, 0, 1, 0,
                      1, 0, 1, 0, 1, 0, 1,
-                     0, 0, 0, 0, 0, 0, 0};
+                     2, 3, 4, 5, 6, 0, 0};
 			color = 
 					{w, w, w, w, w, w, w,
 					 lb4, lb4, lb4, lb4, lb4, lb4, lb4,

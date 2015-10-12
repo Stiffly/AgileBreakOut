@@ -24,6 +24,7 @@
 #include "Physics/ECreateParticleSequence.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/CParticleEmitter.h"
+#include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Transform/TransformSystem.h"
 #include "Transform/TransformSystem.h"
