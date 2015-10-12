@@ -195,11 +195,14 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
     }
 
     if (ballComponent != nullptr) {
-        auto transform = m_World->GetComponent<Components::Transform>(entity);
-        glm::vec2 dir = glm::normalize(glm::vec2(transform->Velocity.x, transform->Velocity.y));
-        glm::vec2 up = glm::vec2(0.f, 1.f);
-        float angle = glm::acos(glm::dot<float>(dir, up)) * glm::sign(dir.x);
-        transform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, -1.f));
+		if (!ballComponent->Sticky)
+		{
+			auto transform = m_World->GetComponent<Components::Transform>(entity);
+			glm::vec2 dir = glm::normalize(glm::vec2(transform->Velocity.x, transform->Velocity.y));
+			glm::vec2 up = glm::vec2(0.f, 1.f);
+			float angle = glm::acos(glm::dot<float>(dir, up)) * glm::sign(dir.x);
+			transform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, -1.f));
+		}
     }
 }
 
@@ -458,7 +461,6 @@ bool dd::Systems::BallSystem::OnInkBlasterOver(const dd::Events::InkBlasterOver 
 	m_InkBlaster = false;
 	m_InkAttached = false;
 	m_BlockedWaiting = false;
-	m_Sticky = true;
 	ballComponent->SavedSpeed = glm::normalize(glm::vec3(0.f, 1.f, 0.f)) * ballComponent->Speed;
 	m_Waiting = false;
 	transform->Velocity = glm::normalize(glm::vec3(0.f, 1, 0.f)) * ballComponent->Speed;

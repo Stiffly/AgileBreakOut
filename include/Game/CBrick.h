@@ -18,6 +18,15 @@ struct Brick : Component
     int Score = 50;
     int Type = 0;
     bool Removed = false;
+
+	//What number of types each is.
+	const int EmptyBrickSpace = 0;
+	const int StandardBrick = 1;
+	const int MultiBallBrick = 2;
+	const int LifebuoyBrick = 3;
+	const int StickyBrick = 4;
+	const int InkBlasterBrick = 5;
+	const int KrakenAttackBrick = 6;
 };
 
 }

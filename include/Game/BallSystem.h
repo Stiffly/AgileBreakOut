@@ -11,6 +11,7 @@
 #include "Physics/CRectangleShape.h"
 #include "Physics/EContact.h"
 #include "Rendering/CModel.h"
+#include "Rendering/CSprite.h"
 #include "Rendering/CPointLight.h"
 #include "Game/CBall.h"
 #include "Game/CPowerUp.h"

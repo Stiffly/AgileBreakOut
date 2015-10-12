@@ -200,21 +200,28 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     auto cBrick = m_World->GetComponent<Components::Brick>(brick);
 	auto model = m_World->GetComponent<Components::Model>(brick);
     if (typeInt == StandardBrick) {
+		cBrick->Type = StandardBrick;
+		auto type = m_World->AddComponent<Components::StandardBrick>(brick);
 		model->Color = colorVec;
     } else if (typeInt == MultiBallBrick) {
         cBrick->Type = MultiBallBrick;
+		auto type = m_World->AddComponent<Components::MultiBallBrick>(brick);
         model->ModelFile = "Models/Brick/IceBrick.obj";
 	} else if (typeInt == LifebuoyBrick) {
 		cBrick->Type = LifebuoyBrick;
+		auto type = m_World->AddComponent<Components::LifebuoyBrick>(brick);
 		model->ModelFile = "Models/Brick/LifeBuoyBrick.obj";
 	} else if (typeInt == StickyBrick) {
 		cBrick->Type = StickyBrick;
+		auto type = m_World->AddComponent<Components::StickyBrick>(brick);
 		model->ModelFile = "Models/Brick/StickyBrick.obj";
 	} else if (typeInt == InkBlasterBrick) {
 		cBrick->Type = InkBlasterBrick;
+		auto type = m_World->AddComponent<Components::InkBlasterBrick>(brick);
 		model->Color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 	} else if (typeInt == KrakenAttackBrick) {
 		cBrick->Type = KrakenAttackBrick;
+		auto type = m_World->AddComponent<Components::KrakenAttackBrick>(brick);
 		model->Color = glm::vec4(0.f, 0.5f, 1.0f, .0f);
 	}
 
