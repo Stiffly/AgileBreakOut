@@ -688,10 +688,12 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 {
 	//Check if it is a brick colliding
 	auto brick = m_World->GetComponent<Components::Brick>(event.Entity1);
+	EntityID entity = event.Entity1;
 	Components::Model* model;
 	
 	if (!brick) {
 		brick = m_World->GetComponent<Components::Brick>(event.Entity2);
+		EntityID entity = event.Entity2;
 		if (!brick) {
 			return false;
 		}
@@ -717,9 +719,25 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 	e.Color = glm::vec4(1.f);
 	e.Radius = 1.f;
 	e.Speed = 0;
-	
-	if (brick->Type == 1 || brick->Type == 0)
-	{
+
+	auto PowerFriend = m_World->GetComponent<Components::MultiBallBrick>(entity);
+	auto PowerSaviour = m_World->GetComponent<Components::LifebuoyBrick>(entity);
+	auto PowerSticky = m_World->GetComponent<Components::StickyBrick>(entity);
+	auto PowerInkBlaster = m_World->GetComponent<Components::InkBlasterBrick>(entity);
+	auto PowerKraken = m_World->GetComponent<Components::KrakenAttackBrick>(entity);
+
+	if (PowerFriend) {
+		e.SpriteFile = "Textures/PowerUps/Friends.png";
+	} else if (PowerSaviour) {
+		e.SpriteFile = "Textures/PowerUps/Saviour.png";
+	} else if (PowerSticky) {
+		e.SpriteFile = "Textures/PowerUps/Sticky.png";
+	} else if (PowerInkBlaster){
+		e.SpriteFile = "Textures/PowerUps/InkBlaster.png";
+	} else if (PowerKraken) { 
+		e.SpriteFile = "Textures/PowerUps/RealeaseTheKraken.png";
+	}
+	else {
 		e.EmitterLifeTime = 4;
 		e.EmittingAngle = glm::half_pi<float>();
 		e.Spread = 0.5f;
@@ -731,18 +749,8 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 		e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
 		e.Color = model->Color + glm::vec4(0.5f);
 		e.Speed = 100;
-	} else if (brick->Type == 2) {
-		e.SpriteFile = "Textures/PowerUps/Friends.png";
-	} else if (brick->Type == 3) {
-		e.SpriteFile = "Textures/PowerUps/Saviour.png";
-	} else if (brick->Type == 4) {
-		e.SpriteFile = "Textures/PowerUps/Sticky.png";
-	} else if (brick->Type == 5) {
-		e.SpriteFile = "Textures/PowerUps/InkBlaster.png";
-	} else if (brick->Type == 6) {
-		e.SpriteFile = "Textures/PowerUps/RealeaseTheKraken.png";
 	}
-	
+
 	EventBroker->Publish(e);
 	return true;
 
