@@ -31,6 +31,7 @@
 #include "CRectangleShape.h"
 
 #include "Game/EStageCleared.h"
+#include "Game/EArrivedAtNewStage.h"
 #include "Game/EPause.h"
 #include "Game/CPad.h"
 #include "Game/CBrick.h"
