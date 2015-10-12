@@ -31,14 +31,15 @@
 //TODO: Remove includes that are only here for the temporary draw solution.
 #include "World.h"
 #include "CTransform.h"
+#include "CTemplate.h"
 #include "Core/EventBroker.h"
 #include "Rendering/CModel.h"
 #include "Rendering/CSprite.h"
-#include "CTemplate.h"
 #include "Rendering/CPointLight.h"
 #include "Transform/TransformSystem.h"
 #include "Sound/SoundSystem.h"
 #include "Sound/CCollisionSound.h"
+
 #include "Game/LevelSystem.h"
 #include "Game/PadSystem.h"
 #include "Game/CBall.h"
@@ -46,11 +47,14 @@
 #include "Game/CLifebuoy.h"
 #include "Game/CProjectile.h"
 #include "Game/CBrick.h"
+#include "Game/CStickyAim.h"
 #include "Game/BallSystem.h"
 #include "Game/HitLagSystem.h"
 #include "Game/LifebuoySystem.h"
 #include "Game/ProjectileSystem.h"
 #include "Game/Bricks/CPowerUpBrick.h"
+
+#include "Game/BrickComponents.h"
 
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
@@ -116,9 +120,17 @@ public:
 		m_World->ComponentFactory.Register<Components::Life>();
 		m_World->ComponentFactory.Register<Components::Lifebuoy>();
 		m_World->ComponentFactory.Register<Components::Projectile>();
+		m_World->ComponentFactory.Register<Components::StickyAim>();
 
 		m_World->ComponentFactory.Register<Components::PowerUp>();
 		m_World->ComponentFactory.Register<Components::PowerUpBrick>();
+
+		m_World->ComponentFactory.Register<Components::StandardBrick>();
+		m_World->ComponentFactory.Register<Components::MultiBallBrick>();
+		m_World->ComponentFactory.Register<Components::LifebuoyBrick>();
+		m_World->ComponentFactory.Register<Components::StickyBrick>();
+		m_World->ComponentFactory.Register<Components::InkBlasterBrick>();
+		m_World->ComponentFactory.Register<Components::KrakenAttackBrick>();
 
 		m_World->SystemFactory.Register<Systems::LevelSystem>(
 				[this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
