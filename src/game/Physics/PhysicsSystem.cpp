@@ -273,7 +273,7 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 
     if (particle && !pTemplate) {
         particle->TimeLived += dt;
-		//Delete particles 
+		//Delete particles
 		if (particle->TimeLived >= particle->LifeTime - 0.1) {
             for (int i = 0; i < m_EntitiesToParticleHandle.size(); i++) {
                 const b2ParticleHandle* handle = m_EntitiesToParticleHandle[i][entity];
@@ -299,7 +299,7 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 		auto emitter = m_World->GetComponent<Components::ParticleEmitter>(particle->ParticleSystem);
 		if (emitter) {
 			sprite->Color.w = ScalarInterpolation(timeProgress, emitter->AlphaValues);
-			if (emitter->RadiusValues.size() >= 1) {
+			if (emitter->RadiusValues.size() > 1) {
 				particle->Radius = ScalarInterpolation(timeProgress, emitter->RadiusValues);
 			}
 		}
@@ -540,12 +540,18 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
         if(emitter->TimeSinceLastSpawn < emitter->SpawnRate || emitter->NumberOfTicks < 1) {
             continue;
         }
-		//Create new particle
+		
         emitter->NumberOfTicks--;
         emitter->TimeSinceLastSpawn -= emitter->SpawnRate;
         auto templateTransform = m_World->GetComponent<Components::Transform>(pt);
-        
+
+		//Create new particle
         for ( int j = 0; j < emitter->ParticlesPerTick; j++) {
+			auto particle = m_World->CloneEntity(pt, 0);
+			m_World->RemoveComponent<Components::Template>(particle);
+			auto particleTransform = m_World->GetComponent<Components::Transform>(particle);
+			auto particleComponent = m_World->GetComponent<Components::Particle>(particle);
+
 			b2ParticleDef particleDef;
             particleDef.flags = particleTemplate->Flags;
             //particleDef.color TODO: Implement this if we want color mixing and shit.
@@ -567,21 +573,18 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 			//position
 			particleDef.position = b2Vec2(emitterTransform->Position.x, emitterTransform->Position.y);
 
-
-            auto particle = m_World->CloneEntity(pt, 0);
-            m_World->RemoveComponent<Components::Template>(particle);
-			auto particleTransform = m_World->GetComponent<Components::Transform>(particle);
-			auto particleComponent = m_World->GetComponent<Components::Particle>(particle);
-
+			//radius - currently not working :j
 			float radius = emitter->RadiusValues[0];
-			if (emitter->RadiusDistribution != 0) {
-				float halfRadius = emitter->RadiusDistribution / 2;
+			float newRadius = 0;
+			if (emitter->RadiusDistribution > 0) {
+				float halfRadius = radius / 2;
 				std::uniform_real_distribution<float> dis3(radius - halfRadius, radius + halfRadius);
-				radius = dis3(gen);
-				//emitter->RadiusValues[0] = radius;
+				newRadius = dis3(gen);
 			}
-			//particleTransform->Scale = glm::vec3(radius * 2, radius * 2, 1);
-			particleComponent->Radius = radius;
+			else {
+				newRadius = radius;
+			}
+			particleComponent->Radius = newRadius;
 			
 			//Random z-value
             std::uniform_real_distribution<float> dist(0, 1);
@@ -773,6 +776,7 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 	e.Color = glm::vec4(1.f);
 	e.AlphaValues.push_back(1.f);
 	e.AlphaValues.push_back(0.f);
+	e.RadiusValues.push_back(1);
 	e.Speed = 0;
 
 	auto PowerFriend = m_World->GetComponent<Components::MultiBallBrick>(entity);
@@ -800,6 +804,7 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 		e.ParticleLifeTime = 1.f;
 		e.ParticlesPerTick = 15;
 		e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -10);
+		e.RadiusValues.clear();
 		e.RadiusValues.push_back(0.2);
 		e.RadiusValues.push_back(1);
 		e.SpriteFile = "Textures/Particles/Cloud_Particle.png";

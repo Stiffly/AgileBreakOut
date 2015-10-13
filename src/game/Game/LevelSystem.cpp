@@ -396,7 +396,7 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 	ep.AlphaValues.push_back(1.f);
 	ep.AlphaValues.push_back(0.f);
 	ep.RadiusValues.push_back(0.05f);
-	ep.RadiusDistribution = 0.05;
+	ep.RadiusDistribution = 0.05f;
 	ep.Speed = 50;
 	EventBroker->Publish(ep);
 }
