@@ -246,7 +246,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             }
         }
 
-        m_Accumulator -= dt;
+        m_Accumulator -= m_TimeStep;
     }
 }
 
@@ -558,9 +558,8 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 // 	for (int i = 0; i < m_EntitiesToParticleHandle.size(); i++)
 // 		entHandles += m_EntitiesToParticleHandle[i].size();
 // 	LOG_INFO("Entities and handles: %i", entHandles);
-
-
-    for (int i = 0; i < emittersToDelete.size(); i++)
+	
+	for (int i = 0; i < emittersToDelete.size(); i++)
     {
         EntityID ent = emittersToDelete[i];
         int key;
@@ -571,6 +570,36 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
         }
 
         if (m_ParticleEmitters.ParticleSystem[key]->GetParticleCount() == 0 && key <= m_ParticleEmitters.ParticleSystem.size()) {
+			// DEBUG vvvvvv
+// 			int t_Entities = m_World->GetEntities()->size();
+// 			int t_Systems = m_ParticleEmitters.ParticleSystem.size();
+// 			int t_Emitters = m_ParticleEmitters.ParticleEmitter.size();
+// 			int t_Templates = m_ParticleEmitters.ParticleTemplate.size();
+// 			int t_LFunParticles = 0;
+// 			int t_EntParticles = 0;
+// 			auto t_WorldEntities = m_World->GetEntities();
+// 
+// 			for (auto &te : *t_WorldEntities)
+// 			{
+// 				if (m_World->GetComponent<Components::Particle>(te.first))
+// 				{
+// 					t_EntParticles++;
+// 				}
+// 			}
+// 
+// 			for (int i = 0; i < t_Systems; i++)
+// 			{
+// 				t_LFunParticles = m_ParticleEmitters.ParticleSystem[i]->GetParticleCount();
+// 			}
+// 
+// 			LOG_INFO("----------------------------");
+// 			LOG_INFO("Deleting emitter and other");
+// 			LOG_INFO("Total before:");
+// 			LOG_INFO("Entities: %i, Systems: %i, Emitters: %i, Templates: %i, LfunParticles: %i, EntParticles: %i, EtH: %i, HtE: %i",
+// 				t_Entities, t_Systems, t_Emitters, t_Templates, t_LFunParticles, t_EntParticles, m_EntitiesToParticleHandle.size(), m_ParticleHandleToEntities.size());
+// 			
+			// DEBUG ^^^^^
+
             m_World->RemoveEntity(ent);
             m_PhysicsWorld->DestroyParticleSystem(m_ParticleEmitters.ParticleSystem[key]);
             m_ParticleEmitters.ParticleSystem.erase(m_ParticleEmitters.ParticleSystem.begin() + key);
@@ -578,7 +607,38 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
             m_ParticleEmitters.ParticleTemplate.erase(m_ParticleEmitters.ParticleTemplate.begin() + key);
             m_EntitiesToParticleHandle.erase(m_EntitiesToParticleHandle.begin() + key);
             m_ParticleHandleToEntities.erase(m_ParticleHandleToEntities.begin() + key);
+
+			// DEBUG vvvvv
+// 			t_Entities = m_World->GetEntities()->size();
+// 			t_Systems = m_ParticleEmitters.ParticleSystem.size();
+// 			t_Emitters = m_ParticleEmitters.ParticleEmitter.size();
+// 			t_Templates = m_ParticleEmitters.ParticleTemplate.size();
+// 			t_LFunParticles = 0;
+// 			t_EntParticles = 0;
+// 			t_WorldEntities = m_World->GetEntities();
+// 
+// 			for (auto &te : *t_WorldEntities)
+// 			{
+// 				if (m_World->GetComponent<Components::Particle>(te.first))
+// 				{
+// 					t_EntParticles++;
+// 				}
+// 			}
+// 
+// 			for (int i = 0; i < t_Systems; i++)
+// 			{
+// 				t_LFunParticles = m_ParticleEmitters.ParticleSystem[i]->GetParticleCount();
+// 			}
+// 
+// 			LOG_INFO("Total after:");
+// 			LOG_INFO("Entities: %i, Systems: %i, Emitters: %i, Templates: %i, LfunParticles: %i, EntParticles: %i, EtH: %i, HtE: %i",
+// 				t_Entities, t_Systems, t_Emitters, t_Templates, t_LFunParticles, t_EntParticles, m_EntitiesToParticleHandle.size(), m_ParticleHandleToEntities.size());
+// 			LOG_INFO("-----------------------------");
+// 			t_counter = 0;
+			
+			// DEBUG ^^^^^
         }
+		
     }
 
 	

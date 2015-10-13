@@ -99,6 +99,8 @@ namespace dd
             std::unordered_map<b2Body*, EntityID> m_BodiesToEntities;
 
 
+			int t_counter = 0;
+
 
             void CreateBody(EntityID entity);
             void SyncEntitiesWithBodies();
@@ -128,7 +130,7 @@ namespace dd
             std::vector<EntityID> ParticleEmitter;
             std::vector<EntityID> ParticleTemplate;
         };
-            EmitterHandler m_ParticleEmitters;
+        EmitterHandler m_ParticleEmitters;
 
             std::list<Impulse> m_Impulses;
             

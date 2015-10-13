@@ -93,7 +93,7 @@ protected:
 	virtual bool OnMousePress(const Events::MousePress& event)
 	{
 		if (Hidden()) {
-			LOG_DEBUG("Pressed hidden button");
+			//LOG_DEBUG("Pressed hidden button");
 			return false;
 		}
 
@@ -117,7 +117,7 @@ protected:
 	virtual bool OnMouseRelease(const Events::MouseRelease& event)
 	{
 		if (Hidden()) {
-			LOG_DEBUG("Released hidden button");
+			//LOG_DEBUG("Released hidden button");
 			return false;
 		}
 
