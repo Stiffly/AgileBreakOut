@@ -377,6 +377,15 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 		glm::vec2 ballToBrick = 4.f * glm::normalize(glm::vec2(cTransform->Position.x - transformComponentHitter->Position.x, cTransform->Position.y - transformComponentHitter->Position.y));
 		cTransform->Velocity = glm::vec3(ballToBrick.x, ballToBrick.y, 0.f);
 
+		std::uniform_real_distribution<float> dist(-1.5f, 1.5f);
+		int impulseStrength = dist(m_RandomGenerator);
+
+		Events::SetImpulse i;
+		i.Entity = b;
+		i.Impulse = glm::vec2(impulseStrength, 0.f);
+		i.Point = glm::vec2(cTransform->Position.x, cTransform->Position.y + 0.5f);
+		EventBroker->Publish(i);
+
 		auto cModel = m_World->GetComponent<Components::Model>(b);
 		cModel->Color = brickModel->Color;
 		cModel->Color *= 0.5f;
