@@ -224,6 +224,7 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 		Events::ScreenShake e;
 		e.Intensity = 20;
 		e.Time = 3;
+		e.TimeTakenToCoolDown = 10;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_Y) {
 		Events::StickyPad e;

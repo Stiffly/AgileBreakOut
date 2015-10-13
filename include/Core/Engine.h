@@ -286,8 +286,8 @@ public:
 			auto transform = m_World->AddComponent<Components::Transform>(BottomWall);
 			transform->Position = glm::vec3(0.f, -6.f, -10.f);
 			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
+			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(BottomWall);
 			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
@@ -304,8 +304,8 @@ public:
 			transform->Position = glm::vec3(0.f, 6.f, -10.f);
 			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
 
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
 			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(topWall);
 			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
@@ -326,8 +326,8 @@ public:
 			transform->Position = glm::vec3(-4.f, 1.f, -10.f);
 			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
 
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
+			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
 			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(leftWall);
 			rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
@@ -348,8 +348,8 @@ public:
 			transform->Position = glm::vec3(4.f, 1.f, -10.f);
 			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
 
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
+			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
 			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(rightWall);
 			rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
@@ -568,28 +568,28 @@ public:
 		if (m_ScreenShake) {
 			m_ShakeTimer += dt;
 			if (m_ShakeTimer >= m_ShakeEndTime) {
-				m_ShakeRepresentativeIntensity -= m_ShakeRepresentativeIntensity * 0.1 * dt;
+				std::cout << "Used: " << m_ShakeIntensity << " True: " << m_ShakeRepresentativeIntensity << std::endl;
+				m_ShakeRepresentativeIntensity -= m_ShakeRepresentativeIntensity * m_CoolerMultiplier * dt;
 				m_ShakeIntensity = m_ShakeRepresentativeIntensity;
-				if (m_ShakeRepresentativeIntensity < 0.1) {
+				if (m_ShakeIntensity <= 0) {
 					m_ScreenShake = false;
 					m_Renderer->PlaceCamera(glm::vec3(0, 0, 0));
 					return;
 				}
 			} else {
-				std::cout << "Timer: " << m_ShakeTimer << " End: " << m_ShakeEndTime << std::endl;
+				//std::cout << "Timer: " << m_ShakeTimer << " End: " << m_ShakeEndTime << std::endl;
 			}
-			//float randomX = (rand() % m_ShakeIntensity);
-			//float randomY = (rand() % m_ShakeIntensity);
-
-			float randomX = 0;
-			float randomY = 0;
-
-			std::cout << "X: " << randomX << " Y: " << randomY << std::endl;
+			float randomX = (rand() % m_ShakeIntensity);
+			float randomY = (rand() % m_ShakeIntensity);
+		
 			float half = m_ShakeIntensity / 2;
 
-			//m_Renderer->PlaceCamera(glm::vec3(randomX - half, randomY - half, 0));
-		} else {
+			randomX = (randomX - half) / 20;
+			randomY = (randomY - half) / 20;
 
+			//std::cout << "X: " << randomX << " Y: " << randomY << std::endl;
+
+			m_Renderer->PlaceCamera(glm::vec3(randomX, randomY, 0));
 		}
 	}
 
@@ -632,13 +632,18 @@ private:
 	float m_ShakeRepresentativeIntensity = 0;
 	float m_ShakeTimer = 0;
 	float m_ShakeEndTime = 0;
+	float m_TimeTakenToCoolDown = 0;
+	float m_CoolerMultiplier = 0;
 	dd::EventRelay<Engine, dd::Events::ScreenShake> m_EScreenShake;
 	bool OnScreenShake(const dd::Events::ScreenShake &event)
 	{
 		m_ScreenShake = true;
 		m_ShakeIntensity = event.Intensity;
+		m_ShakeRepresentativeIntensity = event.Intensity;
 		m_ShakeEndTime = event.Time;
 		m_ShakeTimer = 0;
+		m_TimeTakenToCoolDown = event.TimeTakenToCoolDown;
+		m_CoolerMultiplier = m_ShakeIntensity / m_TimeTakenToCoolDown;
 		return true;
 	}
 	double m_LastTime;

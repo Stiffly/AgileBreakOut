@@ -17,6 +17,7 @@ struct ScreenShake : Event
 {
     float Time;
 	int Intensity;
+	float TimeTakenToCoolDown;
 };
 
 }
