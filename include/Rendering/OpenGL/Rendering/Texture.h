@@ -19,17 +19,12 @@
 #ifndef Texture_h__
 #define Texture_h__
 
-#include <string>
-#include <unordered_map>
-#include <cstdio>
-
-#include "Core/ResourceManager.h"
-#include "Rendering/PNG.h"
+#include "Rendering/BaseTexture.h"
 
 namespace dd
 {
 
-class Texture : public Resource
+class Texture : public BaseTexture
 {
 	friend class ResourceManager;
 
@@ -43,13 +38,9 @@ public:
 
 	operator GLuint() const { return m_Texture; }
 
-	unsigned int Width = 0;
-	unsigned int Height = 0;
-
 private:
 	GLuint m_Texture = 0;
 };
-
 
 }
 

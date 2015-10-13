@@ -19,17 +19,16 @@
 #ifndef Texture_h__
 #define Texture_h__
 
-#include <string>
-#include <unordered_map>
-#include <cstdio>
+#include <d3d11.h>
 
-#include "Core/ResourceManager.h"
-#include "Rendering/PNG.h"
+#include "Rendering/BaseTexture.h"
+#include "Core/StaticSystem.h"
+#include "Rendering/Renderer.h"
 
 namespace dd
 {
 
-class Texture : public Resource
+class Texture : public BaseTexture
 {
 	friend class ResourceManager;
 
@@ -39,11 +38,13 @@ private:
 public:
 	~Texture();
 
-	unsigned int Width = 0;
-	unsigned int Height = 0;
-};
+	operator ID3D11Texture2D*() { return m_Texture; }
 
+	ID3D11Texture2D* m_Texture = nullptr;
+	ID3D11ShaderResourceView* m_ShaderResourceView = nullptr;
+private:
+};
 
 }
 
-#endif // Texture_h__
+#endif

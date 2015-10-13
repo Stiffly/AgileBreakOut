@@ -20,6 +20,7 @@
 #define DD_BASERENDERER_H__
 
 #include "Core/Util/Rectangle.h"
+#include "Core/ResourceManager.h"
 #include "Rendering/Camera.h"
 #include "Rendering/RenderQueue.h"
 

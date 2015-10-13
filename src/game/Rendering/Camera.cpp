@@ -85,12 +85,8 @@ void dd::Camera::UpdateProjectionMatrix()
 //		m_NearClip,
 //		m_FarClip
 //		);
-	m_ProjectionMatrix = glm::perspective(
-		m_FOV,
-		m_AspectRatio,
-		m_NearClip,
-		m_FarClip
-		);
+
+	m_ProjectionMatrix = glm::perspective(m_FOV, m_AspectRatio, m_NearClip, m_FarClip);
 }
 
 void dd::Camera::UpdateViewMatrix()

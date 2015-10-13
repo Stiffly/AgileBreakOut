@@ -26,7 +26,6 @@ using namespace DirectX::SimpleMath;
 //#pragma comment (lib, "DirectXTK.lib")
 
 #include "Rendering/BaseRenderer.h"
-#include "Core/StaticSystem.h"
 
 namespace dd
 {
@@ -47,6 +46,7 @@ public:
 	ID3D11DeviceContext* m_DeviceContext = nullptr;
 	ID3D11RenderTargetView* m_BackBuffer = nullptr;
 	ID3D11DepthStencilView* m_DepthBuffer = nullptr;
+	ID3D11SamplerState* m_SamplerState = nullptr;
 
 private:
 	struct ConstantBufferStruct
@@ -63,7 +63,8 @@ private:
 	const Model* testModel = nullptr;
 	ID3D11Buffer* constantBuffer = nullptr;
 
-	DirectX::SimpleMath::Matrix GLMtoDX(glm::mat4 m);
+	static DirectX::SimpleMath::Matrix GLMtoDXModelView(glm::mat4 m);
+	static DirectX::SimpleMath::Matrix GLMtoDXProjection(glm::mat4 m);
 };
 
 }

@@ -1,5 +1,7 @@
 #include "PrecompiledHeader.h"
 #include "Rendering/Renderer.h"
+
+#include "Rendering/Model.h"
 #include "Rendering/ShaderProgram.h"
 
 void dd::Renderer::Initialize()
@@ -18,12 +20,19 @@ void dd::Renderer::Initialize()
 		monitor = glfwGetPrimaryMonitor();
 	}
 	glfwWindowHint(GLFW_SAMPLES, 8);
-	m_Window = glfwCreateWindow(m_Resolution.Width, m_Resolution.Height, "daydream", monitor, nullptr);
+	m_Window = glfwCreateWindow(m_Resolution.Width, m_Resolution.Height, "DirectX 11", monitor, nullptr);
 	if (!m_Window) {
 		LOG_ERROR("GLFW: Failed to create window");
 		exit(EXIT_FAILURE);
 	}
 	//glfwMakeContextCurrent(m_Window);
+
+	// Create default camera
+	m_DefaultCamera = std::unique_ptr<dd::Camera>(new dd::Camera((float)m_Resolution.Width / m_Resolution.Height, 45.f, 0.01f, 5000.f));
+	m_DefaultCamera->SetPosition(glm::vec3(0, 0, 10));
+	if (m_Camera == nullptr) {
+		m_Camera = m_DefaultCamera.get();
+	}
 
 	DXGI_SWAP_CHAIN_DESC scd = { 0 };
 	scd.BufferCount = 1;
@@ -100,7 +109,7 @@ void dd::Renderer::Initialize()
 	m_DeviceContext->RSSetViewports(1, &viewport);
 
 
-	testModel = ResourceManager::Load<Model>("Models/Core/UnitSphere.obj");
+	testModel = ResourceManager::Load<Model>("Models/Ship/Ship.obj");
 
 	shaderProgram = new ShaderProgram();
 	shaderProgram->CompileVertexShader(L"vertex.hlsl");
@@ -108,8 +117,8 @@ void dd::Renderer::Initialize()
 	D3D11_INPUT_ELEMENT_DESC VertexIED[] = {
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, sizeof(glm::vec3) * 4, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 	shaderProgram->CreateInputLayout(VertexIED, sizeof(VertexIED) / sizeof(VertexIED[0]));
 	shaderProgram->Bind();
@@ -122,33 +131,66 @@ void dd::Renderer::Initialize()
 	m_Device->CreateBuffer(&bd, NULL, &constantBuffer);
 	m_DeviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
 	m_DeviceContext->PSSetConstantBuffers(0, 1, &constantBuffer);
+
+	D3D11_SAMPLER_DESC samplerDesc;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 1.f;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 1.f;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	m_Device->CreateSamplerState(&samplerDesc, &m_SamplerState);
 }
 
 void dd::Renderer::Draw(RenderQueueCollection& rq)
 {
+	using namespace DirectX::SimpleMath;
+
 	float color[] = { 0.f, 0.f, 0.f, 1.f };
 	m_DeviceContext->ClearRenderTargetView(m_BackBuffer, color);
 	m_DeviceContext->ClearDepthStencilView(m_DepthBuffer, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-	constantBufferStruct.MVP = GLMtoDX(glm::mat4(1.f));
-	constantBufferStruct.ModelMatrix = GLMtoDX(glm::mat4(1.f));
-	constantBufferStruct.ViewMatrix = GLMtoDX(glm::mat4(1.f));
-	constantBufferStruct.ProjectionMatrix = GLMtoDX(glm::mat4(1.f));
-	constantBufferStruct.InverseTransposeViewModel = GLMtoDX(glm::mat4(1.f));
-	constantBufferStruct.LightPosition = DirectX::SimpleMath::Vector3(0.f, 0.f, 100.f);
+	Matrix proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(m_Camera->m_FOV, m_Camera->m_AspectRatio, m_Camera->m_NearClip, m_Camera->m_FarClip); // Right-handed
+	Matrix view = Matrix::CreateTranslation(Vector3(m_Camera->Position().x, m_Camera->Position().y, -m_Camera->Position().z));
+	
+	for (auto &job : rq.Deferred) {
+		auto modelJob = std::dynamic_pointer_cast<ModelJob>(job);
+		if (modelJob) {
+			constantBufferStruct.MVP = Matrix(glm::value_ptr(modelJob->ModelMatrix)) * view * proj;
 
-	m_DeviceContext->UpdateSubresource(constantBuffer, 0, 0, &constantBufferStruct, 0, 0);
-	m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	UINT stride = sizeof(Model::Vertex);
-	UINT offset = 0;
-	m_DeviceContext->IASetVertexBuffers(0, 1, &testModel->VertexBuffer, &stride, &offset);
+			m_DeviceContext->UpdateSubresource(constantBuffer, 0, 0, &constantBufferStruct, 0, 0);
+			m_DeviceContext->PSSetSamplers(0, 1, &m_SamplerState);
 
-	for (auto matGroup : testModel->TextureGroups) {
-		//m_DeviceContext->PSSetShaderResources(0, 1, &matGroup.Texture);
-		m_DeviceContext->Draw(matGroup.EndIndex - matGroup.StartIndex, matGroup.StartIndex);
+			m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			UINT stride = sizeof(Model::Vertex);
+			UINT offset = 0;
+			m_DeviceContext->IASetVertexBuffers(0, 1, &modelJob->Model->VertexBuffer, &stride, &offset);
+			m_DeviceContext->IASetIndexBuffer(modelJob->Model->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+			if (modelJob->DiffuseTexture != nullptr) {
+				m_DeviceContext->PSSetShaderResources(0, 1, &modelJob->DiffuseTexture->m_ShaderResourceView);
+			}
+			//m_DeviceContext->Draw(modelJob->EndIndex - modelJob->StartIndex + 1, modelJob->StartIndex);
+			m_DeviceContext->DrawIndexed(modelJob->EndIndex - modelJob->StartIndex + 1, modelJob->StartIndex, 0);
+
+			continue;
+		}
 	}
 
+	//constantBufferStruct.ModelMatrix = GLMtoDX(glm::mat4(1.f));
+	//constantBufferStruct.ViewMatrix = GLMtoDX(m_Camera->ViewMatrix());
+	//constantBufferStruct.ProjectionMatrix = proj;
+	//constantBufferStruct.InverseTransposeViewModel = GLMtoDX(glm::mat4(1.f));
+
 	m_SwapChain->Present(0, 0);
+	//glfwSwapBuffers(m_Window);
 }
 
 //void dd::Renderer::Resize(int width, int height)
@@ -183,13 +225,25 @@ dd::Renderer::~Renderer()
 	m_DeviceContext->Release();
 }
 
-DirectX::SimpleMath::Matrix dd::Renderer::GLMtoDX(glm::mat4 gm)
+DirectX::SimpleMath::Matrix dd::Renderer::GLMtoDXModelView(glm::mat4 gm)
+{
+	gm = glm::transpose(gm);
+	DirectX::SimpleMath::Matrix dm(
+		gm[0][0], gm[0][1], -gm[0][2], gm[0][3],
+		gm[1][0], gm[1][1], -gm[1][2], gm[1][3],
+		-gm[2][0], -gm[2][1], gm[2][2], gm[2][3],
+		gm[3][0], gm[3][1], -gm[3][2], gm[3][3]
+	);
+	return dm;
+}
+
+DirectX::SimpleMath::Matrix dd::Renderer::GLMtoDXProjection(glm::mat4 gm)
 {
 	gm = glm::transpose(gm);
 	DirectX::SimpleMath::Matrix dm(
 		gm[0][0], gm[0][1], gm[0][2], gm[0][3],
 		gm[1][0], gm[1][1], gm[1][2], gm[1][3],
-		gm[2][0], gm[2][1], gm[2][2], gm[2][3],
+		-gm[2][0], -gm[2][1], -gm[2][2], -gm[2][3],
 		gm[3][0], gm[3][1], gm[3][2], gm[3][3]
 	);
 	return dm;

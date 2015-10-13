@@ -4,9 +4,10 @@
 #include <string>
 
 #include <d3d11.h>
+
 #include "Rendering/RawModel.h"
-#include "Rendering/Renderer.h"
 #include "Core/StaticSystem.h"
+#include "Rendering/Renderer.h"
 
 namespace dd
 {
@@ -21,7 +22,8 @@ private:
 public:
 	~Model();
 
-	ID3D11Buffer* VertexBuffer;
+	ID3D11Buffer* VertexBuffer = nullptr;
+	ID3D11Buffer* IndexBuffer = nullptr;
 	unsigned int NumVertices;
 };
 

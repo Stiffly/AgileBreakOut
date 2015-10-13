@@ -27,14 +27,26 @@ dd::ShaderProgram::~ShaderProgram()
 void dd::ShaderProgram::CompileVertexShader(std::wstring filename)
 {
 	//D3DX11CompileFromFile(filename.c_str(), 0, 0, "main", "vs_5_0", 0, 0, 0, &m_VertexShaderBlob, 0, 0);
-	D3DCompileFromFile(filename.c_str(), nullptr, nullptr, "main", "vs_5_0", 0, 0, &m_VertexShaderBlob, nullptr);
+	ID3DBlob* blob = nullptr;
+	HRESULT result = D3DCompileFromFile(filename.c_str(), nullptr, nullptr, "main", "vs_5_0", 0, 0, &m_VertexShaderBlob, nullptr);
+	if (result != S_OK) {
+		std::wstring blobString((wchar_t*)blob->GetBufferPointer(), blob->GetBufferSize());
+		LOG_ERROR("Failed to compile vertex shader!\n\n%s", blobString.c_str());
+		return;
+	}
 	StaticSystem::Get<Renderer>()->m_Device->CreateVertexShader(m_VertexShaderBlob->GetBufferPointer(), m_VertexShaderBlob->GetBufferSize(), NULL, &m_VertexShader);
 }
 
 void dd::ShaderProgram::CompilePixelShader(std::wstring filename)
 {
 	//D3DX11CompileFromFile(filename.c_str(), 0, 0, "main", "ps_5_0", 0, 0, 0, &m_PixelShaderBlob, 0, 0);
-	D3DCompileFromFile(filename.c_str(), nullptr, nullptr, "main", "ps_5_0", 0, 0, &m_PixelShaderBlob, nullptr);
+	ID3DBlob* blob = nullptr;
+	HRESULT result = D3DCompileFromFile(filename.c_str(), nullptr, nullptr, "main", "ps_5_0", 0, 0, &m_PixelShaderBlob, &blob);
+	if (result != S_OK) {
+		std::wstring blobString((wchar_t*)blob->GetBufferPointer(), blob->GetBufferSize());
+		LOG_ERROR("Failed to compile pixel shader!\n\n%s", blobString.c_str());
+		return;
+	}
 	StaticSystem::Get<Renderer>()->m_Device->CreatePixelShader(m_PixelShaderBlob->GetBufferPointer(), m_PixelShaderBlob->GetBufferSize(), NULL, &m_PixelShader);
 }
 

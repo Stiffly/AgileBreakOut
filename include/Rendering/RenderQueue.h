@@ -23,8 +23,6 @@
 #include <forward_list>
 
 #include "Core/Util/Rectangle.h"
-#include "Rendering/Texture.h"
-#include "Rendering/Model.h"
 
 namespace dd
 {
@@ -52,20 +50,18 @@ protected:
 
 struct ModelJob : RenderJob
 {
-	unsigned int ShaderID;
-	unsigned int TextureID;
+	unsigned int ShaderID = 0;
+	unsigned int TextureID = 0;
 
-	glm::mat4 ProjectionMatrix;
-	glm::mat4 ViewMatrix;
 	glm::mat4 ModelMatrix;
 	const Texture* DiffuseTexture;
 	const Texture* NormalTexture;
 	const Texture* SpecularTexture;
-	float Shininess;
+	float Shininess = 0.f;
 	glm::vec4 Color;
-	const dd::Model* Model;
-	unsigned int StartIndex;
-	unsigned int EndIndex;
+	const dd::Model* Model = nullptr;
+	unsigned int StartIndex = 0;
+	unsigned int EndIndex = 0;
 
 	void CalculateHash() override
 	{
@@ -75,15 +71,13 @@ struct ModelJob : RenderJob
 
 struct SpriteJob : RenderJob
 {
-	unsigned int ShaderID;
-	unsigned int TextureID;
+	unsigned int ShaderID = 0;
+	unsigned int TextureID = 0;
 
-	glm::mat4 ProjectionMatrix;
-	glm::mat4 ViewMatrix;
 	glm::mat4 ModelMatrix;
-	const Texture* DiffuseTexture;
-	const Texture* NormalTexture;
-	const Texture* SpecularTexture;
+	const Texture* DiffuseTexture = nullptr;
+	const Texture* NormalTexture = nullptr;
+	const Texture* SpecularTexture = nullptr;
 	glm::vec4 Color;
 
 	void CalculateHash() override
