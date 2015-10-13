@@ -22,6 +22,7 @@ struct CreateParticleSequence : public Event
     float Spread = 1.f;
     float EmittingAngle = 0.f;
     float MaxCount = 0;
+	float RadiusDistribution = 0;
 	glm::vec4 Color = glm::vec4(0);
 	EntityID parent = 0;
 	// values to interpolate between.

@@ -175,6 +175,8 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 		if (m_DistanceTravelled > 12.f) {
 			m_DistanceTravelled = 0;
 			m_Travelling = false;
+			Events::ArrivedAtNewStage e;
+			EventBroker->Publish(e);
 		}
 
 		m_DistanceTravelled += 6.0f * dt;
@@ -297,7 +299,9 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 		auto emitter = m_World->GetComponent<Components::ParticleEmitter>(particle->ParticleSystem);
 		if (emitter) {
 			sprite->Color.w = ScalarInterpolation(timeProgress, emitter->AlphaValues);
-			particle->Radius = ScalarInterpolation(timeProgress, emitter->RadiusValues); 
+			if (emitter->RadiusValues.size() >= 1) {
+				particle->Radius = ScalarInterpolation(timeProgress, emitter->RadiusValues);
+			}
 		}
     }
 
@@ -546,24 +550,40 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
             particleDef.flags = particleTemplate->Flags;
             //particleDef.color TODO: Implement this if we want color mixing and shit.
             particleDef.lifetime = particleTemplate->LifeTime;
-            float eAngle = emitter->EmittingAngle;
+            
+			//random angle
+			float eAngle = emitter->EmittingAngle;
             float halfSpread = emitter->Spread / 2;
-
             std::uniform_real_distribution<float> dis(eAngle - halfSpread, eAngle + halfSpread);
             float pAngle = dis(gen);
+
+			//Using angle to determine velocity
 			std::uniform_real_distribution<float> dis2(0.3, 1.5);
 			float speedMultiplier = dis2(gen);
             glm::vec2 unitVec = glm::normalize(glm::vec2(glm::cos(pAngle), glm::sin(pAngle)));
-			glm::vec2 vel = unitVec * emitter->Speed * (float)dt * speedMultiplier * 0.5f;
+			glm::vec2 vel = unitVec * emitter->Speed * (float)dt * speedMultiplier;
             particleDef.velocity = b2Vec2(vel.x, vel.y);
+
+			//position
 			particleDef.position = b2Vec2(emitterTransform->Position.x, emitterTransform->Position.y);
 
 
             auto particle = m_World->CloneEntity(pt, 0);
             m_World->RemoveComponent<Components::Template>(particle);
 			auto particleTransform = m_World->GetComponent<Components::Transform>(particle);
-			
+			auto particleComponent = m_World->GetComponent<Components::Particle>(particle);
 
+			float radius = emitter->RadiusValues[0];
+			if (emitter->RadiusDistribution != 0) {
+				float halfRadius = emitter->RadiusDistribution / 2;
+				std::uniform_real_distribution<float> dis3(radius - halfRadius, radius + halfRadius);
+				radius = dis3(gen);
+				//emitter->RadiusValues[0] = radius;
+			}
+			//particleTransform->Scale = glm::vec3(radius * 2, radius * 2, 1);
+			particleComponent->Radius = radius;
+			
+			//Random z-value
             std::uniform_real_distribution<float> dist(0, 1);
             float zDistribution = dist(gen);
 			particleTransform->Position = glm::vec3(emitterTransform->Position.x, emitterTransform->Position.y, -9.5f + zDistribution);
@@ -640,6 +660,7 @@ bool dd::Systems::PhysicsSystem::CreateParticleSequence(const Events::CreatePart
     particleEmitter->LifeTime = event.EmitterLifeTime;
 	particleEmitter->AlphaValues = event.AlphaValues;
 	particleEmitter->RadiusValues = event.RadiusValues;
+	particleEmitter->RadiusDistribution = event.RadiusDistribution;
 	{
 		//Creating Particle Template
 		auto particle = m_World->CreateEntity(emitter);
@@ -716,10 +737,12 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 {
 	//Check if it is a brick colliding with ball
 	auto brick = m_World->GetComponent<Components::Brick>(event.Entity1);
+	EntityID entity = event.Entity1;
 	Components::Model* model;
 	auto ball = m_World->GetComponent<Components::Ball>(event.Entity2);
 	if (!brick) {
 		brick = m_World->GetComponent<Components::Brick>(event.Entity2);
+		EntityID entity = event.Entity2;
 		if (!brick) {
 			return false;
 		}
@@ -737,24 +760,59 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 
 		model = m_World->GetComponent<Components::Model>(event.Entity1);
 	}
+
+	//Spawn a particle when a brick collides with somthing
 	Events::CreateParticleSequence e;
-	e.EmitterLifeTime = 4;
-	//- glm::atan(event.Normal.x, event.Normal.y
+	e.EmitterLifeTime = 3;
 	e.EmittingAngle = glm::half_pi<float>();
-	e.Spread = 0.5f;
+	e.Spread = 0.f;
 	e.NumberOfTicks = 1;
 	e.ParticleLifeTime = 1.f;
-	e.ParticlesPerTick = 15;
-	e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -10);
-	e.RadiusValues.push_back(0.2);
-	e.RadiusValues.push_back(1);
-	e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
-	e.Color = model->Color + glm::vec4(0.5f);
+	e.ParticlesPerTick = 1;
+	e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -7);
+	e.Color = glm::vec4(1.f);
 	e.AlphaValues.push_back(1.f);
 	e.AlphaValues.push_back(0.f);
-	e.Speed = 100;
+	e.Speed = 0;
+
+	auto PowerFriend = m_World->GetComponent<Components::MultiBallBrick>(entity);
+	auto PowerSaviour = m_World->GetComponent<Components::LifebuoyBrick>(entity);
+	auto PowerSticky = m_World->GetComponent<Components::StickyBrick>(entity);
+	auto PowerInkBlaster = m_World->GetComponent<Components::InkBlasterBrick>(entity);
+	auto PowerKraken = m_World->GetComponent<Components::KrakenAttackBrick>(entity);
+
+	if (PowerFriend) {
+		e.SpriteFile = "Textures/PowerUps/Friends.png";
+	} else if (PowerSaviour) {
+		e.SpriteFile = "Textures/PowerUps/Saviour.png";
+	} else if (PowerSticky) {
+		e.SpriteFile = "Textures/PowerUps/Sticky.png";
+	} else if (PowerInkBlaster){
+		e.SpriteFile = "Textures/PowerUps/InkBlaster.png";
+	} else if (PowerKraken) { 
+		e.SpriteFile = "Textures/PowerUps/RealeaseTheKraken.png";
+	}
+	else {
+		e.EmitterLifeTime = 4;
+		e.EmittingAngle = glm::half_pi<float>();
+		e.Spread = 0.5f;
+		e.NumberOfTicks = 1;
+		e.ParticleLifeTime = 1.f;
+		e.ParticlesPerTick = 15;
+		e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -10);
+		e.RadiusValues.push_back(0.2);
+		e.RadiusValues.push_back(1);
+		e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
+		e.Color = model->Color + glm::vec4(0.5f);
+		e.AlphaValues.push_back(1.f);
+		e.AlphaValues.push_back(0.f);
+		e.Speed = 100;
+	}
+
 	EventBroker->Publish(e);
 	return true;
+
+	
 }
 
 

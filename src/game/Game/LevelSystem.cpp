@@ -78,7 +78,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
         auto transform = m_World->GetComponent<Components::Transform>(entity);
         //Removes bricks that falls out of the stage.
 		if (transform->Position.y < -10) {
-			if (brick->Type == StandardBrick) {
+			/*if (brick->Type == StandardBrick) {
 			} else if (brick->Type == MultiBallBrick) {
                 Events::MultiBall e;
                 e.padTransform = transform;
@@ -99,7 +99,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 				e.KrakenStrength = 0.1;
 				e.PlayerStrength = 0.05;
 				EventBroker->Publish(e);
-			}
+			}*/
             m_LooseBricks--;
             m_World->RemoveEntity(entity);
         }
@@ -200,21 +200,28 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     auto cBrick = m_World->GetComponent<Components::Brick>(brick);
 	auto model = m_World->GetComponent<Components::Model>(brick);
     if (typeInt == StandardBrick) {
+		cBrick->Type = StandardBrick;
+		auto type = m_World->AddComponent<Components::StandardBrick>(brick);
 		model->Color = colorVec;
     } else if (typeInt == MultiBallBrick) {
         cBrick->Type = MultiBallBrick;
+		auto type = m_World->AddComponent<Components::MultiBallBrick>(brick);
         model->ModelFile = "Models/Brick/IceBrick.obj";
 	} else if (typeInt == LifebuoyBrick) {
 		cBrick->Type = LifebuoyBrick;
+		auto type = m_World->AddComponent<Components::LifebuoyBrick>(brick);
 		model->ModelFile = "Models/Brick/LifeBuoyBrick.obj";
 	} else if (typeInt == StickyBrick) {
 		cBrick->Type = StickyBrick;
+		auto type = m_World->AddComponent<Components::StickyBrick>(brick);
 		model->ModelFile = "Models/Brick/StickyBrick.obj";
 	} else if (typeInt == InkBlasterBrick) {
 		cBrick->Type = InkBlasterBrick;
+		auto type = m_World->AddComponent<Components::InkBlasterBrick>(brick);
 		model->Color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 	} else if (typeInt == KrakenAttackBrick) {
 		cBrick->Type = KrakenAttackBrick;
+		auto type = m_World->AddComponent<Components::KrakenAttackBrick>(brick);
 		model->Color = glm::vec4(0.f, 0.5f, 1.0f, .0f);
 	}
 
@@ -277,117 +284,121 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 	if (entityShot != 0) {
 		// For when a brick gets shot.
 		brick->Removed = true;
-
-		auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
-		physicsComponent->CollisionType = CollisionType::Type::Dynamic;
-		physicsComponent->GravityScale = 1.f;
-		physicsComponent->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Water | CollisionLayer::Wall);
-
-		auto transformComponentBrick = m_World->GetComponent<Components::Transform>(entityBrick);
-		auto transformComponentShot = m_World->GetComponent<Components::Transform>(entityShot);
-		auto brickModel = m_World->GetComponent<Components::Model>(entityBrick);
-
-		Events::SetImpulse e;
-		e.Entity = entityBrick;
-
-		glm::vec2 point = glm::vec2(transformComponentBrick->Position.x + ((transformComponentShot->Position.x - transformComponentBrick->Position.x) / 4),
-			transformComponentBrick->Position.y + ((transformComponentShot->Position.y - transformComponentBrick->Position.y) / 4));
-
-		e.Impulse = glm::normalize(point)*5.f;
-		e.Point = point;
-		EventBroker->Publish(e);
-
-
-		SetNumberOfBricks(NumberOfBricks() - 1);
-		Events::ScoreEvent es;
-		es.Score = brick->Score;
-		EventBroker->Publish(es);
-
 		m_World->RemoveEntity(entityShot);
-
-		Events::CreateParticleSequence ep;
-		ep.parent = entityBrick;
-		ep.EmitterLifeTime = 1.f;
-		ep.ParticleLifeTime = 1.5f;
-		ep.ParticlesPerTick = 1;
-		ep.SpawnRate = 0.2;
-		ep.EmittingAngle = glm::half_pi<float>();
-		ep.Spread = 1.5f;
-		ep.Position = transformComponentBrick->Position;
+		BrickHit(entityShot, entityBrick, 1);
 		//ep.Radius = 0.05;
-		ep.SpriteFile = "Textures/Particles/FadeBall.png";
-		ep.Color = brickModel->Color + glm::vec4(0.3f);
-		ep.AlphaValues.push_back(1.f);
-		ep.AlphaValues.push_back(0.f);
-		ep.RadiusValues.push_back(0.05);
-		ep.Speed = 50;
-		EventBroker->Publish(ep);
 
 		return true;
 	}
 
     if (!Restarting() && !brick->Removed) {
         brick->Removed = true;
-        // Hit brick with ball code.
-        ball->Combo += 1;
-        Events::ComboEvent ec;
-        ec.Combo = ball->Combo;
-        ec.Ball = entityBall;
-        EventBroker->Publish(ec);
+        
+		// Hit brick with ball code.
+		ball->Combo += 1;
+		Events::ComboEvent ec;
+		ec.Combo = ball->Combo;
+		ec.Ball = entityBall;
+		EventBroker->Publish(ec);
 
-        auto ballTransform = m_World->GetComponent<Components::Transform>(entityBall);
-
-        auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
-		physicsComponent->CollisionType = CollisionType::Type::Dynamic;
-        physicsComponent->GravityScale = 1.f;
-        physicsComponent->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Water | CollisionLayer::Wall);
-
-        auto transformComponentBrick = m_World->GetComponent<Components::Transform>(entityBrick);
-        auto transformComponentBall = m_World->GetComponent<Components::Transform>(entityBall);
-		auto brickModel = m_World->GetComponent<Components::Model>(entityBrick);
-
-        Events::SetImpulse e;
-        e.Entity = entityBrick;
-
-        glm::vec2 point = glm::vec2(transformComponentBrick->Position.x + ((transformComponentBall->Position.x - transformComponentBrick->Position.x )/4),
-                                    transformComponentBrick->Position.y  + ((transformComponentBall->Position.y - transformComponentBrick->Position.y)/4));
-
-        e.Impulse = glm::normalize(point)*5.f;///2.f;
-        e.Point = point;
-        EventBroker->Publish(e);
-        //TODO: Bricks dont collide with walls D=
-
-
-        SetNumberOfBricks(NumberOfBricks() - 1);
-        Events::ScoreEvent es;
-        es.Score = brick->Score * ball->Combo;
-        EventBroker->Publish(es);
-
-		Events::CreateParticleSequence ep;
-		ep.parent = entityBrick;
-		ep.EmitterLifeTime = 1.f;
-		ep.ParticleLifeTime = 1.5f;
-		ep.ParticlesPerTick = 1;
-		ep.SpawnRate = 0.2;
-		ep.EmittingAngle = glm::half_pi<float>();
-		ep.Spread = 1.5f;
-		ep.Position = transformComponentBrick->Position;
-		//ep.Radius = 0.05;
-		ep.SpriteFile = "Textures/Particles/FadeBall.png";
-		ep.Color = brickModel->Color + glm::vec4(0.3f);
-		ep.AlphaValues.push_back(1.f);
-		ep.AlphaValues.push_back(0.f);
-		ep.RadiusValues.push_back(0.05f);
-		ep.Speed = 50;
-		EventBroker->Publish(ep);
-
-        //std::cout << "Combo: " << ball->Combo << std::endl;
-        //std::cout << NumberOfBricks() << std::endl;
-        //std::cout << "Brick Score: " << brick->Score  << std::endl;
-        //std::cout << "Score: " << Score() << std::endl;
+		BrickHit(entityBall, entityBrick, ball->Combo);
     }
 
     return true;
+}
+
+void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBrick, int combo)
+{
+	auto brick = m_World->GetComponent<Components::Brick>(entityBrick);
+	auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
+	physicsComponent->CollisionType = CollisionType::Type::Dynamic;
+	physicsComponent->GravityScale = 1.f;
+	physicsComponent->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Water | CollisionLayer::Wall);
+
+	auto transformComponentBrick = m_World->GetComponent<Components::Transform>(entityBrick);
+	auto transformComponentHitter = m_World->GetComponent<Components::Transform>(entityHitter);
+	auto brickModel = m_World->GetComponent<Components::Model>(entityBrick);
+
+	// Check if the brick is any kind of special.
+	auto multi = m_World->GetComponent<Components::MultiBallBrick>(entityBrick);
+	if (multi != nullptr) {
+		Events::MultiBall e;
+		e.padTransform = transformComponentBrick;
+		EventBroker->Publish(e);
+	}
+	else {
+		auto buoy = m_World->GetComponent<Components::LifebuoyBrick>(entityBrick);
+		if (buoy != nullptr) {
+			Events::Lifebuoy e;
+			e.Transform = transformComponentBrick;
+			EventBroker->Publish(e);
+		}
+		else {
+			auto sticky = m_World->GetComponent<Components::StickyBrick>(entityBrick);
+			if (sticky != nullptr) {
+				Events::StickyPad e;
+				e.Transform = transformComponentBrick;
+				e.Times = 3;
+				EventBroker->Publish(e);
+			}
+			else {
+				auto ink = m_World->GetComponent<Components::InkBlasterBrick>(entityBrick);
+				if (ink != nullptr) {
+					Events::InkBlaster e;
+					e.Transform = transformComponentBrick;
+					e.Shots = 5;
+					EventBroker->Publish(e);
+				}
+				else {
+					auto kraken = m_World->GetComponent<Components::KrakenAttackBrick>(entityBrick);
+					if (kraken != nullptr) {
+						Events::KrakenAttack e;
+						e.ChargeUpdate = 0;
+						e.KrakenStrength = 0.1;
+						e.PlayerStrength = 0.05;
+						EventBroker->Publish(e);
+					}
+					else {
+
+					}
+				}
+			}
+		}
+	}
+
+	Events::SetImpulse e;
+	e.Entity = entityBrick;
+
+	glm::vec2 point = glm::vec2(transformComponentBrick->Position.x + ((transformComponentHitter->Position.x - transformComponentBrick->Position.x) / 4),
+		transformComponentBrick->Position.y + ((transformComponentHitter->Position.y - transformComponentBrick->Position.y) / 4));
+
+	e.Impulse = glm::normalize(point)*5.f;
+	e.Point = point;
+	EventBroker->Publish(e);
+
+	SetNumberOfBricks(NumberOfBricks() - 1);
+	Events::ScoreEvent es;
+	es.Score = brick->Score * combo;
+	EventBroker->Publish(es);
+
+	Events::CreateParticleSequence ep;
+	ep.parent = entityBrick;
+	ep.EmitterLifeTime = 1.f;
+	ep.ParticleLifeTime = 1.5f;
+	ep.ParticlesPerTick = 1;
+	ep.SpawnRate = 0.2;
+	ep.EmittingAngle = glm::half_pi<float>();
+	ep.Spread = 1.5f;
+	ep.Position = transformComponentBrick->Position;
+		//ep.Radius = 0.05;
+	ep.SpriteFile = "Textures/Particles/FadeBall.png";
+	ep.Color = brickModel->Color + glm::vec4(0.3f);
+	ep.AlphaValues.push_back(1.f);
+	ep.AlphaValues.push_back(0.f);
+	ep.RadiusValues.push_back(0.05f);
+	ep.RadiusDistribution = 0.05;
+	ep.Speed = 50;
+	EventBroker->Publish(ep);
 }
 
 bool dd::Systems::LevelSystem::OnScoreEvent(const dd::Events::ScoreEvent &event)
@@ -663,14 +674,14 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 4, 1, 1, 1, 3, 1,
                      0, 1, 0, 1, 0, 1, 0,
                      0, 1, 0, 1, 0, 1, 0,
-                     1, 5, 1, 1, 1, 2, 1,
+                     1, 5, 1, 6, 1, 2, 1,
                      0, 1, 0, 0, 0, 1, 0};
 			color = 
 					{w, p3, w, w, w, r, w,
 					 p2, w, p1, g, w, w, w,
 					 w, p4, w, g, w, r, w,
 					 w, br, w, g, w, lb1, w,
-					 y, w, y, g, b, w, b,
+					 y, w, y, d, b, w, b,
 					 w, br, w, w, w, lb1, w};
         }
     } else if (m_CurrentCluster == 3) {

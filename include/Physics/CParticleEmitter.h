@@ -21,6 +21,7 @@ struct ParticleEmitter : public Component
     float Spread = 0.f;
     float Speed = 2.f;
     double LifeTime = 100;
+	float RadiusDistribution = 0;
 
 	//values to interpolate between.
 	std::vector<float> RadiusValues;
