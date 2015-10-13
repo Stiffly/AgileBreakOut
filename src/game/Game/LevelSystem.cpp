@@ -9,6 +9,8 @@
 
 void dd::Systems::LevelSystem::Initialize()
 {
+	std::random_device rd;
+	m_RandomGenerator = std::mt19937(rd());
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &LevelSystem::OnContact);
     EVENT_SUBSCRIBE_MEMBER(m_EScoreEvent, &LevelSystem::OnScoreEvent);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &LevelSystem::OnMultiBall);
@@ -32,16 +34,12 @@ void dd::Systems::LevelSystem::Initialize()
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Ball | CollisionLayer::Type::Projectile | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
     transform->Sticky = false;
-
     model->ModelFile = "Models/Brick/WhiteBrick.obj";
-    transform->Position = glm::vec3(50, 50, -10);
-
-    //sound
-    auto collisionSound = m_World->AddComponent<Components::CollisionSound>(m_BrickTemplate);
-    collisionSound->FilePath = "Sounds/Brick/shortbrickbreak.wav";
-
-    m_World->CommitEntity(m_BrickTemplate);
-
+	transform->Position = glm::vec3(50, 50, -10);
+	//sound
+	auto collisionSound = m_World->AddComponent<Components::CollisionSound>(m_BrickTemplate);
+	collisionSound->FilePath = "Sounds/Brick/shortbrickbreak.wav";
+	m_World->CommitEntity(m_BrickTemplate);
     return;
 }
 
@@ -100,8 +98,8 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 				e.PlayerStrength = 0.05;
 				EventBroker->Publish(e);
 			}
-            m_LooseBricks--;
-            m_World->RemoveEntity(entity);
+			m_LooseBricks--;
+			m_World->RemoveEntity(entity);
         }
     }
 
@@ -201,6 +199,7 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
 	auto model = m_World->GetComponent<Components::Model>(brick);
     if (typeInt == StandardBrick) {
 		model->Color = colorVec;
+		SetBrokenModel(brick);
     } else if (typeInt == MultiBallBrick) {
         cBrick->Type = MultiBallBrick;
         model->ModelFile = "Models/Brick/IceBrick.obj";
@@ -335,25 +334,41 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         auto ballTransform = m_World->GetComponent<Components::Transform>(entityBall);
 
         auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
-		physicsComponent->CollisionType = CollisionType::Type::Dynamic;
-        physicsComponent->GravityScale = 1.f;
-        physicsComponent->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Water | CollisionLayer::Wall);
+		//physicsComponent->CollisionType = CollisionType::Type::Dynamic;
+        //physicsComponent->GravityScale = 1.f;
+        //physicsComponent->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Water | CollisionLayer::Wall);
 
         auto transformComponentBrick = m_World->GetComponent<Components::Transform>(entityBrick);
         auto transformComponentBall = m_World->GetComponent<Components::Transform>(entityBall);
-		auto brickModel = m_World->GetComponent<Components::Model>(entityBrick);
+		
 
-        Events::SetImpulse e;
-        e.Entity = entityBrick;
+		auto brickModel = m_World->GetComponent<Components::Model>(entityBrick);
 
         glm::vec2 point = glm::vec2(transformComponentBrick->Position.x + ((transformComponentBall->Position.x - transformComponentBrick->Position.x )/4),
                                     transformComponentBrick->Position.y  + ((transformComponentBall->Position.y - transformComponentBrick->Position.y)/4));
+		
+		auto brickChildren = m_World->GetEntityChildren(entityBrick);
+		for (auto b : brickChildren)
+		{
+			auto cTransform = m_World->GetComponent<Components::Transform>(b);
+			cTransform->Velocity.z = -2.f;
+			point = point - glm::vec2(cTransform->Position.x, cTransform->Position.y);
+			Events::SetImpulse e;
+			e.Entity = b;
+			e.Impulse = glm::normalize(point)*2.f;;
+			e.Point = point;
+			EventBroker->Publish(e);
 
-        e.Impulse = glm::normalize(point)*5.f;///2.f;
-        e.Point = point;
-        EventBroker->Publish(e);
-        //TODO: Bricks dont collide with walls D=
+			cTransform->Position = cTransform->Position + transformComponentBrick->Position;
 
+			auto cModel = m_World->GetComponent<Components::Model>(b);
+			cModel->Color = brickModel->Color;
+			cModel->Color *= 0.8f;
+
+			m_World->RemoveComponent<Components::Template>(b);
+			m_World->SetEntityParent(b, 0);
+			m_World->CommitEntity(b); 
+		}
 
         SetNumberOfBricks(NumberOfBricks() - 1);
         Events::ScoreEvent es;
@@ -379,6 +394,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
         //std::cout << NumberOfBricks() << std::endl;
         //std::cout << "Brick Score: " << brick->Score  << std::endl;
         //std::cout << "Score: " << Score() << std::endl;
+		m_World->RemoveEntity(entityBrick);
     }
 
     return true;
@@ -679,4 +695,58 @@ bool dd::Systems::LevelSystem::OnHitPad(const dd::Events::HitPad &event)
 {
     m_Cleared = false;
     return true;
+}
+
+void dd::Systems::LevelSystem::SetBrokenModel(EntityID entity)
+{
+	std::uniform_int_distribution<int> dist(0, 2);
+	int index = dist(m_RandomGenerator);
+
+	switch (index)
+	{
+	case 0:
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/1/WhiteBrickBreak1.obj", glm::vec3(-0.29912f, 0.0082f, 0.f), glm::vec2(0.281f, 0.351f));
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/1/WhiteBrickBreak2.obj", glm::vec3(0.07597f, -0.02899f, 0.f), glm::vec2(0.559f, 0.351f));
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/1/WhiteBrickBreak3.obj", glm::vec3(0.3227f, 0.05632, 0.f), glm::vec2(0.25f, 0.25f));
+		break;
+
+	case 1:
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/2/WhiteBrickBreak1.obj", glm::vec3(-0.3236f, 0.0159f, 0.f), glm::vec2(0.237f, 0.327f));
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/2/WhiteBrickBreak2.obj", glm::vec3(0.07645f, 0.03131f, 0.f), glm::vec2(0.594f, 0.211f));
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/2/WhiteBrickBreak3.obj", glm::vec3(0.09468f, -0.11792f, 0.f), glm::vec2(0.692f, 0.112f));
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/2/WhiteBrickBreak4.obj", glm::vec3(0.33957f, 0.13079f, 0.f), glm::vec2(0.208f, 0.085f));
+		break;
+
+	case 2:
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/3/WhiteBrickBreak1.obj", glm::vec3(-0.34882f, 0.0564f, 0.f), glm::vec2(0.175f, 0.228f));
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/3/WhiteBrickBreak2.obj", glm::vec3(0.0678f, 0.07679f, 0.f), glm::vec2(0.699f, 0.183f));
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/3/WhiteBrickBreak3.obj", glm::vec3(-0.11862f, -0.10342, 0.f), glm::vec2(0.563f, 0.164f));
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/3/WhiteBrickBreak4.obj", glm::vec3(0.31479f, -0.06351f, 0.f), glm::vec2(0.261f, 0.21f));
+		break;
+
+	default:
+		LOG_INFO("Something went wrong with the random generator in SetBrokenModel");
+		break;
+	}
+}
+
+void dd::Systems::LevelSystem::CreateBrokenModelPart(EntityID Parent, std::string ModelPath, glm::vec3 RelativePosition, glm::vec2 Hitbox)
+{
+	auto ent = m_World->CreateEntity(Parent);
+	auto cTemplate = m_World->AddComponent<Components::Template>(ent);
+	auto cTransform = m_World->AddComponent<Components::Transform>(ent);
+
+	cTransform->Position = RelativePosition;
+
+	auto cModel = m_World->AddComponent<Components::Model>(ent);
+	cModel->ModelFile = ModelPath;
+
+	auto cRec = m_World->AddComponent<Components::RectangleShape>(ent);
+	cRec->Dimensions = Hitbox;
+
+	auto cPhys = m_World->AddComponent<Components::Physics>(ent);
+	cPhys->CollisionType = CollisionType::Type::Dynamic;
+	cPhys->GravityScale = 1.f;
+	cPhys->Category = CollisionLayer::Type::Brick;
+	cPhys->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Wall);
 }

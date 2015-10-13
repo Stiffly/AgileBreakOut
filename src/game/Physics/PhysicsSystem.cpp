@@ -246,7 +246,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             }
         }
 
-        m_Accumulator -= dt;
+        m_Accumulator -= m_TimeStep;
     }
 }
 

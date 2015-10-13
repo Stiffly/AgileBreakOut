@@ -5,6 +5,10 @@
 #ifndef DAYDREAM_LEVELSYSTEM_H
 #define DAYDREAM_LEVELSYSTEM_H
 
+#include <fstream>
+#include <iostream>
+#include <random>
+
 #include "Core/System.h"
 #include "Core/CTransform.h"
 #include "Core/CTemplate.h"
@@ -42,10 +46,9 @@
 #include "Physics/EContact.h"
 #include "Sound/CCollisionSound.h"
 #include "Game/PadSystem.h"
-#include <fstream>
-#include <iostream>
 
 #include "Physics/ECreateParticleSequence.h"
+
 
 namespace dd
 {
@@ -111,6 +114,8 @@ public:
     void SetNotResettingTheStage(const float& notResettingTheStage) { m_NotResettingTheStage = notResettingTheStage; }
 
 private:
+	std::mt19937 m_RandomGenerator;
+
     bool m_Cleared = false;
     bool m_Restarting = false;
     bool m_Initialized = false;
@@ -162,6 +167,8 @@ private:
     bool OnHitPad(const dd::Events::HitPad &event);
 
     void GetNextLevel();
+	void SetBrokenModel(EntityID entity);
+	void CreateBrokenModelPart(EntityID Parent, std::string ModelPath, glm::vec3 RelativePosition, glm::vec2 Hitbox);
 };
 
 }
