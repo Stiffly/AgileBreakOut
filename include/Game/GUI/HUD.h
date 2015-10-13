@@ -41,6 +41,7 @@ public:
 		//m_ScoreIndicator = new GUI::TextureFrame(this, "HUDScoreIndicator");
 		//m_ScoreIndicator->SetTexture("Textures/GUI/HUD/ScoreIndicatorBG.png");
 		m_ScoreNumberFrame = new GUI::NumberFrame(this, "HUDScoreNumberFrame");
+		m_ScoreNumberFrame->SetTexture("Textures/GUI/Numbers/Background.png");
 		//m_ScoreNumberFrame->X = 15;
 		m_ScoreNumberFrame->Y = 18;
 
