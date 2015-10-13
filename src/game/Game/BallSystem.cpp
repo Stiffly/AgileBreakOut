@@ -446,7 +446,6 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
 bool dd::Systems::BallSystem::OnStickyPad(const dd::Events::StickyPad &event) 
 {
 	m_Sticky = true;
-	m_StickyCounter = 5;
 	return true;
 }
 

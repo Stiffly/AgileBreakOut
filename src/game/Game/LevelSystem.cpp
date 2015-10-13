@@ -337,6 +337,7 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 			if (sticky != nullptr) {
 				Events::StickyPad e;
 				e.Transform = transformComponentBrick;
+				e.Times = 3;
 				EventBroker->Publish(e);
 			}
 			else {
@@ -344,6 +345,7 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 				if (ink != nullptr) {
 					Events::InkBlaster e;
 					e.Transform = transformComponentBrick;
+					e.Shots = 5;
 					EventBroker->Publish(e);
 				}
 				else {

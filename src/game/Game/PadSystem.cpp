@@ -62,9 +62,10 @@ void dd::Systems::PadSystem::Initialize()
 		m_World->SetProperty(ent, "Name", "Stick");
 		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
 		transform->Position = glm::vec3(30.f, 0.f, -10.f);
-		transform->Scale = glm::vec3(0.1f, 20.f, 0.1f);
+		transform->Scale = glm::vec3(0.1f, 25.f, 0.1f);
 		std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-		sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+		sprite->SpriteFile = "Models/Brick/White.png";
+		sprite->Color = glm::vec4(0.f, 0.5f, 0.f, 0.5f);
 		std::shared_ptr<Components::StickyAim> sticky = m_World->AddComponent<Components::StickyAim>(ent);
 		m_World->CommitEntity(ent);
 

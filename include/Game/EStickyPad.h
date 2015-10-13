@@ -16,6 +16,7 @@ namespace Events
 struct StickyPad : Event
 {
     Components::Transform* Transform;
+	int Times;
 };
 
 }

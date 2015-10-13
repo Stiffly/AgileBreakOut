@@ -105,7 +105,7 @@ private:
 	bool m_InkAttached = false;
 	bool m_InkBlockedWaiting = false;
 	bool m_Restarting = false;
-	int m_StickyCounter = 5;
+	int m_StickyCounter = 3;
 
 	bool m_StageBlockedWaiting = false;
 
