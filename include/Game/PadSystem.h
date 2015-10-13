@@ -28,6 +28,7 @@
 #include "Game/EResetBall.h"
 #include "Game/EMultiBall.h"
 #include "Game/EStickyPad.h"
+#include "Game/EStickyAttachedToPad.h"
 #include "Game/EInkBlaster.h"
 #include "Game/EKrakenAttack.h"
 #include "Game/EPowerUpTaken.h"
@@ -101,6 +102,7 @@ private:
     dd::EventRelay<PadSystem, dd::Events::Pause> m_EPause;
 	dd::EventRelay<PadSystem, dd::Events::KrakenAttack> m_EKrakenAttack;
 	dd::EventRelay<PadSystem, dd::Events::StickyPad> m_EStickyPad;
+	dd::EventRelay<PadSystem, dd::Events::StickyAttachedToPad> m_EStickyAttachedToPad;
 	dd::EventRelay<PadSystem, dd::Events::ActionButton> m_EActionButton;
 
     bool OnKeyDown(const dd::Events::KeyDown &event);
@@ -111,6 +113,7 @@ private:
     bool OnPause(const dd::Events::Pause &event);
 	bool OnKrakenAttack(const dd::Events::KrakenAttack &event);
 	bool OnStickyPad(const dd::Events::StickyPad &event);
+	bool OnStickyAttachedToPad(const dd::Events::StickyAttachedToPad &event);
 	bool OnActionButton(const dd::Events::ActionButton &event);
 
     class PadSteeringInputController;

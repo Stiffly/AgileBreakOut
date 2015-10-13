@@ -24,6 +24,7 @@ void dd::Systems::BallSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &BallSystem::OnPause);
     EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &BallSystem::OnActionButton);
 	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &BallSystem::OnStageCleared);
+	EVENT_SUBSCRIBE_MEMBER(m_EArrivedAtNewStage, &BallSystem::OnArrivedToNewStage);
 
     //OctoBall
     {
@@ -292,7 +293,7 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 			if (!m_InkAttached) {
 				m_InkAttached = true;
 				m_Waiting = true;
-				m_BlockedWaiting = true;
+				m_InkBlockedWaiting = true;
 				ballComponent->Sticky = true;
 				ballComponent->StickyPlacement = glm::vec3(0, 0.5f, 0);
 				ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
@@ -305,6 +306,8 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 			ballComponent->StickyPlacement = ballTransform->Position - padTransform->Position;
 			ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
 			ballTransform->Velocity *= -1;
+			Events::StickyAttachedToPad e;
+			EventBroker->Publish(e);
 			return true;
 		}
 
@@ -443,7 +446,6 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
 bool dd::Systems::BallSystem::OnStickyPad(const dd::Events::StickyPad &event) 
 {
 	m_Sticky = true;
-	m_StickyCounter = 5;
 	return true;
 }
 
@@ -460,7 +462,7 @@ bool dd::Systems::BallSystem::OnInkBlasterOver(const dd::Events::InkBlasterOver 
 
 	m_InkBlaster = false;
 	m_InkAttached = false;
-	m_BlockedWaiting = false;
+	m_InkBlockedWaiting = false;
 	ballComponent->SavedSpeed = glm::normalize(glm::vec3(0.f, 1.f, 0.f)) * ballComponent->Speed;
 	m_Waiting = false;
 	transform->Velocity = glm::normalize(glm::vec3(0.f, 1, 0.f)) * ballComponent->Speed;
@@ -469,8 +471,10 @@ bool dd::Systems::BallSystem::OnInkBlasterOver(const dd::Events::InkBlasterOver 
 
 bool dd::Systems::BallSystem::OnActionButton(const dd::Events::ActionButton &event)
 {
-	if (!m_BlockedWaiting) {
-		m_Waiting = false;
+	if (!m_StageBlockedWaiting) {
+		if (!m_InkBlockedWaiting) {
+			m_Waiting = false;
+		}
 	}
     return true;
 }
@@ -478,6 +482,13 @@ bool dd::Systems::BallSystem::OnActionButton(const dd::Events::ActionButton &eve
 bool dd::Systems::BallSystem::OnStageCleared(const dd::Events::StageCleared &event)
 {
 	m_Restarting = true;
+	m_StageBlockedWaiting = true;
+	return true;
+}
+
+bool dd::Systems::BallSystem::OnArrivedToNewStage(const dd::Events::ArrivedAtNewStage &event)
+{
+	m_StageBlockedWaiting = false;
 	return true;
 }
 

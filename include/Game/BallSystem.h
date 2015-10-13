@@ -17,21 +17,23 @@
 #include "Game/CPowerUp.h"
 #include "Game/CLife.h"
 #include "Game/CBrick.h"
+#include "Game/CLifebuoy.h"
 #include "Game/ELifeLost.h"
 #include "Game/EComboEvent.h"
 #include "Game/EResetBall.h"
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
 #include "Game/EStickyPad.h"
+#include "Game/EStickyAttachedToPad.h"
 #include "Game/EInkBlaster.h"
 #include "Game/EInkBlasterOver.h"
 #include "Game/EStageCleared.h"
+#include "Game/EArrivedAtNewStage.h"
 #include "Game/EGameOver.h"
 #include "Game/EPause.h"
 #include "Game/EHitPad.h"
 #include "Game/EHitLag.h"
 #include "Game/EActionButton.h"
-#include "Game/CLifebuoy.h"
 #include "Game/ELifebuoyHit.h"
 
 namespace dd
@@ -101,9 +103,11 @@ private:
 	bool m_Sticky = false;
 	bool m_InkBlaster = false;
 	bool m_InkAttached = false;
-	bool m_BlockedWaiting = false;
+	bool m_InkBlockedWaiting = false;
 	bool m_Restarting = false;
-	int m_StickyCounter = 5;
+	int m_StickyCounter = 3;
+
+	bool m_StageBlockedWaiting = false;
 
     glm::vec3 m_SavedSpeed;
     bool m_InitializePause = false;
@@ -124,6 +128,7 @@ private:
     dd::EventRelay<BallSystem, dd::Events::Contact> m_Contact;
     dd::EventRelay<BallSystem, dd::Events::ActionButton> m_EActionButton;
 	dd::EventRelay<BallSystem, dd::Events::StageCleared> m_EStageCleared;
+	dd::EventRelay<BallSystem, dd::Events::ArrivedAtNewStage> m_EArrivedAtNewStage;
 
     bool Contact(const Events::Contact &event);
     bool OnLifeLost(const dd::Events::LifeLost &event);
@@ -136,6 +141,7 @@ private:
     bool OnPause(const dd::Events::Pause &event);
     bool OnActionButton(const dd::Events::ActionButton &event);
 	bool OnStageCleared(const dd::Events::StageCleared &event);
+	bool OnArrivedToNewStage(const dd::Events::ArrivedAtNewStage &event);
 };
 
 }

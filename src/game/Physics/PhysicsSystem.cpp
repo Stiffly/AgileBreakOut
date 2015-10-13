@@ -175,6 +175,8 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 		if (m_DistanceTravelled > 12.f) {
 			m_DistanceTravelled = 0;
 			m_Travelling = false;
+			Events::ArrivedAtNewStage e;
+			EventBroker->Publish(e);
 		}
 
 		m_DistanceTravelled += 6.0f * dt;

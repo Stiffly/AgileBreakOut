@@ -30,6 +30,7 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PadSystem::OnPause);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttack, &PadSystem::OnKrakenAttack);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &PadSystem::OnStickyPad);
+	EVENT_SUBSCRIBE_MEMBER(m_EStickyAttachedToPad, &PadSystem::OnStickyAttachedToPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &PadSystem::OnActionButton);
     //EVENT_SUBSCRIBE_MEMBER(m_EBindKey, &PadSystem::OnBindKey);
 
@@ -61,13 +62,15 @@ void dd::Systems::PadSystem::Initialize()
 		m_World->SetProperty(ent, "Name", "Stick");
 		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
 		transform->Position = glm::vec3(30.f, 0.f, -10.f);
-		transform->Scale = glm::vec3(0.1f, 20.f, 0.1f);
+		transform->Scale = glm::vec3(0.1f, 25.f, 0.1f);
 		std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(ent);
-		sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+		sprite->SpriteFile = "Models/Brick/White.png";
+		sprite->Color = glm::vec4(0.f, 0.5f, 0.f, 0.5f);
 		std::shared_ptr<Components::StickyAim> sticky = m_World->AddComponent<Components::StickyAim>(ent);
 		m_World->CommitEntity(ent);
 
 		m_StickTransform = transform;
+		m_StickyAim = sticky;
 	}
 }
 
@@ -86,14 +89,11 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 			glm::vec2 up = glm::vec2(0.f, 1.f);
 			float angle = glm::acos(glm::dot<float>(dir, up)) * glm::sign(dir.x);
 			ballTransform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, -1.f));
-			/*if (m_StickyAim->Aiming) {
-				m_StickTransform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, 1.f));
-				m_StickTransform->Position = ballTransform->Position;
-			}*/
-		} else {
-            /*if (!m_StickyAim->Aiming) {
-                m_StickTransform->Position = glm::vec3(30.f, 0.f, 0.f);
-            }*/
+			m_StickTransform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, 1.f));
+			m_StickTransform->Position = ballTransform->Position;
+		}
+		if (!m_StickyAim->Aiming) {
+			m_StickTransform->Position = glm::vec3(30.f, 0.f, 0.f);
 		}
 	}
 }
@@ -374,6 +374,12 @@ bool dd::Systems::PadSystem::OnStickyPad(const dd::Events::StickyPad &event)
 	return true;
 }
 
+bool dd::Systems::PadSystem::OnStickyAttachedToPad(const dd::Events::StickyAttachedToPad &event)
+{
+	m_StickyAim->Aiming = true;
+	return true;
+}
+
 bool dd::Systems::PadSystem::OnActionButton(const dd::Events::ActionButton &event)
 {
 	if (m_KrakenAttack) {
@@ -385,6 +391,7 @@ bool dd::Systems::PadSystem::OnActionButton(const dd::Events::ActionButton &even
 		e.PlayerStrength = 0;
 		EventBroker->Publish(e);
 	}
+	m_StickyAim->Aiming = false;
 	return true;
 }
 

@@ -80,6 +80,7 @@ public:
     void CreateBasicLevel(int, int, glm::vec2, float);
     void CreateLevel(int);
     void CreateBrick(int, int, glm::vec2, float, int, int, int, glm::vec4);
+	void BrickHit(EntityID, EntityID, int);
 
     void OnEntityRemoved(EntityID entity);
 
