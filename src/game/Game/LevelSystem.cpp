@@ -401,6 +401,7 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 	es.Score = brick->Score * combo;
 	EventBroker->Publish(es);
 
+	m_LooseBricks--;
 	m_World->RemoveEntity(entityBrick);
 }
 
