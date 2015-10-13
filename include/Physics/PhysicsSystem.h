@@ -25,6 +25,8 @@
 #include "Physics/CCircleShape.h"
 #include "Physics/CParticleEmitter.h"
 
+#include "Game/BrickComponents.h"
+
 #include "Transform/TransformSystem.h"
 #include "Transform/TransformSystem.h"
 
