@@ -344,51 +344,35 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 
 		auto brickModel = m_World->GetComponent<Components::Model>(entityBrick);
 
-        glm::vec2 point = glm::vec2(transformComponentBrick->Position.x + ((transformComponentBall->Position.x - transformComponentBrick->Position.x )/4),
-                                    transformComponentBrick->Position.y  + ((transformComponentBall->Position.y - transformComponentBrick->Position.y)/4));
-		
 		auto brickChildren = m_World->GetEntityChildren(entityBrick);
 		for (auto b : brickChildren)
 		{
-			auto cTransform = m_World->GetComponent<Components::Transform>(b);
-			cTransform->Velocity.z = -2.f;
-			point = point - glm::vec2(cTransform->Position.x, cTransform->Position.y);
-			Events::SetImpulse e;
-			e.Entity = b;
-			e.Impulse = glm::normalize(point)*2.f;;
-			e.Point = point;
-			EventBroker->Publish(e);
 
+
+			auto cTransform = m_World->GetComponent<Components::Transform>(b);
 			cTransform->Position = cTransform->Position + transformComponentBrick->Position;
+			glm::vec2 ballToBrick = 4.f * glm::normalize(glm::vec2(cTransform->Position.x - ballTransform->Position.x , cTransform->Position.y - ballTransform->Position.y));
+			
+			cTransform->Velocity = glm::vec3(ballToBrick.x, ballToBrick.y, 0.f);
+
+			
 
 			auto cModel = m_World->GetComponent<Components::Model>(b);
 			cModel->Color = brickModel->Color;
-			cModel->Color *= 0.8f;
+			cModel->Color *= 0.5f;
 
 			m_World->RemoveComponent<Components::Template>(b);
 			m_World->SetEntityParent(b, 0);
 			m_World->CommitEntity(b); 
+
+
+			
 		}
 
         SetNumberOfBricks(NumberOfBricks() - 1);
         Events::ScoreEvent es;
         es.Score = brick->Score * ball->Combo;
         EventBroker->Publish(es);
-
-		Events::CreateParticleSequence ep;
-		ep.parent = entityBrick;
-		ep.EmitterLifeTime = 1.f;
-		ep.ParticleLifeTime = 1.5f;
-		ep.ParticlesPerTick = 1;
-		ep.SpawnRate = 0.2;
-		ep.EmittingAngle = glm::half_pi<float>();
-		ep.Spread = 1.5f;
-		ep.Position = transformComponentBrick->Position;
-		ep.Radius = 0.05;
-		ep.SpriteFile = "Textures/Particles/FadeBall.png";
-		ep.Color = brickModel->Color + glm::vec4(0.3f);
-		ep.Speed = 50;
-		EventBroker->Publish(ep);
 
         //std::cout << "Combo: " << ball->Combo << std::endl;
         //std::cout << NumberOfBricks() << std::endl;
