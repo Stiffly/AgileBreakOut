@@ -314,9 +314,12 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 		ep.EmittingAngle = glm::half_pi<float>();
 		ep.Spread = 1.5f;
 		ep.Position = transformComponentBrick->Position;
-		ep.Radius = 0.05;
+		//ep.Radius = 0.05;
 		ep.SpriteFile = "Textures/Particles/FadeBall.png";
 		ep.Color = brickModel->Color + glm::vec4(0.3f);
+		ep.AlphaValues.push_back(1.f);
+		ep.AlphaValues.push_back(0.f);
+		ep.RadiusValues.push_back(0.05);
 		ep.Speed = 50;
 		EventBroker->Publish(ep);
 
@@ -369,9 +372,12 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 		ep.EmittingAngle = glm::half_pi<float>();
 		ep.Spread = 1.5f;
 		ep.Position = transformComponentBrick->Position;
-		ep.Radius = 0.05;
+		//ep.Radius = 0.05;
 		ep.SpriteFile = "Textures/Particles/FadeBall.png";
 		ep.Color = brickModel->Color + glm::vec4(0.3f);
+		ep.AlphaValues.push_back(1.f);
+		ep.AlphaValues.push_back(0.f);
+		ep.RadiusValues.push_back(0.05f);
 		ep.Speed = 50;
 		EventBroker->Publish(ep);
 

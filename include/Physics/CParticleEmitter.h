@@ -22,6 +22,10 @@ struct ParticleEmitter : public Component
     float Speed = 2.f;
     double LifeTime = 100;
 
+	//values to interpolate between.
+	std::vector<float> RadiusValues;
+	std::vector<float> AlphaValues;
+
     //System variables
     float GravityScale = 1.0f;
 };

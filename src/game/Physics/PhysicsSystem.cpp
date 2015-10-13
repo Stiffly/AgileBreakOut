@@ -12,13 +12,13 @@ void dd::Systems::PhysicsSystem::Initialize()
 {
     std::random_device rd;
     gen = std::mt19937(rd());
-    m_DestructionListener = new DestructionListener(this);
+//    m_DestructionListener = new DestructionListener(this);
     m_ContactListener = new ContactListener(this);
     m_PhysicsWorld = new b2World(m_Gravity);
 	m_ParticleContactDisabler = new ParticleContactDisabler();
     m_PhysicsWorld->SetContactListener(m_ContactListener);
 	m_PhysicsWorld->SetContactFilter(m_ParticleContactDisabler);
-	m_PhysicsWorld->SetDestructionListener(m_DestructionListener);
+//	m_PhysicsWorld->SetDestructionListener(m_DestructionListener);
 
     InitializeWater();
     EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, &PhysicsSystem::SetImpulse);
@@ -241,12 +241,14 @@ void dd::Systems::PhysicsSystem::Update(double dt)
                     parentTransform = tp->Position;
                 }
                 auto transform = m_World->GetComponent<Components::Transform>(entity);
+				auto particle = m_World->GetComponent<Components::Particle>(entity);
 
                 transform->Position = glm::vec3(position.x, position.y, transform->Position.z);
+				transform->Scale = glm::vec3(particle->Radius * 2.f, particle->Radius * 2.f, 1);
             }
         }
 
-        m_Accumulator -= dt;
+        m_Accumulator -= m_TimeStep;
     }
 }
 
@@ -268,8 +270,9 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 
 
     if (particle && !pTemplate) {
-        particle->LifeTime -= dt;
-        if (particle->LifeTime <= 0) {
+        particle->TimeLived += dt;
+		//Delete particles 
+		if (particle->TimeLived >= particle->LifeTime - 0.1) {
             for (int i = 0; i < m_EntitiesToParticleHandle.size(); i++) {
                 const b2ParticleHandle* handle = m_EntitiesToParticleHandle[i][entity];
                 std::unordered_map<EntityID, const b2ParticleHandle*>::iterator iter1;
@@ -285,10 +288,20 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
                 m_World->RemoveEntity(entity);
             }
         }
+		//Update alpha
 		auto sprite = m_World->GetComponent<Components::Sprite>(entity);
-		sprite->Color.w = particle->LifeTime;
+		float timeProgress = particle->TimeLived / particle->LifeTime;
+		if (timeProgress > particle->LifeTime) {
+			timeProgress = particle->LifeTime;
+		}
+		auto emitter = m_World->GetComponent<Components::ParticleEmitter>(particle->ParticleSystem);
+		if (emitter) {
+			sprite->Color.w = ScalarInterpolation(timeProgress, emitter->AlphaValues);
+			particle->Radius = ScalarInterpolation(timeProgress, emitter->RadiusValues); 
+		}
     }
 
+	//Particlesystem relative to parent
 	auto emitter = m_World->GetComponent<Components::ParticleEmitter>(entity);
 	if (emitter) {
 		EntityID emitterParent = emitter->Parent;
@@ -300,6 +313,26 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 			}
 		}
 	}
+}
+
+float dd::Systems::PhysicsSystem::ScalarInterpolation(float timeProgress, std::vector<float> spectrum)
+{
+	int alphaVecSize = spectrum.size(); 
+	if (alphaVecSize == 0) {
+		return 0.01f;
+	}
+	if (alphaVecSize == 1) {
+		return spectrum[0];
+	}
+
+	float dValue = glm::abs(spectrum[0] - spectrum[1]);
+	if (spectrum[0] > spectrum[1]) {
+		dValue *= -1;
+	}
+
+	float scalar = spectrum[0] + dValue * timeProgress;
+
+	return scalar;
 }
 
 bool dd::Systems::PhysicsSystem::OnPause(const dd::Events::Pause &event)
@@ -354,7 +387,6 @@ void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
         m_BodiesToEntities.erase(it->second);
         m_EntitiesToBodies.erase(entity);
     }
-
 }
 
 
@@ -504,11 +536,13 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
         if(emitter->TimeSinceLastSpawn < emitter->SpawnRate || emitter->NumberOfTicks < 1) {
             continue;
         }
+		//Create new particle
         emitter->NumberOfTicks--;
         emitter->TimeSinceLastSpawn -= emitter->SpawnRate;
         auto templateTransform = m_World->GetComponent<Components::Transform>(pt);
-        b2ParticleDef particleDef;
+        
         for ( int j = 0; j < emitter->ParticlesPerTick; j++) {
+			b2ParticleDef particleDef;
             particleDef.flags = particleTemplate->Flags;
             //particleDef.color TODO: Implement this if we want color mixing and shit.
             particleDef.lifetime = particleTemplate->LifeTime;
@@ -527,21 +561,21 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 
             auto particle = m_World->CloneEntity(pt, 0);
             m_World->RemoveComponent<Components::Template>(particle);
-			auto transform2 = m_World->GetComponent<Components::Transform>(particle);
+			auto particleTransform = m_World->GetComponent<Components::Transform>(particle);
+			
 
             std::uniform_real_distribution<float> dist(0, 1);
             float zDistribution = dist(gen);
-			transform2->Position = glm::vec3(emitterTransform->Position.x, emitterTransform->Position.y, -9.5f + zDistribution);
-			transform2->Scale = glm::vec3(particleTemplate->Radius * 2.f / speedMultiplier, particleTemplate->Radius * 2.f / speedMultiplier, 1);
+			particleTransform->Position = glm::vec3(emitterTransform->Position.x, emitterTransform->Position.y, -9.5f + zDistribution);
+			particleTransform->Scale = glm::vec3(particleTemplate->Radius * 2.f / speedMultiplier, particleTemplate->Radius * 2.f / speedMultiplier, 1);
+			particleTransform->Velocity = glm::vec3(vel.x, vel.y, 0);
 
 
-            auto b2Particle = ps->CreateParticle(particleDef);
+            auto b2ParticleIndex = ps->CreateParticle(particleDef);
+            auto b2ParticleHandle = ps->GetParticleHandleFromIndex(b2ParticleIndex);
 
-            auto b2ParticleHandle = ps->GetParticleHandleFromIndex(b2Particle);
             m_EntitiesToParticleHandle[i].insert(std::make_pair(particle, b2ParticleHandle));
             m_ParticleHandleToEntities[i].insert(std::make_pair(b2ParticleHandle, particle));
-			
-			
         }
 		
     }
@@ -554,7 +588,7 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 // 	std::cout << "Entities and handles: " << entHandles << std::endl;
 // 	LOG_INFO("Particles living: %i", pSizeTest);
 // 	LOG_INFO("Particle systems: %i", psListSize);
-// 	int entHandles = 0;
+// 	//int entHandles = 0;
 // 	for (int i = 0; i < m_EntitiesToParticleHandle.size(); i++)
 // 		entHandles += m_EntitiesToParticleHandle[i].size();
 // 	LOG_INFO("Entities and handles: %i", entHandles);
@@ -570,7 +604,7 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
             }
         }
 
-        if (m_ParticleEmitters.ParticleSystem[key]->GetParticleCount() == 0 && key <= m_ParticleEmitters.ParticleSystem.size()) {
+        if (m_ParticleEmitters.ParticleSystem[key]->GetParticleCount() == 0 && key <= m_ParticleEmitters.ParticleSystem.size() - 1) {
             m_World->RemoveEntity(ent);
             m_PhysicsWorld->DestroyParticleSystem(m_ParticleEmitters.ParticleSystem[key]);
             m_ParticleEmitters.ParticleSystem.erase(m_ParticleEmitters.ParticleSystem.begin() + key);
@@ -578,15 +612,8 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
             m_ParticleEmitters.ParticleTemplate.erase(m_ParticleEmitters.ParticleTemplate.begin() + key);
             m_EntitiesToParticleHandle.erase(m_EntitiesToParticleHandle.begin() + key);
             m_ParticleHandleToEntities.erase(m_ParticleHandleToEntities.begin() + key);
+			emittersToDelete.clear();
         }
-    }
-
-	
-
-    int stp = 0;
-    for (auto ts : m_EntitiesToParticleHandle)
-    {
-        stp += ts.size();
     }
 }
 
@@ -611,21 +638,22 @@ bool dd::Systems::PhysicsSystem::CreateParticleSequence(const Events::CreatePart
     particleEmitter->Spread = event.Spread;
     particleEmitter->EmittingAngle = event.EmittingAngle;
     particleEmitter->LifeTime = event.EmitterLifeTime;
-
-    {
-        //Creating Particle Template
-        auto particle = m_World->CreateEntity(emitter);
-        auto particleTransform = m_World->AddComponent<Components::Transform>(particle);
-        auto sprite = m_World->AddComponent<Components::Sprite>(particle);
-        auto particleComponent = m_World->AddComponent<Components::Particle>(particle);
-        m_World->AddComponent<Components::Template>(particle);
-
-        particleTransform->Position = emitterTransform->Position;
-        sprite->SpriteFile = event.SpriteFile;
+	particleEmitter->AlphaValues = event.AlphaValues;
+	particleEmitter->RadiusValues = event.RadiusValues;
+	{
+		//Creating Particle Template
+		auto particle = m_World->CreateEntity(emitter);
+		auto particleTransform = m_World->AddComponent<Components::Transform>(particle);
+		auto sprite = m_World->AddComponent<Components::Sprite>(particle);
+		auto particleComponent = m_World->AddComponent<Components::Particle>(particle);
+		m_World->AddComponent<Components::Template>(particle);
+		particleTransform->Position = emitterTransform->Position;
+		sprite->SpriteFile = event.SpriteFile;
 		sprite->Color = event.Color;
-        particleComponent->LifeTime = event.ParticleLifeTime;
-        particleComponent->Flags = event.Flags;
-        particleComponent->Radius = event.Radius;
+		particleComponent->LifeTime = event.ParticleLifeTime;
+		particleComponent->Flags = event.Flags;
+		particleComponent->Radius = event.RadiusValues[0];
+		particleComponent->ParticleSystem = emitter;
     }
     m_World->CommitEntity(emitter);
     return true;
@@ -679,17 +707,17 @@ b2ParticleSystem* dd::Systems::PhysicsSystem::CreateParticleSystem(float radius,
     m_ParticleSystemDef.maxCount = maxCount;
     m_ParticleSystemDef.radius = radius;
     m_ParticleSystemDef.gravityScale = gravityScale;
-    m_ParticleSystemDef.destroyByAge = true;
+    m_ParticleSystemDef.destroyByAge = false;
 
     return m_PhysicsWorld->CreateParticleSystem(&m_ParticleSystemDef);
 }
 
 bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 {
-	//Check if it is a brick colliding
+	//Check if it is a brick colliding with ball
 	auto brick = m_World->GetComponent<Components::Brick>(event.Entity1);
 	Components::Model* model;
-	
+	auto ball = m_World->GetComponent<Components::Ball>(event.Entity2);
 	if (!brick) {
 		brick = m_World->GetComponent<Components::Brick>(event.Entity2);
 		if (!brick) {
@@ -699,7 +727,14 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 			model = m_World->GetComponent<Components::Model>(event.Entity2);
 		}
 	}
+	else if (!ball) {
+		ball = m_World->GetComponent<Components::Ball>(event.Entity1);
+		if (!ball) {
+			return false;
+		}
+	}
 	else {
+
 		model = m_World->GetComponent<Components::Model>(event.Entity1);
 	}
 	Events::CreateParticleSequence e;
@@ -711,9 +746,12 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 	e.ParticleLifeTime = 1.f;
 	e.ParticlesPerTick = 15;
 	e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -10);
-	e.Radius = 0.2f;
+	e.RadiusValues.push_back(0.2);
+	e.RadiusValues.push_back(1);
 	e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
 	e.Color = model->Color + glm::vec4(0.5f);
+	e.AlphaValues.push_back(1.f);
+	e.AlphaValues.push_back(0.f);
 	e.Speed = 100;
 	EventBroker->Publish(e);
 	return true;
