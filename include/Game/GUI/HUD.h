@@ -26,24 +26,24 @@ public:
 		Width = parent->Width;
 		Height = parent->Height;
 
-		m_LevelIndicator = new GUI::TextureFrame(this, "HUDLevelIndicator");
-		m_LevelIndicator->SetTexture("Textures/GUI/HUD/LevelIndicatorBG.png");
+		//m_LevelIndicator = new GUI::TextureFrame(this, "HUDLevelIndicator");
+		//m_LevelIndicator->SetTexture("Textures/GUI/HUD/LevelIndicatorBG.png");
 
-		m_AreaNumberFrame = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
-		m_AreaNumberFrame->X = 132;
-		m_AreaNumberFrame->Y = 19;
-		m_AreaNumberFrame->SetNumber(6);
-		m_StageNumberFrame = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
-		m_StageNumberFrame->X = 165;
-		m_StageNumberFrame->Y = 19;
-		m_StageNumberFrame->SetNumber(5);
+		//m_AreaNumberFrame = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
+		//m_AreaNumberFrame->X = 132;
+		//m_AreaNumberFrame->Y = 19;
+		//m_AreaNumberFrame->SetNumber(6);
+		//m_StageNumberFrame = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
+		//m_StageNumberFrame->X = 165;
+		//m_StageNumberFrame->Y = 19;
+		//m_StageNumberFrame->SetNumber(5);
 
-		m_ScoreIndicator = new GUI::TextureFrame(this, "HUDScoreIndicator");
-		m_ScoreIndicator->SetTexture("Textures/GUI/HUD/ScoreIndicatorBG.png");
-		m_ScoreIndicator->SetRight(Right());
-		m_ScoreNumberFrame = new GUI::NumberFrame(m_ScoreIndicator, "HUDScoreNumberFrame");
-		m_ScoreNumberFrame->X = 15;
-		m_ScoreNumberFrame->Y = 21;
+		//m_ScoreIndicator = new GUI::TextureFrame(this, "HUDScoreIndicator");
+		//m_ScoreIndicator->SetTexture("Textures/GUI/HUD/ScoreIndicatorBG.png");
+		m_ScoreNumberFrame = new GUI::NumberFrame(this, "HUDScoreNumberFrame");
+		m_ScoreNumberFrame->SetTexture("Textures/GUI/Numbers/Background.png");
+		//m_ScoreNumberFrame->X = 15;
+		m_ScoreNumberFrame->Y = 18;
 
 		m_FPSCounter = new GUI::FPSCounter(this, "FPSCounter");
 
@@ -58,6 +58,11 @@ public:
 		EVENT_SUBSCRIBE_MEMBER(m_EGameOver, &HUD::OnGameOver);
 		EVENT_SUBSCRIBE_MEMBER(m_ClusterClear, &HUD::OnClusterClear);
 		EVENT_SUBSCRIBE_MEMBER(m_KrakenAttack, &HUD::OnKrakenAttack);
+	}
+
+	void Update(double dt) override
+	{
+		m_ScoreNumberFrame->SetLeft(Width / 2.f - m_ScoreNumberFrame->Width / 2.f);
 	}
 
 private:

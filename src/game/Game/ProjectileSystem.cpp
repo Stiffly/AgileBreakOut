@@ -90,7 +90,7 @@ bool dd::Systems::ProjectileSystem::OnContact(const dd::Events::Contact &event)
 bool dd::Systems::ProjectileSystem::OnInkBlaster(const dd::Events::InkBlaster &event)
 {
 	m_InkBlaster = true;
-	m_Shots = 5;
+	m_Shots = event.Shots;
 	return true;
 }
 

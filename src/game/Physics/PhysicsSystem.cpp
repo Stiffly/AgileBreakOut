@@ -175,6 +175,8 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 		if (m_DistanceTravelled > 12.f) {
 			m_DistanceTravelled = 0;
 			m_Travelling = false;
+			Events::ArrivedAtNewStage e;
+			EventBroker->Publish(e);
 		}
 
 		m_DistanceTravelled += 6.0f * dt;
@@ -558,9 +560,8 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 // 	for (int i = 0; i < m_EntitiesToParticleHandle.size(); i++)
 // 		entHandles += m_EntitiesToParticleHandle[i].size();
 // 	LOG_INFO("Entities and handles: %i", entHandles);
-
-
-    for (int i = 0; i < emittersToDelete.size(); i++)
+	
+	for (int i = 0; i < emittersToDelete.size(); i++)
     {
         EntityID ent = emittersToDelete[i];
         int key;
@@ -571,6 +572,36 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
         }
 
         if (m_ParticleEmitters.ParticleSystem[key]->GetParticleCount() == 0 && key <= m_ParticleEmitters.ParticleSystem.size()) {
+			// DEBUG vvvvvv
+// 			int t_Entities = m_World->GetEntities()->size();
+// 			int t_Systems = m_ParticleEmitters.ParticleSystem.size();
+// 			int t_Emitters = m_ParticleEmitters.ParticleEmitter.size();
+// 			int t_Templates = m_ParticleEmitters.ParticleTemplate.size();
+// 			int t_LFunParticles = 0;
+// 			int t_EntParticles = 0;
+// 			auto t_WorldEntities = m_World->GetEntities();
+// 
+// 			for (auto &te : *t_WorldEntities)
+// 			{
+// 				if (m_World->GetComponent<Components::Particle>(te.first))
+// 				{
+// 					t_EntParticles++;
+// 				}
+// 			}
+// 
+// 			for (int i = 0; i < t_Systems; i++)
+// 			{
+// 				t_LFunParticles = m_ParticleEmitters.ParticleSystem[i]->GetParticleCount();
+// 			}
+// 
+// 			LOG_INFO("----------------------------");
+// 			LOG_INFO("Deleting emitter and other");
+// 			LOG_INFO("Total before:");
+// 			LOG_INFO("Entities: %i, Systems: %i, Emitters: %i, Templates: %i, LfunParticles: %i, EntParticles: %i, EtH: %i, HtE: %i",
+// 				t_Entities, t_Systems, t_Emitters, t_Templates, t_LFunParticles, t_EntParticles, m_EntitiesToParticleHandle.size(), m_ParticleHandleToEntities.size());
+// 			
+			// DEBUG ^^^^^
+
             m_World->RemoveEntity(ent);
             m_PhysicsWorld->DestroyParticleSystem(m_ParticleEmitters.ParticleSystem[key]);
             m_ParticleEmitters.ParticleSystem.erase(m_ParticleEmitters.ParticleSystem.begin() + key);
@@ -578,7 +609,38 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
             m_ParticleEmitters.ParticleTemplate.erase(m_ParticleEmitters.ParticleTemplate.begin() + key);
             m_EntitiesToParticleHandle.erase(m_EntitiesToParticleHandle.begin() + key);
             m_ParticleHandleToEntities.erase(m_ParticleHandleToEntities.begin() + key);
+
+			// DEBUG vvvvv
+// 			t_Entities = m_World->GetEntities()->size();
+// 			t_Systems = m_ParticleEmitters.ParticleSystem.size();
+// 			t_Emitters = m_ParticleEmitters.ParticleEmitter.size();
+// 			t_Templates = m_ParticleEmitters.ParticleTemplate.size();
+// 			t_LFunParticles = 0;
+// 			t_EntParticles = 0;
+// 			t_WorldEntities = m_World->GetEntities();
+// 
+// 			for (auto &te : *t_WorldEntities)
+// 			{
+// 				if (m_World->GetComponent<Components::Particle>(te.first))
+// 				{
+// 					t_EntParticles++;
+// 				}
+// 			}
+// 
+// 			for (int i = 0; i < t_Systems; i++)
+// 			{
+// 				t_LFunParticles = m_ParticleEmitters.ParticleSystem[i]->GetParticleCount();
+// 			}
+// 
+// 			LOG_INFO("Total after:");
+// 			LOG_INFO("Entities: %i, Systems: %i, Emitters: %i, Templates: %i, LfunParticles: %i, EntParticles: %i, EtH: %i, HtE: %i",
+// 				t_Entities, t_Systems, t_Emitters, t_Templates, t_LFunParticles, t_EntParticles, m_EntitiesToParticleHandle.size(), m_ParticleHandleToEntities.size());
+// 			LOG_INFO("-----------------------------");
+// 			t_counter = 0;
+			
+			// DEBUG ^^^^^
         }
+		
     }
 
 	
@@ -688,10 +750,12 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 {
 	//Check if it is a brick colliding
 	auto brick = m_World->GetComponent<Components::Brick>(event.Entity1);
+	EntityID entity = event.Entity1;
 	Components::Model* model;
 	
 	if (!brick) {
 		brick = m_World->GetComponent<Components::Brick>(event.Entity2);
+		EntityID entity = event.Entity2;
 		if (!brick) {
 			return false;
 		}
@@ -702,21 +766,57 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 	else {
 		model = m_World->GetComponent<Components::Model>(event.Entity1);
 	}
+
+	//Spawn a particle when a brick collides with somthing
 	Events::CreateParticleSequence e;
-	e.EmitterLifeTime = 4;
-	//- glm::atan(event.Normal.x, event.Normal.y
+	
+	
+	e.EmitterLifeTime = 3;
 	e.EmittingAngle = glm::half_pi<float>();
-	e.Spread = 0.5f;
+	e.Spread = 0.f;
 	e.NumberOfTicks = 1;
 	e.ParticleLifeTime = 1.f;
-	e.ParticlesPerTick = 15;
-	e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -10);
-	e.Radius = 0.2f;
-	e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
-	e.Color = model->Color + glm::vec4(0.5f);
-	e.Speed = 100;
+	e.ParticlesPerTick = 1;
+	e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -7);
+	e.Color = glm::vec4(1.f);
+	e.Radius = 1.f;
+	e.Speed = 0;
+
+	auto PowerFriend = m_World->GetComponent<Components::MultiBallBrick>(entity);
+	auto PowerSaviour = m_World->GetComponent<Components::LifebuoyBrick>(entity);
+	auto PowerSticky = m_World->GetComponent<Components::StickyBrick>(entity);
+	auto PowerInkBlaster = m_World->GetComponent<Components::InkBlasterBrick>(entity);
+	auto PowerKraken = m_World->GetComponent<Components::KrakenAttackBrick>(entity);
+
+	if (PowerFriend) {
+		e.SpriteFile = "Textures/PowerUps/Friends.png";
+	} else if (PowerSaviour) {
+		e.SpriteFile = "Textures/PowerUps/Saviour.png";
+	} else if (PowerSticky) {
+		e.SpriteFile = "Textures/PowerUps/Sticky.png";
+	} else if (PowerInkBlaster){
+		e.SpriteFile = "Textures/PowerUps/InkBlaster.png";
+	} else if (PowerKraken) { 
+		e.SpriteFile = "Textures/PowerUps/RealeaseTheKraken.png";
+	}
+	else {
+		e.EmitterLifeTime = 4;
+		e.EmittingAngle = glm::half_pi<float>();
+		e.Spread = 0.5f;
+		e.NumberOfTicks = 1;
+		e.ParticleLifeTime = 1.f;
+		e.ParticlesPerTick = 15;
+		e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -10);
+		e.Radius = 0.2f;
+		e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
+		e.Color = model->Color + glm::vec4(0.5f);
+		e.Speed = 100;
+	}
+
 	EventBroker->Publish(e);
 	return true;
+
+	
 }
 
 

@@ -10,11 +10,11 @@ namespace dd
 namespace GUI
 {
 
-class NumberFrame : public Frame
+class NumberFrame : public TextureFrame
 {
 public:
 	NumberFrame(Frame* parent, std::string name)
-		: Frame(parent, name)
+		: TextureFrame(parent, name)
 	{
 		m_CharacterTextures['0'] = "Textures/GUI/Numbers/N0.png";
 		m_CharacterTextures['1'] = "Textures/GUI/Numbers/N1.png";

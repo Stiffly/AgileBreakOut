@@ -16,6 +16,7 @@ namespace Events
 struct InkBlaster : Event
 {
     Components::Transform* Transform;
+	int Shots;
 };
 
 }

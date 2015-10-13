@@ -34,6 +34,7 @@ void dd::Systems::LevelSystem::Initialize()
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Ball | CollisionLayer::Type::Projectile | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
     transform->Sticky = false;
+
     model->ModelFile = "Models/Brick/WhiteBrick.obj";
 	transform->Position = glm::vec3(50, 50, -10);
 	//sound
@@ -198,22 +199,29 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     auto cBrick = m_World->GetComponent<Components::Brick>(brick);
 	auto model = m_World->GetComponent<Components::Model>(brick);
     if (typeInt == StandardBrick) {
+		cBrick->Type = StandardBrick;
+		auto type = m_World->AddComponent<Components::StandardBrick>(brick);
 		model->Color = colorVec;
 		SetBrokenModel(brick);
     } else if (typeInt == MultiBallBrick) {
         cBrick->Type = MultiBallBrick;
+		auto type = m_World->AddComponent<Components::MultiBallBrick>(brick);
         model->ModelFile = "Models/Brick/IceBrick.obj";
 	} else if (typeInt == LifebuoyBrick) {
 		cBrick->Type = LifebuoyBrick;
+		auto type = m_World->AddComponent<Components::LifebuoyBrick>(brick);
 		model->ModelFile = "Models/Brick/LifeBuoyBrick.obj";
 	} else if (typeInt == StickyBrick) {
 		cBrick->Type = StickyBrick;
+		auto type = m_World->AddComponent<Components::StickyBrick>(brick);
 		model->ModelFile = "Models/Brick/StickyBrick.obj";
 	} else if (typeInt == InkBlasterBrick) {
 		cBrick->Type = InkBlasterBrick;
+		auto type = m_World->AddComponent<Components::InkBlasterBrick>(brick);
 		model->Color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 	} else if (typeInt == KrakenAttackBrick) {
 		cBrick->Type = KrakenAttackBrick;
+		auto type = m_World->AddComponent<Components::KrakenAttackBrick>(brick);
 		model->Color = glm::vec4(0.f, 0.5f, 1.0f, .0f);
 	}
 
@@ -276,112 +284,115 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 	if (entityShot != 0) {
 		// For when a brick gets shot.
 		brick->Removed = true;
-
-		auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
-		physicsComponent->CollisionType = CollisionType::Type::Dynamic;
-		physicsComponent->GravityScale = 1.f;
-		physicsComponent->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Water | CollisionLayer::Wall);
-
-		auto transformComponentBrick = m_World->GetComponent<Components::Transform>(entityBrick);
-		auto transformComponentShot = m_World->GetComponent<Components::Transform>(entityShot);
-		auto brickModel = m_World->GetComponent<Components::Model>(entityBrick);
-
-		Events::SetImpulse e;
-		e.Entity = entityBrick;
-
-		glm::vec2 point = glm::vec2(transformComponentBrick->Position.x + ((transformComponentShot->Position.x - transformComponentBrick->Position.x) / 4),
-			transformComponentBrick->Position.y + ((transformComponentShot->Position.y - transformComponentBrick->Position.y) / 4));
-
-		e.Impulse = glm::normalize(point)*5.f;
-		e.Point = point;
-		EventBroker->Publish(e);
-
-
-		SetNumberOfBricks(NumberOfBricks() - 1);
-		Events::ScoreEvent es;
-		es.Score = brick->Score;
-		EventBroker->Publish(es);
-
 		m_World->RemoveEntity(entityShot);
-
-		Events::CreateParticleSequence ep;
-		ep.parent = entityBrick;
-		ep.EmitterLifeTime = 1.f;
-		ep.ParticleLifeTime = 1.5f;
-		ep.ParticlesPerTick = 1;
-		ep.SpawnRate = 0.2;
-		ep.EmittingAngle = glm::half_pi<float>();
-		ep.Spread = 1.5f;
-		ep.Position = transformComponentBrick->Position;
-		ep.Radius = 0.05;
-		ep.SpriteFile = "Textures/Particles/FadeBall.png";
-		ep.Color = brickModel->Color + glm::vec4(0.3f);
-		ep.Speed = 50;
-		EventBroker->Publish(ep);
+		BrickHit(entityShot, entityBrick, 1);
 
 		return true;
 	}
 
     if (!Restarting() && !brick->Removed) {
         brick->Removed = true;
-        // Hit brick with ball code.
-        ball->Combo += 1;
-        Events::ComboEvent ec;
-        ec.Combo = ball->Combo;
-        ec.Ball = entityBall;
-        EventBroker->Publish(ec);
+        
+		// Hit brick with ball code.
+		ball->Combo += 1;
+		Events::ComboEvent ec;
+		ec.Combo = ball->Combo;
+		ec.Ball = entityBall;
+		EventBroker->Publish(ec);
 
-        auto ballTransform = m_World->GetComponent<Components::Transform>(entityBall);
+		BrickHit(entityBall, entityBrick, ball->Combo);
+    }
 
-        auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
+    return true;
+}
+
+void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBrick, int combo)
+{
+	auto brick = m_World->GetComponent<Components::Brick>(entityBrick);
+	auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
 		//physicsComponent->CollisionType = CollisionType::Type::Dynamic;
         //physicsComponent->GravityScale = 1.f;
         //physicsComponent->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Water | CollisionLayer::Wall);
 
-        auto transformComponentBrick = m_World->GetComponent<Components::Transform>(entityBrick);
-        auto transformComponentBall = m_World->GetComponent<Components::Transform>(entityBall);
+	auto transformComponentBrick = m_World->GetComponent<Components::Transform>(entityBrick);
+	auto transformComponentHitter = m_World->GetComponent<Components::Transform>(entityHitter);
 		
 
-		auto brickModel = m_World->GetComponent<Components::Model>(entityBrick);
+	auto brickModel = m_World->GetComponent<Components::Model>(entityBrick);
 
-		auto brickChildren = m_World->GetEntityChildren(entityBrick);
-		for (auto b : brickChildren)
-		{
-
-
-			auto cTransform = m_World->GetComponent<Components::Transform>(b);
-			cTransform->Position = cTransform->Position + transformComponentBrick->Position;
-			glm::vec2 ballToBrick = 4.f * glm::normalize(glm::vec2(cTransform->Position.x - ballTransform->Position.x , cTransform->Position.y - ballTransform->Position.y));
-			
-			cTransform->Velocity = glm::vec3(ballToBrick.x, ballToBrick.y, 0.f);
-
-			
-
-			auto cModel = m_World->GetComponent<Components::Model>(b);
-			cModel->Color = brickModel->Color;
-			cModel->Color *= 0.5f;
-
-			m_World->RemoveComponent<Components::Template>(b);
-			m_World->SetEntityParent(b, 0);
-			m_World->CommitEntity(b); 
-
-
-			
+	// Check if the brick is any kind of special.
+	auto multi = m_World->GetComponent<Components::MultiBallBrick>(entityBrick);
+	if (multi != nullptr) {
+		Events::MultiBall e;
+		e.padTransform = transformComponentBrick;
+		EventBroker->Publish(e);
+	}
+	else {
+		auto buoy = m_World->GetComponent<Components::LifebuoyBrick>(entityBrick);
+		if (buoy != nullptr) {
+			Events::Lifebuoy e;
+			e.Transform = transformComponentBrick;
+			EventBroker->Publish(e);
 		}
+		else {
+			auto sticky = m_World->GetComponent<Components::StickyBrick>(entityBrick);
+			if (sticky != nullptr) {
+				Events::StickyPad e;
+				e.Transform = transformComponentBrick;
+				e.Times = 3;
+				EventBroker->Publish(e);
+			}
+			else {
+				auto ink = m_World->GetComponent<Components::InkBlasterBrick>(entityBrick);
+				if (ink != nullptr) {
+					Events::InkBlaster e;
+					e.Transform = transformComponentBrick;
+					e.Shots = 5;
+					EventBroker->Publish(e);
+				}
+				else {
+					auto kraken = m_World->GetComponent<Components::KrakenAttackBrick>(entityBrick);
+					if (kraken != nullptr) {
+						Events::KrakenAttack e;
+						e.ChargeUpdate = 0;
+						e.KrakenStrength = 0.1;
+						e.PlayerStrength = 0.05;
+						EventBroker->Publish(e);
+					}
+					else {
 
-        SetNumberOfBricks(NumberOfBricks() - 1);
-        Events::ScoreEvent es;
-        es.Score = brick->Score * ball->Combo;
-        EventBroker->Publish(es);
+					}
+				}
+			}
+		}
+	}
+	
+	auto brickChildren = m_World->GetEntityChildren(entityBrick);
+	for (auto b : brickChildren)
+	{
 
-        //std::cout << "Combo: " << ball->Combo << std::endl;
-        //std::cout << NumberOfBricks() << std::endl;
-        //std::cout << "Brick Score: " << brick->Score  << std::endl;
-        //std::cout << "Score: " << Score() << std::endl;
-		m_World->RemoveEntity(entityBrick);
-    }
 
-    return true;
+		auto cTransform = m_World->GetComponent<Components::Transform>(b);
+		cTransform->Position = cTransform->Position + transformComponentBrick->Position;
+		glm::vec2 ballToBrick = 4.f * glm::normalize(glm::vec2(cTransform->Position.x - transformComponentHitter->Position.x, cTransform->Position.y - transformComponentHitter->Position.y));
+		cTransform->Velocity = glm::vec3(ballToBrick.x, ballToBrick.y, 0.f);
+
+		auto cModel = m_World->GetComponent<Components::Model>(b);
+		cModel->Color = brickModel->Color;
+		cModel->Color *= 0.5f;
+
+		m_World->RemoveComponent<Components::Template>(b);
+		m_World->SetEntityParent(b, 0);
+		m_World->CommitEntity(b);
+	}
+
+
+	SetNumberOfBricks(NumberOfBricks() - 1);
+	Events::ScoreEvent es;
+	es.Score = brick->Score * combo;
+	EventBroker->Publish(es);
+
+	m_World->RemoveEntity(entityBrick);
 }
 
 bool dd::Systems::LevelSystem::OnScoreEvent(const dd::Events::ScoreEvent &event)
@@ -657,14 +668,14 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 4, 1, 1, 1, 3, 1,
                      0, 1, 0, 1, 0, 1, 0,
                      0, 1, 0, 1, 0, 1, 0,
-                     1, 5, 1, 1, 1, 2, 1,
+                     1, 5, 1, 6, 1, 2, 1,
                      0, 1, 0, 0, 0, 1, 0};
 			color = 
 					{w, p3, w, w, w, r, w,
 					 p2, w, p1, g, w, w, w,
 					 w, p4, w, g, w, r, w,
 					 w, br, w, g, w, lb1, w,
-					 y, w, y, g, b, w, b,
+					 y, w, y, d, b, w, b,
 					 w, br, w, w, w, lb1, w};
         }
     } else if (m_CurrentCluster == 3) {

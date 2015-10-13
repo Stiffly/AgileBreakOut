@@ -25,12 +25,15 @@
 #include "Physics/CCircleShape.h"
 #include "Physics/CParticleEmitter.h"
 
+#include "Game/BrickComponents.h"
+
 #include "Transform/TransformSystem.h"
 #include "Transform/TransformSystem.h"
 
 #include "CRectangleShape.h"
 
 #include "Game/EStageCleared.h"
+#include "Game/EArrivedAtNewStage.h"
 #include "Game/EPause.h"
 #include "Game/CPad.h"
 #include "Game/CBrick.h"
@@ -97,6 +100,8 @@ namespace dd
             std::unordered_map<b2Body*, EntityID> m_BodiesToEntities;
 
 
+			int t_counter = 0;
+
 
             void CreateBody(EntityID entity);
             void SyncEntitiesWithBodies();
@@ -126,7 +131,7 @@ namespace dd
             std::vector<EntityID> ParticleEmitter;
             std::vector<EntityID> ParticleTemplate;
         };
-            EmitterHandler m_ParticleEmitters;
+        EmitterHandler m_ParticleEmitters;
 
             std::list<Impulse> m_Impulses;
             

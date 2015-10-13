@@ -16,11 +16,15 @@
 #include "Core/World.h"
 #include "Rendering/CSprite.h"
 #include "Rendering/CModel.h"
+
 #include "Game/CBrick.h"
 #include "Game/CBall.h"
 #include "Game/CLife.h"
 #include "Game/CProjectile.h"
 #include "Game/CPowerUp.h"
+
+#include "Game/BrickComponents.h"
+
 #include "Game/EStageCleared.h"
 #include "Game/ELifeLost.h"
 #include "Game/EResetBall.h"
@@ -38,7 +42,7 @@
 #include "Game/EClusterClear.h"
 #include "Game/ECreatePowerUp.h"
 #include "Game/EPowerUpTaken.h"
-//#include "Game/Bricks/CPowerUpBrick.h"
+
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/CRectangleShape.h"
@@ -79,6 +83,7 @@ public:
     void CreateBasicLevel(int, int, glm::vec2, float);
     void CreateLevel(int);
     void CreateBrick(int, int, glm::vec2, float, int, int, int, glm::vec4);
+	void BrickHit(EntityID, EntityID, int);
 
     void OnEntityRemoved(EntityID entity);
 

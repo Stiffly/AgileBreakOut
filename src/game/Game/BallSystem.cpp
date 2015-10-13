@@ -23,12 +23,14 @@ void dd::Systems::BallSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EInkBlasterOver, &BallSystem::OnInkBlasterOver);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &BallSystem::OnPause);
     EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &BallSystem::OnActionButton);
+	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &BallSystem::OnStageCleared);
+	EVENT_SUBSCRIBE_MEMBER(m_EArrivedAtNewStage, &BallSystem::OnArrivedToNewStage);
 
     //OctoBall
     {
         auto ent = m_World->CreateEntity();
         std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-        transform->Position = glm::vec3(-0.f, 50.26f, -10.f);
+        transform->Position = glm::vec3(0.f, 0.26f, -10.f);
         transform->Scale = glm::vec3(0.3f, 0.3f, 0.3f);
         transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
         auto model = m_World->AddComponent<Components::Model>(ent);
@@ -117,6 +119,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 
         if (ballComponent->Waiting) {
             if (!m_Waiting) {
+				m_Restarting = false;
                 ballComponent->Waiting = false;
 				auto transform = m_World->GetComponent<Components::Transform>(entity);
                 transform->Velocity = glm::normalize(glm::vec3(0.5f, 1, 0.f)) * ballComponent->Speed;
@@ -155,7 +158,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 m_World->RemoveEntity(entity);
                 Events::MultiBallLost e;
                 EventBroker->Publish(e);
-            } else if (Lives() == PastLives()) {
+            } else if (Lives() == PastLives() && !m_Restarting) {
                 Events::ResetBall be;
                 EventBroker->Publish(be);
                 Events::LifeLost e;
@@ -193,11 +196,14 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
     }
 
     if (ballComponent != nullptr) {
-        auto transform = m_World->GetComponent<Components::Transform>(entity);
-        glm::vec2 dir = glm::normalize(glm::vec2(transform->Velocity.x, transform->Velocity.y));
-        glm::vec2 up = glm::vec2(0.f, 1.f);
-        float angle = glm::acos(glm::dot<float>(dir, up)) * glm::sign(dir.x);
-        transform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, -1.f));
+		if (!ballComponent->Sticky)
+		{
+			auto transform = m_World->GetComponent<Components::Transform>(entity);
+			glm::vec2 dir = glm::normalize(glm::vec2(transform->Velocity.x, transform->Velocity.y));
+			glm::vec2 up = glm::vec2(0.f, 1.f);
+			float angle = glm::acos(glm::dot<float>(dir, up)) * glm::sign(dir.x);
+			transform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, -1.f));
+		}
     }
 }
 
@@ -287,7 +293,7 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 			if (!m_InkAttached) {
 				m_InkAttached = true;
 				m_Waiting = true;
-				m_BlockedWaiting = true;
+				m_InkBlockedWaiting = true;
 				ballComponent->Sticky = true;
 				ballComponent->StickyPlacement = glm::vec3(0, 0.5f, 0);
 				ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
@@ -300,6 +306,8 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 			ballComponent->StickyPlacement = ballTransform->Position - padTransform->Position;
 			ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
 			ballTransform->Velocity *= -1;
+			Events::StickyAttachedToPad e;
+			EventBroker->Publish(e);
 			return true;
 		}
 
@@ -438,7 +446,6 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
 bool dd::Systems::BallSystem::OnStickyPad(const dd::Events::StickyPad &event) 
 {
 	m_Sticky = true;
-	m_StickyCounter = 5;
 	return true;
 }
 
@@ -455,8 +462,7 @@ bool dd::Systems::BallSystem::OnInkBlasterOver(const dd::Events::InkBlasterOver 
 
 	m_InkBlaster = false;
 	m_InkAttached = false;
-	m_BlockedWaiting = false;
-	m_Sticky = true;
+	m_InkBlockedWaiting = false;
 	ballComponent->SavedSpeed = glm::normalize(glm::vec3(0.f, 1.f, 0.f)) * ballComponent->Speed;
 	m_Waiting = false;
 	transform->Velocity = glm::normalize(glm::vec3(0.f, 1, 0.f)) * ballComponent->Speed;
@@ -465,9 +471,24 @@ bool dd::Systems::BallSystem::OnInkBlasterOver(const dd::Events::InkBlasterOver 
 
 bool dd::Systems::BallSystem::OnActionButton(const dd::Events::ActionButton &event)
 {
-	if (!m_BlockedWaiting) {
-		m_Waiting = false;
+	if (!m_StageBlockedWaiting) {
+		if (!m_InkBlockedWaiting) {
+			m_Waiting = false;
+		}
 	}
     return true;
+}
+
+bool dd::Systems::BallSystem::OnStageCleared(const dd::Events::StageCleared &event)
+{
+	m_Restarting = true;
+	m_StageBlockedWaiting = true;
+	return true;
+}
+
+bool dd::Systems::BallSystem::OnArrivedToNewStage(const dd::Events::ArrivedAtNewStage &event)
+{
+	m_StageBlockedWaiting = false;
+	return true;
 }
 
