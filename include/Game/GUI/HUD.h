@@ -26,22 +26,9 @@ public:
 		Width = parent->Width;
 		Height = parent->Height;
 
-		//m_LevelIndicator = new GUI::TextureFrame(this, "HUDLevelIndicator");
-		//m_LevelIndicator->SetTexture("Textures/GUI/HUD/LevelIndicatorBG.png");
-
-		//m_AreaNumberFrame = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
-		//m_AreaNumberFrame->X = 132;
-		//m_AreaNumberFrame->Y = 19;
-		//m_AreaNumberFrame->SetNumber(6);
-		//m_StageNumberFrame = new GUI::NumberFrame(m_LevelIndicator, "HUDScoreNumberFrameawdawdwa");
-		//m_StageNumberFrame->X = 165;
-		//m_StageNumberFrame->Y = 19;
-		//m_StageNumberFrame->SetNumber(5);
-
-		//m_ScoreIndicator = new GUI::TextureFrame(this, "HUDScoreIndicator");
-		//m_ScoreIndicator->SetTexture("Textures/GUI/HUD/ScoreIndicatorBG.png");
+		m_ScoreBackground = new GUI::TextureFrame(this, "HUDScoreBackgroundFrame");
+		m_ScoreBackground->SetTexture("Textures/GUI/Numbers/Background.png");
 		m_ScoreNumberFrame = new GUI::NumberFrame(this, "HUDScoreNumberFrame");
-		m_ScoreNumberFrame->SetTexture("Textures/GUI/Numbers/Background.png");
 		//m_ScoreNumberFrame->X = 15;
 		m_ScoreNumberFrame->Y = 18;
 
@@ -58,18 +45,14 @@ public:
 		EVENT_SUBSCRIBE_MEMBER(m_EGameOver, &HUD::OnGameOver);
 		EVENT_SUBSCRIBE_MEMBER(m_ClusterClear, &HUD::OnClusterClear);
 		EVENT_SUBSCRIBE_MEMBER(m_KrakenAttack, &HUD::OnKrakenAttack);
+
+		updateScore();
 	}
 
-	void Update(double dt) override
-	{
-		m_ScoreNumberFrame->SetLeft(Width / 2.f - m_ScoreNumberFrame->Width / 2.f);
-	}
+
 
 private:
-	TextureFrame* m_LevelIndicator = nullptr;
-	TextureFrame* m_ScoreIndicator = nullptr;
-	NumberFrame* m_AreaNumberFrame = nullptr;
-	NumberFrame* m_StageNumberFrame = nullptr;
+	TextureFrame* m_ScoreBackground = nullptr;
 	NumberFrame* m_ScoreNumberFrame = nullptr;
 	FPSCounter* m_FPSCounter = nullptr;
 	TextureFrame* m_GameOverFrame = nullptr;
@@ -81,9 +64,18 @@ private:
 	EventRelay<Frame, Events::ClusterClear> m_ClusterClear;
 	EventRelay<Frame, Events::KrakenAttack> m_KrakenAttack;
 
+	void updateScore()
+	{
+		m_ScoreNumberFrame->SetLeft(Width / 2.f - m_ScoreNumberFrame->Width / 2.f);
+		m_ScoreBackground->SetLeft(m_ScoreNumberFrame->Left() - 20);
+		m_ScoreBackground->Width = m_ScoreNumberFrame->Width + 40;
+		m_ScoreBackground->Height = m_ScoreNumberFrame->Height + 30;
+	}
+
 	bool OnScore(const Events::ScoreEvent& event)
 	{
 		m_ScoreNumberFrame->SetNumber(m_ScoreNumberFrame->Number() + event.Score);
+		updateScore();
 		return true;
 	}
 
