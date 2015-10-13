@@ -20,6 +20,12 @@
 #define DD_RENDERER_H__
 
 #include "Util/Rectangle.h"
+#include "Core/System.h"
+#include "Core/CTransform.h"
+#include "Core/CTemplate.h"
+#include "Core/EventBroker.h"
+#include "Core/World.h"
+#include "Game/EScreenShake.h"
 #include "Camera.h"
 #include "RenderQueue.h"
 #include "ShaderProgram.h"
@@ -48,6 +54,7 @@ public:
 	}
 	void Initialize();
 	void Draw(RenderQueueCollection& rq);
+	void PlaceCamera(glm::vec3 position);
 
 private:
 	Rectangle m_Resolution = Rectangle(1280, 720);
@@ -107,6 +114,12 @@ private:
 	void DrawWater(RenderQueue &objects);
 	void DrawGUI(RenderQueue& rq);
 	void DebugKeys();
+
+	dd::EventRelay<Renderer, dd::Events::ScreenShake> m_EScreenShake;
+	bool OnScreenShake(dd::Events::ScreenShake &event);
+	bool m_ScreenShake = false;
+	float m_ShakeIntensity = 0;
+	float m_ShakeTimer = 0;
 };
 
 }

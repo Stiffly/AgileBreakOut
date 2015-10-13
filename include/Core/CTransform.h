@@ -43,7 +43,7 @@ struct Transform : public Component
 	glm::vec3 Scale;
 
 	// Sticky is if it sticks with the player or not. True means it will follow the camera.
-	bool Sticky;
+	bool Sticky = true;
 };
 
 }
