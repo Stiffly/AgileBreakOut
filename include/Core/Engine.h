@@ -50,11 +50,14 @@
 #include "Game/CStickyAim.h"
 #include "Game/BallSystem.h"
 #include "Game/HitLagSystem.h"
+#include "Game/TravellingSystem.h"
 #include "Game/LifebuoySystem.h"
 #include "Game/ProjectileSystem.h"
 #include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Game/BrickComponents.h"
+
+#include "Game/EScreenShake.h"
 
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
@@ -153,6 +156,9 @@ public:
 		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
 				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::PhysicsSystem>();
+		m_World->SystemFactory.Register<Systems::TravellingSystem>(
+			[this]() { return new Systems::TravellingSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::TravellingSystem>();
 
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
@@ -360,8 +366,10 @@ public:
 		//EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &Engine::OnGameStart);
 		m_EGameStart = decltype(m_EGameStart)(std::bind(&Engine::OnGameStart, this, std::placeholders::_1));
 		m_EventBroker->Subscribe(m_EGameStart);
+		m_EScreenShake = decltype(m_EScreenShake)(std::bind(&Engine::OnScreenShake, this, std::placeholders::_1));
+		m_EventBroker->Subscribe(m_EScreenShake);
 
-			m_LastTime = glfwGetTime();
+		m_LastTime = glfwGetTime();
 	}
 
 	bool Running() const { return !glfwWindowShouldClose(m_Renderer->Window()); }
@@ -380,6 +388,9 @@ public:
 		//ResourceManager::Update();
 		if (m_GameIsRunning) {
 			m_World->Update(dt);
+
+			// I apologize about this.
+			ScreenShakeUpdate(dt);
 		}
 		m_EventBroker->Process<GUI::Frame>();
 		m_FrameStack->UpdateLayered(dt);
@@ -390,6 +401,8 @@ public:
 		if (m_GameIsRunning) {
 			TEMPAddToRenderQueue();
 		}
+
+		std::unique_ptr<dd::Camera> defaultCamera = nullptr;
 
 		// Render scene
 		//TODO send renderqueue to draw.
@@ -550,6 +563,36 @@ public:
 		m_RendererQueue.Forward.Add(job);
 	}
 
+	void ScreenShakeUpdate(double dt)
+	{
+		if (m_ScreenShake) {
+			m_ShakeTimer += dt;
+			if (m_ShakeTimer >= m_ShakeEndTime) {
+				m_ShakeRepresentativeIntensity -= m_ShakeRepresentativeIntensity * 0.1 * dt;
+				m_ShakeIntensity = m_ShakeRepresentativeIntensity;
+				if (m_ShakeRepresentativeIntensity < 0.1) {
+					m_ScreenShake = false;
+					m_Renderer->PlaceCamera(glm::vec3(0, 0, 0));
+					return;
+				}
+			} else {
+				std::cout << "Timer: " << m_ShakeTimer << " End: " << m_ShakeEndTime << std::endl;
+			}
+			//float randomX = (rand() % m_ShakeIntensity);
+			//float randomY = (rand() % m_ShakeIntensity);
+
+			float randomX = 0;
+			float randomY = 0;
+
+			std::cout << "X: " << randomX << " Y: " << randomY << std::endl;
+			float half = m_ShakeIntensity / 2;
+
+			//m_Renderer->PlaceCamera(glm::vec3(randomX - half, randomY - half, 0));
+		} else {
+
+		}
+	}
+
 private:
 	std::shared_ptr<EventBroker> m_EventBroker;
 	GUI::Frame* m_FrameStack = nullptr;
@@ -557,6 +600,7 @@ private:
 	RenderQueueCollection m_RendererQueue;
 	std::shared_ptr<InputManager> m_InputManager;
 	std::shared_ptr<World> m_World;
+	glm::vec3 m_CameraPosition = glm::vec3(0.f, 0.f, 0.f);
 
 	//TODO: Redo
 	bool m_GameIsRunning = false;
@@ -581,6 +625,22 @@ private:
 
 		return true;
 	};
+
+	//TODO: Extreme Redo.
+	bool m_ScreenShake = false;
+	int m_ShakeIntensity = 0;
+	float m_ShakeRepresentativeIntensity = 0;
+	float m_ShakeTimer = 0;
+	float m_ShakeEndTime = 0;
+	dd::EventRelay<Engine, dd::Events::ScreenShake> m_EScreenShake;
+	bool OnScreenShake(const dd::Events::ScreenShake &event)
+	{
+		m_ScreenShake = true;
+		m_ShakeIntensity = event.Intensity;
+		m_ShakeEndTime = event.Time;
+		m_ShakeTimer = 0;
+		return true;
+	}
 	double m_LastTime;
 };
 

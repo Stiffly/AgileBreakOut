@@ -27,6 +27,7 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &PadSystem::OnContact);
     EVENT_SUBSCRIBE_MEMBER(m_EContactPowerUp, &PadSystem::OnContactPowerUp);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PadSystem::OnStageCleared);
+	EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &PadSystem::OnResetBall);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PadSystem::OnPause);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttack, &PadSystem::OnKrakenAttack);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &PadSystem::OnStickyPad);
@@ -72,6 +73,8 @@ void dd::Systems::PadSystem::Initialize()
 		m_StickTransform = transform;
 		m_StickyAim = sticky;
 	}
+
+	m_ResetBall = true;
 }
 
 void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
@@ -81,7 +84,12 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 
 	auto ball = m_World->GetComponent<Components::Ball>(entity);
 	if (ball != nullptr) {
-		if (ball->Sticky) {
+		if (ball->Waiting || ball->Sticky) {
+			if (m_ResetBall && ball->Waiting) {
+				ball->StickyPlacement = glm::vec3(0.f, 0.f, 0.f);
+				ball->StickyPlacement.y += 0.45f;
+				m_ResetBall = false;
+			}
 			auto ballTransform = m_World->GetComponent<Components::Transform>(entity);
 			ballTransform->Position = Transform()->Position;
 			ballTransform->Position += ball->StickyPlacement;
@@ -89,8 +97,10 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 			glm::vec2 up = glm::vec2(0.f, 1.f);
 			float angle = glm::acos(glm::dot<float>(dir, up)) * glm::sign(dir.x);
 			ballTransform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, -1.f));
-			m_StickTransform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, 1.f));
-			m_StickTransform->Position = ballTransform->Position;
+			if (ball->Sticky) {
+				m_StickTransform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, 1.f));
+				m_StickTransform->Position = ballTransform->Position;
+			}
 		}
 		if (!m_StickyAim->Aiming) {
 			m_StickTransform->Position = glm::vec3(30.f, 0.f, 0.f);
@@ -103,6 +113,7 @@ void dd::Systems::PadSystem::Update(double dt)
     if (IsPaused()) {
         return;
     }
+
     if (Entity() == 0) {
         for (auto it = m_World->GetEntities()->begin(); it != m_World->GetEntities()->end(); it++) {
             if (m_World->GetProperty<std::string>(it->first, "Name") == "Pad") {
@@ -208,6 +219,11 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_S) {
 		Events::StageCleared e;
+		EventBroker->Publish(e);
+	} else if (val == GLFW_KEY_E) {
+		Events::ScreenShake e;
+		e.Intensity = 20;
+		e.Time = 3;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_Y) {
 		Events::StickyPad e;
@@ -343,6 +359,12 @@ bool dd::Systems::PadSystem::OnStageCleared(const dd::Events::StageCleared &even
 {
     //auto entity = CreateBall();
     return true;
+}
+
+bool dd::Systems::PadSystem::OnResetBall(const dd::Events::ResetBall &event)
+{
+	m_ResetBall = true;
+	return true;
 }
 
 bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &event)

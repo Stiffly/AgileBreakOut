@@ -35,6 +35,7 @@
 #include "Game/EStageCleared.h"
 #include "Game/EPause.h"
 #include "Game/EHitLag.h"
+#include "Game/EScreenShake.h"
 #include "Game/EActionButton.h"
 
 
@@ -92,6 +93,7 @@ private:
 	std::shared_ptr<Components::Transform> m_StickTransform;
 	std::shared_ptr<Components::StickyAim> m_StickyAim;
 
+	bool m_ResetBall = false;
     bool m_Pause = false;
 
     dd::EventRelay<PadSystem, dd::Events::KeyDown> m_EKeyDown;
@@ -99,6 +101,7 @@ private:
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContactPowerUp;
     dd::EventRelay<PadSystem, dd::Events::StageCleared> m_EStageCleared;
+	dd::EventRelay<PadSystem, dd::Events::ResetBall> m_EResetBall;
     dd::EventRelay<PadSystem, dd::Events::Pause> m_EPause;
 	dd::EventRelay<PadSystem, dd::Events::KrakenAttack> m_EKrakenAttack;
 	dd::EventRelay<PadSystem, dd::Events::StickyPad> m_EStickyPad;
@@ -110,6 +113,7 @@ private:
     bool OnContact(const dd::Events::Contact &event);
     bool OnContactPowerUp(const dd::Events::Contact &event);
     bool OnStageCleared(const dd::Events::StageCleared &event);
+	bool OnResetBall(const dd::Events::ResetBall &event);
     bool OnPause(const dd::Events::Pause &event);
 	bool OnKrakenAttack(const dd::Events::KrakenAttack &event);
 	bool OnStickyPad(const dd::Events::StickyPad &event);
