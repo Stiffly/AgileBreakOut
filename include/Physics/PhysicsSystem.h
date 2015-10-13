@@ -31,9 +31,6 @@
 #include "Transform/TransformSystem.h"
 
 #include "CRectangleShape.h"
-
-#include "Game/EStageCleared.h"
-#include "Game/EArrivedAtNewStage.h"
 #include "Game/EPause.h"
 #include "Game/CPad.h"
 #include "Game/CBrick.h"
@@ -115,12 +112,8 @@ namespace dd
             bool SetImpulse(const Events::SetImpulse &event);
             dd::EventRelay<PhysicsSystem, dd::Events::Pause> m_EPause;
             bool OnPause(const dd::Events::Pause &event);
-			dd::EventRelay<PhysicsSystem, dd::Events::StageCleared> m_EStageCleared;
-			bool OnStageCleared(const dd::Events::StageCleared &event);
 			dd::EventRelay<PhysicsSystem, dd::Events::Contact> m_EContact;
 			bool OnContact(const dd::Events::Contact &event);
-			bool m_Travelling = false;
-			float m_DistanceTravelled = 0;
 
             //TODO: Fill struct with info needed.
         struct EmitterHandler //TODO CHANGE NAMES

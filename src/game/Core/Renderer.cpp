@@ -72,6 +72,7 @@ void dd::Renderer::Initialize()
 
 	m_CurrentScreenBuffer = m_TFinal;
 }
+
 void dd::Renderer::LoadShaders()
 {
 	/*
@@ -382,6 +383,11 @@ void dd::Renderer::DrawForward(RenderQueue &objects, RenderQueue &lights)
 	glClear(GL_COLOR_BUFFER_BIT);
 	m_SpWater->Bind();
 	DrawWater(objects);
+}
+
+void dd::Renderer::PlaceCamera(glm::vec3 position)
+{
+	m_DefaultCamera->SetPosition(position);
 }
 
 void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
