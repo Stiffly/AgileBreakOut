@@ -358,6 +358,7 @@ bool dd::Systems::PadSystem::OnContactPowerUp(const dd::Events::Contact &event)
 bool dd::Systems::PadSystem::OnStageCleared(const dd::Events::StageCleared &event)
 {
     //auto entity = CreateBall();
+	m_StickyAim->Aiming = false;
     return true;
 }
 
