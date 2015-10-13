@@ -568,7 +568,7 @@ public:
 		if (m_ScreenShake) {
 			m_ShakeTimer += dt;
 			if (m_ShakeTimer >= m_ShakeEndTime) {
-				std::cout << "Used: " << m_ShakeIntensity << " True: " << m_ShakeRepresentativeIntensity << std::endl;
+				//std::cout << "Used: " << m_ShakeIntensity << " True: " << m_ShakeRepresentativeIntensity << std::endl;
 				m_ShakeRepresentativeIntensity -= m_ShakeRepresentativeIntensity * m_CoolerMultiplier * dt;
 				m_ShakeIntensity = m_ShakeRepresentativeIntensity;
 				if (m_ShakeIntensity <= 0) {
