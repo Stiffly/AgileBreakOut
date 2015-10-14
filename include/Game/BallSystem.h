@@ -35,6 +35,7 @@
 #include "Game/EHitLag.h"
 #include "Game/EActionButton.h"
 #include "Game/ELifebuoyHit.h"
+#include "Physics/ECreateParticleSequence.h"
 
 namespace dd
 {
