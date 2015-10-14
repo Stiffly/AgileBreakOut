@@ -26,8 +26,14 @@ public:
 		Width = parent->Width;
 		Height = parent->Height;
 
-		m_ScoreBackground = new GUI::TextureFrame(this, "HUDScoreBackgroundFrame");
-		m_ScoreBackground->SetTexture("Textures/GUI/Numbers/Background.png");
+		m_ScoreBackMid = new GUI::TextureFrame(this, "HUDScoreBackgroundFrame");
+		m_ScoreBackMid->SetTexture("Textures/GUI/Numbers/ScoreBackgroundMid.png");
+
+		m_ScoreBackLeft = new GUI::TextureFrame(this, "HUDScoreBackgroundLeftFrame");
+		m_ScoreBackLeft->SetTexture("Textures/GUI/Numbers/ScoreBackgroundLeft.png");
+
+		m_ScoreBackRight = new GUI::TextureFrame(this, "HUDScoreBackgroundRightFrame");
+		m_ScoreBackRight->SetTexture("Textures/GUI/Numbers/ScoreBackgroundRight.png");
 		m_ScoreNumberFrame = new GUI::NumberFrame(this, "HUDScoreNumberFrame");
 		//m_ScoreNumberFrame->X = 15;
 		m_ScoreNumberFrame->Y = 18;
@@ -52,7 +58,9 @@ public:
 
 
 private:
-	TextureFrame* m_ScoreBackground = nullptr;
+	TextureFrame* m_ScoreBackMid = nullptr;
+	TextureFrame* m_ScoreBackLeft = nullptr;
+	TextureFrame* m_ScoreBackRight = nullptr;
 	NumberFrame* m_ScoreNumberFrame = nullptr;
 	FPSCounter* m_FPSCounter = nullptr;
 	TextureFrame* m_GameOverFrame = nullptr;
@@ -67,9 +75,18 @@ private:
 	void updateScore()
 	{
 		m_ScoreNumberFrame->SetLeft(Width / 2.f - m_ScoreNumberFrame->Width / 2.f);
-		m_ScoreBackground->SetLeft(m_ScoreNumberFrame->Left() - 20);
-		m_ScoreBackground->Width = m_ScoreNumberFrame->Width + 40;
-		m_ScoreBackground->Height = m_ScoreNumberFrame->Height + 30;
+
+		m_ScoreBackMid->SetLeft(m_ScoreNumberFrame->Left());
+		m_ScoreBackMid->Width = m_ScoreNumberFrame->Width;
+		m_ScoreBackMid->Height = m_ScoreNumberFrame->Height + 35;
+
+		m_ScoreBackLeft->SetRight(m_ScoreBackMid->Left());
+		m_ScoreBackLeft->Width = 40;
+		m_ScoreBackLeft->Height = m_ScoreBackMid->Height;
+
+		m_ScoreBackRight->SetLeft(m_ScoreBackMid->Right());
+		m_ScoreBackRight->Width = 40;
+		m_ScoreBackRight->Height = m_ScoreBackMid->Height;
 	}
 
 	bool OnScore(const Events::ScoreEvent& event)
