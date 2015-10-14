@@ -234,7 +234,7 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 				auto particle = m_World->GetComponent<Components::Particle>(entity);
 
                 transform->Position = glm::vec3(position.x, position.y, transform->Position.z);
-				transform->Scale = glm::vec3(particle->Radius * 2.f, particle->Radius * 2.f, 1);
+				transform->Scale = particle->Scale;//glm::vec3(particle->Radius * 2.f, particle->Radius * 2.f, 1);
             }
         }
 
@@ -275,8 +275,12 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 		auto emitter = m_World->GetComponent<Components::ParticleEmitter>(particle->ParticleSystem);
 		if (emitter) {
 			sprite->Color.w = ScalarInterpolation(timeProgress, emitter->AlphaValues);
-			if (emitter->RadiusValues.size() > 1) {
-				particle->Radius = ScalarInterpolation(timeProgress, emitter->RadiusValues);
+			if (emitter->ScaleValues.size() > 1) {
+				//TODO: Implement vector interpolation function. Use scale from resourcemanager. Texture->Width...
+				std::vector<float> spectrum;
+				spectrum.push_back(emitter->ScaleValues[0].x);
+				spectrum.push_back(emitter->ScaleValues[1].x);
+				particle->Scale = glm::vec3(ScalarInterpolation(timeProgress, spectrum));
 			}
 		}
     }
@@ -544,10 +548,8 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 			glm::vec2 vel = unitVec * emitter->Speed * (float)dt * speedMultiplier;
             particleDef.velocity = b2Vec2(vel.x, vel.y);
 
-			
-
-			//radius - currently not working :j
-			float radius = emitter->RadiusValues[0];
+			//radius
+			float radius = emitter->ScaleValues[0].x;
 			float newRadius = 0;
 			if (emitter->RadiusDistribution > 0) {
 				float halfRadius = radius / 2;
@@ -557,13 +559,15 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 			else {
 				newRadius = radius;
 			}
-			particleComponent->Radius = newRadius;
+			particleComponent->Scale = glm::vec3(newRadius);
+	
 			
 			//Random z-value
             std::uniform_real_distribution<float> dist(0, 1);
             float zDistribution = dist(gen);
 			particleTransform->Position = glm::vec3(emitterTransform->Position.x, emitterTransform->Position.y, -9.5f + zDistribution);
-			particleTransform->Scale = glm::vec3(particleTemplate->Radius * 2.f / speedMultiplier, particleTemplate->Radius * 2.f / speedMultiplier, 1);
+			particleTransform->Scale = particleTemplate->Scale;
+				//glm::vec3(particleTemplate->Radius * 2.f / speedMultiplier, particleTemplate->Radius * 2.f / speedMultiplier, 1);
 			particleTransform->Velocity = glm::vec3(vel.x, vel.y, 0);
 
 
@@ -694,7 +698,7 @@ bool dd::Systems::PhysicsSystem::CreateParticleSequence(const Events::CreatePart
     particleEmitter->EmittingAngle = event.EmittingAngle;
     particleEmitter->LifeTime = event.EmitterLifeTime;
 	particleEmitter->AlphaValues = event.AlphaValues;
-	particleEmitter->RadiusValues = event.RadiusValues;
+	particleEmitter->ScaleValues = event.ScaleValues;
 	particleEmitter->RadiusDistribution = event.RadiusDistribution;
 	{
 		//Creating Particle Template
@@ -708,7 +712,7 @@ bool dd::Systems::PhysicsSystem::CreateParticleSequence(const Events::CreatePart
 		sprite->Color = event.Color;
 		particleComponent->LifeTime = event.ParticleLifeTime;
 		particleComponent->Flags = event.Flags;
-		particleComponent->Radius = event.RadiusValues[0];
+		particleComponent->Scale = event.ScaleValues[0];
 		particleComponent->ParticleSystem = emitter;
     }
     m_World->CommitEntity(emitter);
@@ -746,7 +750,7 @@ void dd::Systems::PhysicsSystem::CreateParticleEmitter(EntityID entity)
     }
     //TODO: Skicka med fler flaggor till particlesystemet;
 
-    m_ParticleEmitters.ParticleSystem.push_back(CreateParticleSystem(particle->Radius, 0.f, 0));
+    m_ParticleEmitters.ParticleSystem.push_back(CreateParticleSystem(particle->Scale.x, 0.f, 0));
     m_ParticleEmitters.ParticleEmitter.push_back(entity);
     m_ParticleEmitters.ParticleTemplate.push_back(childEntity);
 }
@@ -808,7 +812,7 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 	e.Color = glm::vec4(1.f);
 	e.AlphaValues.push_back(1.f);
 	e.AlphaValues.push_back(0.f);
-	e.RadiusValues.push_back(1);
+	e.ScaleValues.push_back(glm::vec3(1.f));
 	e.Speed = 0;
 
 	auto PowerFriend = m_World->GetComponent<Components::MultiBallBrick>(entity);
@@ -836,9 +840,9 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 		e.ParticleLifeTime = 1.f;
 		e.ParticlesPerTick = 15;
 		e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -10);
-		e.RadiusValues.clear();
-		e.RadiusValues.push_back(0.2);
-		e.RadiusValues.push_back(1);
+		e.ScaleValues.clear();
+		e.ScaleValues.push_back(glm::vec3(0.2f));
+		e.ScaleValues.push_back(glm::vec3(1.f));
 		e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
 		e.Color = model->Color + glm::vec4(0.5f);
 		e.AlphaValues.push_back(1.f);

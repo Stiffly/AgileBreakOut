@@ -400,8 +400,8 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 		p.parent = b;
 		p.AlphaValues.push_back(1.f);
 		p.AlphaValues.push_back(0.f);
-		p.RadiusValues.push_back(0.06f);
-		p.RadiusValues.push_back(0.f);
+		p.ScaleValues.push_back(glm::vec3(0.06f));
+		p.ScaleValues.push_back(glm::vec3(0.f));
 		p.RadiusDistribution = 1;
 		p.EmitterLifeTime = 2.f;
 		p.ParticleLifeTime = 1.f;

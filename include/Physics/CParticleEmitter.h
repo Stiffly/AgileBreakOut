@@ -24,7 +24,7 @@ struct ParticleEmitter : public Component
 	float RadiusDistribution = 0;
 
 	//values to interpolate between.
-	std::vector<float> RadiusValues;
+	std::vector<glm::vec3> ScaleValues;
 	std::vector<float> AlphaValues;
 
     //System variables

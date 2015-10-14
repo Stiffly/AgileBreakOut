@@ -34,7 +34,7 @@ namespace Components
 struct Particle : public Component
 {
 	EntityID ParticleSystem;
-    float Radius = 0.5f;
+	glm::vec3 Scale = glm::vec3(1.f);
 	double TimeLived = 0;
 	double LifeTime = 5;
 
