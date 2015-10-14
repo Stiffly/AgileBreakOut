@@ -126,7 +126,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
             } else if (!ballComponent->Sticky) {
                 auto transform = m_World->GetComponent<Components::Transform>(entity);
                 transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
-                transform->Position = glm::vec3(0.0f, -3.f, -10.f);
+                //transform->Position = glm::vec3(0.0f, -3.f, -10.f);
                 transform->Orientation = glm::quat();
                 return;
             }
@@ -288,27 +288,29 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         float y = glm::cos((abs(x) / (1.6f)) * glm::pi<float>() / 2.f) + 1.f;
 
 		ballComponent->Combo = 0;
-
-		if (m_InkBlaster) {
-			if (!m_InkAttached) {
-				m_InkAttached = true;
-				m_Waiting = true;
-				m_InkBlockedWaiting = true;
-				ballComponent->Sticky = true;
-				ballComponent->StickyPlacement = glm::vec3(0, 0.5f, 0);
-				ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
-				ballTransform->Velocity = glm::vec3(0.f, 0.f, 0.f);
+		if (!ballComponent->Waiting) {
+			if (m_InkBlaster) {
+				if (!m_InkAttached) {
+					m_InkAttached = true;
+					m_Waiting = true;
+					m_InkBlockedWaiting = true;
+					ballComponent->Sticky = true;
+					ballComponent->StickyPlacement = glm::vec3(0, 0.5f, 0);
+					ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
+					ballTransform->Velocity = glm::vec3(0.f, 0.f, 0.f);
+				}
 			}
-		} else if (m_Sticky) {
-			m_Sticky = false;
-			m_Waiting = true;
-			ballComponent->Sticky = true;
-			ballComponent->StickyPlacement = ballTransform->Position - padTransform->Position;
-			ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
-			ballTransform->Velocity *= -1;
-			Events::StickyAttachedToPad e;
-			EventBroker->Publish(e);
-			return true;
+			else if (m_Sticky) {
+				m_Sticky = false;
+				m_Waiting = true;
+				ballComponent->Sticky = true;
+				ballComponent->StickyPlacement = ballTransform->Position - padTransform->Position;
+				ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
+				ballTransform->Velocity *= -1;
+				Events::StickyAttachedToPad e;
+				EventBroker->Publish(e);
+				return true;
+			}
 		}
 
         ballTransform->Velocity = glm::normalize(glm::vec3(x, y ,0.f)) * ballComponent->Speed;

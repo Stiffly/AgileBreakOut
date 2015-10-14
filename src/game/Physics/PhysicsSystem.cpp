@@ -23,7 +23,6 @@ void dd::Systems::PhysicsSystem::Initialize()
     InitializeWater();
     EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, &PhysicsSystem::SetImpulse);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PhysicsSystem::OnPause);
-	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PhysicsSystem::OnStageCleared);
     EVENT_SUBSCRIBE_MEMBER(m_ECreateParticleSequence, &PhysicsSystem::CreateParticleSequence);
 	EVENT_SUBSCRIBE_MEMBER(m_EContact, &PhysicsSystem::OnContact);
 }
@@ -170,17 +169,6 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 	if (m_Pause) {
 		return;
 	}
-
-	if (m_Travelling) {
-		if (m_DistanceTravelled > 12.f) {
-			m_DistanceTravelled = 0;
-			m_Travelling = false;
-			Events::ArrivedAtNewStage e;
-			EventBroker->Publish(e);
-		}
-
-		m_DistanceTravelled += 6.0f * dt;
-	}
     m_Accumulator += dt;
 
     while(m_Accumulator >= m_TimeStep)
@@ -256,20 +244,8 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
 void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {    
-	if (m_Travelling) {
-		auto transform = m_World->GetComponent<Components::Transform>(entity);
-		if (transform != nullptr) {
-			if (!transform->Sticky) {
-				transform->Position.y -= 6.0f * dt;
-			}
-		} else {
-			transform->Position.y -= 6.0f * dt;
-		}
-	}
     auto particle = m_World->GetComponent<Components::Particle>(entity);
 	auto pTemplate = m_World->GetComponent<Components::Template>(entity);
-	
-
 
     if (particle && !pTemplate) {
         particle->TimeLived += dt;
@@ -391,15 +367,6 @@ void dd::Systems::PhysicsSystem::OnEntityRemoved(EntityID entity)
         m_BodiesToEntities.erase(it->second);
         m_EntitiesToBodies.erase(entity);
     }
-}
-
-
-bool dd::Systems::PhysicsSystem::OnStageCleared(const dd::Events::StageCleared &event)
-{
-	if (event.ClearedStage < 5) {
-		m_Travelling = true;
-	}
-	return true;
 }
 
 

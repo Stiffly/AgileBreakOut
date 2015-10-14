@@ -50,11 +50,14 @@
 #include "Game/CStickyAim.h"
 #include "Game/BallSystem.h"
 #include "Game/HitLagSystem.h"
+#include "Game/TravellingSystem.h"
 #include "Game/LifebuoySystem.h"
 #include "Game/ProjectileSystem.h"
 #include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Game/BrickComponents.h"
+
+#include "Game/EScreenShake.h"
 
 #include "Physics/PhysicsSystem.h"
 #include "Physics/CPhysics.h"
@@ -153,6 +156,9 @@ public:
 		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
 				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::PhysicsSystem>();
+		m_World->SystemFactory.Register<Systems::TravellingSystem>(
+			[this]() { return new Systems::TravellingSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::TravellingSystem>();
 
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
@@ -280,8 +286,8 @@ public:
 			auto transform = m_World->AddComponent<Components::Transform>(BottomWall);
 			transform->Position = glm::vec3(0.f, -6.f, -10.f);
 			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
+			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(BottomWall);
 			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
 			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
@@ -298,8 +304,8 @@ public:
 			transform->Position = glm::vec3(0.f, 6.f, -10.f);
 			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
 
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
 			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(topWall);
 			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
@@ -320,8 +326,8 @@ public:
 			transform->Position = glm::vec3(-4.f, 1.f, -10.f);
 			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
 
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
+			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
 			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(leftWall);
 			rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
@@ -342,8 +348,8 @@ public:
 			transform->Position = glm::vec3(4.f, 1.f, -10.f);
 			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
 
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
-			sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
+			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
 			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(rightWall);
 			rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
@@ -360,8 +366,10 @@ public:
 		//EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &Engine::OnGameStart);
 		m_EGameStart = decltype(m_EGameStart)(std::bind(&Engine::OnGameStart, this, std::placeholders::_1));
 		m_EventBroker->Subscribe(m_EGameStart);
+		m_EScreenShake = decltype(m_EScreenShake)(std::bind(&Engine::OnScreenShake, this, std::placeholders::_1));
+		m_EventBroker->Subscribe(m_EScreenShake);
 
-			m_LastTime = glfwGetTime();
+		m_LastTime = glfwGetTime();
 	}
 
 	bool Running() const { return !glfwWindowShouldClose(m_Renderer->Window()); }
@@ -380,6 +388,9 @@ public:
 		//ResourceManager::Update();
 		if (m_GameIsRunning) {
 			m_World->Update(dt);
+
+			// I apologize about this.
+			ScreenShakeUpdate(dt);
 		}
 		m_EventBroker->Process<GUI::Frame>();
 		m_FrameStack->UpdateLayered(dt);
@@ -390,6 +401,8 @@ public:
 		if (m_GameIsRunning) {
 			TEMPAddToRenderQueue();
 		}
+
+		std::unique_ptr<dd::Camera> defaultCamera = nullptr;
 
 		// Render scene
 		//TODO send renderqueue to draw.
@@ -550,6 +563,36 @@ public:
 		m_RendererQueue.Forward.Add(job);
 	}
 
+	void ScreenShakeUpdate(double dt)
+	{
+		if (m_ScreenShake) {
+			m_ShakeTimer += dt;
+			if (m_ShakeTimer >= m_ShakeEndTime) {
+				//std::cout << "Used: " << m_ShakeIntensity << " True: " << m_ShakeRepresentativeIntensity << std::endl;
+				m_ShakeRepresentativeIntensity -= m_ShakeRepresentativeIntensity * m_CoolerMultiplier * dt;
+				m_ShakeIntensity = m_ShakeRepresentativeIntensity;
+				if (m_ShakeIntensity <= 0) {
+					m_ScreenShake = false;
+					m_Renderer->PlaceCamera(glm::vec3(0, 0, 0));
+					return;
+				}
+			} else {
+				//std::cout << "Timer: " << m_ShakeTimer << " End: " << m_ShakeEndTime << std::endl;
+			}
+			float randomX = (rand() % m_ShakeIntensity);
+			float randomY = (rand() % m_ShakeIntensity);
+		
+			float half = m_ShakeIntensity / 2;
+
+			randomX = (randomX - half) / 20;
+			randomY = (randomY - half) / 20;
+
+			//std::cout << "X: " << randomX << " Y: " << randomY << std::endl;
+
+			m_Renderer->PlaceCamera(glm::vec3(randomX, randomY, 0));
+		}
+	}
+
 private:
 	std::shared_ptr<EventBroker> m_EventBroker;
 	GUI::Frame* m_FrameStack = nullptr;
@@ -557,6 +600,7 @@ private:
 	RenderQueueCollection m_RendererQueue;
 	std::shared_ptr<InputManager> m_InputManager;
 	std::shared_ptr<World> m_World;
+	glm::vec3 m_CameraPosition = glm::vec3(0.f, 0.f, 0.f);
 
 	//TODO: Redo
 	bool m_GameIsRunning = false;
@@ -581,6 +625,27 @@ private:
 
 		return true;
 	};
+
+	//TODO: Extreme Redo.
+	bool m_ScreenShake = false;
+	int m_ShakeIntensity = 0;
+	float m_ShakeRepresentativeIntensity = 0;
+	float m_ShakeTimer = 0;
+	float m_ShakeEndTime = 0;
+	float m_TimeTakenToCoolDown = 0;
+	float m_CoolerMultiplier = 0;
+	dd::EventRelay<Engine, dd::Events::ScreenShake> m_EScreenShake;
+	bool OnScreenShake(const dd::Events::ScreenShake &event)
+	{
+		m_ScreenShake = true;
+		m_ShakeIntensity = event.Intensity;
+		m_ShakeRepresentativeIntensity = event.Intensity;
+		m_ShakeEndTime = event.Time;
+		m_ShakeTimer = 0;
+		m_TimeTakenToCoolDown = event.TimeTakenToCoolDown;
+		m_CoolerMultiplier = m_ShakeIntensity / m_TimeTakenToCoolDown;
+		return true;
+	}
 	double m_LastTime;
 };
 
