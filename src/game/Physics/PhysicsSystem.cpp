@@ -268,7 +268,7 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
         }
 		//Update alpha
 		auto sprite = m_World->GetComponent<Components::Sprite>(entity);
-		float timeProgress = particle->TimeLived / particle->LifeTime;
+		float timeProgress = particle->TimeLived / (particle->LifeTime - 0.1);
 		if (timeProgress > particle->LifeTime) {
 			timeProgress = particle->LifeTime;
 		}
@@ -305,10 +305,11 @@ float dd::Systems::PhysicsSystem::ScalarInterpolation(float timeProgress, std::v
 		return spectrum[0];
 	}
 
-	float dValue = glm::abs(spectrum[0] - spectrum[1]);
-	if (spectrum[0] > spectrum[1]) {
-		dValue *= -1;
-	}
+	float dValue = spectrum[1] - spectrum[0];
+//	glm::abs(spectrum[0] - spectrum[1]);
+// 	if (spectrum[0] > spectrum[1]) {
+// 		dValue *= -1;
+// 	}
 
 	float scalar = spectrum[0] + dValue * timeProgress;
 
@@ -514,12 +515,18 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 
 		//Create new particle
         for ( int j = 0; j < emitter->ParticlesPerTick; j++) {
+			b2ParticleDef particleDef;
+			//position
+			particleDef.position = b2Vec2(emitterTransform->Position.x, emitterTransform->Position.y);
+			if (particleDef.position.x == 0.f && particleDef.position.y == 0.f) {
+				continue;
+			}
+
 			auto particle = m_World->CloneEntity(pt, 0);
 			m_World->RemoveComponent<Components::Template>(particle);
 			auto particleTransform = m_World->GetComponent<Components::Transform>(particle);
 			auto particleComponent = m_World->GetComponent<Components::Particle>(particle);
 
-			b2ParticleDef particleDef;
             particleDef.flags = particleTemplate->Flags;
             //particleDef.color TODO: Implement this if we want color mixing and shit.
             particleDef.lifetime = particleTemplate->LifeTime;
@@ -537,8 +544,7 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 			glm::vec2 vel = unitVec * emitter->Speed * (float)dt * speedMultiplier;
             particleDef.velocity = b2Vec2(vel.x, vel.y);
 
-			//position
-			particleDef.position = b2Vec2(emitterTransform->Position.x, emitterTransform->Position.y);
+			
 
 			//radius - currently not working :j
 			float radius = emitter->RadiusValues[0];

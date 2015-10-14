@@ -394,6 +394,25 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 		m_World->RemoveComponent<Components::Template>(b);
 		m_World->SetEntityParent(b, 0);
 		m_World->CommitEntity(b);
+
+		//Particle trail
+		Events::CreateParticleSequence p;
+		p.parent = b;
+		p.AlphaValues.push_back(1.f);
+		p.AlphaValues.push_back(0.f);
+		p.RadiusValues.push_back(0.06f);
+		p.RadiusValues.push_back(0.f);
+		p.RadiusDistribution = 1;
+		p.EmitterLifeTime = 2.f;
+		p.ParticleLifeTime = 1.f;
+		p.ParticlesPerTick = 1;
+		p.SpawnRate = 0.1f;
+		p.Speed = 10.f;
+		p.EmittingAngle = glm::half_pi<float>();
+		p.SpriteFile = "Textures/Particles/FadeBall.png";
+		p.Color = brickModel->Color;
+		//p.Spread = ...
+		EventBroker->Publish(p);
 	}
 
 
