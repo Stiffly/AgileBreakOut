@@ -266,6 +266,10 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         return false;
     }
 
+	if (ballComponent->Waiting || ballComponent->Sticky) {
+		return false;
+	}
+
 	
     auto ballTransform = m_World->GetComponent<Components::Transform>(ballEntity);
     glm::vec2 ballVelocity = glm::vec2(ballTransform->Velocity.x, ballTransform->Velocity.y);
