@@ -289,7 +289,7 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
         float y = glm::cos((abs(x) / (1.6f)) * glm::pi<float>() / 2.f) + 1.f;
 
 		//When a combo is more than 2 create a particle showing it.
-		if (ballComponent->Combo >= 1){
+		if (ballComponent->Combo >= 2){
 
 			Events::CreateParticleSequence particleEvent;
 
@@ -311,10 +311,10 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 
 			if (ballComponent->Combo <= 9) {
 				particleEvent.SpriteFile = "Textures/Combo/Combo00" + std::to_string(ballComponent->Combo) + ".png";
-			} else if (ballComponent->Combo <= 99) {
+			} else if (ballComponent->Combo <= 42) {
 				particleEvent.SpriteFile = "Textures/Combo/Combo0" + std::to_string(ballComponent->Combo) + ".png";
 			} else {
-				particleEvent.SpriteFile = "Textures/Combo/Combo" + std::to_string(ballComponent->Combo) + ".png";
+				particleEvent.SpriteFile = "Textures/Combo/Combo043.png";
 			}
 			EventBroker->Publish(particleEvent);
 		}
@@ -322,7 +322,7 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 
 		
 
-		ballComponent->Combo = 0;
+		ballComponent->Combo = 56;
 		if (!ballComponent->Waiting) {
 			if (m_InkBlaster) {
 				if (!m_InkAttached) {
