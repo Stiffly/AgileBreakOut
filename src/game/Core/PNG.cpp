@@ -112,12 +112,12 @@ dd::PNG::~PNG()
 	}
 }
 
-void dd::PNG::lpngErrorFunction()
+void dd::PNG::pngErrorFunction(png_structp png_ptr, png_const_charp error_msg)
 {
-
+	LOG_WARNING("%s", error_msg);
 }
 
-void dd::PNG::lpngWarningFunction()
+void dd::PNG::pngWarningFunction(png_structp png_ptr, png_const_charp warning_msg)
 {
-
+	LOG_WARNING("%s", warning_msg);
 }

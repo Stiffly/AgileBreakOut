@@ -35,8 +35,8 @@ public:
 	~PNG();
 
 private:
-	static void pngErrorFunction();
-	static void pngWarningFunction();
+	static void pngErrorFunction(png_structp png_ptr, png_const_charp error_msg);
+	static void pngWarningFunction(png_structp png_ptr, png_const_charp warning_msg);
 };
 
 }
