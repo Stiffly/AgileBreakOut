@@ -67,7 +67,7 @@ struct ModelJob : RenderJob
 	unsigned int EndIndex;
 
 	// Animation
-	Skeleton* Skeleton = nullptr;
+	dd::Skeleton* Skeleton = nullptr;
 	bool NoRootMotion = true;
 	std::string AnimationName;
 	double AnimationTime = 0;
