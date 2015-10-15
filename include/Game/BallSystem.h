@@ -5,23 +5,53 @@
 #include "Core/World.h"
 #include "Core/EventBroker.h"
 #include "Core/CTransform.h"
+#include "Core/CTemplate.h"
+#include "Physics/CPhysics.h"
+#include "Physics/CCircleShape.h"
+#include "Physics/CRectangleShape.h"
 #include "Physics/EContact.h"
+#include "Rendering/CModel.h"
+#include "Rendering/CSprite.h"
+#include "Rendering/CPointLight.h"
 #include "Game/CBall.h"
 #include "Game/CPowerUp.h"
+#include "Game/CLife.h"
+#include "Game/CBrick.h"
+#include "Game/CLifebuoy.h"
+#include "Game/ELifeLost.h"
+#include "Game/EComboEvent.h"
+#include "Game/EResetBall.h"
+#include "Game/EMultiBall.h"
+#include "Game/EMultiBallLost.h"
+#include "Game/EStickyPad.h"
+#include "Game/EStickyAttachedToPad.h"
+#include "Game/EInkBlaster.h"
+#include "Game/EInkBlasterOver.h"
+#include "Game/EStageCleared.h"
+#include "Game/EArrivedAtNewStage.h"
+#include "Game/EGameOver.h"
+#include "Game/EPause.h"
+#include "Game/EHitPad.h"
+#include "Game/EHitLag.h"
+#include "Game/EActionButton.h"
+#include "Game/ELifebuoyHit.h"
+#include "Physics/ECreateParticleSequence.h"
 
-namespace dd {
+namespace dd
+{
 
-namespace Systems {
+namespace Systems
+{
 
-class BallSystem : public System {
+class BallSystem : public System
+{
 public:
     BallSystem(World *world, std::shared_ptr<dd::EventBroker> eventBroker)
             : System(world, eventBroker) { }
 
     ~BallSystem();
 
-    EventRelay<BallSystem, Events::Contact> m_Contact;
-    bool Contact(const Events::Contact &event);
+
 
     void RegisterComponents(ComponentFactory *cf) override;
 
@@ -39,11 +69,84 @@ public:
     // Called when an entity is removed
     void OnEntityRemoved(EntityID entity) override;
 
-private:
+    EntityID CreateBall();
+    void CreateLife(int);
+    EntityID Ball() { return m_Ball; };
+    void SetBall(const EntityID& ball) { m_Ball = ball; }
 
+    float& XMovementMultiplier() { return m_XMovementMultiplier; }
+    void SetXMovementMultiplier(const float& xMovementMultiplier) { m_XMovementMultiplier = xMovementMultiplier; }
+    float& EdgeX() { return m_EdgeX; }
+    void SetEdgeX(const float& edgeX) { m_EdgeX = edgeX; }
+    float& EdgeY() { return m_EdgeY; }
+    void SetEdgeY(const float& edgeY) { m_EdgeY = edgeY; }
+    int& MultiBalls() { return m_MultiBalls; }
+    void SetMultiBalls(const int& multiBalls) { m_MultiBalls = multiBalls; }
+    int& Lives() { return m_Lives; }
+    void SetLives(const int& lives) { m_Lives = lives; }
+    int& PastLives() { return m_PastLives; }
+    void SetPastLives(const int& pastLives) { m_PastLives = pastLives; }
+    bool ReplaceBall() const { return m_ReplaceBall; }
+    void SetReplaceBall(const bool& replaceBall) { m_ReplaceBall = replaceBall; }
+    bool IsPaused() const { return m_Pause; }
+    void SetPause(const bool& pause) { m_Pause = pause; }
+
+private:
+    float m_XMovementMultiplier = 2.f;
+    float m_EdgeX = 3.2f;
+    float m_EdgeY = 5.2f;
+    int m_MultiBalls = 0;
+    int m_Lives = 3;
+    int m_PastLives = 3;
+    bool m_ReplaceBall = false;
+    bool m_Pause = false;
+    bool m_Waiting = true;
+	bool m_Sticky = false;
+	bool m_InkBlaster = false;
+	bool m_InkAttached = false;
+	bool m_InkBlockedWaiting = false;
+	bool m_Restarting = false;
+	int m_StickyCounter = 3;
+
+	bool m_StageBlockedWaiting = false;
+
+    glm::vec3 m_SavedSpeed;
+    bool m_InitializePause = false;
+
+    EntityID m_Ball;
+
+    std::unordered_map<EntityID, std::list<glm::vec2>> m_Contacts;
+    void ResolveContacts();
+
+    dd::EventRelay<BallSystem, dd::Events::LifeLost> m_ELifeLost;
+    dd::EventRelay<BallSystem, dd::Events::MultiBallLost> m_EMultiBallLost;
+    dd::EventRelay<BallSystem, dd::Events::ResetBall> m_EResetBall;
+    dd::EventRelay<BallSystem, dd::Events::MultiBall> m_EMultiBall;
+	dd::EventRelay<BallSystem, dd::Events::StickyPad> m_EStickyPad;
+	dd::EventRelay<BallSystem, dd::Events::InkBlaster> m_EInkBlaster;
+	dd::EventRelay<BallSystem, dd::Events::InkBlasterOver> m_EInkBlasterOver;
+    dd::EventRelay<BallSystem, dd::Events::Pause> m_EPause;
+    dd::EventRelay<BallSystem, dd::Events::Contact> m_Contact;
+    dd::EventRelay<BallSystem, dd::Events::ActionButton> m_EActionButton;
+	dd::EventRelay<BallSystem, dd::Events::StageCleared> m_EStageCleared;
+	dd::EventRelay<BallSystem, dd::Events::ArrivedAtNewStage> m_EArrivedAtNewStage;
+
+    bool Contact(const Events::Contact &event);
+    bool OnLifeLost(const dd::Events::LifeLost &event);
+    bool OnMultiBallLost(const dd::Events::MultiBallLost &event);
+    bool OnResetBall(const dd::Events::ResetBall &event);
+    bool OnMultiBall(const dd::Events::MultiBall &event);
+	bool OnStickyPad(const dd::Events::StickyPad &event);
+	bool OnInkBlaster(const dd::Events::InkBlaster &event);
+	bool OnInkBlasterOver(const dd::Events::InkBlasterOver &event);
+    bool OnPause(const dd::Events::Pause &event);
+    bool OnActionButton(const dd::Events::ActionButton &event);
+	bool OnStageCleared(const dd::Events::StageCleared &event);
+	bool OnArrivedToNewStage(const dd::Events::ArrivedAtNewStage &event);
 };
 
 }
+
 }
 
 #endif

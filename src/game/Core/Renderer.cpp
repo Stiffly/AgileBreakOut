@@ -70,8 +70,9 @@ void dd::Renderer::Initialize()
 	LoadShaders();
 	CreateBuffers();
 
-	m_CurrentScreenBuffer = m_tFinal;
+	m_CurrentScreenBuffer = m_TFinal;
 }
+
 void dd::Renderer::LoadShaders()
 {
 	/*
@@ -79,39 +80,39 @@ void dd::Renderer::LoadShaders()
 	*/
 
 	// Pass #1: Fill G-buffers
-	m_spDeferred1 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/1/");
-	m_spDeferred1->BindFragDataLocation(0, "GDiffuse");
-	m_spDeferred1->BindFragDataLocation(1, "GPosition");
-	m_spDeferred1->BindFragDataLocation(2, "GNormal");
-	m_spDeferred1->BindFragDataLocation(3, "GSpecular");
-	m_spDeferred1->Link();
+	m_SpDeferred1 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/1/");
+	m_SpDeferred1->BindFragDataLocation(0, "GDiffuse");
+	m_SpDeferred1->BindFragDataLocation(1, "GPosition");
+	m_SpDeferred1->BindFragDataLocation(2, "GNormal");
+	m_SpDeferred1->BindFragDataLocation(3, "GSpecular");
+	m_SpDeferred1->Link();
 
 	// Pass #2: Lighting
-	m_spDeferred2 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/2/");
+	m_SpDeferred2 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/2/");
 	//glBindFragDataLocation(m_SPDeferred2, 0, "FragmentLighting");
-	m_spDeferred2->Link();
+	m_SpDeferred2->Link();
 
 	//Water Pass
-	t_m_spWater = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/water/");
-	t_m_spWater->Link();
-	t_m_spWater2 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/water2/");
-	t_m_spWater2->Link();
+	m_SpWater = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/water/");
+	m_SpWater->Link();
+	m_SpWater2 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/water2/");
+	m_SpWater2->Link();
 
 	// Pass #3: Combining into final image
-	m_spDeferred3 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/3/");
-	m_spDeferred3->Link();
+	m_SpDeferred3 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/3/");
+	m_SpDeferred3->Link();
 
 	/*
 		Forward rendering
 	*/
-	m_spForward = ResourceManager::Load<ShaderProgram>("Shaders/Forward/");
-	m_spForward->Link();
+	m_SpForward = ResourceManager::Load<ShaderProgram>("Shaders/Forward/");
+	m_SpForward->Link();
 
 	/*
 		Screen draw
 	*/
-	m_spScreen = ResourceManager::Load<ShaderProgram>("Shaders/Screen/");
-	m_spScreen->Link();
+	m_SpScreen = ResourceManager::Load<ShaderProgram>("Shaders/Screen/");
+	m_SpScreen->Link();
 }
 
 void dd::Renderer::CreateBuffers()
@@ -122,10 +123,10 @@ void dd::Renderer::CreateBuffers()
 	m_UnitSphere = ResourceManager::Load<Model>("Models/Core/UnitSphere.obj");
 	m_StandardNormal = ResourceManager::Load<Texture>("Textures/Core/NeutralNormalMap.png");
 	m_StandardSpecular = ResourceManager::Load<Texture>("Textures/Core/NeutralSpecularMap.png");
-	t_m_WhiteSphereTexture = ResourceManager::Load<Texture>("Textures/Test/Water.png");
+	m_WhiteSphereTexture = ResourceManager::Load<Texture>("Textures/Test/Water.png");
 
-	glGenRenderbuffers(1, &m_rbDepthBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, m_rbDepthBuffer);
+	glGenRenderbuffers(1, &m_RbDepthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, m_RbDepthBuffer);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_Resolution.Width, m_Resolution.Height);
 
 	// Generate G-buffer textures
@@ -157,8 +158,8 @@ void dd::Renderer::CreateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glGenTextures(1, &t_m_Gwater);
-	glBindTexture(GL_TEXTURE_2D, t_m_Gwater);
+	glGenTextures(1, &m_Gwater);
+	glBindTexture(GL_TEXTURE_2D, m_Gwater);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -166,9 +167,9 @@ void dd::Renderer::CreateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	// Create first pass framebuffer
-	glGenFramebuffers(1, &m_fbDeferred1);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred1);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbDepthBuffer);
+	glGenFramebuffers(1, &m_FbDeferred1);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbDeferred1);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RbDepthBuffer);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_GDiffuse, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_GPosition, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_GNormal, 0);
@@ -176,13 +177,13 @@ void dd::Renderer::CreateBuffers()
 	GLenum firstPassDrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
 	glDrawBuffers(4, firstPassDrawBuffers);
 	if (GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		LOG_ERROR("m_fbDeferred1 incomplete: 0x%x\n", fbStatus);
+		LOG_ERROR("m_FbDeferred1 incomplete: 0x%x\n", fbStatus);
 		exit(EXIT_FAILURE);
 	}
 
 	// Generate lighting texture
-	glGenTextures(1, &m_tLighting);
-	glBindTexture(GL_TEXTURE_2D, m_tLighting);
+	glGenTextures(1, &m_TLighting);
+	glBindTexture(GL_TEXTURE_2D, m_TLighting);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -190,19 +191,19 @@ void dd::Renderer::CreateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	// Create second pass framebuffer
-	glGenFramebuffers(1, &m_fbDeferred2);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred2);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tLighting, 0);
+	glGenFramebuffers(1, &m_FbDeferred2);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbDeferred2);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_TLighting, 0);
 	GLenum secondPassDrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, secondPassDrawBuffers);
 	if (GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		LOG_ERROR("m_fbDeferred2 incomplete: 0x%x\n", fbStatus);
+		LOG_ERROR("m_FbDeferred2 incomplete: 0x%x\n", fbStatus);
 		exit(EXIT_FAILURE);
 	}
 
 	//Fill Water Texture
-	glGenTextures(1, &t_m_Gwater);
-	glBindTexture(GL_TEXTURE_2D, t_m_Gwater);
+	glGenTextures(1, &m_Gwater);
+	glBindTexture(GL_TEXTURE_2D, m_Gwater);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -210,19 +211,19 @@ void dd::Renderer::CreateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	//Fill water pass
-	glGenFramebuffers(1, &t_m_fbWater);
-	glBindFramebuffer(GL_FRAMEBUFFER, t_m_fbWater);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t_m_Gwater, 0);
+	glGenFramebuffers(1, &m_FbWater);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbWater);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_Gwater, 0);
 	GLenum waterPassDrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, waterPassDrawBuffers);
 	if (GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		LOG_ERROR("m_fbDeferred2 incomplete: 0x%x\n", fbStatus);
+		LOG_ERROR("m_FbDeferred2 incomplete: 0x%x\n", fbStatus);
 		exit(EXIT_FAILURE);
 	}
 
 	//water Blur texture
-	glGenTextures(1, &t_m_BWater);
-	glBindTexture(GL_TEXTURE_2D, t_m_BWater);
+	glGenTextures(1, &m_BWater);
+	glBindTexture(GL_TEXTURE_2D, m_BWater);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -230,20 +231,20 @@ void dd::Renderer::CreateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	//Fill waterBlur pass
-	glGenFramebuffers(1, &t_m_fbWaterBlur);
-	glBindFramebuffer(GL_FRAMEBUFFER, t_m_fbWaterBlur);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t_m_BWater, 0);
+	glGenFramebuffers(1, &m_FbWaterBlur);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbWaterBlur);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_BWater, 0);
 	GLenum waterBlurDrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, waterBlurDrawBuffers);
 	if (GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		LOG_ERROR("m_fbDeferred2 incomplete: 0x%x\n", fbStatus);
+		LOG_ERROR("m_FbDeferred2 incomplete: 0x%x\n", fbStatus);
 		exit(EXIT_FAILURE);
 	}
 
 	//water Blur texture2
-	glGenTextures(1, &t_m_BWater2);
-	glBindTexture(GL_TEXTURE_2D, t_m_BWater2);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbDepthBuffer);
+	glGenTextures(1, &m_BWater2);
+	glBindTexture(GL_TEXTURE_2D, m_BWater2);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RbDepthBuffer);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -251,19 +252,19 @@ void dd::Renderer::CreateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	//Fill waterBlur pass2
-	glGenFramebuffers(1, &t_m_fbWaterBlur2);
-	glBindFramebuffer(GL_FRAMEBUFFER, t_m_fbWaterBlur2);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t_m_BWater2, 0);
+	glGenFramebuffers(1, &m_FbWaterBlur2);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbWaterBlur2);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_BWater2, 0);
 	GLenum waterBlur2DrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, waterBlur2DrawBuffers);
 	if (GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		LOG_ERROR("m_fbDeferred2 incomplete: 0x%x\n", fbStatus);
+		LOG_ERROR("m_FbDeferred2 incomplete: 0x%x\n", fbStatus);
 		exit(EXIT_FAILURE);
 	}
 
 	// Generate final deferred texture
-	glGenTextures(1, &m_tFinal);
-	glBindTexture(GL_TEXTURE_2D, m_tFinal);
+	glGenTextures(1, &m_TFinal);
+	glBindTexture(GL_TEXTURE_2D, m_TFinal);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -271,14 +272,14 @@ void dd::Renderer::CreateBuffers()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	// Create third pass framebuffer
-	glGenFramebuffers(1, &m_fbDeferred3);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred3);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbDepthBuffer);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tFinal, 0);
+	glGenFramebuffers(1, &m_FbDeferred3);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbDeferred3);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_RbDepthBuffer);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_TFinal, 0);
 	GLenum thirdPassDrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, thirdPassDrawBuffers);
 	if (GLenum fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		LOG_ERROR("m_fbDeferred3 incomplete: 0x%x\n", fbStatus);
+		LOG_ERROR("m_FbDeferred3 incomplete: 0x%x\n", fbStatus);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -298,7 +299,7 @@ void dd::Renderer::Draw(RenderQueueCollection& rq)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClearColor(1, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
-	m_spScreen->Bind();
+	m_SpScreen->Bind();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_CurrentScreenBuffer);
 	glBindVertexArray(m_ScreenQuad);
@@ -312,17 +313,17 @@ void dd::Renderer::Draw(RenderQueueCollection& rq)
 void dd::Renderer::DrawDeferred(RenderQueue &objects, RenderQueue &lights)
 {
 	// Pass #1: Fill G-buffers
-	glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred1);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbDeferred1);
 	glClearColor(1, 1, 1, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	m_spDeferred1->Bind();
-	DrawScene(objects, *m_spDeferred1);
+	m_SpDeferred1->Bind();
+	DrawScene(objects, *m_SpDeferred1);
 
 	// Pass #2: Lighting
 	glEnable(GL_CULL_FACE);
@@ -332,24 +333,24 @@ void dd::Renderer::DrawDeferred(RenderQueue &objects, RenderQueue &lights)
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_ONE, GL_ONE);
 	glDepthMask(GL_FALSE);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred2);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbDeferred2);
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	m_spDeferred2->Bind();
+	m_SpDeferred2->Bind();
 	DrawLightSpheres(lights);
 
 	// Pass #3: Combine into final deferred image
 	glCullFace(GL_BACK);
 	glDisable(GL_BLEND);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred3);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbDeferred3);
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	m_spDeferred3->Bind();
-	glUniform3fv(glGetUniformLocation(*m_spDeferred3, "La"), 1, glm::value_ptr(glm::vec3(0.5f)));
+	m_SpDeferred3->Bind();
+	glUniform3fv(glGetUniformLocation(*m_SpDeferred3, "La"), 1, glm::value_ptr(glm::vec3(0.5f)));
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_GDiffuse);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_tLighting);
+	glBindTexture(GL_TEXTURE_2D, m_TLighting);
 	glBindVertexArray(m_ScreenQuad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
@@ -358,19 +359,17 @@ void dd::Renderer::DrawForward(RenderQueue &objects, RenderQueue &lights)
 {
 	// Forward-render semi-transparent objects on top of the current framebuffer
 	glDisable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	//glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred3);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbDeferred3);
 //	glClearColor(1, 0.9, 0.8f, 1);
 //	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	m_spForward->Bind();
-	DrawScene(objects, *m_spForward);
+	m_SpForward->Bind();
+	DrawScene(objects, *m_SpForward);
 
 	//WaterPass
 	glDisable(GL_CULL_FACE);
@@ -379,11 +378,16 @@ void dd::Renderer::DrawForward(RenderQueue &objects, RenderQueue &lights)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBindFramebuffer(GL_FRAMEBUFFER, t_m_fbWater);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbWater);
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	t_m_spWater->Bind();
+	m_SpWater->Bind();
 	DrawWater(objects);
+}
+
+void dd::Renderer::PlaceCamera(glm::vec3 position)
+{
+	m_DefaultCamera->SetPosition(position);
 }
 
 void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
@@ -442,7 +446,7 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "M"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "V"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
-			glUniform4fv(glGetUniformLocation(shaderProgramHandle, "Color"), 1, glm::value_ptr(modelJob->Color));
+			glUniform4fv(glGetUniformLocation(shaderProgramHandle, "Color"), 1, glm::value_ptr(spriteJob->Color));
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, spriteJob->DiffuseTexture);
@@ -462,7 +466,7 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 
 void dd::Renderer::DrawLightSpheres(RenderQueue &lights)
 {
-	GLuint shaderProgramHandle = *m_spDeferred2;
+	GLuint shaderProgramHandle = *m_SpDeferred2;
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_GPosition);
@@ -499,7 +503,7 @@ void dd::Renderer::DrawLightSpheres(RenderQueue &lights)
 
 void dd::Renderer::DrawWater(RenderQueue &rq)
 {
-	GLuint shaderProgramHandle = *t_m_spWater;
+	GLuint shaderProgramHandle = *m_SpWater;
 
 	glm::mat4 projectionMatrix = m_Camera->ProjectionMatrix();
 	glm::mat4 viewMatrix = m_Camera->ViewMatrix();
@@ -517,7 +521,7 @@ void dd::Renderer::DrawWater(RenderQueue &rq)
 							   glm::value_ptr(viewMatrix));
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, *t_m_WhiteSphereTexture);
+			glBindTexture(GL_TEXTURE_2D, *m_WhiteSphereTexture);
 
 			glBindVertexArray(m_UnitQuad->VAO);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_UnitQuad->ElementBuffer);
@@ -528,16 +532,17 @@ void dd::Renderer::DrawWater(RenderQueue &rq)
 
 
 	//blur1
-	shaderProgramHandle = *t_m_spWater2;
+	shaderProgramHandle = *m_SpWater2;
 	glDisable(GL_CULL_FACE);
 	glDepthMask(GL_FALSE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBindFramebuffer(GL_FRAMEBUFFER, t_m_fbWaterBlur);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbWaterBlur);
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	t_m_spWater2->Bind();
+	m_SpWater2->Bind();
+	//TODO: Add this in water particle component. Blurradius
 	float radius = 3.f;
 
 	glUniform2fv(glGetUniformLocation(shaderProgramHandle, "dir"), 1, glm::value_ptr(glm::vec2(1.0f, 0.0f)));
@@ -545,62 +550,29 @@ void dd::Renderer::DrawWater(RenderQueue &rq)
 	glUniform1f(glGetUniformLocation(shaderProgramHandle, "radius"), radius);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, t_m_Gwater);
+	glBindTexture(GL_TEXTURE_2D, m_Gwater);
 	glBindVertexArray(m_ScreenQuad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
 	//blur2
-	shaderProgramHandle = *t_m_spWater2;
+	shaderProgramHandle = *m_SpWater2;
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred3);
-	t_m_spWater2->Bind();
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbDeferred3);
+	m_SpWater2->Bind();
 
 	glUniform2fv(glGetUniformLocation(shaderProgramHandle, "dir"), 1, glm::value_ptr(glm::vec2(0.0f, 1.0f)));
 	glUniform1f(glGetUniformLocation(shaderProgramHandle, "res"), m_Resolution.Height);
 	glUniform1f(glGetUniformLocation(shaderProgramHandle, "radius"), radius);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, t_m_BWater);
+	glBindTexture(GL_TEXTURE_2D, m_BWater);
 	glBindVertexArray(m_ScreenQuad);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-}
-
-
-
-GLuint dd::Renderer::CreateWaterParticleVAO(RenderQueue &particles)
-{
-	float waterVerts[particles.Size()];
-	int i = 0;
-
-	for ( auto &job : particles ) {
-		auto waterJob = std::dynamic_pointer_cast<WaterParticleJob>(job);
-		if (!waterJob)
-			continue;
-		waterVerts[i  ] = waterJob->Position.x;
-		waterVerts[i+1] = waterJob->Position.y;
-		waterVerts[i+2] = waterJob->Position.z;
-		i+3;
-	}
-
-	GLuint vbo[1], vao;
-	glGenBuffers(1, vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, 3 * particles.Size() * sizeof(float), waterVerts, GL_STATIC_DRAW);
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	return vao;
 }
 
 GLuint dd::Renderer::CreateQuad()
@@ -649,7 +621,7 @@ GLuint dd::Renderer::CreateQuad()
 void dd::Renderer::DebugKeys()
 {
 	if (glfwGetKey(m_Window, GLFW_KEY_F1)) {
-		m_CurrentScreenBuffer = m_tFinal;
+		m_CurrentScreenBuffer = m_TFinal;
 	}
 	if (glfwGetKey(m_Window, GLFW_KEY_F2)) {
 		m_CurrentScreenBuffer = m_GDiffuse;
@@ -664,19 +636,19 @@ void dd::Renderer::DebugKeys()
 		m_CurrentScreenBuffer = m_GSpecular;
 	}
 	if (glfwGetKey(m_Window, GLFW_KEY_F6)) {
-		m_CurrentScreenBuffer = m_tLighting;
+		m_CurrentScreenBuffer = m_TLighting;
 	}
 	if (glfwGetKey(m_Window, GLFW_KEY_F7)) {
-		m_CurrentScreenBuffer  = t_m_Gwater;
+		m_CurrentScreenBuffer  = m_Gwater;
 	}
 	if (glfwGetKey(m_Window, GLFW_KEY_F8)) {
-		m_CurrentScreenBuffer  = t_m_BWater;
+		m_CurrentScreenBuffer  = m_BWater;
 	}
 }
 
 void dd::Renderer::DrawGUI(dd::RenderQueue& rq)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbDeferred3);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FbDeferred3);
 	glDisable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glDisable(GL_DEPTH_TEST);
@@ -684,7 +656,7 @@ void dd::Renderer::DrawGUI(dd::RenderQueue& rq)
 	//glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 
-	m_spScreen->Bind();
+	m_SpScreen->Bind();
 
 	glm::mat4 MVP;
 
@@ -696,9 +668,10 @@ void dd::Renderer::DrawGUI(dd::RenderQueue& rq)
 			glm::mat4 PV = glm::mat4(1); //frameJob->ProjectionMatrix * viewMatrix;
 			glm::mat4 modelMatrix = glm::mat4(1); //frameJob->ModelMatrix;
 			MVP = PV * modelMatrix;
-			glUniformMatrix4fv(glGetUniformLocation(*m_spScreen, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
-			glUniformMatrix4fv(glGetUniformLocation(*m_spScreen, "M"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-			glUniformMatrix4fv(glGetUniformLocation(*m_spScreen, "V"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+			glUniformMatrix4fv(glGetUniformLocation(*m_SpScreen, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+			glUniformMatrix4fv(glGetUniformLocation(*m_SpScreen, "M"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+			glUniformMatrix4fv(glGetUniformLocation(*m_SpScreen, "V"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+			glUniform4fv(glGetUniformLocation(*m_SpScreen, "Color"), 1, glm::value_ptr(frameJob->Color));
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, frameJob->DiffuseTexture);

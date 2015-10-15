@@ -188,13 +188,13 @@ void ResourceManager::Preload(std::string resourceName)
 	auto resourceType = typeid(T).name();
 	if (IsResourceLoaded(resourceType, resourceName))
 	{
-		LOG_WARNING("Attempted to preload resource \"%s\" multiple times!", resourceName);
+		LOG_WARNING("Attempted to preload resource \"%s\" multiple times!", resourceName.c_str());
 		return;
 	}
 
 	m_Preloading = true;
 	LOG_INFO("Preloading resource \"%s\"", resourceName.c_str());
-	CreateResource<T>(resourceName);
+	CreateResource<T>(resourceName, nullptr);
 	m_Preloading = false;
 }
 

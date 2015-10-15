@@ -17,6 +17,7 @@
 #include "Game/CBall.h"
 #include "Game/CBrick.h"
 #include "Game/CPad.h"
+#include "Physics/ECreateParticleSequence.h"
 
 namespace dd
 {

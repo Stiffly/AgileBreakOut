@@ -10,7 +10,7 @@ namespace Components
 
 struct RectangleShape : public Component
 {
-
+    glm::vec2 Dimensions = glm::vec2(1.f, 1.f);
 };
 
 }

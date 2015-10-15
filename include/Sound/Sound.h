@@ -32,7 +32,7 @@ private:
     short m_FormatType, m_Channels;
     unsigned long m_SampleRate, m_AvgBytesPerSec;
     short m_BytesPerSample, m_BitsPerSample;
-    unsigned long m_DataSize;
+    unsigned int m_DataSize;
     std::map<std::string, ALuint> m_BufferCache;
     ALuint LoadFile(std::string path);
 };

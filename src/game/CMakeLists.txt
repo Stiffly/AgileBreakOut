@@ -7,7 +7,6 @@ find_package(Boost REQUIRED COMPONENTS system filesystem thread chrono)
 find_package(assimp REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
-find_package(BGFX REQUIRED)
 find_package(liquidfun REQUIRED)
 # Because FindOpenAL is retarded
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/deps/include/AL")
@@ -28,7 +27,6 @@ include_directories(
     ${assimp_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIRS}
     ${X11_INCLUDE_DIRS}
-    ${BGFX_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
 	${liquidfun_INCLUDE_DIRS}
 )
@@ -72,6 +70,11 @@ file(GLOB SOURCE_FILES_Game
     "Game/*.cpp"
 )
 source_group(Game FILES ${SOURCE_FILES_Game})
+file(GLOB SOURCE_FILES_Game_GUI
+    "${INCLUDE_PATH}/Game/GUI/*.h"
+    "Game/GUI/*.cpp"
+)
+source_group(Game\\GUI FILES ${SOURCE_FILES_Game_GUI})
 
 file(GLOB SOURCE_FILES_Sound
     "${INCLUDE_PATH}/Sound/*.h"
@@ -93,6 +96,7 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Physics}
     ${SOURCE_FILES_Game}
+    ${SOURCE_FILES_Game_GUI}
     ${SOURCE_FILES_Sound}
     ${SOURCE_FILES_GUI}
 )
@@ -112,7 +116,6 @@ target_link_libraries(game
     ${assimp_LIBRARIES}
     ${PNG_LIBRARIES}
     ${X11_LIBRARIES}
-    ${BGFX_LIBRARIES}
     ${OPENAL_LIBRARY}
 	${liquidfun_LIBRARIES}
 )
@@ -129,7 +132,6 @@ target_link_libraries(breakout
     ${assimp_LIBRARIES}
     ${PNG_LIBRARIES}
 	${X11_LIBRARIES}
-	${BGFX_LIBRARIES}
     ${OPENAL_LIBRARY}
     ${liquidfun_LIBRARIES}
 )

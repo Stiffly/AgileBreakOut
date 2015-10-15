@@ -60,6 +60,10 @@ protected:
 
 	virtual bool OnMouseMove(const Events::MouseMove& event)
 	{
+		if (Hidden()) {
+			return false;
+		}
+
 		bool isOver = Rectangle::Intersects(AbsoluteRectangle(), Rectangle(event.X, event.Y, 1, 1));
 		if (isOver && !m_MouseIsOver) { // Enter
 			if (!m_IsDown) {
@@ -88,6 +92,11 @@ protected:
 	}
 	virtual bool OnMousePress(const Events::MousePress& event)
 	{
+		if (Hidden()) {
+			//LOG_DEBUG("Pressed hidden button");
+			return false;
+		}
+
 		if (!Rectangle::Intersects(AbsoluteRectangle(), Rectangle(event.X, event.Y, 1, 1))) {
 			return false;
 		}
@@ -107,6 +116,11 @@ protected:
 	}
 	virtual bool OnMouseRelease(const Events::MouseRelease& event)
 	{
+		if (Hidden()) {
+			//LOG_DEBUG("Released hidden button");
+			return false;
+		}
+
 		bool isOver = Rectangle::Intersects(AbsoluteRectangle(), Rectangle(event.X, event.Y, 1, 1));
 		if (!isOver && !m_IsDown) {
 			return false;

@@ -1,18 +1,17 @@
 project(tests)
 
+find_package(PNG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS chrono thread unit_test_framework)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
+    ${PNG_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
 )
 
-set(SOURCE_FILES
-    main.cpp
-    FileWatcherTest.cpp
-    EventTest.cpp
-    ComponentCopyTest.cpp
-    EntityCloneTest.cpp
+
+file(GLOB SOURCE_FILES
+    "*.cpp"
 )
 
 if(CMAKE_COMPILER_IS_GNUCXX)

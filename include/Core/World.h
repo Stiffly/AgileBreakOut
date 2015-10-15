@@ -194,7 +194,7 @@ public:
 
 	// Triggers commit events in systems
 	// TODO: Replace completely by EComponentCreated?
-	int CommitEntity(EntityID entity);
+	void CommitEntity(EntityID entity);
 
 	/** Get all components of a specific type.
 	

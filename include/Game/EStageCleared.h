@@ -9,13 +9,18 @@
 
 namespace dd
 {
+
 namespace Events
 {
+
 struct StageCleared : Event
 {
-
+    int ClearedStage = 0;
+    int StageCluster = 0;
 };
+
 }
+
 }
 
 #endif //DAYDREAM_ESTAGECLEARED_H
