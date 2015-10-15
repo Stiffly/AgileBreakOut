@@ -86,19 +86,25 @@ class Engine
 
 public:
 	Engine(int argc, char* argv[]) {
+		auto config = ResourceManager::Load<ConfigFile>("Config.ini");
+
 		m_EventBroker = std::make_shared<EventBroker>();
 
 		m_Renderer = std::make_shared<Renderer>();
-		m_Renderer->SetFullscreen(false);
-		//m_Renderer->SetResolution(Rectangle(0, 0, 1920, 1080));
-		m_Renderer->SetResolution(Rectangle(0, 0, 675, 1080));
+		m_Renderer->SetFullscreen(config->GetValue<bool>("Video.Fullscreen", false));
+		m_Renderer->SetResolution(Rectangle(
+			0, 
+			0, 
+			config->GetValue<int>("Video.Width", 675), 
+			config->GetValue<int>("Video.Height", 1080)
+		));
 		m_Renderer->Initialize();
 
 		m_FrameStack = new GUI::Frame(m_EventBroker.get());
 		m_FrameStack->Width = 675;
 		m_FrameStack->Height = 1080;
 
-		if (ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<int>("Debug.SkipStory", 0) == 1) {
+		if (config->GetValue<bool>("Debug.SkipStory", false)) {
 			Events::GameStart e;
 			m_EventBroker->Publish(e);
 			auto hud = new GUI::HUD(m_FrameStack, "HUD");
