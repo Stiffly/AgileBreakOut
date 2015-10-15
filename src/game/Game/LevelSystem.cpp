@@ -400,6 +400,11 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
     auto transform = m_World->GetComponent<Components::Transform>(brick);
     auto cBrick = m_World->GetComponent<Components::Brick>(brick);
 	auto model = m_World->GetComponent<Components::Model>(brick);
+
+	float x = line * spacesBetweenBricks.x;
+	float y = row * spacesBetweenBricks.y;
+	transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y + aboveLevel, -10.f);
+
     if (typeInt == StandardBrick) {
 		cBrick->Type = StandardBrick;
 		auto type = m_World->AddComponent<Components::StandardBrick>(brick);
@@ -425,12 +430,15 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
 		cBrick->Type = KrakenAttackBrick;
 		auto type = m_World->AddComponent<Components::KrakenAttackBrick>(brick);
 		model->Color = glm::vec4(0.f, 0.5f, 1.0f, .0f);
+	} else if (typeInt == Kraken) {
+		Events::KrakenAppear e;
+		e.Position = transform->Position;
+		e.Health = 10;
+		EventBroker->Publish(e);
+		m_World->RemoveEntity(brick);
+		return;
 	}
 
-	
-    float x = line * spacesBetweenBricks.x;
-    float y = row * spacesBetweenBricks.y;
-    transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y + aboveLevel, -10.f);
     cBrick->Score = 10 * num;
     return;
 }
@@ -700,6 +708,8 @@ void dd::Systems::LevelSystem::GetNextLevel()
 	// 5 is ink blaster brick.
 	// 6 is kraken attack brick.
 
+	// 100 is KRAKEN!
+
 	// wolor array determines the color of standard bricks.
 	// w is white.
 	// r is red.
@@ -733,25 +743,8 @@ void dd::Systems::LevelSystem::GetNextLevel()
 	glm::vec4 p4 = glm::vec4(125.f / 255.f, 0.f / 255.f, 147.f / 255.f, 1.f);
 
 
-
-
     if (m_CurrentCluster == 0) {
         if (m_CurrentLevel == 1) {
-            level =
-                    {0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 1, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0};
-			color = 
-					{w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w};
-        } else if (m_CurrentLevel == 2) {
             level =
                     {1, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
@@ -766,7 +759,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
 					 w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w};
-        } else if (m_CurrentLevel == 3) {
+        } else if (m_CurrentLevel == 2) {
             level =
                     {0, 0, 0, 0, 0, 0, 1,
                      0, 0, 0, 0, 0, 0, 0,
@@ -781,7 +774,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
 					 w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w};
-        } else if (m_CurrentLevel == 4) {
+        } else if (m_CurrentLevel == 3) {
             level =
                     {0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
@@ -796,7 +789,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
 					 w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w};
-        } else if (m_CurrentLevel == 5) {
+        } else if (m_CurrentLevel == 4) {
             level =
                     {0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
@@ -811,7 +804,37 @@ void dd::Systems::LevelSystem::GetNextLevel()
 					 w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w};
-        }
+        } else if (m_CurrentLevel == 5) {
+            level =
+                    {0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 100, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0};
+			color = 
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
+		} else if (m_CurrentLevel == 6) {
+					level =
+					{0, 0, 0, 1, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0};
+					color =
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
+		}
     } else if (m_CurrentCluster == 1) {
         if (m_CurrentLevel == 1) {
             level =
@@ -888,7 +911,23 @@ void dd::Systems::LevelSystem::GetNextLevel()
 					 w, br, w, g, w, lb1, w,
 					 y, w, y, d, b, w, b,
 					 w, br, w, w, w, lb1, w};
-        }
+		}
+		else if (m_CurrentLevel == 6) {
+					level =
+					{0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 100, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0};
+					color =
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
+		}
     } else if (m_CurrentCluster == 3) {
 
     }

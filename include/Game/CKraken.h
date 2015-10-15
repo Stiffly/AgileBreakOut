@@ -1,9 +1,9 @@
 //
-// Created by Adniklastrator on 2015-09-15.
+// Created by Adniklastrator on 2015-10-15.
 //
 
-#ifndef DAYDREAM_CLIFE_H
-#define DAYDREAM_CLIFE_H
+#ifndef DAYDREAM_CKRAKEN_H
+#define DAYDREAM_CKRAKEN_H
 
 #include "Core/Component.h"
 
@@ -13,9 +13,9 @@ namespace dd
 namespace Components
 {
 
-struct Life : Component {
+struct Kraken : Component {
 
-    int Number = 0;
+    int Health = 10;
 
 };
 
@@ -23,4 +23,4 @@ struct Life : Component {
 
 }
 
-#endif //DAYDREAM_CLIFE_H
+#endif //DAYDREAM_CKRAKEN_H

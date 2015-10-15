@@ -52,7 +52,6 @@ void dd::Systems::TravellingSystem::UpdateEntity(double dt, EntityID entity, Ent
 							float yValue = position.y; // A negative value between -34.6 and -22.6;
 							yValue += 22.6; // A positive value between -12 and 0. The distance it should travel from 34.6;
 							background->distanceLeftToCorrectTravelPosition = yValue;
-							std::cout << "This happened." << std::endl;
 						} else {
 							m_World->RemoveEntity(entity);
 							return;

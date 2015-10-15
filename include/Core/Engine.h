@@ -48,6 +48,7 @@
 #include "Game/CProjectile.h"
 #include "Game/CBrick.h"
 #include "Game/CWall.h"
+#include "Game/CKraken.h"
 #include "Game/CBackground.h"
 #include "Game/CTravels.h"
 #include "Game/CStickyAim.h"
@@ -56,6 +57,7 @@
 #include "Game/TravellingSystem.h"
 #include "Game/LifebuoySystem.h"
 #include "Game/ProjectileSystem.h"
+#include "Game/KrakenSystem.h"
 #include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Game/BrickComponents.h"
@@ -128,6 +130,7 @@ public:
 		m_World->ComponentFactory.Register<Components::Life>();
 		m_World->ComponentFactory.Register<Components::Lifebuoy>();
 		m_World->ComponentFactory.Register<Components::Projectile>();
+		m_World->ComponentFactory.Register<Components::Kraken>();
 		m_World->ComponentFactory.Register<Components::StickyAim>();
 		m_World->ComponentFactory.Register<Components::Travels>();
 
@@ -165,6 +168,9 @@ public:
 		m_World->SystemFactory.Register<Systems::TravellingSystem>(
 			[this]() { return new Systems::TravellingSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::TravellingSystem>();
+		m_World->SystemFactory.Register<Systems::KrakenSystem>(
+			[this]() { return new Systems::KrakenSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::KrakenSystem>();
 
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();

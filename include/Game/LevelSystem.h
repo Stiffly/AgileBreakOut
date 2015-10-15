@@ -49,6 +49,8 @@
 #include "Game/ECreatePowerUp.h"
 #include "Game/EPowerUpTaken.h"
 
+#include "Game/EKrakenAppear.h"
+
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/CRectangleShape.h"
@@ -133,7 +135,7 @@ private:
     bool m_Initialized = false;
     bool m_Pause = false;
     int m_LooseBricks = 0;
-    int m_CurrentCluster = 1;
+    int m_CurrentCluster = 0;
     int m_CurrentLevel = 1;
     int m_MultiBalls = 0;
     int m_PowerUps = 0;
@@ -152,6 +154,8 @@ private:
 	const int StickyBrick = 4;
 	const int InkBlasterBrick = 5;
 	const int KrakenAttackBrick = 6;
+
+	const int Kraken = 100;
 
     EntityID m_BrickTemplate;
 
