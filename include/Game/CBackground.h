@@ -15,7 +15,7 @@ namespace Components
 
 struct Background : Component
 {
-
+	float distanceLeftToCorrectTravelPosition;
 };
 
 }

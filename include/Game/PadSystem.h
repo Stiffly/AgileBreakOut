@@ -13,15 +13,22 @@
 #include "Core/EventBroker.h"
 #include "Core/EKeyDown.h"
 #include "Core/EKeyUp.h"
+
 #include "Input/EBindKey.h"
+
 #include "Physics/EContact.h"
 #include "Physics/CRectangleShape.h"
 #include "Physics/CWaterVolume.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/ESetImpulse.h"
+
 #include "Rendering/CSprite.h"
 #include "Rendering/CModel.h"
+
+#include "Transform/EMove.h"
+#include "Transform/ERotate.h"
+
 #include "Game/CBall.h"
 #include "Game/CPad.h"
 #include "Game/CPowerUp.h"

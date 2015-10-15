@@ -53,6 +53,7 @@ void dd::Systems::LevelSystem::Initialize()
 		transform->Position = glm::vec3(0.f, 0.f, -15.f);
 		transform->Scale = glm::vec3(6.f, 6.f, 10.f);
 		auto travels = m_World->AddComponent<Components::Travels>(t_halfPipe);
+		travels->CurrentlyTraveling = false;
 		auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
 		model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
 		model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 0.3f);
@@ -60,22 +61,23 @@ void dd::Systems::LevelSystem::Initialize()
 
 		auto t_halfPipe2 = m_World->CloneEntity(t_halfPipe);
 		auto transform2 = m_World->GetComponent<Components::Transform>(t_halfPipe);
-		transform2->Position = glm::vec3(0.f, 34.6f, -15.f);
+		transform2->Position = glm::vec3(0.f, 34.6f, -15.f); //Halfpipe Value
 	}
 
 	//Background
 
-	{
+	/*{
 		auto background = m_World->CreateEntity();
 		auto transform = m_World->AddComponent<Components::Transform>(background);
 		auto travels = m_World->AddComponent<Components::Travels>(background);
+		travels->CurrentlyTraveling = false;
 		auto backgroundComponent = m_World->AddComponent<Components::Background>(background);
 		transform->Position = glm::vec3(0.f, 0.f, -30.f);
 		transform->Scale = glm::vec3(2681.f / 50.f, 1080.f / 50.f, 1.f);
 		auto sprite = m_World->AddComponent<Components::Sprite>(background);
 		sprite->SpriteFile = "Textures/Background.png";
 		m_World->CommitEntity(background);
-	}
+	}*/
 
 	//			auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
 	//Water test
@@ -184,7 +186,7 @@ void dd::Systems::LevelSystem::Initialize()
 		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(leftWall);
 		physics->CollisionType = CollisionType::Type::Static;
 		physics->Category = CollisionLayer::Wall;
-		physics->Mask = static_cast<CollisionLayer::Type>(/*CollisionLayer::Ball |*/ CollisionLayer::Brick);
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
 
 		m_World->CommitEntity(leftWall);
 	}
@@ -207,7 +209,7 @@ void dd::Systems::LevelSystem::Initialize()
 		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(rightWall);
 		physics->CollisionType = CollisionType::Type::Static;
 		physics->Category = CollisionLayer::Wall;
-		physics->Mask = static_cast<CollisionLayer::Type>(/*CollisionLayer::Ball |*/ CollisionLayer::Brick);
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
 
 		m_World->CommitEntity(rightWall);
 	}
@@ -222,6 +224,7 @@ void dd::Systems::LevelSystem::Initialize()
     std::shared_ptr<Components::Template> cTemplate = m_World->AddComponent<Components::Template>(m_BrickTemplate);
 
 	auto travels = m_World->AddComponent<Components::Travels>(m_BrickTemplate);
+	travels->CurrentlyTraveling = false;
 
     cPhys->CollisionType = CollisionType::Type::Static;
     cPhys->GravityScale = 0.f;
@@ -255,15 +258,19 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     if (templateCheck != nullptr){ return; }
 
     // Check the background.
-    auto model = m_World->GetComponent<Components::Model>(entity);
-    if (model != nullptr) {
-		if (model->ModelFile == "Models/Test/halfpipe/Halfpipe.obj") {
-            auto transform = m_World->GetComponent<Components::Transform>(entity);
-            if (transform->Position.y <= -34.6) {
-                transform->Position.y = 34.6;
-            }
-        }
-    }
+    auto background = m_World->GetComponent<Components::Background>(entity);
+	if (background != nullptr) {
+		auto transform = m_World->GetComponent<Components::Transform>(entity);
+		if (transform->Position.y <= -34.6) { //Halfpipe Value.
+			transform->Position.y = 34.6;
+			Events::Move e;
+			e.Entity = entity;
+			e.GoalPosition = glm::vec3(transform->Position.x, 34.6 + background->distanceLeftToCorrectTravelPosition, transform->Position.z);
+			e.Speed = 6.0f;
+			e.Queue = false;
+			EventBroker->Publish(e);
+		}
+	}
 
     auto brick = m_World->GetComponent<Components::Brick>(entity);
     if (brick != nullptr) {
@@ -281,9 +288,11 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 				EventBroker->Publish(e);
 			} else if (brick->Type == StickyBrick) {
 				Events::StickyPad e;
+				e.Times = 3;
 				EventBroker->Publish(e);
 			} else if (brick->Type == InkBlasterBrick) {
 				Events::InkBlaster e;
+				e.Shots = 5;
 				EventBroker->Publish(e);
 			} else if(brick->Type == KrakenAttackBrick) {
 				Events::KrakenAttack e;
@@ -664,7 +673,7 @@ bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &ev
         m_CurrentLevel++;
         if (m_CurrentLevel < 6) {
             GetNextLevel();
-            CreateLevel(12);
+            CreateLevel(12); //NextLevelDistance
 		} else {
 			// Win
 			Events::ClusterClear e;

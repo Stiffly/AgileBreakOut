@@ -167,7 +167,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 return;
             }
         } //Removing this made the wall collisions work again
-         else if (transformBall->Position.x > EdgeX()) {
+        /* else if (transformBall->Position.x > EdgeX()) {
             if (transformBall->Velocity.x > 0) {
                 glm::vec2 reflectedVelocity = glm::reflect(glm::vec2(transformBall->Velocity.x, transformBall->Velocity.y), glm::vec2(1, 0));
                 transformBall->Velocity = glm::vec3(reflectedVelocity, 0.f);
@@ -322,9 +322,6 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 			EventBroker->Publish(particleEvent);
 		}
 		
-
-		
-
 		ballComponent->Combo = 56;
 		if (!ballComponent->Waiting) {
 			if (m_InkBlaster) {
@@ -342,7 +339,8 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 				m_Sticky = false;
 				m_Waiting = true;
 				ballComponent->Sticky = true;
-				ballComponent->StickyPlacement = ballTransform->Position - padTransform->Position;
+				//ballComponent->StickyPlacement = ballTransform->Position - padTransform->Position;
+				ballComponent->StickyPlacement = glm::vec3(0, 0.5f, 0);
 				ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
 				ballTransform->Velocity *= -1;
 				Events::StickyAttachedToPad e;
@@ -485,6 +483,7 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
 bool dd::Systems::BallSystem::OnStickyPad(const dd::Events::StickyPad &event) 
 {
 	m_Sticky = true;
+	m_StickyCounter = event.Times;
 	return true;
 }
 

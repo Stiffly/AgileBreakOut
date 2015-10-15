@@ -240,15 +240,24 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_Y) {
 		Events::StickyPad e;
+		e.Times = 3;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_I) {
 		Events::InkBlaster e;
+		e.Shots = 5;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_K) {
 		Events::KrakenAttack e;
 		e.ChargeUpdate = 0;
 		e.KrakenStrength = 0.1;
 		e.PlayerStrength = 0.05;
+		EventBroker->Publish(e);
+	} else if (val == GLFW_KEY_Q) {
+		Events::Move e;
+		e.Entity = Entity();
+		e.GoalPosition = glm::vec3(0, 0, -10);
+		e.Speed = 5;
+		e.Queue = false;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_SPACE) {
         Events::ActionButton e;

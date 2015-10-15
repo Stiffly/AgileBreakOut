@@ -18,6 +18,8 @@
 #include "Rendering/CModel.h"
 #include "Rendering/CPointLight.h"
 
+#include "Transform/EMove.h"
+
 #include "Game/CBrick.h"
 #include "Game/CBall.h"
 #include "Game/CLife.h"
