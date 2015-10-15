@@ -2,6 +2,7 @@
 #define ConfigFile_h__
 
 #include <string>
+#include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 
@@ -26,20 +27,23 @@ public:
 	void SaveToDisk();
 
 private:
-	std::string m_Path;
-	boost::property_tree::ptree m_Ptree;
+	boost::filesystem::path m_Path;
+	boost::property_tree::ptree m_PTreeDefaults;
+	boost::property_tree::ptree m_PTreeOverrides;
+	boost::property_tree::ptree m_PTreeMerged;
 };
 
 template <typename T>
 T ConfigFile::GetValue(std::string key, T defaultValue)
 {
-	return m_Ptree.get<T>(key, defaultValue);
+	return m_PTreeMerged.get<T>(key, defaultValue);
 }
 
 template <typename T>
 void ConfigFile::SetValue(std::string key, T value)
 {
-	m_Ptree.put<T>(key, value);
+	m_PTreeOverrides.put<T>(key, value);
+	m_PTreeMerged.put<T>(key, value);
 }
 
 };
