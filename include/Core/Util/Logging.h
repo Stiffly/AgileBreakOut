@@ -45,11 +45,7 @@ enum _LOG_LEVEL
 	LOG_LEVEL_DEBUG
 };
 
-#ifdef DEBUG
-static _LOG_LEVEL LOG_LEVEL = LOG_LEVEL_DEBUG;
-#else
-static _LOG_LEVEL LOG_LEVEL = LOG_LEVEL_DEBUG;
-#endif
+extern _LOG_LEVEL LOG_LEVEL;
 
 const static char* _LOG_LEVEL_PREFIX[] =
 {
