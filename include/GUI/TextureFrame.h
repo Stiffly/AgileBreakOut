@@ -62,6 +62,7 @@ public:
 		if (m_Texture == nullptr) {
 			m_Texture = ResourceManager::Load<dd::Texture>("Textures/Core/ErrorTexture.png");
 		}
+
 		SizeToTexture();
 	}
 

@@ -6,12 +6,12 @@ dd::Systems::SoundSystem::~SoundSystem()
 	for (auto &bgm : m_BGMSourcesToBuffers) {
 		alSourceStop(bgm.first);
 		alDeleteSources(1, &bgm.first);
-		bgm.second->~Sound();
+		//bgm.second->~Sound();
 	}
 	for (auto &sfx : m_SFXSourcesToBuffers) {
 		alSourceStop(sfx.first);
 		alDeleteSources(1, &sfx.first);
-		sfx.second->~Sound();
+		//sfx.second->~Sound();
 	}
 	m_BGMSourcesToBuffers.clear();
 	m_SFXSourcesToBuffers.clear();
@@ -40,22 +40,20 @@ void dd::Systems::SoundSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EStopSound, &SoundSystem::OnStopSound);
     EVENT_SUBSCRIBE_MEMBER(m_EMasterVolume, &SoundSystem::OnMasterVolume);
 
-    //Todo: Move this
-    {
-        dd::Events::PlaySound e;
-        e.FilePath = "Sounds/BGM/under-the-sea-instrumental.wav";
-        e.IsAmbient = true;
-        EventBroker->Publish(e);
-    }
-    {
-        dd::Events::PlaySound e;
-        e.FilePath = "Sounds/BGM/water-flowing.wav";
-        e.Gain = 0.3f;
-        e.IsAmbient = true;
-        EventBroker->Publish(e);
-    }
-
-
+//     //Todo: Move this
+//     {
+//         dd::Events::PlaySound e;
+//         e.FilePath = "Sounds/BGM/under-the-sea-instrumental.wav";
+//         e.IsAmbient = true;
+//         EventBroker->Publish(e);
+//     }
+//     {
+//         dd::Events::PlaySound e;
+//         e.FilePath = "Sounds/BGM/water-flowing.wav";
+//         e.Gain = 0.3f;
+//         e.IsAmbient = true;
+//         EventBroker->Publish(e);
+//     }
 }
 
 void dd::Systems::SoundSystem::Update(double dt)
@@ -88,7 +86,7 @@ ALuint dd::Systems::SoundSystem::CreateSource()
 bool dd::Systems::SoundSystem::OnPlaySound(const dd::Events::PlaySound &event)
 {
     //Loading and binding sound buffer to source
-        Sound *sound = ResourceManager::Load<Sound>(event.FilePath);
+    Sound *sound = ResourceManager::Load<Sound>(event.FilePath);
     if (sound == nullptr) {
        return false;
     }
@@ -181,10 +179,10 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
     //Send play-sound event
 
     {
-        dd::Events::PlaySound e;
-        e.FilePath = collisionSound->FilePath;
-        e.IsAmbient = false;
-        EventBroker->Publish(e);
+//         dd::Events::PlaySound e;
+//         e.FilePath = collisionSound->FilePath;
+//         e.IsAmbient = false;
+//         EventBroker->Publish(e);
     }
 
     return true;
