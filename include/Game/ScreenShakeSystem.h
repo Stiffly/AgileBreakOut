@@ -30,7 +30,7 @@ public:
     { }
 
     void Initialize() override;
-	void InitializeObjects() override;
+	void InitializeObjects();
 
 	void UpdateEntity(double dt, EntityID entity, EntityID parent) override;
     void FlipPause();

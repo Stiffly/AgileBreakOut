@@ -16,10 +16,13 @@
 #include "Core/World.h"
 #include "Rendering/CSprite.h"
 #include "Rendering/CModel.h"
+#include "Rendering/CPointLight.h"
 
 #include "Game/CBrick.h"
 #include "Game/CBall.h"
 #include "Game/CLife.h"
+#include "Game/CWall.h"
+#include "Game/CBackground.h"
 #include "Game/CProjectile.h"
 #include "Game/CPowerUp.h"
 
@@ -46,6 +49,7 @@
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/CRectangleShape.h"
+#include "Physics/CWaterVolume.h"
 #include "Physics/ESetImpulse.h"
 #include "Physics/EContact.h"
 #include "Sound/CCollisionSound.h"

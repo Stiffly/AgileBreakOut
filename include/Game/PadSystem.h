@@ -16,6 +16,7 @@
 #include "Input/EBindKey.h"
 #include "Physics/EContact.h"
 #include "Physics/CRectangleShape.h"
+#include "Physics/CWaterVolume.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/ESetImpulse.h"
@@ -26,7 +27,10 @@
 #include "Game/CPowerUp.h"
 #include "Game/CStickyAim.h"
 #include "Game/EResetBall.h"
+#include "Game/EResetAll.h"
+#include "Game/ERaiseWater.h"
 #include "Game/EMultiBall.h"
+#include "Game/ELifebuoy.h"
 #include "Game/EStickyPad.h"
 #include "Game/EStickyAttachedToPad.h"
 #include "Game/EInkBlaster.h"
@@ -102,6 +106,8 @@ private:
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContactPowerUp;
     dd::EventRelay<PadSystem, dd::Events::StageCleared> m_EStageCleared;
 	dd::EventRelay<PadSystem, dd::Events::ResetBall> m_EResetBall;
+	dd::EventRelay<PadSystem, dd::Events::ResetAll> m_EResetAll;
+	dd::EventRelay<PadSystem, dd::Events::RaiseWater> m_ERaiseWater;
     dd::EventRelay<PadSystem, dd::Events::Pause> m_EPause;
 	dd::EventRelay<PadSystem, dd::Events::KrakenAttack> m_EKrakenAttack;
 	dd::EventRelay<PadSystem, dd::Events::StickyPad> m_EStickyPad;
@@ -114,6 +120,8 @@ private:
     bool OnContactPowerUp(const dd::Events::Contact &event);
     bool OnStageCleared(const dd::Events::StageCleared &event);
 	bool OnResetBall(const dd::Events::ResetBall &event);
+	bool OnResetAll(const dd::Events::ResetAll &event);
+	bool OnRaiseWater(const dd::Events::RaiseWater &event);
     bool OnPause(const dd::Events::Pause &event);
 	bool OnKrakenAttack(const dd::Events::KrakenAttack &event);
 	bool OnStickyPad(const dd::Events::StickyPad &event);
