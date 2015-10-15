@@ -8,6 +8,8 @@ echo "Deploying resources to ${DeployLocation}"
 ln -srf assets/Models ${DeployLocation}
 ln -srf assets/Textures ${DeployLocation}
 ln -srf assets/Sounds ${DeployLocation}
+# Configuration files
+ln -s assets/DefaultConfig.ini $[DeployLocation}
 # Shaders
 ln -srf src/game/Core/Shaders ${DeployLocation}
 # Platform specific binaries
