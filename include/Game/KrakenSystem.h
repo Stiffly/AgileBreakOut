@@ -36,12 +36,10 @@ public:
     bool IsPaused() const { return m_Pause; }
     void SetPause(const bool& pause) { m_Pause = pause; }
 private:
+	bool m_Pause = false;
 
     dd::EventRelay<KrakenSystem, dd::Events::Pause> m_EPause;
     bool OnPause(const dd::Events::Pause &event);
-
-
-
 };
 
 }
