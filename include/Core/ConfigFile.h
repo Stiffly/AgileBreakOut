@@ -19,11 +19,10 @@ private:
 	ConfigFile(std::string path);
 
 public:
-	template <typename T>
+	template <typename T, T defaultValue>
 	T GetValue(std::string key)
 	{
-		std::cout << m_ptree.get<T>(key) << std::endl;
-		return m_ptree.get<T>(key);	
+		return m_ptree.get<T>(key, defaultValue);
 	}
 
 private:
