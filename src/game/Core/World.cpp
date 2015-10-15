@@ -154,12 +154,14 @@ void dd::World::Initialize()
 {
 	RegisterSystems();
 	AddSystems();
-	for (auto pair : m_Systems)
-	{
-		auto system = pair.second;
-		system->RegisterComponents(&ComponentFactory);
-		system->RegisterResourceTypes(ResourceManager);
-		system->Initialize();
+	for (auto pair : m_Systems) {
+		pair.second->RegisterComponents(&ComponentFactory);
+	}
+	for (auto pair : m_Systems) { 
+		pair.second->RegisterResourceTypes(ResourceManager);
+	}
+	for (auto pair : m_Systems) { 
+		pair.second->Initialize();
 	}
 }
 
