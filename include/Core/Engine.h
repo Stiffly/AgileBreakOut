@@ -88,6 +88,8 @@ public:
 	Engine(int argc, char* argv[]) {
 		auto config = ResourceManager::Load<ConfigFile>("Config.ini");
 
+		LOG_LEVEL = static_cast<_LOG_LEVEL>(config->GetValue<int>("Debug.LogLevel", 1));
+
 		m_EventBroker = std::make_shared<EventBroker>();
 
 		m_Renderer = std::make_shared<Renderer>();

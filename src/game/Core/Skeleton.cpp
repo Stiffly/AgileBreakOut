@@ -125,6 +125,9 @@ int dd::Skeleton::GetBoneID(std::string name)
 
 void dd::Skeleton::PrintSkeleton()
 {
+	if (LOG_LEVEL < LOG_LEVEL_DEBUG) {
+		return;
+	}
 	PrintSkeleton(RootBone, 0);
 }
 
