@@ -9,15 +9,16 @@
 #include "Core/EventBroker.h"
 #include "Core/ResourceManager.h"
 #include "Sound.h"
-#include "Sound/EPlaySound.h"
-#include "Sound/EStopSound.h"
-#include "Sound/EMasterVolume.h"
 #include "Sound/CCollisionSound.h"
-#include "Physics/EContact.h"
 #include "Game/CBall.h"
 #include "Game/CBrick.h"
 #include "Game/CPad.h"
+#include "Sound/EPlaySound.h"
+#include "Sound/EStopSound.h"
+#include "Sound/EMasterVolume.h"
 #include "Physics/ECreateParticleSequence.h"
+#include "Physics/EContact.h"
+
 
 namespace dd
 {
@@ -40,6 +41,7 @@ private:
     std::map<ALuint, Sound*> m_BGMSourcesToBuffers;
     std::map<ALuint, Sound*> m_SFXSourcesToBuffers;
     ALCdevice* m_Device = nullptr;
+	ALCcontext* m_Context = nullptr;
 
     //Events
     dd::EventRelay<SoundSystem, dd::Events::PlaySound> m_EPlaySFX;

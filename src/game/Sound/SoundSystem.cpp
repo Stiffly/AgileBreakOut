@@ -3,6 +3,19 @@
 
 dd::Systems::SoundSystem::~SoundSystem()
 {
+	for (auto &bgm : m_BGMSourcesToBuffers) {
+		alSourceStop(bgm.first);
+		alDeleteSources(1, &bgm.first);
+		bgm.second->~Sound();
+	}
+	for (auto &sfx : m_SFXSourcesToBuffers) {
+		alSourceStop(sfx.first);
+		alDeleteSources(1, &sfx.first);
+		sfx.second->~Sound();
+	}
+	m_BGMSourcesToBuffers.clear();
+	m_SFXSourcesToBuffers.clear();
+	alcDestroyContext(m_Context);
     alcCloseDevice(m_Device);
 }
 
@@ -10,16 +23,16 @@ void dd::Systems::SoundSystem::Initialize()
 {
     //initialize OpenAL
     m_Device = alcOpenDevice(NULL);
-    ALCcontext* context;
+    
 
     if (m_Device) {
-        context = alcCreateContext(m_Device, NULL);
-        alcMakeContextCurrent(context);
+		m_Context = alcCreateContext(m_Device, NULL);
+		alcMakeContextCurrent(m_Context);
     }
     else {
         LOG_ERROR("OpenAL failed to initialize.");
     }
-    alGetError();
+    //alGetError();
 
     //Subscribe to events
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &SoundSystem::OnContact);
@@ -60,7 +73,6 @@ void dd::Systems::SoundSystem::Update(double dt)
 
     for (int i = 0; i < deleteList.size(); i++) {
         alDeleteSources(1, &deleteList[i]);
-        //alDeleteBuffers(1, &m_SourcesToBuffers[deleteList[i]]);
         m_SFXSourcesToBuffers.erase(deleteList[i]);
     }
 }
@@ -76,7 +88,7 @@ ALuint dd::Systems::SoundSystem::CreateSource()
 bool dd::Systems::SoundSystem::OnPlaySound(const dd::Events::PlaySound &event)
 {
     //Loading and binding sound buffer to source
-    Sound *sound = ResourceManager::Load<Sound>(event.FilePath);
+        Sound *sound = ResourceManager::Load<Sound>(event.FilePath);
     if (sound == nullptr) {
        return false;
     }
