@@ -7,7 +7,6 @@
 
 #include "ResourceManager.h"
 
-
 namespace dd
 {
 
@@ -20,15 +19,28 @@ private:
 
 public:
 	template <typename T>
-	T GetValue(std::string key, T defaultValue)
-	{
-		return m_ptree.get<T>(key, defaultValue);
-	}
+	T GetValue(std::string key, T defaultValue);
+	template <typename T>
+	void SetValue(std::string key, T value);
+
+	void SaveToDisk();
 
 private:
-	boost::property_tree::ptree m_ptree;
-
+	std::string m_Path;
+	boost::property_tree::ptree m_Ptree;
 };
+
+template <typename T>
+T ConfigFile::GetValue(std::string key, T defaultValue)
+{
+	return m_Ptree.get<T>(key, defaultValue);
+}
+
+template <typename T>
+void ConfigFile::SetValue(std::string key, T value)
+{
+	m_Ptree.put<T>(key, value);
+}
 
 };
 #endif // ConfigFile_h__
