@@ -98,7 +98,7 @@ public:
 		m_FrameStack->Width = 675;
 		m_FrameStack->Height = 1080;
 
-		if (ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<int, 0>("Debug.SkipStory") == 1) {
+		if (ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<int>("Debug.SkipStory", 0) == 1) {
 			Events::GameStart e;
 			m_EventBroker->Publish(e);
 			auto hud = new GUI::HUD(m_FrameStack, "HUD");
