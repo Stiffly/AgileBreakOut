@@ -26,6 +26,7 @@ void dd::Systems::BallSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &BallSystem::OnStageCleared);
 	EVENT_SUBSCRIBE_MEMBER(m_EArrivedAtNewStage, &BallSystem::OnArrivedToNewStage);
 
+
     //OctoBall
     {
         auto ent = m_World->CreateEntity();
@@ -291,7 +292,41 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 		float x = (ballTransform->Position.x - padTransform->Position.x) * XMovementMultiplier();
         float y = glm::cos((abs(x) / (1.6f)) * glm::pi<float>() / 2.f) + 1.f;
 
-		ballComponent->Combo = 0;
+		//When a combo is more than 2 create a particle showing it.
+		if (ballComponent->Combo >= 2){
+
+			Events::CreateParticleSequence particleEvent;
+
+			particleEvent.EmitterLifeTime = 3;
+			particleEvent.EmittingAngle = glm::half_pi<float>();
+			particleEvent.Spread = 0.f;
+			particleEvent.NumberOfTicks = 1;
+			particleEvent.ParticleLifeTime = 2.f;
+			particleEvent.ParticlesPerTick = 1;
+			particleEvent.Position = glm::vec3(ballTransform->Position.x, -3.f, -3.f);
+			if (ballTransform->Position.x >= 2.7f) {
+				particleEvent.Position = glm::vec3(2.7f, -3.f, -3.f);
+			} else if (ballTransform->Position.x <= -2.7f) {
+				particleEvent.Position = glm::vec3(-2.7f, -3.f, -3.f);
+			}
+			particleEvent.Radius = 1.f;
+			particleEvent.Color = glm::vec4(1.f);
+			particleEvent.Speed = 0;
+
+			if (ballComponent->Combo <= 9) {
+				particleEvent.SpriteFile = "Textures/Combo/Combo00" + std::to_string(ballComponent->Combo) + ".png";
+			} else if (ballComponent->Combo <= 42) {
+				particleEvent.SpriteFile = "Textures/Combo/Combo0" + std::to_string(ballComponent->Combo) + ".png";
+			} else {
+				particleEvent.SpriteFile = "Textures/Combo/Combo043.png";
+			}
+			EventBroker->Publish(particleEvent);
+		}
+		
+
+		
+
+		ballComponent->Combo = 56;
 		if (!ballComponent->Waiting) {
 			if (m_InkBlaster) {
 				if (!m_InkAttached) {
