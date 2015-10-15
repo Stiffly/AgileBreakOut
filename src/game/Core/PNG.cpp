@@ -97,6 +97,7 @@ dd::PNG::PNG(std::string path)
 
 	// Read in the data
 	png_read_image(png_ptr, row_pointers);
+	delete[] row_pointers;
 
 	this->Width = width;
 	this->Height = height;
@@ -107,8 +108,9 @@ dd::PNG::PNG(std::string path)
 
 dd::PNG::~PNG()
 {
-	if (Data) {
-		delete[] Data;
+	if (this->Data != nullptr) {
+		delete[] this->Data;
+		this->Data = nullptr;
 	}
 }
 
