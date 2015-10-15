@@ -322,7 +322,7 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 
 		
 
-		ballComponent->Combo = 56;
+		ballComponent->Combo = 0;
 		if (!ballComponent->Waiting) {
 			if (m_InkBlaster) {
 				if (!m_InkAttached) {
