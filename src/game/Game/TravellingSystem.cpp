@@ -31,14 +31,12 @@ void dd::Systems::TravellingSystem::Update(double dt)
 void dd::Systems::TravellingSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
 	if (m_Travelling) {
-		auto transform = m_World->GetComponent<Components::Transform>(entity);
-		if (transform != nullptr) {
-			if (!transform->Sticky) {
+		auto travels = m_World->GetComponent<Components::Travels>(entity);
+		if (travels != nullptr) {
+			auto transform = m_World->GetComponent<Components::Transform>(entity);
+			if (transform != nullptr) {
 				transform->Position.y -= 6.0f * dt;
 			}
-		}
-		else {
-			transform->Position.y -= 6.0f * dt;
 		}
 	}
 }

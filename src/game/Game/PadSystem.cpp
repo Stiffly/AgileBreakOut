@@ -49,7 +49,6 @@ void dd::Systems::PadSystem::Initialize()
         physics->Category = CollisionLayer::Type::Pad;
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::PowerUp | CollisionLayer::LifeBuoy);
         physics->Calculate = true;
-        ctransform->Sticky = true;
         auto cModel = m_World->AddComponent<Components::Model>(ent);
         cModel->ModelFile = "Models/Ship/Ship.obj";
 
@@ -396,7 +395,6 @@ bool dd::Systems::PadSystem::OnRaiseWater(const dd::Events::RaiseWater &event)
 		auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
 		transform->Position = glm::vec3(0.f, -3.5f, -10.f);
 		transform->Scale = glm::vec3(7.0f, event.Amount * 1.6f, 1.f);
-		transform->Sticky = true;
 		auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
 		auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
 		m_World->CommitEntity(t_waterBody);

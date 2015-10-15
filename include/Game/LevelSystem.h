@@ -25,6 +25,7 @@
 #include "Game/CBackground.h"
 #include "Game/CProjectile.h"
 #include "Game/CPowerUp.h"
+#include "Game/CTravels.h"
 
 #include "Game/BrickComponents.h"
 

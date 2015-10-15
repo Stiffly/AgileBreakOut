@@ -13,6 +13,7 @@
 #include "Game/EPause.h"
 #include "Game/EArrivedAtNewStage.h"
 #include "Game/EStageCleared.h"
+#include "Game/CTravels.h"
 
 
 namespace dd

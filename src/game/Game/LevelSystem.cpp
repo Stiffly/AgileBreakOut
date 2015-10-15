@@ -11,22 +11,21 @@ void dd::Systems::LevelSystem::Initialize()
 {
 	std::random_device rd;
 	m_RandomGenerator = std::mt19937(rd());
-    EVENT_SUBSCRIBE_MEMBER(m_EContact, &LevelSystem::OnContact);
-    EVENT_SUBSCRIBE_MEMBER(m_EScoreEvent, &LevelSystem::OnScoreEvent);
-    EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &LevelSystem::OnMultiBall);
-    EVENT_SUBSCRIBE_MEMBER(m_ECreatePowerUp, &LevelSystem::OnCreatePowerUp);
-    EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &LevelSystem::OnMultiBallLost);
-    EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, &LevelSystem::OnPowerUpTaken);
-    EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &LevelSystem::OnStageCleared);
-    EVENT_SUBSCRIBE_MEMBER(m_EPause, &LevelSystem::OnPause);
-    EVENT_SUBSCRIBE_MEMBER(m_EHitPad, &LevelSystem::OnHitPad);
+	EVENT_SUBSCRIBE_MEMBER(m_EContact, &LevelSystem::OnContact);
+	EVENT_SUBSCRIBE_MEMBER(m_EScoreEvent, &LevelSystem::OnScoreEvent);
+	EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &LevelSystem::OnMultiBall);
+	EVENT_SUBSCRIBE_MEMBER(m_ECreatePowerUp, &LevelSystem::OnCreatePowerUp);
+	EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &LevelSystem::OnMultiBallLost);
+	EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, &LevelSystem::OnPowerUpTaken);
+	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &LevelSystem::OnStageCleared);
+	EVENT_SUBSCRIBE_MEMBER(m_EPause, &LevelSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EHitPad, &LevelSystem::OnHitPad);
 
 	//PointLightTest
 	{
 		auto t_Light = m_World->CreateEntity();
 		auto transform = m_World->AddComponent<Components::Transform>(t_Light);
 		transform->Position = glm::vec3(-3.f, 6.f, -5.f);
-		transform->Sticky = true;
 		auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
 		pl->Radius = 20.f;
 		pl->Diffuse = glm::vec3(0.8f, 0.7f, 0.05f);
@@ -34,187 +33,184 @@ void dd::Systems::LevelSystem::Initialize()
 		model->ModelFile = "Models/Core/UnitSphere.obj";
 		m_World->CommitEntity(t_Light);
 	}
-		{
-			auto t_Light = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(t_Light);
-			transform->Position = glm::vec3(3.f, -5.f, -5.f);
-			transform->Sticky = true;
-			auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
-			pl->Radius = 15.f;
-			pl->Diffuse = glm::vec3(0.1f, 0.5f, 0.8f);
-			auto model = m_World->AddComponent<Components::Model>(t_Light);
-			model->ModelFile = "Models/Core/UnitSphere.obj";
-			m_World->CommitEntity(t_Light);
-		}
+	{
+		auto t_Light = m_World->CreateEntity();
+		auto transform = m_World->AddComponent<Components::Transform>(t_Light);
+		transform->Position = glm::vec3(3.f, -5.f, -5.f);
+		auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
+		pl->Radius = 15.f;
+		pl->Diffuse = glm::vec3(0.1f, 0.5f, 0.8f);
+		auto model = m_World->AddComponent<Components::Model>(t_Light);
+		model->ModelFile = "Models/Core/UnitSphere.obj";
+		m_World->CommitEntity(t_Light);
+	}
 
-		//Halfpipe background test model.
-		{
-			auto t_halfPipe = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
-			transform->Position = glm::vec3(0.f, 0.f, -15.f);
-			transform->Scale = glm::vec3(6.f, 6.f, 10.f);
-			transform->Sticky = false;
-			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
-			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
-			model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 0.3f);
-			m_World->CommitEntity(t_halfPipe);
-		}
-		{
-			auto t_halfPipe = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
-			transform->Position = glm::vec3(0.f, 34.6f, -15.f);
-			transform->Scale = glm::vec3(6.f, 6.f, 10.f);
-			transform->Sticky = false;
-			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
-			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
-			model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 0.3f);
-			m_World->CommitEntity(t_halfPipe);
-		}
+	//Halfpipe background test model.
+	{
+		auto t_halfPipe = m_World->CreateEntity();
+		auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
+		auto background = m_World->AddComponent<Components::Background>(t_halfPipe);
+		transform->Position = glm::vec3(0.f, 0.f, -15.f);
+		transform->Scale = glm::vec3(6.f, 6.f, 10.f);
+		auto travels = m_World->AddComponent<Components::Travels>(t_halfPipe);
+		auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
+		model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
+		model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 0.3f);
+		m_World->CommitEntity(t_halfPipe);
 
-		//Background
+		auto t_halfPipe2 = m_World->CloneEntity(t_halfPipe);
+		auto transform2 = m_World->GetComponent<Components::Transform>(t_halfPipe);
+		transform2->Position = glm::vec3(0.f, 34.6f, -15.f);
+	}
 
-		{
-			auto background = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(background);
-			transform->Position = glm::vec3(0.f, 0.f, -30.f);
-			transform->Scale = glm::vec3(2681.f / 50.f, 1080.f / 50.f, 1.f);
-			auto sprite = m_World->AddComponent<Components::Sprite>(background);
-			sprite->SpriteFile = "Textures/Background.png";
-			m_World->CommitEntity(background);
-		}
+	//Background
 
-		//			auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
-		//Water test
-		{
-			auto t_waterBody = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
-			transform->Position = glm::vec3(0.f, -3.5f, -10.f);
-			transform->Scale = glm::vec3(7.0f, 1.5f, 1.f);
-			transform->Sticky = true;
-			auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
-			auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
-			m_World->CommitEntity(t_waterBody);
-		}
+	{
+		auto background = m_World->CreateEntity();
+		auto transform = m_World->AddComponent<Components::Transform>(background);
+		auto travels = m_World->AddComponent<Components::Travels>(background);
+		auto backgroundComponent = m_World->AddComponent<Components::Background>(background);
+		transform->Position = glm::vec3(0.f, 0.f, -30.f);
+		transform->Scale = glm::vec3(2681.f / 50.f, 1080.f / 50.f, 1.f);
+		auto sprite = m_World->AddComponent<Components::Sprite>(background);
+		sprite->SpriteFile = "Textures/Background.png";
+		m_World->CommitEntity(background);
+	}
 
-		//ParticleTest
+	//			auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
+	//Water test
+	{
+		auto t_waterBody = m_World->CreateEntity();
+		auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
+		transform->Position = glm::vec3(0.f, -3.5f, -10.f);
+		transform->Scale = glm::vec3(7.0f, 1.5f, 1.f);
+		auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
+		auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
+		m_World->CommitEntity(t_waterBody);
+	}
+
+	//ParticleTest
 
 
-		/*{
-		auto Pe = m_World->CreateEntity();
-		auto transform = m_World->AddComponent<Components::Transform>(Pe);
-		auto particleEmitter= m_World->AddComponent<Components::ParticleEmitter>(Pe);
-		auto emitteSprite = m_World->AddComponent<Components::Sprite>(Pe);
+	/*{
+	auto Pe = m_World->CreateEntity();
+	auto transform = m_World->AddComponent<Components::Transform>(Pe);
+	auto particleEmitter= m_World->AddComponent<Components::ParticleEmitter>(Pe);
+	auto emitteSprite = m_World->AddComponent<Components::Sprite>(Pe);
 
-		transform->Position = glm::vec3(0.f, 0.f, -10.f);
-		emitteSprite->SpriteFile = "Textures/Test/Brick_Normal.png";
-		particleEmitter->GravityScale = 0.0f;
-		particleEmitter->SpawnRate = 1.f;
-		particleEmitter->NumberOfTicks = 2;
-		particleEmitter->Speed = 1.f;
-		particleEmitter->ParticlesPerTick = 5;
-		particleEmitter->Spread = glm::pi<float>()*2;
-		particleEmitter->EmittingAngle = glm::pi<float>();
-		particleEmitter->LifeTime = 50;
+	transform->Position = glm::vec3(0.f, 0.f, -10.f);
+	emitteSprite->SpriteFile = "Textures/Test/Brick_Normal.png";
+	particleEmitter->GravityScale = 0.0f;
+	particleEmitter->SpawnRate = 1.f;
+	particleEmitter->NumberOfTicks = 2;
+	particleEmitter->Speed = 1.f;
+	particleEmitter->ParticlesPerTick = 5;
+	particleEmitter->Spread = glm::pi<float>()*2;
+	particleEmitter->EmittingAngle = glm::pi<float>();
+	particleEmitter->LifeTime = 50;
 
-		{
-		auto Pt = m_World->CreateEntity(Pe);
-		auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
-		auto PtSprite = m_World->AddComponent<Components::Sprite>(Pt);
-		auto PtParticle = m_World->AddComponent<Components::Particle>(Pt);
-		auto PtTemplate = m_World->AddComponent<Components::Template>(Pt);
+	{
+	auto Pt = m_World->CreateEntity(Pe);
+	auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
+	auto PtSprite = m_World->AddComponent<Components::Sprite>(Pt);
+	auto PtParticle = m_World->AddComponent<Components::Particle>(Pt);
+	auto PtTemplate = m_World->AddComponent<Components::Template>(Pt);
 
-		//PtTransform->Velocity = glm::vec3(1.0f, 0.f, 0.f);
-		PtTransform->Position = transform->Position;
-		PtSprite->SpriteFile = "Textures/Background.png";
-		PtParticle->LifeTime = 3.f;
-		PtParticle->Flags = static_cast<ParticleFlags::Type>(ParticleFlags::Type::Powder | ParticleFlags::Type::ParticleContactFilter | ParticleFlags::Type::FixtureContactFilter);
-		}
-		m_World->CommitEntity(Pe);
-		}*/
+	//PtTransform->Velocity = glm::vec3(1.0f, 0.f, 0.f);
+	PtTransform->Position = transform->Position;
+	PtSprite->SpriteFile = "Textures/Background.png";
+	PtParticle->LifeTime = 3.f;
+	PtParticle->Flags = static_cast<ParticleFlags::Type>(ParticleFlags::Type::Powder | ParticleFlags::Type::ParticleContactFilter | ParticleFlags::Type::FixtureContactFilter);
+	}
+	m_World->CommitEntity(Pe);
+	}*/
 
-		//TODO: Why does the ball not collide with these bricks?
-		//BottomBox
-		{
-			auto BottomWall = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(BottomWall);
-			transform->Position = glm::vec3(0.f, -6.f, -10.f);
-			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
-			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
-			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
-			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(BottomWall);
-			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
-			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
-			physics->CollisionType = CollisionType::Type::Static;
-			physics->Category = CollisionLayer::Wall;
-			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy);
-			transform->Sticky = true;
-			m_World->CommitEntity(BottomWall);
-		}
+	//TODO: Why does the ball not collide with these bricks?
+	//BottomBox
+	{
+		auto BottomWall = m_World->CreateEntity();
+		auto transform = m_World->AddComponent<Components::Transform>(BottomWall);
+		auto wall = m_World->AddComponent<Components::Wall>(BottomWall);
+		transform->Position = glm::vec3(0.f, -6.f, -10.f);
+		transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
+		//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
+		//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+		std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(BottomWall);
+		rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
+		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
+		physics->CollisionType = CollisionType::Type::Static;
+		physics->Category = CollisionLayer::Wall;
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy);
+		m_World->CommitEntity(BottomWall);
+	}
 
-		{
-			auto topWall = m_World->CreateEntity();
-			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
-			transform->Position = glm::vec3(0.f, 6.f, -10.f);
-			transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
+	{
+		auto topWall = m_World->CreateEntity();
+		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
+		transform->Position = glm::vec3(0.f, 6.f, -10.f);
+		transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
 
-			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
-			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+		auto wall = m_World->AddComponent<Components::Wall>(topWall);
 
-			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(topWall);
-			rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
+		//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+		//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
-			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
-			physics->CollisionType = CollisionType::Type::Static;
-			physics->Category = CollisionLayer::Wall;
-			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
-			transform->Sticky = true;
+		std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(topWall);
+		rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
 
-			m_World->CommitEntity(topWall);
-		}
+		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
+		physics->CollisionType = CollisionType::Type::Static;
+		physics->Category = CollisionLayer::Wall;
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
 
-		{
-			auto leftWall = m_World->CreateEntity();
-			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
-				leftWall);
-			transform->Position = glm::vec3(-4.f, 1.f, -10.f);
-			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
+		m_World->CommitEntity(topWall);
+	}
 
-			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
-			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+	{
+		auto leftWall = m_World->CreateEntity();
+		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
+			leftWall);
+		transform->Position = glm::vec3(-4.f, 1.f, -10.f);
+		transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
 
-			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(leftWall);
-			rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
+		auto wall = m_World->AddComponent<Components::Wall>(leftWall);
 
-			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(leftWall);
-			physics->CollisionType = CollisionType::Type::Static;
-			physics->Category = CollisionLayer::Wall;
-			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
-			transform->Sticky = true;
+		//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
+		//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 
-			m_World->CommitEntity(leftWall);
-		}
+		std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(leftWall);
+		rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
 
-		{
-			auto rightWall = m_World->CreateEntity();
-			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
-				rightWall);
-			transform->Position = glm::vec3(4.f, 1.f, -10.f);
-			transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
+		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(leftWall);
+		physics->CollisionType = CollisionType::Type::Static;
+		physics->Category = CollisionLayer::Wall;
+		physics->Mask = static_cast<CollisionLayer::Type>(/*CollisionLayer::Ball |*/ CollisionLayer::Brick);
 
-			//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
-			//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+		m_World->CommitEntity(leftWall);
+	}
 
-			std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(rightWall);
-			rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
+	{
+		auto rightWall = m_World->CreateEntity();
+		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
+			rightWall);
+		transform->Position = glm::vec3(4.f, 1.f, -10.f);
+		transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
 
-			std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(rightWall);
-			physics->CollisionType = CollisionType::Type::Static;
-			physics->Category = CollisionLayer::Wall;
-			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
-			transform->Sticky = true;
+		auto wall = m_World->AddComponent<Components::Wall>(rightWall);
 
-			m_World->CommitEntity(rightWall);
-		}
+		//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
+		//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+		std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(rightWall);
+		rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
+
+		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(rightWall);
+		physics->CollisionType = CollisionType::Type::Static;
+		physics->Category = CollisionLayer::Wall;
+		physics->Mask = static_cast<CollisionLayer::Type>(/*CollisionLayer::Ball |*/ CollisionLayer::Brick);
+
+		m_World->CommitEntity(rightWall);
+	}
 
     m_BrickTemplate = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(m_BrickTemplate);
@@ -224,11 +220,13 @@ void dd::Systems::LevelSystem::Initialize()
     cRec->Dimensions = glm::vec2(0.9f, 0.35f);
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(m_BrickTemplate);
     std::shared_ptr<Components::Template> cTemplate = m_World->AddComponent<Components::Template>(m_BrickTemplate);
+
+	auto travels = m_World->AddComponent<Components::Travels>(m_BrickTemplate);
+
     cPhys->CollisionType = CollisionType::Type::Static;
     cPhys->GravityScale = 0.f;
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Ball | CollisionLayer::Type::Projectile | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
-    transform->Sticky = false;
 
     model->ModelFile = "Models/Brick/WhiteBrick.obj";
 	transform->Position = glm::vec3(50, 50, -10);
@@ -633,7 +631,6 @@ bool dd::Systems::LevelSystem::OnCreatePowerUp(const dd::Events::CreatePowerUp &
     cPhys->CollisionType = CollisionType::Type::Dynamic;
     cPhys->Category = CollisionLayer::Type::PowerUp;
     cPhys->Mask = CollisionLayer::Type::Pad;
-    transform->Sticky = false;
 
     std::shared_ptr<Components::PowerUp> cPow = m_World->AddComponent<Components::PowerUp>(powerUp);
 

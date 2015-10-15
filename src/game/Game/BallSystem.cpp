@@ -47,7 +47,6 @@ void dd::Systems::BallSystem::Initialize()
         physics->Category = CollisionLayer::Type::Ball;
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
         physics->Calculate = true;
-        transform->Sticky = true;
 
         m_World->CommitEntity(ent);
 
@@ -168,7 +167,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 return;
             }
         } //Removing this made the wall collisions work again
-         /*else if (transformBall->Position.x > EdgeX()) {
+         else if (transformBall->Position.x > EdgeX()) {
             if (transformBall->Velocity.x > 0) {
                 glm::vec2 reflectedVelocity = glm::reflect(glm::vec2(transformBall->Velocity.x, transformBall->Velocity.y), glm::vec2(1, 0));
                 transformBall->Velocity = glm::vec3(reflectedVelocity, 0.f);
@@ -178,7 +177,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 glm::vec2 reflectedVelocity = glm::reflect(glm::vec2(transformBall->Velocity.x, transformBall->Velocity.y), glm::vec2(-1, 0));
                 transformBall->Velocity = glm::vec3(reflectedVelocity, 0.f);
             }
-        } else if (transformBall->Position.y > EdgeY()) {
+        } /*else if (transformBall->Position.y > EdgeY()) {
             if (transformBall->Velocity.y > 0) {
                 glm::vec2 reflectedVelocity = glm::reflect(glm::vec2(transformBall->Velocity.x, transformBall->Velocity.y), glm::vec2(0, 1));
                 transformBall->Velocity = glm::vec3(reflectedVelocity, 0.f);
@@ -419,7 +418,6 @@ void dd::Systems::BallSystem::CreateLife(int number)
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(life);
     transform->Position = glm::vec3(-1.5f + number * 0.15f, -2.f, -5.f);
     transform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
-    transform->Sticky = true;
 
     std::shared_ptr<Components::Life> lifeNr = m_World->AddComponent<Components::Life>(life);
     lifeNr->Number = number;

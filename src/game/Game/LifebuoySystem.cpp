@@ -29,7 +29,6 @@ void dd::Systems::LifebuoySystem::Initialize()
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick | CollisionLayer::LifeBuoy | CollisionLayer::Pad | CollisionLayer::Water);
 		physics->Density = 1.0f;
 		physics->GravityScale = 1;
-		ctransform->Sticky = true;
 		auto cModel = m_World->AddComponent<Components::Model>(ent);
 		cModel->ModelFile = "Models/Lifebuoy/Lifebuoy1.obj";
 		auto lifebuoy = m_World->AddComponent<Components::Lifebuoy>(ent);

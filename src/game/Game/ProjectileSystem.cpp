@@ -29,7 +29,6 @@ void dd::Systems::ProjectileSystem::Initialize()
 		physics->Category = CollisionLayer::Type::Projectile;
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall);
 		physics->Calculate = true;
-		ctransform->Sticky = true;
 		ctransform->Position = glm::vec3(0.f, 0.f, -10.f);
 		ctransform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
 		auto cModel = m_World->AddComponent<Components::Model>(ent);

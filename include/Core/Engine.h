@@ -49,6 +49,7 @@
 #include "Game/CBrick.h"
 #include "Game/CWall.h"
 #include "Game/CBackground.h"
+#include "Game/CTravels.h"
 #include "Game/CStickyAim.h"
 #include "Game/BallSystem.h"
 #include "Game/HitLagSystem.h"
@@ -128,6 +129,7 @@ public:
 		m_World->ComponentFactory.Register<Components::Lifebuoy>();
 		m_World->ComponentFactory.Register<Components::Projectile>();
 		m_World->ComponentFactory.Register<Components::StickyAim>();
+		m_World->ComponentFactory.Register<Components::Travels>();
 
 		m_World->ComponentFactory.Register<Components::PowerUp>();
 		m_World->ComponentFactory.Register<Components::PowerUpBrick>();
