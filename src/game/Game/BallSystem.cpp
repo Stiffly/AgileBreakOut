@@ -35,7 +35,9 @@ void dd::Systems::BallSystem::Initialize()
         transform->Scale = glm::vec3(0.3f, 0.3f, 0.3f);
         transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
         auto model = m_World->AddComponent<Components::Model>(ent);
-        model->ModelFile = "Models/Test/Ball/Sid.obj";
+        model->ModelFile = "Models/Sid/Sid.dae";
+		auto animation = m_World->AddComponent<Components::Animation>(ent);
+		animation->Speed = 1.0;
         std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
         circleShape->Radius = 0.4f;
         std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
@@ -421,7 +423,7 @@ void dd::Systems::BallSystem::CreateLife(int number)
     lifeNr->Number = number;
 
     auto model = m_World->AddComponent<Components::Model>(life);
-    model->ModelFile = "Models/Test/Ball/Sid.obj";
+    model->ModelFile = "Models/Sid/Sid.dae";
 
 
     m_World->CommitEntity(life);

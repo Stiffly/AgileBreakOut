@@ -68,6 +68,8 @@
 #include "Physics/CParticle.h"
 #include "Physics/CParticleEmitter.h"
 
+#include "Rendering/AnimationSystem.h"
+
 #include "Game/EGameStart.h"
 #include "Sound/EPlaySound.h"
 
@@ -165,6 +167,9 @@ public:
 		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
 				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::PhysicsSystem>();
+		m_World->SystemFactory.Register<Systems::AnimationSystem>(
+				[this]() { return new Systems::AnimationSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::AnimationSystem>();
 		m_World->SystemFactory.Register<Systems::TravellingSystem>(
 			[this]() { return new Systems::TravellingSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::TravellingSystem>();
@@ -457,7 +462,8 @@ public:
 					glm::mat4 modelMatrix = glm::translate(glm::mat4(), absoluteTransform.Position)
 						* glm::toMat4(absoluteTransform.Orientation)
 						* glm::scale(absoluteTransform.Scale);
-					EnqueueModel(modelAsset, modelMatrix, modelComponent->Transparent, modelComponent->Color, modelComponent->ModelFile);
+					Components::Animation* animationComponent = m_World->GetComponent<Components::Animation>(entity);
+					EnqueueModel(modelAsset, modelMatrix, modelComponent, animationComponent);
 				}
 			}
 
@@ -513,7 +519,7 @@ public:
 	}
 
 	//TODO: Get this out of engine.h
-	void EnqueueModel(Model* model, glm::mat4 modelMatrix, float transparent, glm::vec4 color, std::string fileName)
+	void EnqueueModel(Model* model, glm::mat4 modelMatrix, const Components::Model* modelComponent, const Components::Animation* animationComponent)
 	{
 		for (auto texGroup : model->TextureGroups)
 		{
@@ -526,8 +532,17 @@ public:
 			job.ElementBuffer = model->ElementBuffer;
 			job.StartIndex = texGroup.StartIndex;
 			job.EndIndex = texGroup.EndIndex;
-			job.ModelMatrix = modelMatrix;
-			job.Color = color;
+			job.ModelMatrix = modelMatrix * model->m_Matrix;
+			job.Color = modelComponent->Color;
+			
+			if (model->m_Skeleton != nullptr) {
+				job.Skeleton = model->m_Skeleton;
+				if (animationComponent != nullptr) {
+					job.AnimationName = animationComponent->Name;
+					job.AnimationTime = animationComponent->Time;
+					job.NoRootMotion = animationComponent->NoRootMotion;
+				}
+			}
 
 			m_RendererQueue.Deferred.Add(job);
 		}

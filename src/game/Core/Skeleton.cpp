@@ -48,10 +48,18 @@ dd::Skeleton::~Skeleton()
 	}
 }
 
-std::vector<glm::mat4> dd::Skeleton::GetFrameBones(std::string animationName, double time, bool noRootMotion /*= false*/)
+const dd::Skeleton::Animation* dd::Skeleton::GetAnimation(std::string name)
 {
-	auto& animation = Animations.at(animationName);
-	
+	auto it = Animations.find(name);
+	if (it != Animations.end()) {
+		return const_cast<const Animation*>(&it->second);
+	} else {
+		return nullptr;
+	}
+}
+
+std::vector<glm::mat4> dd::Skeleton::GetFrameBones(const Animation& animation, double time, bool noRootMotion /*= false*/)
+{
 	// HACK: Animation wrap-around
 	while (time < 0)
 		time += animation.Duration;
@@ -60,8 +68,8 @@ std::vector<glm::mat4> dd::Skeleton::GetFrameBones(std::string animationName, do
 
 	int currentKeyframeIndex = GetKeyframe(animation, time);
 
-	Animation::Keyframe& currentFrame = animation.Keyframes[currentKeyframeIndex];
-	Animation::Keyframe& nextFrame = animation.Keyframes[currentKeyframeIndex + 1];
+	const Animation::Keyframe& currentFrame = animation.Keyframes[currentKeyframeIndex];
+	const Animation::Keyframe& nextFrame = animation.Keyframes[currentKeyframeIndex + 1];
 	float alpha = (time - currentFrame.Time) / (nextFrame.Time - currentFrame.Time);
 
 	//auto animationFrame = Animations[""].Keyframes[frame];
@@ -75,7 +83,7 @@ std::vector<glm::mat4> dd::Skeleton::GetFrameBones(std::string animationName, do
 	return finalMatrices;
 }
 
-void dd::Skeleton::AccumulateBoneTransforms(bool noRootMotion, Animation::Keyframe &currentFrame, Animation::Keyframe &nextFrame, float progress, std::map<int, glm::mat4> &boneMatrices, Bone* bone, glm::mat4 parentMatrix)
+void dd::Skeleton::AccumulateBoneTransforms(bool noRootMotion, const Animation::Keyframe &currentFrame, const Animation::Keyframe &nextFrame, float progress, std::map<int, glm::mat4> &boneMatrices, const Bone* bone, glm::mat4 parentMatrix)
 {
 	glm::mat4 boneMatrix;
 
@@ -120,7 +128,7 @@ void dd::Skeleton::PrintSkeleton()
 	PrintSkeleton(RootBone, 0);
 }
 
-void dd::Skeleton::PrintSkeleton(Bone* bone, int depthCount)
+void dd::Skeleton::PrintSkeleton(const Bone* bone, int depthCount)
 {
 	std::stringstream ss;
 	ss << std::string(depthCount, ' ');
@@ -134,7 +142,7 @@ void dd::Skeleton::PrintSkeleton(Bone* bone, int depthCount)
 	}
 }
 
-int dd::Skeleton::GetKeyframe(Animation& animation, double time)
+int dd::Skeleton::GetKeyframe(const Animation& animation, double time)
 {
 	if (time < 0)
 		time = 0;
@@ -143,7 +151,7 @@ int dd::Skeleton::GetKeyframe(Animation& animation, double time)
 
 	for (int keyframe = 0; keyframe < animation.Keyframes.size(); ++keyframe) {
 		if (animation.Keyframes[keyframe].Time > time)
-			return keyframe - 1;
+			return glm::max(0, keyframe - 1); // HACK: If the time is less than the first keyframe, don
 	}
 
 	return 0;

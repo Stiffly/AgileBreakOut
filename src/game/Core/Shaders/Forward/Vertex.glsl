@@ -65,8 +65,8 @@ void main()
 					  + BoneWeights2[3] * Bones[int(BoneIndices2[3])];
 	}
 
-	//gl_Position = MVP * boneTransform * vec4(Position, 1.0);
-	gl_Position = MVP * vec4(Position, 1.0);
+	gl_Position = MVP * boneTransform * vec4(Position, 1.0);
+	//gl_Position = MVP * vec4(Position, 1.0);
 
 	//TODO: Make sure that boneTransform works here.
 	Output.Position = (V * M * boneTransform * vec4(Position, 1.0)).xyz;
