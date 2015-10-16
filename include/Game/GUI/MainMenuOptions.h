@@ -6,6 +6,7 @@
 #include "GUI/Slider.h"
 #include "GUI/ESliderUpdate.h"
 #include "Sound/EMasterVolume.h"
+#include "Core/ConfigFile.h"
 
 namespace dd
 {
@@ -33,7 +34,6 @@ public:
 		m_SFXSlider->SetTexture("Textures/GUI/Menu/SliderBackground.png");
 		m_SFXSlider->SetTextureReleased("Textures/GUI/Menu/SliderHandle.png");
 		m_SFXSlider->AlignVertically();
-		m_SFXSlider->SetPercentage(1.f);
 
 		m_TitleBGM = new GUI::TextureFrame(this, "MainMenuOptionsBGMTitle");
 		m_TitleBGM->SetTop(m_SFXSlider->Bottom() + 20);
@@ -44,9 +44,12 @@ public:
 		m_BGMSlider->SetTexture("Textures/GUI/Menu/SliderBackground.png");
 		m_BGMSlider->SetTextureReleased("Textures/GUI/Menu/SliderHandle.png");
 		m_BGMSlider->AlignVertically();
-		m_BGMSlider->SetPercentage(1.f);
 
 		EVENT_SUBSCRIBE_MEMBER(m_ESliderUpdate, &MainMenuOptions::OnSliderUpdate);
+
+		auto config = ResourceManager::Load<ConfigFile>("Config.ini");
+		m_SFXSlider->SetPercentage(config->GetValue<float>("Audio.SFXVolume", 1.f));
+		m_BGMSlider->SetPercentage(config->GetValue<float>("Audio.BGMVolume", 1.f));
 	}
 
 private:
@@ -72,6 +75,11 @@ private:
 			e.Gain = event.Percentage;
 			EventBroker->Publish(e);
 		}
+
+		auto config = ResourceManager::Load<ConfigFile>("Config.ini");
+		config->SetValue("Audio.SFXVolume", m_SFXSlider->Percentage());
+		config->SetValue("Audio.BGMVolume", m_BGMSlider->Percentage());
+		config->SaveToDisk();
 
 		return true;
 	}

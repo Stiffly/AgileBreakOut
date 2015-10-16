@@ -431,6 +431,20 @@ void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)
 				glBindTexture(GL_TEXTURE_2D, *m_StandardSpecular);
 			}
 
+			if (modelJob->Skeleton != nullptr) {
+				auto animation = modelJob->Skeleton->GetAnimation(modelJob->AnimationName);
+				if (animation != nullptr) {
+					std::vector<glm::mat4> frameBones = modelJob->Skeleton->GetFrameBones(
+						*animation,
+						modelJob->AnimationTime,
+						modelJob->NoRootMotion
+					);
+					glUniformMatrix4fv(glGetUniformLocation(shaderProgramHandle, "Bones"), frameBones.size(), GL_FALSE, glm::value_ptr(frameBones[0]));
+				} else {
+					LOG_WARNING("Tried to play unknown animation \"%s\"", modelJob->AnimationName.c_str());
+				}
+			}
+
 			glBindVertexArray(modelJob->VAO);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, modelJob->ElementBuffer);
 			glDrawElementsBaseVertex(GL_TRIANGLES, modelJob->EndIndex - modelJob->StartIndex + 1, GL_UNSIGNED_INT, 0, modelJob->StartIndex);

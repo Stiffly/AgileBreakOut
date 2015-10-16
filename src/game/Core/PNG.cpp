@@ -37,7 +37,7 @@ dd::PNG::PNG(std::string path)
 	}
 
 	// Initialize libpng
-	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, (png_error_ptr)&PNG::pngErrorFunction, (png_error_ptr)&PNG::pngErrorFunction);
 	if (!png_ptr) {
 		LOG_ERROR("libpng: Failed to initialze png_struct");
 		png_destroy_read_struct(&png_ptr, nullptr, nullptr);
@@ -97,6 +97,7 @@ dd::PNG::PNG(std::string path)
 
 	// Read in the data
 	png_read_image(png_ptr, row_pointers);
+	delete[] row_pointers;
 
 	this->Width = width;
 	this->Height = height;
@@ -107,7 +108,18 @@ dd::PNG::PNG(std::string path)
 
 dd::PNG::~PNG()
 {
-	if (Data) {
-		delete[] Data;
+	if (this->Data != nullptr) {
+		delete[] this->Data;
+		this->Data = nullptr;
 	}
+}
+
+void dd::PNG::pngErrorFunction(png_structp png_ptr, png_const_charp error_msg)
+{
+	LOG_WARNING("%s", error_msg);
+}
+
+void dd::PNG::pngWarningFunction(png_structp png_ptr, png_const_charp warning_msg)
+{
+	LOG_WARNING("%s", warning_msg);
 }

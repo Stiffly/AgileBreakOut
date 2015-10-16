@@ -8,6 +8,7 @@
 #include "Core/World.h"
 #include "Core/EventBroker.h"
 #include "Core/ResourceManager.h"
+#include "Core/ConfigFile.h"
 #include "Sound.h"
 #include "Sound/CCollisionSound.h"
 #include "Game/CBall.h"
