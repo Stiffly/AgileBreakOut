@@ -21,6 +21,11 @@ struct ParticleEmitter : public Component
     float Spread = 0.f;
     float Speed = 2.f;
     double LifeTime = 100;
+	float RadiusDistribution = 0;
+
+	//values to interpolate between.
+	std::vector<glm::vec3> ScaleValues;
+	std::vector<float> AlphaValues;
 
     //System variables
     float GravityScale = 1.0f;
