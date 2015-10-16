@@ -107,6 +107,8 @@ namespace dd
             void CreateParticleEmitter(EntityID entity);
             void UpdateParticleEmitters(double dt); //TODO: Remove them and particles if needed.
 			float ScalarInterpolation(float timeProgress, std::vector<float> spectrum);
+			glm::vec3 VectorInterpolation(float timeProgress, std::vector<glm::vec3> spectrum);
+
 
             EventRelay<PhysicsSystem, Events::SetImpulse> m_SetImpulse;
             bool SetImpulse(const Events::SetImpulse &event);

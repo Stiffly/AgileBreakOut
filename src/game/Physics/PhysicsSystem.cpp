@@ -269,19 +269,14 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 		//Update alpha
 		auto sprite = m_World->GetComponent<Components::Sprite>(entity);
 		float timeProgress = particle->TimeLived / (particle->LifeTime - 0.1);
-		if (timeProgress > particle->LifeTime) {
-			timeProgress = particle->LifeTime;
+		if (timeProgress > 1) {
+			timeProgress = 1;
 		}
 		auto emitter = m_World->GetComponent<Components::ParticleEmitter>(particle->ParticleSystem);
 		if (emitter) {
 			sprite->Color.w = ScalarInterpolation(timeProgress, emitter->AlphaValues);
-			if (emitter->ScaleValues.size() > 1) {
-				//TODO: Implement vector interpolation function. Use scale from resourcemanager. Texture->Width...
-				std::vector<float> spectrum;
-				spectrum.push_back(emitter->ScaleValues[0].x);
-				spectrum.push_back(emitter->ScaleValues[1].x);
-				particle->Scale = glm::vec3(ScalarInterpolation(timeProgress, spectrum));
-			}
+			particle->Scale = VectorInterpolation(timeProgress, emitter->ScaleValues);
+			
 		}
     }
 
@@ -301,23 +296,39 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 
 float dd::Systems::PhysicsSystem::ScalarInterpolation(float timeProgress, std::vector<float> spectrum)
 {
-	int alphaVecSize = spectrum.size(); 
-	if (alphaVecSize == 0) {
-		return 0.01f;
+	int spectrumSize = spectrum.size();
+	if (spectrumSize == 0) {
+		return 1.f;
 	}
-	if (alphaVecSize == 1) {
+	if (spectrumSize == 1) {
 		return spectrum[0];
 	}
 
 	float dValue = spectrum[1] - spectrum[0];
-//	glm::abs(spectrum[0] - spectrum[1]);
-// 	if (spectrum[0] > spectrum[1]) {
-// 		dValue *= -1;
-// 	}
-
 	float scalar = spectrum[0] + dValue * timeProgress;
 
 	return scalar;
+}
+
+glm::vec3 dd::Systems::PhysicsSystem::VectorInterpolation(float timeProgress, std::vector<glm::vec3> spectrum)
+{
+	int spectrumSize = spectrum.size();
+	if (spectrumSize == 0) {
+		LOG_ERROR("You need to supply your particlesystem with scales in ScaleValues.");
+		return glm::vec3(1);
+	}
+	else if (spectrumSize == 1) {
+		return spectrum[0];
+	}
+
+	float dX = spectrum[1].x - spectrum[0].x;
+	float x = spectrum[0].x + dX * timeProgress;
+	float dY = spectrum[1].y - spectrum[0].y;
+	float y = spectrum[0].y + dY * timeProgress;
+	float dZ = spectrum[1].z - spectrum[0].z;
+	float z = spectrum[0].z + dZ * timeProgress;
+
+	return glm::vec3(x, y, z);
 }
 
 bool dd::Systems::PhysicsSystem::OnPause(const dd::Events::Pause &event)
@@ -837,17 +848,18 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 		e.EmittingAngle = glm::half_pi<float>();
 		e.Spread = 0.5f;
 		e.NumberOfTicks = 1;
-		e.ParticleLifeTime = 1.f;
-		e.ParticlesPerTick = 15;
+		e.ParticleLifeTime = 0.5f;
+		e.ParticlesPerTick = 1;
 		e.Position = glm::vec3(event.IntersectionPoint.x, event.IntersectionPoint.y, -10);
 		e.ScaleValues.clear();
-		e.ScaleValues.push_back(glm::vec3(0.2f));
-		e.ScaleValues.push_back(glm::vec3(1.f));
+		e.ScaleValues.push_back(glm::vec3(0.5f));
+		e.ScaleValues.push_back(glm::vec3(4.f, 4.f, 0.2f));
 		e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
-		e.Color = model->Color + glm::vec4(0.5f);
+		e.Color = model->Color;
+		e.AlphaValues.clear();
 		e.AlphaValues.push_back(1.f);
 		e.AlphaValues.push_back(0.f);
-		e.Speed = 100;
+		//e.Speed = 0;
 	}
 
 	EventBroker->Publish(e);
