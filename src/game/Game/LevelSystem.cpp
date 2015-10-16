@@ -396,23 +396,43 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 		m_World->CommitEntity(b);
 
 		//Particle trail
-		Events::CreateParticleSequence p;
-		p.parent = b;
-		p.AlphaValues.push_back(1.f);
-		p.AlphaValues.push_back(0.f);
-		p.ScaleValues.push_back(glm::vec3(0.08f));
-		p.ScaleValues.push_back(glm::vec3(0.f));
-		p.RadiusDistribution = 1;
-		p.EmitterLifeTime = 2.f;
-		p.ParticleLifeTime = 1.f;
-		p.ParticlesPerTick = 1;
-		p.SpawnRate = 0.1f;
-		p.Speed = 10.f;
-		p.EmittingAngle = glm::half_pi<float>();
-		p.SpriteFile = "Textures/Particles/FadeBall.png";
-		p.Color = brickModel->Color;
+		Events::CreateParticleSequence trail;
+		trail.parent = b;
+		trail.AlphaValues.push_back(1.f);
+		trail.AlphaValues.push_back(0.f);
+		trail.ScaleValues.push_back(glm::vec3(0.08f));
+		trail.ScaleValues.push_back(glm::vec3(0.f));
+		trail.RadiusDistribution = 1;
+		trail.EmitterLifeTime = 2.f;
+		trail.ParticleLifeTime = 1.f;
+		trail.ParticlesPerTick = 1;
+		trail.SpawnRate = 0.1f;
+		trail.Speed = 10.f;
+		trail.EmittingAngle = glm::half_pi<float>();
+		trail.SpriteFile = "Textures/Particles/FadeBall.png";
+		trail.Color = brickModel->Color;
 		//p.Spread = ...
-		EventBroker->Publish(p);
+		EventBroker->Publish(trail);
+
+		//ParticlePoof
+		Events::CreateParticleSequence poof;
+		poof.EmitterLifeTime = 4;
+		poof.EmittingAngle = glm::half_pi<float>();
+		poof.Spread = 0.5f;
+		poof.NumberOfTicks = 1;
+		poof.ParticleLifeTime = 1.5f;
+		poof.ParticlesPerTick = 1;
+		poof.Position = cTransform->Position;
+		poof.ScaleValues.clear();
+		poof.ScaleValues.push_back(glm::vec3(0.5f));
+		poof.ScaleValues.push_back(glm::vec3(2.f, 2.f, 0.2f));
+		poof.SpriteFile = "Textures/Particles/Cloud_Particle.png";
+		poof.Color = brickModel->Color;
+		poof.AlphaValues.clear();
+		poof.AlphaValues.push_back(1.f);
+		poof.AlphaValues.push_back(0.f);
+		poof.Speed = 10;
+		EventBroker->Publish(poof);
 	}
 
 
