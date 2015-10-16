@@ -40,23 +40,19 @@
 enum _LOG_LEVEL
 {
 	LOG_LEVEL_ERROR,
-	LOG_LEVEL_WARNING,
 	LOG_LEVEL_INFO,
+	LOG_LEVEL_WARNING,
 	LOG_LEVEL_DEBUG
 };
 
-#ifdef DEBUG
-static _LOG_LEVEL LOG_LEVEL = LOG_LEVEL_DEBUG;
-#else
-static _LOG_LEVEL LOG_LEVEL = LOG_LEVEL_DEBUG;
-#endif
+extern _LOG_LEVEL LOG_LEVEL;
 
 const static char* _LOG_LEVEL_PREFIX[] =
 {
-	"E: ",
-	"W: ",
+	"EE: ",
 	"",
-	"D: "
+	"WW: ",
+	"DD: "
 };
 
 static void _LOG(_LOG_LEVEL logLevel, const char* file, const char* func, unsigned int line, const char* format, ...)

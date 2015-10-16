@@ -57,9 +57,6 @@ namespace dd
 
             ~PhysicsSystem();
 
-	EventRelay<PhysicsSystem, Events::CreateParticleSequence> m_ECreateParticleSequence;
-    	bool CreateParticleSequence(const Events::CreateParticleSequence &event);
-
             void RegisterComponents(ComponentFactory* cf) override;
             void Initialize() override;
             void Update(double dt) override;
@@ -117,6 +114,8 @@ namespace dd
             bool OnPause(const dd::Events::Pause &event);
 			dd::EventRelay<PhysicsSystem, dd::Events::Contact> m_EContact;
 			bool OnContact(const dd::Events::Contact &event);
+			EventRelay<PhysicsSystem, Events::CreateParticleSequence> m_ECreateParticleSequence;
+			bool CreateParticleSequence(const Events::CreateParticleSequence &event);
 
             //TODO: Fill struct with info needed.
         struct EmitterHandler //TODO CHANGE NAMES

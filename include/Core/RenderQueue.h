@@ -66,6 +66,12 @@ struct ModelJob : RenderJob
 	unsigned int StartIndex;
 	unsigned int EndIndex;
 
+	// Animation
+	dd::Skeleton* Skeleton = nullptr;
+	bool NoRootMotion = true;
+	std::string AnimationName;
+	double AnimationTime = 0;
+
 	void CalculateHash() override
 	{
 		Hash = TextureID;

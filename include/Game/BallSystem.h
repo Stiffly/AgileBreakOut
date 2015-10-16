@@ -13,6 +13,7 @@
 #include "Rendering/CModel.h"
 #include "Rendering/CSprite.h"
 #include "Rendering/CPointLight.h"
+#include "Rendering/CAnimation.h"
 #include "Game/CBall.h"
 #include "Game/CPowerUp.h"
 #include "Game/CLife.h"
@@ -35,6 +36,7 @@
 #include "Game/EHitLag.h"
 #include "Game/EActionButton.h"
 #include "Game/ELifebuoyHit.h"
+#include "Physics/ECreateParticleSequence.h"
 
 namespace dd
 {

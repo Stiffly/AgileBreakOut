@@ -1,4 +1,4 @@
-@ECHO on
+@ECHO off
 
 SET DeployLocation=bin\
 
@@ -7,6 +7,8 @@ ECHO Deploying resources to %DeployLocation%
 MKLINK "%DeployLocation%\Models\" "assets\Models" /J
 MKLINK "%DeployLocation%\Textures\" "assets\Textures\" /J
 MKLINK "%DeployLocation%\Sounds\" "assets\Sounds\" /J
+:: Configuration files
+MKLINK "%DeployLocation%\DefaultConfig.ini" "assets\DefaultConfig.ini" /H
 :: Shaders
 MKLINK "%DeployLocation%\Shaders\" "src\game\Core\Shaders\" /J
 :: Platform specific binaries
