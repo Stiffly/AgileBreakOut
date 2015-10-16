@@ -21,21 +21,21 @@
 
 dd::Texture::Texture(std::string path)
 {
-	std::unique_ptr<Image> image = std::make_unique<PNG>(path);
+	PNG image(path);
 
-	if (image->Width == 0 && image->Height == 0 || image->Format == Image::ImageFormat::Unknown) {
-		image = std::make_unique<PNG>("Textures/Core/ErrorTexture.png");
-		if (image->Width == 0 && image->Height == 0 || image->Format == Image::ImageFormat::Unknown) {
+	if (image.Width == 0 && image.Height == 0 || image.Format == Image::ImageFormat::Unknown) {
+		image = PNG("Textures/Core/ErrorTexture.png");
+		if (image.Width == 0 && image.Height == 0 || image.Format == Image::ImageFormat::Unknown) {
 			LOG_ERROR("Couldn't even load the error texture. This is a dark day indeed.");
 			return;
 		}
 	}
 
-	this->Width = image->Width;
-	this->Height = image->Height;
+	this->Width = image.Width;
+	this->Height = image.Height;
 
 	GLint format;
-	switch (image->Format) {
+	switch (image.Format) {
 	case Image::ImageFormat::RGB:
 		format = GL_RGB;
 		break;
@@ -48,7 +48,7 @@ dd::Texture::Texture(std::string path)
 	glGenTextures(1, &m_Texture);
 	glBindTexture(GL_TEXTURE_2D, m_Texture);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glTexImage2D(GL_TEXTURE_2D, 0, format, image->Width, image->Height, 0, format, GL_UNSIGNED_BYTE, image->Data);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, image.Width, image.Height, 0, format, GL_UNSIGNED_BYTE, image.Data);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

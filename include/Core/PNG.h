@@ -33,6 +33,10 @@ class PNG : public Image
 public:
 	PNG(std::string path);
 	~PNG();
+
+private:
+	static void pngErrorFunction(png_structp png_ptr, png_const_charp error_msg);
+	static void pngWarningFunction(png_structp png_ptr, png_const_charp warning_msg);
 };
 
 }
