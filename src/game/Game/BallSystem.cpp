@@ -50,6 +50,8 @@ void dd::Systems::BallSystem::Initialize()
         physics->Category = CollisionLayer::Type::Ball;
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
         physics->Calculate = true;
+		auto collisionSound = m_World->AddComponent<Components::CollisionSound>(ent);
+		collisionSound->FilePath = "Sounds/Jelly/squid-bounce-n.wav";
 
         m_World->CommitEntity(ent);
 
