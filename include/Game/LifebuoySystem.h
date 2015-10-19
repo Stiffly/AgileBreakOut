@@ -15,6 +15,7 @@
 #include "Physics/CPhysics.h"
 #include "Physics/CRectangleShape.h"
 #include "Game/EPause.h"
+#include "Game/EResume.h"
 #include "Game/ELifebuoy.h"
 #include "Game/ELifebuoyHit.h"
 #include "Game/CLifebuoy.h"
@@ -48,11 +49,13 @@ private:
 
 	dd::EventRelay<LifebuoySystem, dd::Events::Contact> m_EContact;
 	dd::EventRelay<LifebuoySystem, dd::Events::Pause> m_EPause;
+	dd::EventRelay<LifebuoySystem, dd::Events::Resume> m_EResume;
 	dd::EventRelay<LifebuoySystem, dd::Events::Lifebuoy> m_ELifebuoy;
 	dd::EventRelay<LifebuoySystem, dd::Events::LifebuoyHit> m_ELifebuoyHit;
 
     bool OnContact(const dd::Events::Contact &event);
 	bool OnPause(const dd::Events::Pause &event);
+	bool OnResume(const dd::Events::Resume &event);
 	bool OnLifebuoy(const dd::Events::Lifebuoy &event);
 	bool OnLifebuoyHit(const dd::Events::LifebuoyHit &event);
 

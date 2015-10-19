@@ -19,6 +19,7 @@ struct Brick : Component
 	//0 = empty, 1 = normal, 2 = multi-brick, 3 = lifebuoy, 4 = sticky, 5 = blaster, 6 = kraken
     int Type = 0;
     bool Removed = false;
+	int Number = 0; // For the Kraken to keep track of which bricks needs replacing.
 
 	//What number of types each is.
 	const int EmptyBrickSpace = 0;

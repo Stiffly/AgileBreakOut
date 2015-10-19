@@ -23,6 +23,7 @@ void dd::Systems::PhysicsSystem::Initialize()
     InitializeWater();
     EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, &PhysicsSystem::SetImpulse);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PhysicsSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &PhysicsSystem::OnResume);
     EVENT_SUBSCRIBE_MEMBER(m_ECreateParticleSequence, &PhysicsSystem::CreateParticleSequence);
 	EVENT_SUBSCRIBE_MEMBER(m_EContact, &PhysicsSystem::OnContact);
 }
@@ -244,6 +245,10 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
 void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {    
+	if (m_Pause) {
+		return;
+	}
+
     auto particle = m_World->GetComponent<Components::Particle>(entity);
 	auto pTemplate = m_World->GetComponent<Components::Template>(entity);
 
@@ -333,16 +338,20 @@ glm::vec3 dd::Systems::PhysicsSystem::VectorInterpolation(float timeProgress, st
 
 bool dd::Systems::PhysicsSystem::OnPause(const dd::Events::Pause &event)
 {
-    if (event.Type != "PhysicsSystem" && event.Type != "All") {
+    /*if (event.Type != "PhysicsSystem" && event.Type != "All") {
         return false;
-    }
-
-    if (m_Pause) {
-        m_Pause = false;
-    } else {
-        m_Pause = true;
-    }
+    }*/
+    m_Pause = true;
     return true;
+}
+
+bool dd::Systems::PhysicsSystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "PhysicsSystem" && event.Type != "All") {
+	return false;
+	}*/
+	m_Pause = false;
+	return true;
 }
 
 void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)

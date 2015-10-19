@@ -5,6 +5,7 @@
 #include "Core/World.h"
 #include "Rendering/CAnimation.h"
 #include "Game/EPause.h"
+#include "Game/EResume.h"
 
 namespace dd
 {
@@ -25,7 +26,9 @@ private:
 	bool m_Paused = false;
 
 	EventRelay<AnimationSystem, Events::Pause> m_EPause;
+	EventRelay<AnimationSystem, Events::Resume> m_EResume;
 	bool OnPause(const Events::Pause& e);
+	bool OnResume(const Events::Resume& e);
 };
 
 }
