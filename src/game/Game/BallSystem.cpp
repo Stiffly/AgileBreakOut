@@ -64,6 +64,8 @@ void dd::Systems::BallSystem::Initialize()
     for (int i = 0; i < Lives(); i++) {
         CreateLife(i);
     }
+
+	m_GodMode = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<bool>("Cheat.GodMode", false);
 }
 
 void dd::Systems::BallSystem::Update(double dt)
@@ -445,8 +447,9 @@ void dd::Systems::BallSystem::CreateLife(int number)
 
 bool dd::Systems::BallSystem::OnLifeLost(const dd::Events::LifeLost &event)
 {
-    SetLives(Lives() - 1);
-
+	if (!m_GodMode){
+		SetLives(Lives() - 1);
+	}
     return true;
 }
 

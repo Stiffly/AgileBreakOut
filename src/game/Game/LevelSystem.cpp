@@ -23,6 +23,8 @@ void dd::Systems::LevelSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EHitPad, &LevelSystem::OnHitPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EBrickGenerating, &LevelSystem::OnBrickGenerating);
 
+	m_GodMode = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue("Cheat.GodMode", false);
+
 	//PointLightTest
 	{
 		auto t_Light = m_World->CreateEntity();
@@ -144,7 +146,11 @@ void dd::Systems::LevelSystem::Initialize()
 		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
 		physics->CollisionType = CollisionType::Type::Static;
 		physics->Category = CollisionLayer::Wall;
-		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy);
+		if (m_GodMode) {
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy | CollisionLayer::Ball);
+		} else {
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy);
+		}
 		m_World->CommitEntity(BottomWall);
 	}
 
