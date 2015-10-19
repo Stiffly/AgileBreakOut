@@ -80,7 +80,7 @@ void dd::Renderer::LoadShaders()
 	*/
 
 	// Pass #1: Fill G-buffers
-	m_SpDeferred1 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/1/");
+	m_SpDeferred1 = ResourceManager::Load<ShaderProgram>("Shaders/OpenGL/Deferred/1/");
 	m_SpDeferred1->BindFragDataLocation(0, "GDiffuse");
 	m_SpDeferred1->BindFragDataLocation(1, "GPosition");
 	m_SpDeferred1->BindFragDataLocation(2, "GNormal");
@@ -88,30 +88,30 @@ void dd::Renderer::LoadShaders()
 	m_SpDeferred1->Link();
 
 	// Pass #2: Lighting
-	m_SpDeferred2 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/2/");
+	m_SpDeferred2 = ResourceManager::Load<ShaderProgram>("Shaders/OpenGL/Deferred/2/");
 	//glBindFragDataLocation(m_SPDeferred2, 0, "FragmentLighting");
 	m_SpDeferred2->Link();
 
 	//Water Pass
-	m_SpWater = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/water/");
+	m_SpWater = ResourceManager::Load<ShaderProgram>("Shaders/OpenGL/Deferred/water/");
 	m_SpWater->Link();
-	m_SpWater2 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/water2/");
+	m_SpWater2 = ResourceManager::Load<ShaderProgram>("Shaders/OpenGL/Deferred/water2/");
 	m_SpWater2->Link();
 
 	// Pass #3: Combining into final image
-	m_SpDeferred3 = ResourceManager::Load<ShaderProgram>("Shaders/Deferred/3/");
+	m_SpDeferred3 = ResourceManager::Load<ShaderProgram>("Shaders/OpenGL/Deferred/3/");
 	m_SpDeferred3->Link();
 
 	/*
 		Forward rendering
 	*/
-	m_SpForward = ResourceManager::Load<ShaderProgram>("Shaders/Forward/");
+	m_SpForward = ResourceManager::Load<ShaderProgram>("Shaders/OpenGL/Forward/");
 	m_SpForward->Link();
 
 	/*
 		Screen draw
 	*/
-	m_SpScreen = ResourceManager::Load<ShaderProgram>("Shaders/Screen/");
+	m_SpScreen = ResourceManager::Load<ShaderProgram>("Shaders/OpenGL/Screen/");
 	m_SpScreen->Link();
 }
 
