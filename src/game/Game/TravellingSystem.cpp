@@ -8,6 +8,7 @@
 void dd::Systems::TravellingSystem::Initialize()
 {
 	EVENT_SUBSCRIBE_MEMBER(m_EPause, &TravellingSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &TravellingSystem::OnResume);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &TravellingSystem::OnStageCleared);
 }
 
@@ -17,7 +18,7 @@ void dd::Systems::TravellingSystem::Update(double dt)
 		return;
 	}
 	if (m_Travelling) {
-		if (m_DistanceTravelled > 12.f) {
+		if (m_DistanceTravelled > 12.f) { //NextLevelDistance
 			m_DistanceTravelled = 0;
 			m_Travelling = false;
 			Events::ArrivedAtNewStage e;
@@ -30,31 +31,68 @@ void dd::Systems::TravellingSystem::Update(double dt)
 
 void dd::Systems::TravellingSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
+	if (m_Pause) {
+		return;
+	}
+
+	auto templateCheck = m_World->GetComponent<Components::Template>(entity);
+	if (templateCheck != nullptr){ return; }
+
 	if (m_Travelling) {
-		auto transform = m_World->GetComponent<Components::Transform>(entity);
-		if (transform != nullptr) {
-			if (!transform->Sticky) {
-				transform->Position.y -= 6.0f * dt;
+		auto travels = m_World->GetComponent<Components::Travels>(entity);
+		if (travels != nullptr) {
+			if (!travels->CurrentlyTraveling) {
+				auto transform = m_World->GetComponent<Components::Transform>(entity);
+				if (transform != nullptr) {
+					Events::Move e;
+					e.Entity = entity;
+					glm::vec3 position = transform->Position;
+					glm::vec3 goalPosition = position;
+					e.Queue = false;
+					e.Speed = 6;
+					goalPosition.y -= 12; //NextLevelDistance
+					if (goalPosition.y < -34.6) { //Halfpipe Value
+						auto background = m_World->GetComponent<Components::Background>(entity);
+						if (background != nullptr) {
+							float yValue = position.y; // A negative value between -34.6 and -22.6;
+							yValue += 22.6; // A positive value between -12 and 0. The distance it should travel from 34.6;
+							background->distanceLeftToCorrectTravelPosition = yValue;
+						} else {
+							m_World->RemoveEntity(entity);
+							return;
+						}
+					}
+					e.GoalPosition = goalPosition;
+					
+					travels->CurrentlyTraveling = true;
+					EventBroker->Publish(e);
+					//transform->Position.y -= 6.0f * dt;
+				}
 			}
 		}
-		else {
-			transform->Position.y -= 6.0f * dt;
+	} else {
+		auto travels = m_World->GetComponent<Components::Travels>(entity);
+		if (travels != nullptr) {
+			travels->CurrentlyTraveling = false;
 		}
 	}
 }
 
 bool dd::Systems::TravellingSystem::OnPause(const dd::Events::Pause &event)
 {
-	if (event.Type != "TravellingSystem" && event.Type != "All") {
+	/*if (event.Type != "TravellingSystem" && event.Type != "All") {
 		return false;
-	}
-
-    if (IsPaused()) {
-        SetPause(false);
-    } else {
-        SetPause(true);
-    }
+	}*/
+	m_Pause = true;
     return true;
+}
+bool dd::Systems::TravellingSystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "TravellingSystem" && event.Type != "All") {
+	return false;
+	}*/
+	m_Pause = false;
+	return true;
 }
 
 bool dd::Systems::TravellingSystem::OnStageCleared(const dd::Events::StageCleared &event)
@@ -62,5 +100,11 @@ bool dd::Systems::TravellingSystem::OnStageCleared(const dd::Events::StageCleare
 	if (event.ClearedStage < 5) {
 		m_Travelling = true;
 	}
+	return true;
+}
+
+bool dd::Systems::TravellingSystem::OnArrivedAtNewStage(const dd::Events::ArrivedAtNewStage &event)
+{
+	
 	return true;
 }

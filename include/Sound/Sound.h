@@ -14,6 +14,7 @@ class Sound : public Resource
     friend class ResourceManager;
 
 public:
+	~Sound();
     ALuint Buffer() { return m_Buffer; };
     std::string Path() { return m_Path; };
     float Gain() { return m_Gain; };

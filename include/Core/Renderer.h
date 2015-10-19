@@ -25,6 +25,8 @@
 #include "Core/CTemplate.h"
 #include "Core/EventBroker.h"
 #include "Core/World.h"
+#include "Core/ResourceManager.h"
+#include "Core/ConfigFile.h"
 #include "Game/EScreenShake.h"
 #include "Camera.h"
 #include "RenderQueue.h"

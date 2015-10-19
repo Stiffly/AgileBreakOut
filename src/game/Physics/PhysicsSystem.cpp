@@ -23,13 +23,14 @@ void dd::Systems::PhysicsSystem::Initialize()
     InitializeWater();
     EVENT_SUBSCRIBE_MEMBER(m_SetImpulse, &PhysicsSystem::SetImpulse);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PhysicsSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &PhysicsSystem::OnResume);
     EVENT_SUBSCRIBE_MEMBER(m_ECreateParticleSequence, &PhysicsSystem::CreateParticleSequence);
 	EVENT_SUBSCRIBE_MEMBER(m_EContact, &PhysicsSystem::OnContact);
 }
 
 void dd::Systems::PhysicsSystem::InitializeWater()
 {
-    float radius = 0.13f;
+	float radius = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Water.Radius", 0.2f);
     float gravityScale = 1.0f;
 
     b2ParticleSystemDef m_ParticleSystemDef;
@@ -244,6 +245,10 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 
 void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {    
+	if (m_Pause) {
+		return;
+	}
+
     auto particle = m_World->GetComponent<Components::Particle>(entity);
 	auto pTemplate = m_World->GetComponent<Components::Template>(entity);
 
@@ -333,16 +338,20 @@ glm::vec3 dd::Systems::PhysicsSystem::VectorInterpolation(float timeProgress, st
 
 bool dd::Systems::PhysicsSystem::OnPause(const dd::Events::Pause &event)
 {
-    if (event.Type != "PhysicsSystem" && event.Type != "All") {
+    /*if (event.Type != "PhysicsSystem" && event.Type != "All") {
         return false;
-    }
-
-    if (m_Pause) {
-        m_Pause = false;
-    } else {
-        m_Pause = true;
-    }
+    }*/
+    m_Pause = true;
     return true;
+}
+
+bool dd::Systems::PhysicsSystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "PhysicsSystem" && event.Type != "All") {
+	return false;
+	}*/
+	m_Pause = false;
+	return true;
 }
 
 void dd::Systems::PhysicsSystem::OnEntityCommit(EntityID entity)
@@ -477,6 +486,7 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
 
                 transformChild->Position = glm::vec3(t_ParticlePositions[i].x - transform->Position.x, t_ParticlePositions[i].y - transform->Position.y, -9.5f);
                 transformChild->Scale = glm::vec3(m_WaterParticleSystem->GetRadius())/transform->Scale;
+				transformChild->Scale *= 2;
                 m_World->CommitEntity(t_waterparticle);
 
                 m_EntitiesToWaterParticleHandle.insert(std::make_pair(t_waterparticle, m_WaterParticleSystem->GetParticleHandleFromIndex(i)));

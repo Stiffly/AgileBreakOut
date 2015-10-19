@@ -9,6 +9,7 @@ void dd::Systems::AnimationSystem::RegisterComponents(ComponentFactory* cf)
 void dd::Systems::AnimationSystem::Initialize()
 {
 	EVENT_SUBSCRIBE_MEMBER(m_EPause, &AnimationSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &AnimationSystem::OnResume);
 }
 
 void dd::Systems::AnimationSystem::Update(double dt)
@@ -30,6 +31,12 @@ void dd::Systems::AnimationSystem::Update(double dt)
 
 bool dd::Systems::AnimationSystem::OnPause(const Events::Pause& e)
 {
-	m_Paused = !m_Paused;
+	m_Paused = true;
+	return true;
+}
+
+bool dd::Systems::AnimationSystem::OnResume(const Events::Resume& e)
+{
+	m_Paused = false;
 	return true;
 }
