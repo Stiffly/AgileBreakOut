@@ -60,7 +60,6 @@ private:
 	} constantBufferStruct;
 
 	ShaderProgram* shaderProgram = nullptr;
-	const Model* testModel = nullptr;
 	ID3D11Buffer* constantBuffer = nullptr;
 
 	static DirectX::SimpleMath::Matrix GLMtoDXModelView(glm::mat4 m);

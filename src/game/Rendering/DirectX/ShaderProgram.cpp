@@ -28,7 +28,7 @@ void dd::ShaderProgram::CompileVertexShader(std::wstring filename)
 {
 	//D3DX11CompileFromFile(filename.c_str(), 0, 0, "main", "vs_5_0", 0, 0, 0, &m_VertexShaderBlob, 0, 0);
 	ID3DBlob* blob = nullptr;
-	HRESULT result = D3DCompileFromFile(filename.c_str(), nullptr, nullptr, "main", "vs_5_0", 0, 0, &m_VertexShaderBlob, nullptr);
+	HRESULT result = D3DCompileFromFile(filename.c_str(), nullptr, nullptr, "main", "vs_5_0", 0, 0, &m_VertexShaderBlob, &blob);
 	if (result != S_OK) {
 		std::wstring blobString((wchar_t*)blob->GetBufferPointer(), blob->GetBufferSize());
 		LOG_ERROR("Failed to compile vertex shader!\n\n%s", blobString.c_str());

@@ -65,14 +65,14 @@ public:
 	float FarClip() const { return m_FarClip; }
 	void SetFarClip(float val);
 
-private:
-	void UpdateViewMatrix();
-	void UpdateProjectionMatrix();
-
 	float m_AspectRatio;
 	float m_FOV;
 	float m_NearClip;
 	float m_FarClip;
+
+private:
+	void UpdateViewMatrix();
+	void UpdateProjectionMatrix();
 
 	glm::vec3 m_Position;
 	glm::quat m_Orientation;

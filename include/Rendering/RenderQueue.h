@@ -28,6 +28,7 @@ namespace dd
 {
 
 class Model;
+class Skeleton;
 class Texture;
 class RenderQueue;
 
@@ -62,6 +63,12 @@ struct ModelJob : RenderJob
 	const dd::Model* Model = nullptr;
 	unsigned int StartIndex = 0;
 	unsigned int EndIndex = 0;
+
+	// Animation
+	dd::Skeleton* Skeleton = nullptr;
+	bool NoRootMotion = true;
+	std::string AnimationName;
+	double AnimationTime = 0;
 
 	void CalculateHash() override
 	{

@@ -603,7 +603,7 @@ public:
 				m_ShakeIntensity = m_ShakeRepresentativeIntensity;
 				if (m_ShakeIntensity <= 0) {
 					m_ScreenShake = false;
-					m_Renderer->PlaceCamera(glm::vec3(0, 0, 0));
+					//m_Renderer->PlaceCamera(glm::vec3(0, 0, 0));
 					return;
 				}
 			} else {
@@ -619,7 +619,7 @@ public:
 
 			//std::cout << "X: " << randomX << " Y: " << randomY << std::endl;
 
-			m_Renderer->PlaceCamera(glm::vec3(randomX, randomY, 0));
+			//m_Renderer->PlaceCamera(glm::vec3(randomX, randomY, 0));
 		}
 	}
 
