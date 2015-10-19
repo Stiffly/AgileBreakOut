@@ -121,12 +121,13 @@ bool dd::Systems::SoundSystem::OnStopSound(const dd::Events::StopSound &event)
     {
         if (item.second->Path() == event.FilePath) {
             itemToDeleted = item.first;
-            break;
+			alSourceStop(itemToDeleted);
+			alDeleteSources(1, &itemToDeleted);
+			m_BGMSourcesToBuffers.erase(itemToDeleted);
+			return true;
         }
     }
-    alSourceStop(itemToDeleted);
-    alDeleteSources(1, &itemToDeleted);
-    m_BGMSourcesToBuffers.erase(itemToDeleted);
+    
 
     //Should not happen because SFX's should be very short.
     for (auto item : m_SFXSourcesToBuffers)
