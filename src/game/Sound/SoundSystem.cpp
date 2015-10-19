@@ -3,6 +3,19 @@
 
 dd::Systems::SoundSystem::~SoundSystem()
 {
+	for (auto &bgm : m_BGMSourcesToBuffers) {
+		alSourceStop(bgm.first);
+		alDeleteSources(1, &bgm.first);
+		//bgm.second->~Sound();
+	}
+	for (auto &sfx : m_SFXSourcesToBuffers) {
+		alSourceStop(sfx.first);
+		alDeleteSources(1, &sfx.first);
+		//sfx.second->~Sound();
+	}
+	m_BGMSourcesToBuffers.clear();
+	m_SFXSourcesToBuffers.clear();
+	alcDestroyContext(m_Context);
     alcCloseDevice(m_Device);
 }
 
@@ -10,42 +23,26 @@ void dd::Systems::SoundSystem::Initialize()
 {
     //initialize OpenAL
     m_Device = alcOpenDevice(NULL);
-    ALCcontext* context;
+    
 
     if (m_Device) {
-        context = alcCreateContext(m_Device, NULL);
-        alcMakeContextCurrent(context);
+		m_Context = alcCreateContext(m_Device, NULL);
+		alcMakeContextCurrent(m_Context);
     }
     else {
         LOG_ERROR("OpenAL failed to initialize.");
     }
-    alGetError();
+    //alGetError();
 
     //Subscribe to events
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &SoundSystem::OnContact);
     EVENT_SUBSCRIBE_MEMBER(m_EPlaySFX, &SoundSystem::OnPlaySound);
     EVENT_SUBSCRIBE_MEMBER(m_EStopSound, &SoundSystem::OnStopSound);
     EVENT_SUBSCRIBE_MEMBER(m_EMasterVolume, &SoundSystem::OnMasterVolume);
+	EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &SoundSystem::OnGameStart);
 
 	m_SFXMasterVolume = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Audio.SFXVolume", 1.f);
 	m_BGMMasterVolume = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Audio.BGMVolume", 1.f);
-
-    //Todo: Move this
-    {
-        dd::Events::PlaySound e;
-        e.FilePath = "Sounds/BGM/under-the-sea-instrumental.wav";
-        e.IsAmbient = true;
-        EventBroker->Publish(e);
-    }
-    {
-        dd::Events::PlaySound e;
-        e.FilePath = "Sounds/BGM/water-flowing.wav";
-        e.Gain = 0.3f;
-        e.IsAmbient = true;
-        EventBroker->Publish(e);
-    }
-
-
 }
 
 void dd::Systems::SoundSystem::Update(double dt)
@@ -63,7 +60,6 @@ void dd::Systems::SoundSystem::Update(double dt)
 
     for (int i = 0; i < deleteList.size(); i++) {
         alDeleteSources(1, &deleteList[i]);
-        //alDeleteBuffers(1, &m_SourcesToBuffers[deleteList[i]]);
         m_SFXSourcesToBuffers.erase(deleteList[i]);
     }
 }
@@ -175,10 +171,29 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
         dd::Events::PlaySound e;
         e.FilePath = collisionSound->FilePath;
         e.IsAmbient = false;
+		e.Gain = 0.8f;
         EventBroker->Publish(e);
     }
 
     return true;
+}
+
+bool dd::Systems::SoundSystem::OnGameStart(const dd::Events::GameStart &event)
+{
+    {
+        dd::Events::PlaySound e;
+        e.FilePath = "Sounds/BGM/under-the-sea-instrumental.wav";
+        e.IsAmbient = true;
+        EventBroker->Publish(e);
+    }
+    {
+        dd::Events::PlaySound e;
+        e.FilePath = "Sounds/BGM/water-flowing.wav";
+        e.Gain = 0.3f;
+        e.IsAmbient = true;
+        EventBroker->Publish(e);
+    }
+	return true;
 }
 
 

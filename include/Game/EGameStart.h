@@ -1,7 +1,3 @@
-//
-// Created by Adam on 2015-09-25.
-//
-
 #ifndef EVENTS_EGAMESTART_H__
 #define EVENTS_EGAMESTART_H__
 

@@ -8,6 +8,7 @@
 void dd::Systems::HitLagSystem::Initialize()
 {
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &HitLagSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &HitLagSystem::OnResume);
     EVENT_SUBSCRIBE_MEMBER(m_EHitLag, &HitLagSystem::OnHitLag);
 }
 
@@ -29,25 +30,33 @@ void dd::Systems::HitLagSystem::Update(double dt)
 
 void dd::Systems::HitLagSystem::FlipPause()
 {
-    Events::Pause e;
-    e.Type = CurrentType();
-    EventBroker->Publish(e);
+	if (!IsPaused()) {
+		Events::Pause e;
+		e.Type = CurrentType();
+		EventBroker->Publish(e);
+	} else {
+		Events::Resume e;
+		e.Type = CurrentType();
+		EventBroker->Publish(e);
+	}
 }
 
 bool dd::Systems::HitLagSystem::OnPause(const dd::Events::Pause &event)
 {
-    if (IsPaused()) {
-        SetPause(false);
-    } else {
-        SetPause(true);
-    }
+    m_Pause = true;
     return true;
+}
+bool dd::Systems::HitLagSystem::OnResume(const dd::Events::Resume &event)
+{
+	m_Pause = false;
+	return true;
 }
 
 bool dd::Systems::HitLagSystem::OnHitLag(const dd::Events::HitLag &event)
 {
     if (HitLag()) {
         FlipPause();
+		SetHitLagTimer(0);
     }
     SetHitLag(true);
     SetCurrentType(event.Type);
