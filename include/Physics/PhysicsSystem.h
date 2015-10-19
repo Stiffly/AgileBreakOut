@@ -49,7 +49,7 @@ namespace dd
         class PhysicsSystem : public System
         {
             friend class ContractListener;
-            friend class DestructionListener;
+            //friend class DestructionListener;
 
         public:
             PhysicsSystem(World* world, std::shared_ptr<dd::EventBroker> eventBroker)
@@ -106,6 +106,9 @@ namespace dd
              b2ParticleSystem* CreateParticleSystem(float radius, float gravityScale, int maxCount);
             void CreateParticleEmitter(EntityID entity);
             void UpdateParticleEmitters(double dt); //TODO: Remove them and particles if needed.
+			float ScalarInterpolation(float timeProgress, std::vector<float> spectrum);
+			glm::vec3 VectorInterpolation(float timeProgress, std::vector<glm::vec3> spectrum);
+
 
             EventRelay<PhysicsSystem, Events::SetImpulse> m_SetImpulse;
             bool SetImpulse(const Events::SetImpulse &event);
@@ -128,36 +131,36 @@ namespace dd
             std::list<Impulse> m_Impulses;
             
             
-            class DestructionListener : public b2DestructionListener
-    {
-    public:
-        DestructionListener(PhysicsSystem* physicsSystem)
-                : m_PhysicsSystem(physicsSystem) { }
-
-        void SayGoodbye(b2Joint*) {LOG_INFO("joint körs");};
-        void SayGoodbye(b2Fixture*) {/*LOG_INFO("Fixture körs");*/};
-
-        void SayGoodbye(b2ParticleSystem* particleSystem, int32 index) override
-        {
-            LOG_INFO("Particle ded");
-
-
-            const b2ParticleHandle* handle = particleSystem->GetParticleHandleFromIndex(index);
-            for (int i = 0; i < m_PhysicsSystem->m_ParticleEmitters.ParticleSystem.size(); i++) {
-                if(m_PhysicsSystem->m_ParticleEmitters.ParticleSystem[i] == particleSystem) {
-                    std::unordered_map<const b2ParticleHandle*, EntityID>::iterator it = m_PhysicsSystem->m_ParticleHandleToEntities[i].find(handle);
-                    if(it != m_PhysicsSystem->m_ParticleHandleToEntities[i].end()) {
-                        EntityID id = it->second;
-                        m_PhysicsSystem->m_World->RemoveEntity(id);
-                        m_PhysicsSystem->m_ParticleHandleToEntities[i].erase(it);
-                        LOG_INFO("Removing from list");
-                    }
-                }
-            }
-        }
-    private:
-        PhysicsSystem* m_PhysicsSystem;
-    };
+//             class DestructionListener : public b2DestructionListener
+//     {
+//     public:
+//         DestructionListener(PhysicsSystem* physicsSystem)
+//                 : m_PhysicsSystem(physicsSystem) { }
+// 
+//         void SayGoodbye(b2Joint*) {LOG_INFO("joint körs");};
+//         void SayGoodbye(b2Fixture*) {/*LOG_INFO("Fixture körs");*/};
+// 
+//         void SayGoodbye(b2ParticleSystem* particleSystem, int32 index) override
+//         {
+// //             LOG_INFO("Particle ded");
+// // 
+// // 
+// //             const b2ParticleHandle* handle = particleSystem->GetParticleHandleFromIndex(index);
+// //             for (int i = 0; i < m_PhysicsSystem->m_ParticleEmitters.ParticleSystem.size(); i++) {
+// //                 if(m_PhysicsSystem->m_ParticleEmitters.ParticleSystem[i] == particleSystem) {
+// //                     std::unordered_map<const b2ParticleHandle*, EntityID>::iterator it = m_PhysicsSystem->m_ParticleHandleToEntities[i].find(handle);
+// //                     if(it != m_PhysicsSystem->m_ParticleHandleToEntities[i].end()) {
+// //                         EntityID id = it->second;
+// //                         m_PhysicsSystem->m_World->RemoveEntity(id);
+// //                         m_PhysicsSystem->m_ParticleHandleToEntities[i].erase(it);
+// //                         LOG_INFO("Removing from list");
+// //                     }
+// //                 }
+// //             }
+//         }
+//     private:
+//         PhysicsSystem* m_PhysicsSystem;
+//     };
 
      class ParticleContactDisabler : public b2ContactFilter
     {
@@ -195,7 +198,7 @@ namespace dd
             PhysicsSystem* m_PhysicsSystem;
         };
 
-        DestructionListener* m_DestructionListener;
+        //DestructionListener* m_DestructionListener;
         ParticleContactDisabler* m_ParticleContactDisabler;
         ContactListener* m_ContactListener;
         };

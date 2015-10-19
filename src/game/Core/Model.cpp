@@ -29,6 +29,15 @@ dd::Model::Model(std::string fileName)
 		LOG_ERROR("Assimp error: %s", importer.GetErrorString());
 		return;
 	}
+	
+	auto m = scene->mRootNode->mTransformation;
+	m_Matrix = glm::mat4(
+		m.a1, m.a2, m.a3, m.a4,
+		m.b1, m.b2, m.b3, m.b4,
+		m.c1, m.c2, m.c3, m.c4,
+		m.d1, m.d2, m.d3, m.d4
+	);
+	m_Matrix = glm::transpose(m_Matrix);
 
 	auto meshes = scene->mMeshes;
 

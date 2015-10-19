@@ -27,6 +27,9 @@ void dd::Systems::SoundSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EStopSound, &SoundSystem::OnStopSound);
     EVENT_SUBSCRIBE_MEMBER(m_EMasterVolume, &SoundSystem::OnMasterVolume);
 
+	m_SFXMasterVolume = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Audio.SFXVolume", 1.f);
+	m_BGMMasterVolume = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Audio.BGMVolume", 1.f);
+
     //Todo: Move this
     {
         dd::Events::PlaySound e;

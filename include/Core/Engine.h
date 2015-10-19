@@ -32,6 +32,7 @@
 #include "World.h"
 #include "CTransform.h"
 #include "CTemplate.h"
+#include "Core/ConfigFile.h"
 #include "Core/EventBroker.h"
 #include "Rendering/CModel.h"
 #include "Rendering/CSprite.h"
@@ -72,6 +73,8 @@
 #include "Physics/CParticle.h"
 #include "Physics/CParticleEmitter.h"
 
+#include "Rendering/AnimationSystem.h"
+
 #include "Game/EGameStart.h"
 #include "Sound/EPlaySound.h"
 
@@ -88,18 +91,34 @@ class Engine
 
 public:
 	Engine(int argc, char* argv[]) {
+		auto config = ResourceManager::Load<ConfigFile>("Config.ini");
+
+		LOG_LEVEL = static_cast<_LOG_LEVEL>(config->GetValue<int>("Debug.LogLevel", 1));
+
 		m_EventBroker = std::make_shared<EventBroker>();
 
 		m_Renderer = std::make_shared<Renderer>();
-		m_Renderer->SetFullscreen(false);
-		//m_Renderer->SetResolution(Rectangle(0, 0, 1920, 1080));
-		m_Renderer->SetResolution(Rectangle(0, 0, 675, 1080));
+		m_Renderer->SetFullscreen(config->GetValue<bool>("Video.Fullscreen", false));
+		m_Renderer->SetResolution(Rectangle(
+			0, 
+			0, 
+			config->GetValue<int>("Video.Width", 675), 
+			config->GetValue<int>("Video.Height", 1080)
+		));
 		m_Renderer->Initialize();
 
 		m_FrameStack = new GUI::Frame(m_EventBroker.get());
 		m_FrameStack->Width = 675;
 		m_FrameStack->Height = 1080;
-		auto menu = new GUI::MainMenu(m_FrameStack, "MainMenu");
+
+		if (config->GetValue<bool>("Debug.SkipStory", false)) {
+			Events::GameStart e;
+			m_EventBroker->Publish(e);
+			auto hud = new GUI::HUD(m_FrameStack, "HUD");
+		}
+		else {
+			auto menu = new GUI::MainMenu(m_FrameStack, "MainMenu");
+		}
 
 		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
 
@@ -165,6 +184,9 @@ public:
 		m_World->SystemFactory.Register<Systems::PhysicsSystem>(
 				[this]() { return new Systems::PhysicsSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::PhysicsSystem>();
+		m_World->SystemFactory.Register<Systems::AnimationSystem>(
+				[this]() { return new Systems::AnimationSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::AnimationSystem>();
 		m_World->SystemFactory.Register<Systems::TravellingSystem>(
 			[this]() { return new Systems::TravellingSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::TravellingSystem>();
@@ -260,7 +282,8 @@ public:
 					glm::mat4 modelMatrix = glm::translate(glm::mat4(), absoluteTransform.Position)
 						* glm::toMat4(absoluteTransform.Orientation)
 						* glm::scale(absoluteTransform.Scale);
-					EnqueueModel(modelAsset, modelMatrix, modelComponent->Transparent, modelComponent->Color, modelComponent->ModelFile);
+					Components::Animation* animationComponent = m_World->GetComponent<Components::Animation>(entity);
+					EnqueueModel(modelAsset, modelMatrix, modelComponent, animationComponent);
 				}
 			}
 
@@ -316,7 +339,7 @@ public:
 	}
 
 	//TODO: Get this out of engine.h
-	void EnqueueModel(Model* model, glm::mat4 modelMatrix, float transparent, glm::vec4 color, std::string fileName)
+	void EnqueueModel(Model* model, glm::mat4 modelMatrix, const Components::Model* modelComponent, const Components::Animation* animationComponent)
 	{
 		for (auto texGroup : model->TextureGroups)
 		{
@@ -329,8 +352,17 @@ public:
 			job.ElementBuffer = model->ElementBuffer;
 			job.StartIndex = texGroup.StartIndex;
 			job.EndIndex = texGroup.EndIndex;
-			job.ModelMatrix = modelMatrix;
-			job.Color = color;
+			job.ModelMatrix = modelMatrix * model->m_Matrix;
+			job.Color = modelComponent->Color;
+			
+			if (model->m_Skeleton != nullptr) {
+				job.Skeleton = model->m_Skeleton;
+				if (animationComponent != nullptr) {
+					job.AnimationName = animationComponent->Name;
+					job.AnimationTime = animationComponent->Time;
+					job.NoRootMotion = animationComponent->NoRootMotion;
+				}
+			}
 
 			m_RendererQueue.Deferred.Add(job);
 		}

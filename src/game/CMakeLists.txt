@@ -50,6 +50,7 @@ source_group(Input FILES ${SOURCE_FILES_Input})
 
 file(GLOB SOURCE_FILES_Rendering
     "${INCLUDE_PATH}/Rendering/*.h"
+    "Rendering/*.cpp"
 )
 source_group(Rendering FILES ${SOURCE_FILES_Rendering})
 

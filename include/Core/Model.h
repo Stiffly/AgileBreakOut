@@ -86,6 +86,8 @@ public:
 	std::vector<unsigned int> m_Indices;
 	Skeleton* m_Skeleton = nullptr;
 
+	glm::mat4 m_Matrix;
+
 private:
 	std::vector<glm::ivec2> BoneIndices;
 	std::vector<glm::vec2> BoneWeights;
