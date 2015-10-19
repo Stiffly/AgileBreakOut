@@ -82,7 +82,7 @@ private:
 		}
 		else {
 			Events::PlaySound e;
-			e.FilePath = "Sounds/GUI/click.wav";
+			e.FilePath = "Sounds/GUI/click-n.wav";
 			EventBroker->Publish(e);
 		}
 

@@ -43,6 +43,13 @@ void dd::Systems::SoundSystem::Initialize()
 
 	m_SFXMasterVolume = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Audio.SFXVolume", 1.f);
 	m_BGMMasterVolume = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Audio.BGMVolume", 1.f);
+
+	//TODO: Move this
+	Events::PlaySound e;
+	e.FilePath = MENU_BGM;
+	e.IsAmbient = true;
+	e.Gain = 0.2f;
+	EventBroker->Publish(e);
 }
 
 void dd::Systems::SoundSystem::Update(double dt)
@@ -180,15 +187,20 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
 
 bool dd::Systems::SoundSystem::OnGameStart(const dd::Events::GameStart &event)
 {
+	{
+		dd::Events::StopSound e;
+		e.FilePath = MENU_BGM;
+		EventBroker->Publish(e);
+	}
     {
         dd::Events::PlaySound e;
-        e.FilePath = "Sounds/BGM/under-the-sea-instrumental.wav";
+        e.FilePath = GAME_BGM;
         e.IsAmbient = true;
         EventBroker->Publish(e);
     }
     {
         dd::Events::PlaySound e;
-        e.FilePath = "Sounds/BGM/water-flowing.wav";
+        e.FilePath = WATER_BGM;
         e.Gain = 0.3f;
         e.IsAmbient = true;
         EventBroker->Publish(e);
