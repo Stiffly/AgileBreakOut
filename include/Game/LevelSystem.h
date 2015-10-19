@@ -50,6 +50,7 @@
 #include "Game/EPowerUpTaken.h"
 
 #include "Game/EKrakenAppear.h"
+#include "Game/EBrickGenerating.h"
 
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
@@ -91,7 +92,7 @@ public:
 
     void CreateBasicLevel(int, int, glm::vec2, float);
     void CreateLevel(int);
-    void CreateBrick(int, int, glm::vec2, float, int, int, int, glm::vec4);
+    EntityID CreateBrick(int, int, glm::vec2, float, int, int, int, glm::vec4);
 	void BrickHit(EntityID, EntityID, int);
 
     void OnEntityRemoved(EntityID entity);
@@ -135,7 +136,7 @@ private:
     bool m_Initialized = false;
     bool m_Pause = false;
     int m_LooseBricks = 0;
-    int m_CurrentCluster = 0;
+    int m_CurrentCluster = 1;
     int m_CurrentLevel = 1;
     int m_MultiBalls = 0;
     int m_PowerUps = 0;
@@ -162,6 +163,9 @@ private:
     std::array<int, 42> m_Bricks;
 	std::array<glm::vec4, 42> m_Colors;
 
+	std::array<int, 14> m_BrickSet;
+	std::array<glm::vec4, 14> m_ColorSet;
+
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::ScoreEvent> m_EScoreEvent;
     dd::EventRelay<LevelSystem, dd::Events::MultiBall> m_EMultiBall;
@@ -171,6 +175,7 @@ private:
     dd::EventRelay<LevelSystem, dd::Events::StageCleared> m_EStageCleared;
     dd::EventRelay<LevelSystem, dd::Events::Pause> m_EPause;
     dd::EventRelay<LevelSystem, dd::Events::HitPad> m_EHitPad;
+	dd::EventRelay<LevelSystem, dd::Events::BrickGenerating> m_EBrickGenerating;
 
     bool OnContact(const dd::Events::Contact &event);
     bool OnScoreEvent(const dd::Events::ScoreEvent &event);
@@ -181,6 +186,8 @@ private:
     bool OnStageCleared(const dd::Events::StageCleared &event);
     bool OnPause(const dd::Events::Pause &event);
     bool OnHitPad(const dd::Events::HitPad &event);
+	bool OnBrickGenerating(const dd::Events::BrickGenerating &event);
+	void GetBrickSet(int Set);
 
     void GetNextLevel();
 	void SetBrokenModel(EntityID entity);

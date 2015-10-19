@@ -234,6 +234,11 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 		e.Time = 3;
 		e.TimeTakenToCoolDown = 10;
 		EventBroker->Publish(e);
+	} else if (val == GLFW_KEY_G) {
+		Events::BrickGenerating e;
+		e.Origin = glm::vec3(-5, 7, -10);
+		e.Set = 1;
+		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_L) {
 		Events::Lifebuoy e;
 		e.Transform = Transform();

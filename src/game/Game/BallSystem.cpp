@@ -31,7 +31,7 @@ void dd::Systems::BallSystem::Initialize()
     {
         auto ent = m_World->CreateEntity();
         std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
-        transform->Position = glm::vec3(0.f, 0.26f, -10.f);
+        transform->Position = glm::vec3(-20.f, 0.26f, -10.f);
         transform->Scale = glm::vec3(0.3f, 0.3f, 0.3f);
         transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
         auto model = m_World->AddComponent<Components::Model>(ent);

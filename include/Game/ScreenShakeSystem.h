@@ -5,6 +5,7 @@
 #ifndef DAYDREAM_SCREENSHAKESYSTEM_H
 #define DAYDREAM_SCREENSHAKESYSTEM_H
 
+#include <random>
 
 #include "Core/System.h"
 #include "Core/CTransform.h"
@@ -38,6 +39,8 @@ public:
     bool IsPaused() const { return m_Pause; }
     void SetPause(const bool& pause) { m_Pause = pause; }
 private:
+	std::mt19937 m_RandomGenerator;
+
     bool m_Pause;
 	bool m_ScreenShake;
 	int m_ShakeIntensity;

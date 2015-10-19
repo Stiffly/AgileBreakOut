@@ -7,6 +7,8 @@
 
 void dd::Systems::ScreenShakeSystem::Initialize()
 {
+	std::random_device rd;
+	m_RandomGenerator = std::mt19937(rd());
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &ScreenShakeSystem::OnPause);
     EVENT_SUBSCRIBE_MEMBER(m_EScreenShake, &ScreenShakeSystem::OnScreenShake);
 
@@ -55,13 +57,15 @@ void dd::Systems::ScreenShakeSystem::UpdateEntity(double dt, EntityID entity, En
 			else {
 				//std::cout << "Timer: " << m_ShakeTimer << " End: " << m_ShakeEndTime << std::endl;
 			}
-			m_Random.x = (rand() % m_ShakeIntensity);
-			m_Random.y = (rand() % m_ShakeIntensity);
+			std::uniform_real_distribution<float> dist(-m_ShakeIntensity, m_ShakeIntensity);
+			//float impulseStrength = dist(m_RandomGenerator);
+			m_Random.x = dist(m_RandomGenerator) / 20;
+			m_Random.y = dist(m_RandomGenerator) / 20;
 
-			float half = m_ShakeIntensity / 2;
+			//float half = m_ShakeIntensity / 2;
 
-			m_Random.x = (m_Random.x - half) / 20;
-			m_Random.y = (m_Random.y - half) / 20;
+			//m_Random.x = (m_Random.x - half) / 20;
+			//m_Random.y = (m_Random.y - half) / 20;
 
 			//std::cout << "X: " << randomX << " Y: " << randomY << std::endl;
 			transform->Position = glm::vec3(m_Random);
@@ -73,6 +77,10 @@ void dd::Systems::ScreenShakeSystem::UpdateEntity(double dt, EntityID entity, En
 
 bool dd::Systems::ScreenShakeSystem::OnPause(const dd::Events::Pause &event)
 {
+	if (event.Type != "ScreenShakeSystem" && event.Type != "All") {
+		return false;
+	}
+
     if (IsPaused()) {
         SetPause(false);
     } else {

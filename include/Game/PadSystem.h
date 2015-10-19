@@ -49,6 +49,8 @@
 #include "Game/EScreenShake.h"
 #include "Game/EActionButton.h"
 
+#include "Game/EBrickGenerating.h"
+
 
 namespace dd
 {

@@ -20,6 +20,7 @@ void dd::Systems::LevelSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &LevelSystem::OnStageCleared);
 	EVENT_SUBSCRIBE_MEMBER(m_EPause, &LevelSystem::OnPause);
 	EVENT_SUBSCRIBE_MEMBER(m_EHitPad, &LevelSystem::OnHitPad);
+	EVENT_SUBSCRIBE_MEMBER(m_EBrickGenerating, &LevelSystem::OnBrickGenerating);
 
 	//PointLightTest
 	{
@@ -389,11 +390,11 @@ void dd::Systems::LevelSystem::CreateLevel(int aboveBasicLevel)
     SetRestarting(false);
 }
 
-void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBetweenBricks, float spaceToEdge, int aboveLevel, int num, int typeInt, glm::vec4 colorVec)
+EntityID dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBetweenBricks, float spaceToEdge, int aboveLevel, int num, int typeInt, glm::vec4 colorVec)
 {
     if (typeInt == EmptyBrickSpace) {
         SetNumberOfBricks(NumberOfBricks() - 1);
-        return;
+        return NULL;
     }
     auto brick = m_World->CloneEntity(m_BrickTemplate);
     m_World->RemoveComponent<Components::Template>(brick);
@@ -436,12 +437,127 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
 		e.Health = 10;
 		EventBroker->Publish(e);
 		m_World->RemoveEntity(brick);
-		return;
+		return brick;
 	}
 
     cBrick->Score = 10 * num;
-    return;
+    return brick;
 }
+
+bool dd::Systems::LevelSystem::OnBrickGenerating(const dd::Events::BrickGenerating &event)
+{
+	GetBrickSet(event.Set);
+	LOG_DEBUG("This is happening.");
+
+	int rows = 2;
+	int lines = 7;
+	int getter = 0;
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < lines; j++) {
+			auto ent = CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), -4, 1, m_BrickSet[getter], m_ColorSet[getter]);
+			if (ent != NULL) {
+				auto transform = m_World->GetComponent<Components::Transform>(ent);
+				Events::Move e;
+				e.GoalPosition = transform->Position;
+				transform->Position = event.Origin;
+				e.Entity = ent;
+				e.Speed = 6;
+				e.Queue = false;
+				EventBroker->Publish(e);
+				m_LooseBricks++;
+				SetNumberOfBricks(NumberOfBricks() + 1);
+			}
+			getter++;
+		}
+	}
+	return true;
+}
+
+void dd::Systems::LevelSystem::GetBrickSet(int set)
+{
+	std::array<int, 14> level;
+	std::array<glm::vec4, 14> color;
+	// Level array indicates type of brick.
+	// 0 is empty space.
+	// 1 is standard brick.
+	// 2 is multiball brick.
+	// 3 is lifebuoy brick.
+	// 4 is sticky brick.
+	// 5 is ink blaster brick.
+	// 6 is kraken attack brick.
+
+	// color array determines the color of standard bricks.
+	// w is white.
+	// r is red.
+	// g is green.
+	// b is blue.
+	// y is yellow.
+	// c is cyan.
+	// m is magenta.
+	// d is dark.
+	// Feel free to make your own.
+	glm::vec4 w = glm::vec4(1, 1, 1, 0);
+	glm::vec4 r = glm::vec4(1, 0, 0, 0);
+	glm::vec4 g = glm::vec4(0, 1, 0, 0);
+	glm::vec4 b = glm::vec4(0, 0, 1, 0);
+	glm::vec4 y = glm::vec4(1, 1, 0, 0);
+	glm::vec4 c = glm::vec4(0, 1, 1, 0);
+	glm::vec4 m = glm::vec4(1, 0, 1, 0);
+	glm::vec4 d = glm::vec4(0, 0, 0, 0);
+
+	if (set == 1) {
+		level =
+		{1, 1, 1, 1, 1, 1, 1,
+		 1, 1, 1, 1, 1, 1, 1 };
+		color =
+		{r, r, r, r, r, r, r,
+		 r, r, r, r, r, r, r };
+	}
+	else if (set == 2) {
+		level =
+		{2, 2, 2, 2, 2, 2, 2,
+		 2, 2, 2, 2, 2, 2, 2 };
+		color =
+		{w, w, w, w, w, w, w,
+		 w, w, w, w, w, w, w };
+	}
+	else if (set == 3) {
+		level =
+		{0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0 };
+		color =
+		{w, w, w, w, w, w, w,
+		 w, w, w, w, w, w, w };
+	}
+	else if (set == 4) {
+		level =
+		{0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0 };
+		color =
+		{w, w, w, w, w, w, w,
+		 w, w, w, w, w, w, w };
+	}
+	else if (set == 5) {
+		level =
+		{0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0 };
+		color =
+		{w, w, w, w, w, w, w,
+		 w, w, w, w, w, w, w };
+	}
+	else if (set == 6) {
+		level =
+		{0, 0, 0, 1, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0 };
+		color =
+		{w, w, w, w, w, w, w,
+		 w, w, w, w, w, w, w };
+	}
+
+	std::copy(std::begin(level), std::end(level), std::begin(m_BrickSet));
+	std::copy(std::begin(color), std::end(color), std::begin(m_ColorSet));
+}
+
 
 void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
 {
@@ -710,7 +826,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
 
 	// 100 is KRAKEN!
 
-	// wolor array determines the color of standard bricks.
+	// color array determines the color of standard bricks.
 	// w is white.
 	// r is red.
 	// g is green.
@@ -746,12 +862,12 @@ void dd::Systems::LevelSystem::GetNextLevel()
     if (m_CurrentCluster == 0) {
         if (m_CurrentLevel == 1) {
             level =
-                    {1, 0, 0, 0, 0, 0, 0,
+                    {0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0};
+                     0, 0, 0, 0, 0, 0, 1};
 			color = 
 					{w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w,
@@ -761,9 +877,9 @@ void dd::Systems::LevelSystem::GetNextLevel()
 					 w, w, w, w, w, w, w};
         } else if (m_CurrentLevel == 2) {
             level =
-                    {0, 0, 0, 0, 0, 0, 1,
+                    {0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 100, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0};
@@ -808,7 +924,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
             level =
                     {0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 100, 0, 0, 0,
+                     0, 0, 0, 1, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0};
