@@ -33,8 +33,10 @@ namespace Components
 
 struct Particle : public Component
 {
-    float Radius = 0.5f;
-    float LifeTime = 5.0f;
+	EntityID ParticleSystem;
+	glm::vec3 Scale = glm::vec3(1.f);
+	double TimeLived = 0;
+	double LifeTime = 5;
 
 	ParticleFlags::Type Flags = static_cast<ParticleFlags::Type>(
 			ParticleFlags::Water

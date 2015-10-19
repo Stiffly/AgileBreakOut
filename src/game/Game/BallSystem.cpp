@@ -307,7 +307,7 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 			} else if (ballTransform->Position.x <= -2.7f) {
 				particleEvent.Position = glm::vec3(-2.7f, -3.f, -3.f);
 			}
-			particleEvent.Radius = 1.f;
+			particleEvent.ScaleValues.push_back(glm::vec3(1.f));
 			particleEvent.Color = glm::vec4(1.f);
 			particleEvent.Speed = 0;
 
