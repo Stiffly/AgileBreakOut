@@ -39,24 +39,10 @@ void dd::Systems::SoundSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EPlaySFX, &SoundSystem::OnPlaySound);
     EVENT_SUBSCRIBE_MEMBER(m_EStopSound, &SoundSystem::OnStopSound);
     EVENT_SUBSCRIBE_MEMBER(m_EMasterVolume, &SoundSystem::OnMasterVolume);
+	EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &SoundSystem::OnGameStart);
 
 	m_SFXMasterVolume = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Audio.SFXVolume", 1.f);
 	m_BGMMasterVolume = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Audio.BGMVolume", 1.f);
-
-//     //Todo: Move this
-//     {
-//         dd::Events::PlaySound e;
-//         e.FilePath = "Sounds/BGM/under-the-sea-instrumental.wav";
-//         e.IsAmbient = true;
-//         EventBroker->Publish(e);
-//     }
-//     {
-//         dd::Events::PlaySound e;
-//         e.FilePath = "Sounds/BGM/water-flowing.wav";
-//         e.Gain = 0.3f;
-//         e.IsAmbient = true;
-//         EventBroker->Publish(e);
-//     }
 }
 
 void dd::Systems::SoundSystem::Update(double dt)
@@ -182,13 +168,32 @@ bool dd::Systems::SoundSystem::OnContact(const dd::Events::Contact &event)
     //Send play-sound event
 
     {
-//         dd::Events::PlaySound e;
-//         e.FilePath = collisionSound->FilePath;
-//         e.IsAmbient = false;
-//         EventBroker->Publish(e);
+        dd::Events::PlaySound e;
+        e.FilePath = collisionSound->FilePath;
+        e.IsAmbient = false;
+		e.Gain = 0.8f;
+        EventBroker->Publish(e);
     }
 
     return true;
+}
+
+bool dd::Systems::SoundSystem::OnGameStart(const dd::Events::GameStart &event)
+{
+    {
+        dd::Events::PlaySound e;
+        e.FilePath = "Sounds/BGM/under-the-sea-instrumental.wav";
+        e.IsAmbient = true;
+        EventBroker->Publish(e);
+    }
+    {
+        dd::Events::PlaySound e;
+        e.FilePath = "Sounds/BGM/water-flowing.wav";
+        e.Gain = 0.3f;
+        e.IsAmbient = true;
+        EventBroker->Publish(e);
+    }
+	return true;
 }
 
 

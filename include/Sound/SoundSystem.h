@@ -19,6 +19,7 @@
 #include "Sound/EMasterVolume.h"
 #include "Physics/ECreateParticleSequence.h"
 #include "Physics/EContact.h"
+#include "Game/EGameStart.h"
 
 
 namespace dd
@@ -54,6 +55,9 @@ private:
     bool OnStopSound(const dd::Events::StopSound &event);
     dd::EventRelay<SoundSystem, dd::Events::MasterVolume> m_EMasterVolume;
     bool OnMasterVolume(const dd::Events::MasterVolume &event);
+	dd::EventRelay<SoundSystem, dd::Events::GameStart> m_EGameStart;
+	bool OnGameStart(const dd::Events::GameStart &event);
+	
 
     ALuint CreateSource();
 };
