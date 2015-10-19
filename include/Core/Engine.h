@@ -252,7 +252,7 @@ public:
 			m_World->CommitEntity(background);
 		}
 
-//			auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
+		//			auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
 		//Water test
 		{
 			auto t_waterBody = m_World->CreateEntity();
@@ -264,6 +264,9 @@ public:
 			auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
 			m_World->CommitEntity(t_waterBody);
 		}
+
+
+		
 
 		//ParticleTest
 
