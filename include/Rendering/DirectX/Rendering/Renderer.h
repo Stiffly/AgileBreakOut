@@ -56,14 +56,23 @@ private:
 		Matrix ViewMatrix;
 		Matrix ProjectionMatrix;
 		Matrix InverseTransposeViewModel;
-		Vector3 LightPosition;
+		Vector4 Color;
+		Vector4 LightPositions[10];
+		Vector4 LightColors[10];
+		float LightRadii[10];
+		unsigned int NumLights;
+		float paddingBitch;
 	} constantBufferStruct;
 
 	ShaderProgram* shaderProgram = nullptr;
 	ID3D11Buffer* constantBuffer = nullptr;
 
+	Model* m_UnitQuad = nullptr;
+	Texture* m_WhiteSphereTexture = nullptr;
+
 	static DirectX::SimpleMath::Matrix GLMtoDXModelView(glm::mat4 m);
 	static DirectX::SimpleMath::Matrix GLMtoDXProjection(glm::mat4 m);
+	static bool DepthSort(const std::shared_ptr<RenderJob> &i, const std::shared_ptr<RenderJob> &j) { return (i->Depth < j->Depth); }
 };
 
 }

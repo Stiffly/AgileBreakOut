@@ -5,7 +5,8 @@ cbuffer ConstantBuffer
 	float4x4 ViewMatrix;
 	float4x4 ProjectionMatrix;
 	float4x4 InverseTransposeViewModel;
-	float3 LightPosition;
+	float4 Color;
+	float4 LightPositions[2];
 }
 
 struct VIn
@@ -50,8 +51,8 @@ VOut main(VIn input)
 
     output.PixelPosition = mul(MVP, input.Position);
 	//TODO: Make sure that boneTransform works here.
-	//output.Position = (V * M * boneTransform * vec4(Position, 1.0)).xyz;
-	//output.Normal = (inverse(transpose(V * M)) * boneTransform * vec4(Normal, 0.0)).xyz;
+	output.Position = mul(ModelMatrix * ViewMatrix, float4(input.Position.xyz, 1.0f));
+	output.Normal = mul(InverseTransposeViewModel, float4(input.Normal.xyz, 0.0f));
 	output.Tangent = input.Tangent;
 	output.BiTangent = input.BiTangent;
 	output.TextureCoord = input.TextureCoord;

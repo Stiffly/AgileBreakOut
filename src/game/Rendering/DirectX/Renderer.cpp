@@ -99,6 +99,21 @@ void dd::Renderer::Initialize()
 	m_Device->CreateRasterizerState(&rd, &rasterState);
 	m_DeviceContext->RSSetState(rasterState);
 
+	D3D11_BLEND_DESC blend = { 0 };
+	for (int i = 0; i < 1; i++) {
+		blend.RenderTarget[i].BlendEnable = true;
+		blend.RenderTarget[i].BlendOp = D3D11_BLEND_OP_ADD;
+		blend.RenderTarget[i].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		blend.RenderTarget[i].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		blend.RenderTarget[i].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		blend.RenderTarget[i].SrcBlendAlpha = D3D11_BLEND_ONE;
+		blend.RenderTarget[i].DestBlendAlpha = D3D11_BLEND_ZERO;
+		blend.RenderTarget[i].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	}
+	ID3D11BlendState* blendState;
+	m_Device->CreateBlendState(&blend, &blendState);
+	m_DeviceContext->OMSetBlendState(blendState, nullptr, 0xffffffff);
+
 	// Set the viewport
 	D3D11_VIEWPORT viewport = { 0 };
 	viewport.TopLeftX = 0;
@@ -131,7 +146,7 @@ void dd::Renderer::Initialize()
 	// Create constant buffer
 	// TODO: Put this in shader
 	D3D11_BUFFER_DESC bd = { };
-	bd.ByteWidth = 64*6;
+	bd.ByteWidth = sizeof(ConstantBufferStruct);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	m_Device->CreateBuffer(&bd, NULL, &constantBuffer);
 	m_DeviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
@@ -152,11 +167,16 @@ void dd::Renderer::Initialize()
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	m_Device->CreateSamplerState(&samplerDesc, &m_SamplerState);
+	
+	m_UnitQuad = ResourceManager::Load<Model>("Models/Core/UnitQuad.obj");
+	m_WhiteSphereTexture = ResourceManager::Load<Texture>("Textures/Test/Water.png");
 }
 
 void dd::Renderer::Draw(RenderQueueCollection& rq)
 {
 	using namespace DirectX::SimpleMath;
+
+	rq.Forward.Jobs.sort(dd::Renderer::DepthSort);
 
 	float color[] = { 0.f, 0.f, 0.f, 1.f };
 	m_DeviceContext->ClearRenderTargetView(m_BackBuffer, color);
@@ -165,10 +185,31 @@ void dd::Renderer::Draw(RenderQueueCollection& rq)
 	Matrix proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(m_Camera->m_FOV, m_Camera->m_AspectRatio, m_Camera->m_NearClip, m_Camera->m_FarClip); // Right-handed
 	Matrix view = Matrix::CreateTranslation(Vector3(m_Camera->Position().x, m_Camera->Position().y, -m_Camera->Position().z));
 	
+	int i = 0;
+	constantBufferStruct.NumLights = 0;
+	for (auto &job : rq.Lights) {
+		auto pointLightJob = std::dynamic_pointer_cast<PointLightJob>(job);
+		if (pointLightJob) {
+			glm::vec3 p = pointLightJob->Position;
+			constantBufferStruct.LightPositions[i] = Vector4(p.r, p.g, p.b, 0.f);
+			glm::vec3 c = pointLightJob->DiffuseColor;
+			constantBufferStruct.LightColors[i] = Vector4(c.r, c.g, c.b, 1.f);
+			constantBufferStruct.LightRadii[i] = pointLightJob->Radius;
+			constantBufferStruct.NumLights++;
+			i++;
+		}
+	}
+	
+
+	//constantBufferStruct.LightPositions[0] = Vector4(2.0f, 0.0f, 5.0f, 0.0f);
+	//constantBufferStruct.LightPositions[1] = Vector4(-2.0f, 0.0f, 5.0f, 0.0f);
+
 	for (auto &job : rq.Deferred) {
 		auto modelJob = std::dynamic_pointer_cast<ModelJob>(job);
 		if (modelJob) {
 			constantBufferStruct.MVP = Matrix(glm::value_ptr(modelJob->ModelMatrix)) * view * proj;
+			constantBufferStruct.InverseTransposeViewModel = (Matrix(glm::value_ptr(modelJob->ModelMatrix)) * view).Transpose().Invert();
+			constantBufferStruct.Color = Vector4(modelJob->Color.r, modelJob->Color.g, modelJob->Color.b, modelJob->Color.a);
 
 			m_DeviceContext->UpdateSubresource(constantBuffer, 0, 0, &constantBufferStruct, 0, 0);
 			m_DeviceContext->PSSetSamplers(0, 1, &m_SamplerState);
@@ -184,6 +225,54 @@ void dd::Renderer::Draw(RenderQueueCollection& rq)
 			}
 			//m_DeviceContext->Draw(modelJob->EndIndex - modelJob->StartIndex + 1, modelJob->StartIndex);
 			m_DeviceContext->DrawIndexed(modelJob->EndIndex - modelJob->StartIndex + 1, modelJob->StartIndex, 0);
+
+			continue;
+		}
+	}
+
+	for (auto &job : rq.Forward) {
+		auto spriteJob = std::dynamic_pointer_cast<SpriteJob>(job);
+		if (spriteJob) {
+			constantBufferStruct.MVP = Matrix(glm::value_ptr(spriteJob->ModelMatrix)) * view * proj;
+			constantBufferStruct.InverseTransposeViewModel = (Matrix(glm::value_ptr(spriteJob->ModelMatrix)) * view).Transpose().Invert();
+			constantBufferStruct.Color = Vector4(glm::value_ptr(spriteJob->Color));
+			
+			m_DeviceContext->UpdateSubresource(constantBuffer, 0, 0, &constantBufferStruct, 0, 0);
+			m_DeviceContext->PSSetSamplers(0, 1, &m_SamplerState);
+
+			m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			UINT stride = sizeof(Model::Vertex);
+			UINT offset = 0;
+			m_DeviceContext->IASetVertexBuffers(0, 1, &m_UnitQuad->VertexBuffer, &stride, &offset);
+			m_DeviceContext->IASetIndexBuffer(m_UnitQuad->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+			if (spriteJob->DiffuseTexture != nullptr) {
+				m_DeviceContext->PSSetShaderResources(0, 1, &spriteJob->DiffuseTexture->m_ShaderResourceView);
+			}
+			//m_DeviceContext->Draw(modelJob->EndIndex - modelJob->StartIndex + 1, modelJob->StartIndex);
+			m_DeviceContext->DrawIndexed(m_UnitQuad->m_Indices.size(), 0, 0);
+
+			continue;
+		}
+
+		auto waterJob = std::dynamic_pointer_cast<WaterParticleJob>(job);
+		if (waterJob) {
+			constantBufferStruct.MVP = Matrix(glm::value_ptr(waterJob->ModelMatrix)) * view * proj;
+			constantBufferStruct.InverseTransposeViewModel = (Matrix(glm::value_ptr(waterJob->ModelMatrix)) * view).Transpose().Invert();
+			constantBufferStruct.Color = Vector4(glm::value_ptr(waterJob->Color));
+
+			m_DeviceContext->UpdateSubresource(constantBuffer, 0, 0, &constantBufferStruct, 0, 0);
+			m_DeviceContext->PSSetSamplers(0, 1, &m_SamplerState);
+
+			m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			UINT stride = sizeof(Model::Vertex);
+			UINT offset = 0;
+			m_DeviceContext->IASetVertexBuffers(0, 1, &m_UnitQuad->VertexBuffer, &stride, &offset);
+			m_DeviceContext->IASetIndexBuffer(m_UnitQuad->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+			m_DeviceContext->PSSetShaderResources(0, 1, &m_WhiteSphereTexture->m_ShaderResourceView);
+			//m_DeviceContext->Draw(modelJob->EndIndex - modelJob->StartIndex + 1, modelJob->StartIndex);
+			m_DeviceContext->DrawIndexed(m_UnitQuad->m_Indices.size(), 0, 0);
 
 			continue;
 		}

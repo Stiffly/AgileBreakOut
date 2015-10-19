@@ -225,7 +225,7 @@ public:
 			transform->Sticky = false;
 			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
 			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
-			model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 0.3f);
+			model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.f);
 			m_World->CommitEntity(t_halfPipe);
 		}
 		{
@@ -236,7 +236,7 @@ public:
 			transform->Sticky = false;
 			auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
 			model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
-			model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 0.3f);
+			model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.f);
 			m_World->CommitEntity(t_halfPipe);
 		}
 

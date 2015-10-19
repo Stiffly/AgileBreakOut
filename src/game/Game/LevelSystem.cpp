@@ -549,14 +549,14 @@ void dd::Systems::LevelSystem::GetNextLevel()
 	// m is magenta.
 	// d is dark.
 	// Feel free to make your own.
-	glm::vec4 w = glm::vec4(1, 1, 1, 0);
-	glm::vec4 r = glm::vec4(1, 0, 0, 0);
-	glm::vec4 g = glm::vec4(0, 1, 0, 0);
-	glm::vec4 b = glm::vec4(0, 0, 1, 0);
-	glm::vec4 y = glm::vec4(1, 1, 0, 0);
-	glm::vec4 c = glm::vec4(0, 1, 1, 0);
-	glm::vec4 m = glm::vec4(1, 0, 1, 0);
-	glm::vec4 d = glm::vec4(0, 0, 0, 0);
+	glm::vec4 w = glm::vec4(1, 1, 1, 1);
+	glm::vec4 r = glm::vec4(1, 0, 0, 1);
+	glm::vec4 g = glm::vec4(0, 1, 0, 1);
+	glm::vec4 b = glm::vec4(0, 0, 1, 1);
+	glm::vec4 y = glm::vec4(1, 1, 0, 1);
+	glm::vec4 c = glm::vec4(0, 1, 1, 1);
+	glm::vec4 m = glm::vec4(1, 0, 1, 1);
+	glm::vec4 d = glm::vec4(0, 0, 0, 1);
 
 	//glm::vec4 p4 = glm::vec4(asd.f / 255.f, asd.f / 255.f, sad.f / 255.f, 1.f);
 	glm::vec4 br = glm::vec4(143.f / 255.f, 98.f / 255.f, 0.f / 255.f, 1.f);
