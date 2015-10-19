@@ -19,6 +19,7 @@ void dd::Systems::LevelSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, &LevelSystem::OnPowerUpTaken);
 	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &LevelSystem::OnStageCleared);
 	EVENT_SUBSCRIBE_MEMBER(m_EPause, &LevelSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &LevelSystem::OnResume);
 	EVENT_SUBSCRIBE_MEMBER(m_EHitPad, &LevelSystem::OnHitPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EBrickGenerating, &LevelSystem::OnBrickGenerating);
 
@@ -338,16 +339,22 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 
 bool dd::Systems::LevelSystem::OnPause(const dd::Events::Pause &event)
 {
-    if (event.Type != "LevelSystem" && event.Type != "All") {
+    /*if (event.Type != "LevelSystem" && event.Type != "All") {
         return false;
-    }
+    }*/
 
-    if (IsPaused()) {
-        SetPause(false);
-    } else {
-        SetPause(true);
-    }
+    m_Pause = true;
+
     return true;
+}
+
+bool dd::Systems::LevelSystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "LevelSystem" && event.Type != "All") {
+	return false;
+	}*/
+	m_Pause = false;
+	return true;
 }
 
 void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 spacesBetweenBricks, float spaceToEdge)

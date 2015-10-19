@@ -21,7 +21,8 @@ void dd::Systems::BallSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &BallSystem::OnStickyPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EInkBlaster, &BallSystem::OnInkBlaster);
 	EVENT_SUBSCRIBE_MEMBER(m_EInkBlasterOver, &BallSystem::OnInkBlasterOver);
-    EVENT_SUBSCRIBE_MEMBER(m_EPause, &BallSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EPause, &BallSystem::OnPause); 
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &BallSystem::OnResume);
     EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &BallSystem::OnActionButton);
 	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &BallSystem::OnStageCleared);
 	EVENT_SUBSCRIBE_MEMBER(m_EArrivedAtNewStage, &BallSystem::OnArrivedToNewStage);
@@ -86,8 +87,13 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 {
     //TODO: When the ball collides with 2 bricks on the same frame it is reflected and then reflected again, make it reflect only once like a list or something?
 
+	if (IsPaused()) {
+		return;
+	}
+
     auto ballComponent = m_World->GetComponent<Components::Ball>(entity);
-    if (IsPaused()) {
+	
+    /*if (IsPaused()) {
         if (ballComponent != nullptr) {
             auto transform = m_World->GetComponent<Components::Transform>(entity);
 
@@ -107,7 +113,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 ballComponent->Paused = false;
             }
         }
-    }
+    }*/
 
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
@@ -211,16 +217,24 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 
 bool dd::Systems::BallSystem::OnPause(const dd::Events::Pause &event)
 {
-    if (event.Type != "BallSystem" && event.Type != "All") {
+    /*if (event.Type != "BallSystem" && event.Type != "All") {
         return false;
-    }
+    }*/
 
-    if (IsPaused()) {
-        SetPause(false);
-    } else {
-        SetPause(true);
-    }
+    m_Pause = true;
+
     return true;
+}
+
+bool dd::Systems::BallSystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "BallSystem" && event.Type != "All") {
+		return false;
+	}*/
+
+	m_Pause = false;
+
+	return true;
 }
 
 void dd::Systems::BallSystem::OnEntityCommit(EntityID entity)

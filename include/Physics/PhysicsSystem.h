@@ -32,6 +32,7 @@
 
 #include "CRectangleShape.h"
 #include "Game/EPause.h"
+#include "Game/EResume.h"
 #include "Game/CPad.h"
 #include "Game/CBrick.h"
 #include "Game/CBall.h"
@@ -114,6 +115,8 @@ namespace dd
             bool SetImpulse(const Events::SetImpulse &event);
             dd::EventRelay<PhysicsSystem, dd::Events::Pause> m_EPause;
             bool OnPause(const dd::Events::Pause &event);
+			dd::EventRelay<PhysicsSystem, dd::Events::Resume> m_EResume;
+			bool OnResume(const dd::Events::Resume &event);
 			dd::EventRelay<PhysicsSystem, dd::Events::Contact> m_EContact;
 			bool OnContact(const dd::Events::Contact &event);
 			EventRelay<PhysicsSystem, Events::CreateParticleSequence> m_ECreateParticleSequence;

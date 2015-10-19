@@ -13,6 +13,7 @@
 #include "Core/EventBroker.h"
 #include "Core/World.h"
 #include "Game/EPause.h"
+#include "Game/EResume.h"
 #include "Game/EScreenShake.h"
 //#include "Core/Camera.h" Camera Component
 
@@ -53,8 +54,10 @@ private:
 	glm::vec3 m_Random;
 
     dd::EventRelay<ScreenShakeSystem, dd::Events::Pause> m_EPause;
+	dd::EventRelay<ScreenShakeSystem, dd::Events::Resume> m_EResume;
 	dd::EventRelay<ScreenShakeSystem, dd::Events::ScreenShake> m_EScreenShake;
     bool OnPause(const dd::Events::Pause &event);
+	bool OnResume(const dd::Events::Resume &event);
     bool OnScreenShake(const dd::Events::ScreenShake &event);
 
 

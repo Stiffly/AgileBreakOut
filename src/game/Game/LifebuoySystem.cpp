@@ -11,6 +11,7 @@ void dd::Systems::LifebuoySystem::Initialize()
 {
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &LifebuoySystem::OnContact);
 	EVENT_SUBSCRIBE_MEMBER(m_EPause, &LifebuoySystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &LifebuoySystem::OnResume);
 	EVENT_SUBSCRIBE_MEMBER(m_ELifebuoy, &LifebuoySystem::OnLifebuoy);
 	EVENT_SUBSCRIBE_MEMBER(m_ELifebuoyHit, &LifebuoySystem::OnLifebuoyHit);
 
@@ -88,18 +89,23 @@ void dd::Systems::LifebuoySystem::UpdateEntity(double dt, EntityID entity, Entit
 
 bool dd::Systems::LifebuoySystem::OnPause(const dd::Events::Pause &event)
 {
-    if (event.Type != "LifebuoySystem" && event.Type != "All") {
+    /*if (event.Type != "LifebuoySystem" && event.Type != "All") {
         return false;
-    }
+    }*/
 
-    if (IsPaused()) {
-        SetPause(false);
-    } else {
-        SetPause(true);
-    }
+    m_Pause = true;
+
     return true;
 }
 
+bool dd::Systems::LifebuoySystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "LifebuoySystem" && event.Type != "All") {
+	return false;
+	}*/
+	m_Pause = false;
+	return true;
+}
 
 bool dd::Systems::LifebuoySystem::OnContact(const dd::Events::Contact &event)
 {

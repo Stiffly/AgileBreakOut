@@ -45,6 +45,7 @@
 #include "Game/EPowerUpTaken.h"
 #include "Game/EStageCleared.h"
 #include "Game/EPause.h"
+#include "Game/EResume.h"
 #include "Game/EHitLag.h"
 #include "Game/EScreenShake.h"
 #include "Game/EActionButton.h"
@@ -118,6 +119,7 @@ private:
 	dd::EventRelay<PadSystem, dd::Events::ResetAll> m_EResetAll;
 	dd::EventRelay<PadSystem, dd::Events::RaiseWater> m_ERaiseWater;
     dd::EventRelay<PadSystem, dd::Events::Pause> m_EPause;
+	dd::EventRelay<PadSystem, dd::Events::Resume> m_EResume;
 	dd::EventRelay<PadSystem, dd::Events::KrakenAttack> m_EKrakenAttack;
 	dd::EventRelay<PadSystem, dd::Events::StickyPad> m_EStickyPad;
 	dd::EventRelay<PadSystem, dd::Events::StickyAttachedToPad> m_EStickyAttachedToPad;
@@ -132,6 +134,7 @@ private:
 	bool OnResetAll(const dd::Events::ResetAll &event);
 	bool OnRaiseWater(const dd::Events::RaiseWater &event);
     bool OnPause(const dd::Events::Pause &event);
+	bool OnResume(const dd::Events::Resume &event);
 	bool OnKrakenAttack(const dd::Events::KrakenAttack &event);
 	bool OnStickyPad(const dd::Events::StickyPad &event);
 	bool OnStickyAttachedToPad(const dd::Events::StickyAttachedToPad &event);

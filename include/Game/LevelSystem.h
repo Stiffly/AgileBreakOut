@@ -44,6 +44,7 @@
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
 #include "Game/EPause.h"
+#include "Game/EResume.h"
 #include "Game/EGameOver.h"
 #include "Game/EClusterClear.h"
 #include "Game/ECreatePowerUp.h"
@@ -174,6 +175,7 @@ private:
     dd::EventRelay<LevelSystem, dd::Events::PowerUpTaken> m_EPowerUpTaken;
     dd::EventRelay<LevelSystem, dd::Events::StageCleared> m_EStageCleared;
     dd::EventRelay<LevelSystem, dd::Events::Pause> m_EPause;
+	dd::EventRelay<LevelSystem, dd::Events::Resume> m_EResume;
     dd::EventRelay<LevelSystem, dd::Events::HitPad> m_EHitPad;
 	dd::EventRelay<LevelSystem, dd::Events::BrickGenerating> m_EBrickGenerating;
 
@@ -185,6 +187,7 @@ private:
     bool OnPowerUpTaken(const dd::Events::PowerUpTaken &event);
     bool OnStageCleared(const dd::Events::StageCleared &event);
     bool OnPause(const dd::Events::Pause &event);
+	bool OnResume(const dd::Events::Resume &event);
     bool OnHitPad(const dd::Events::HitPad &event);
 	bool OnBrickGenerating(const dd::Events::BrickGenerating &event);
 	void GetBrickSet(int Set);

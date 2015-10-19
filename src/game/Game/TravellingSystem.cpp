@@ -8,6 +8,7 @@
 void dd::Systems::TravellingSystem::Initialize()
 {
 	EVENT_SUBSCRIBE_MEMBER(m_EPause, &TravellingSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &TravellingSystem::OnResume);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &TravellingSystem::OnStageCleared);
 }
 
@@ -30,6 +31,10 @@ void dd::Systems::TravellingSystem::Update(double dt)
 
 void dd::Systems::TravellingSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
+	if (m_Pause) {
+		return;
+	}
+
 	auto templateCheck = m_World->GetComponent<Components::Template>(entity);
 	if (templateCheck != nullptr){ return; }
 
@@ -75,16 +80,19 @@ void dd::Systems::TravellingSystem::UpdateEntity(double dt, EntityID entity, Ent
 
 bool dd::Systems::TravellingSystem::OnPause(const dd::Events::Pause &event)
 {
-	if (event.Type != "TravellingSystem" && event.Type != "All") {
+	/*if (event.Type != "TravellingSystem" && event.Type != "All") {
 		return false;
-	}
-
-    if (IsPaused()) {
-        SetPause(false);
-    } else {
-        SetPause(true);
-    }
+	}*/
+	m_Pause = true;
     return true;
+}
+bool dd::Systems::TravellingSystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "TravellingSystem" && event.Type != "All") {
+	return false;
+	}*/
+	m_Pause = false;
+	return true;
 }
 
 bool dd::Systems::TravellingSystem::OnStageCleared(const dd::Events::StageCleared &event)

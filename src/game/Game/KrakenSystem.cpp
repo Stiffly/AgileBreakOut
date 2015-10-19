@@ -10,6 +10,7 @@ void dd::Systems::KrakenSystem::Initialize()
 	std::random_device rd;
 	m_RandomGenerator = std::mt19937(rd());
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &KrakenSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &KrakenSystem::OnResume);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAppear, &KrakenSystem::OnKrakenAppear);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttack, &KrakenSystem::OnKrakenAttack);
 	EVENT_SUBSCRIBE_MEMBER(m_EBrickGenerating, &KrakenSystem::OnBrickGenerating);
@@ -51,7 +52,9 @@ void dd::Systems::KrakenSystem::InitializeObjects()
 
 void dd::Systems::KrakenSystem::Update(double dt)
 {
-
+	if (m_Pause) {
+		return;
+	}
 }
 
 void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
@@ -105,16 +108,22 @@ void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityI
 
 bool dd::Systems::KrakenSystem::OnPause(const dd::Events::Pause &event)
 {
-	if (event.Type != "KrakenSystem" && event.Type != "All") {
+	/*if (event.Type != "KrakenSystem" && event.Type != "All") {
 		return false;
-	}
+	}*/
 
-    if (IsPaused()) {
-        SetPause(false);
-    } else {
-        SetPause(true);
-    }
+    m_Pause = true;
+
     return true;
+}
+
+bool dd::Systems::KrakenSystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "KrakenSystem" && event.Type != "All") {
+	return false;
+	}*/
+	m_Pause = false;
+	return true;
 }
 
 bool dd::Systems::KrakenSystem::OnKrakenAppear(const dd::Events::KrakenAppear &event)

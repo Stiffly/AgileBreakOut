@@ -18,6 +18,7 @@
 #include "Physics/CPhysics.h"
 #include "Physics/EContact.h"
 #include "Game/EPause.h"
+#include "Game/EResume.h"
 #include "Game/EKrakenAppear.h"
 #include "Game/EKrakenAttack.h"
 #include "Game/EBrickGenerating.h"
@@ -64,11 +65,13 @@ private:
 	std::array<int, 14> m_Colors;
 
     dd::EventRelay<KrakenSystem, dd::Events::Pause> m_EPause;
+	dd::EventRelay<KrakenSystem, dd::Events::Resume> m_EResume;
 	dd::EventRelay<KrakenSystem, dd::Events::Contact> m_EContact;
 	dd::EventRelay<KrakenSystem, dd::Events::KrakenAppear> m_EKrakenAppear;
 	dd::EventRelay<KrakenSystem, dd::Events::KrakenAttack> m_EKrakenAttack;
 	dd::EventRelay<KrakenSystem, dd::Events::BrickGenerating> m_EBrickGenerating;
     bool OnPause(const dd::Events::Pause &event);
+	bool OnResume(const dd::Events::Resume &event);
 	bool OnContact(const dd::Events::Contact &event);
 	bool OnKrakenAppear(const dd::Events::KrakenAppear &event);
 	bool OnKrakenAttack(const dd::Events::KrakenAttack &event);

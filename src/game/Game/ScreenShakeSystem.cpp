@@ -10,6 +10,7 @@ void dd::Systems::ScreenShakeSystem::Initialize()
 	std::random_device rd;
 	m_RandomGenerator = std::mt19937(rd());
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &ScreenShakeSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &ScreenShakeSystem::OnResume);
     EVENT_SUBSCRIBE_MEMBER(m_EScreenShake, &ScreenShakeSystem::OnScreenShake);
 
 	InitializeObjects();
@@ -77,16 +78,20 @@ void dd::Systems::ScreenShakeSystem::UpdateEntity(double dt, EntityID entity, En
 
 bool dd::Systems::ScreenShakeSystem::OnPause(const dd::Events::Pause &event)
 {
-	if (event.Type != "ScreenShakeSystem" && event.Type != "All") {
+	/*if (event.Type != "ScreenShakeSystem" && event.Type != "All") {
 		return false;
-	}
+	}*/
 
-    if (IsPaused()) {
-        SetPause(false);
-    } else {
-        SetPause(true);
-    }
+    m_Pause = true;
     return true;
+}
+bool dd::Systems::ScreenShakeSystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "ScreenShakeSystem" && event.Type != "All") {
+	return false;
+	}*/
+	m_Pause = false;
+	return true;
 }
 
 bool dd::Systems::ScreenShakeSystem::OnScreenShake(const dd::Events::ScreenShake &event)

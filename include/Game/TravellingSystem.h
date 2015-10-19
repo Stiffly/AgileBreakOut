@@ -13,6 +13,7 @@
 #include "Core/World.h"
 #include "Transform/EMove.h"
 #include "Game/EPause.h"
+#include "Game/EResume.h"
 #include "Game/EArrivedAtNewStage.h"
 #include "Game/EStageCleared.h"
 #include "Game/CTravels.h"
@@ -47,10 +48,12 @@ private:
 	float m_DistanceTravelled = 0;
 
     dd::EventRelay<TravellingSystem, dd::Events::Pause> m_EPause;
+	dd::EventRelay<TravellingSystem, dd::Events::Resume> m_EResume;
 	dd::EventRelay<TravellingSystem, dd::Events::StageCleared> m_EStageCleared;
 	dd::EventRelay<TravellingSystem, dd::Events::ArrivedAtNewStage> m_EArrivedAtNewStage;
 
     bool OnPause(const dd::Events::Pause &event);
+	bool OnResume(const dd::Events::Resume &event);
 	bool OnStageCleared(const dd::Events::StageCleared &event);
 	bool OnArrivedAtNewStage(const dd::Events::ArrivedAtNewStage &event);
 };

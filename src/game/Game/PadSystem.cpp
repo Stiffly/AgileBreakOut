@@ -31,6 +31,7 @@ void dd::Systems::PadSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EResetAll, &PadSystem::OnResetAll);
 	EVENT_SUBSCRIBE_MEMBER(m_ERaiseWater, &PadSystem::OnRaiseWater);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PadSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &PadSystem::OnResume);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttack, &PadSystem::OnKrakenAttack);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &PadSystem::OnStickyPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyAttachedToPad, &PadSystem::OnStickyAttachedToPad);
@@ -80,6 +81,10 @@ void dd::Systems::PadSystem::Initialize()
 
 void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
+	if (m_Pause) {
+		return;
+	}
+
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
 
@@ -176,16 +181,22 @@ void dd::Systems::PadSystem::Update(double dt)
 
 bool dd::Systems::PadSystem::OnPause(const dd::Events::Pause &event)
 {
-    if (event.Type != "PadSystem" && event.Type != "All") {
+    /*if (event.Type != "PadSystem" && event.Type != "All") {
         return false;
-    }
+    }*/
 
-    if (IsPaused()) {
-        SetPause(false);
-    } else {
-        SetPause(true);
-    }
+	m_Pause = true;
+
     return true;
+}
+
+bool dd::Systems::PadSystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "PadSystem" && event.Type != "All") {
+	return false;
+	}*/
+	m_Pause = false;
+	return true;
 }
 
 bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
@@ -217,9 +228,15 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
         e.padTransform = Transform();
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_P) {
-        Events::Pause e;
-        e.Type = "All";
-        EventBroker->Publish(e);
+		if (IsPaused()) {
+			Events::Resume e;
+			e.Type = "All";
+			EventBroker->Publish(e);
+		} else {
+			Events::Pause e;
+			e.Type = "All";
+			EventBroker->Publish(e);
+		}
     } else if (val == GLFW_KEY_H) {
         Events::HitLag e;
         e.Time = 0.2;

@@ -32,6 +32,7 @@
 #include "Game/EArrivedAtNewStage.h"
 #include "Game/EGameOver.h"
 #include "Game/EPause.h"
+#include "Game/EResume.h"
 #include "Game/EHitPad.h"
 #include "Game/EHitLag.h"
 #include "Game/EActionButton.h"
@@ -127,6 +128,7 @@ private:
 	dd::EventRelay<BallSystem, dd::Events::InkBlaster> m_EInkBlaster;
 	dd::EventRelay<BallSystem, dd::Events::InkBlasterOver> m_EInkBlasterOver;
     dd::EventRelay<BallSystem, dd::Events::Pause> m_EPause;
+	dd::EventRelay<BallSystem, dd::Events::Resume> m_EResume;
     dd::EventRelay<BallSystem, dd::Events::Contact> m_Contact;
     dd::EventRelay<BallSystem, dd::Events::ActionButton> m_EActionButton;
 	dd::EventRelay<BallSystem, dd::Events::StageCleared> m_EStageCleared;
@@ -141,6 +143,7 @@ private:
 	bool OnInkBlaster(const dd::Events::InkBlaster &event);
 	bool OnInkBlasterOver(const dd::Events::InkBlasterOver &event);
     bool OnPause(const dd::Events::Pause &event);
+	bool OnResume(const dd::Events::Resume &event);
     bool OnActionButton(const dd::Events::ActionButton &event);
 	bool OnStageCleared(const dd::Events::StageCleared &event);
 	bool OnArrivedToNewStage(const dd::Events::ArrivedAtNewStage &event);
