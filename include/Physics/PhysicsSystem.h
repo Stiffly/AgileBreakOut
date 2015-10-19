@@ -6,6 +6,8 @@
 
 #include <Box2D/Box2D.h>
 
+#include "Core/ResourceManager.h"
+#include "Core/ConfigFile.h"
 #include "Core/System.h"
 #include "Core/World.h"
 #include "Core/EventBroker.h"
