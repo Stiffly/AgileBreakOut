@@ -11,6 +11,7 @@ void dd::Systems::ProjectileSystem::Initialize()
 {
 	EVENT_SUBSCRIBE_MEMBER(m_EContact, &ProjectileSystem::OnContact);
 	EVENT_SUBSCRIBE_MEMBER(m_EPause, &ProjectileSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &ProjectileSystem::OnResume);
 	EVENT_SUBSCRIBE_MEMBER(m_EInkBlaster, &ProjectileSystem::OnInkBlaster);
 	EVENT_SUBSCRIBE_MEMBER(m_EHitPad, &ProjectileSystem::OnHitPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &ProjectileSystem::OnActionButton);
@@ -29,7 +30,6 @@ void dd::Systems::ProjectileSystem::Initialize()
 		physics->Category = CollisionLayer::Type::Projectile;
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall);
 		physics->Calculate = true;
-		ctransform->Sticky = true;
 		ctransform->Position = glm::vec3(0.f, 0.f, -10.f);
 		ctransform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
 		auto cModel = m_World->AddComponent<Components::Model>(ent);
@@ -46,7 +46,9 @@ void dd::Systems::ProjectileSystem::Initialize()
 
 void dd::Systems::ProjectileSystem::Update(double dt)
 {
-
+	if (m_Pause) {
+		return;
+	}
 }
 
 void dd::Systems::ProjectileSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
@@ -68,18 +70,23 @@ void dd::Systems::ProjectileSystem::UpdateEntity(double dt, EntityID entity, Ent
 
 bool dd::Systems::ProjectileSystem::OnPause(const dd::Events::Pause &event)
 {
-    if (event.Type != "ProjectileSystem" && event.Type != "All") {
+    /*if (event.Type != "ProjectileSystem" && event.Type != "All") {
         return false;
-    }
+    }*/
+    
+    m_Pause = true;
 
-    if (IsPaused()) {
-        SetPause(false);
-    } else {
-        SetPause(true);
-    }
     return true;
 }
 
+bool dd::Systems::ProjectileSystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "ProjectileSystem" && event.Type != "All") {
+	return false;
+	}*/
+	m_Pause = false;
+	return true;
+}
 
 bool dd::Systems::ProjectileSystem::OnContact(const dd::Events::Contact &event)
 {
