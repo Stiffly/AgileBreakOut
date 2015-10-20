@@ -41,8 +41,11 @@ public:
 	void Initialize() override;
 	void Draw(RenderQueueCollection& rq) override;
 
+	D3D11_RASTERIZER_DESC m_RasterDesc;
+
 	IDXGISwapChain* m_SwapChain = nullptr;
 	ID3D11Device* m_Device = nullptr;
+	ID3D11RasterizerState* m_RasterState = nullptr;
 	ID3D11DeviceContext* m_DeviceContext = nullptr;
 	ID3D11RenderTargetView* m_BackBuffer = nullptr;
 	ID3D11DepthStencilView* m_DepthBuffer = nullptr;
@@ -72,6 +75,8 @@ private:
 
 	static DirectX::SimpleMath::Matrix GLMtoDXModelView(glm::mat4 m);
 	static DirectX::SimpleMath::Matrix GLMtoDXProjection(glm::mat4 m);
+	void setDefaultRasterState();
+	void setGUIRasterState();
 	static bool DepthSort(const std::shared_ptr<RenderJob> &i, const std::shared_ptr<RenderJob> &j) { return (i->Depth < j->Depth); }
 };
 
