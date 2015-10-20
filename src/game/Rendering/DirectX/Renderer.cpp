@@ -101,9 +101,6 @@ void dd::Renderer::Initialize()
 	m_DeviceContext->OMSetBlendState(blendState, nullptr, 0xffffffff);
 
 
-	shaderProgram = new ShaderProgram();
-	shaderProgram->CompileVertexShader(L"Shaders/DirectX/vertex.hlsl");
-	shaderProgram->CompilePixelShader(L"Shaders/DirectX/pixel.hlsl");
 	D3D11_INPUT_ELEMENT_DESC VertexIED[] = {
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -117,8 +114,14 @@ void dd::Renderer::Initialize()
 		{"BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"BLENDWEIGHT", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
-	shaderProgram->CreateInputLayout(VertexIED, sizeof(VertexIED) / sizeof(VertexIED[0]));
-	shaderProgram->Bind();
+	m_ForwardShaderProgram = new ShaderProgram();
+	m_ForwardShaderProgram->CompileVertexShader(L"Shaders/DirectX/vertex.hlsl");
+	m_ForwardShaderProgram->CompilePixelShader(L"Shaders/DirectX/pixel.hlsl");
+	m_ForwardShaderProgram->CreateInputLayout(VertexIED, sizeof(VertexIED) / sizeof(VertexIED[0]));
+	m_GUIShaderProgram = new ShaderProgram();
+	m_GUIShaderProgram->CompileVertexShader(L"Shaders/DirectX/vertex.hlsl");
+	m_GUIShaderProgram->CompilePixelShader(L"Shaders/DirectX/Flat.pixel.hlsl");
+	m_GUIShaderProgram->CreateInputLayout(VertexIED, sizeof(VertexIED) / sizeof(VertexIED[0]));
 
 	// Create constant buffer
 	// TODO: Put this in shader
@@ -169,6 +172,8 @@ void dd::Renderer::Draw(RenderQueueCollection& rq)
 	viewport.MinDepth = 0;
 	viewport.MaxDepth = 1;
 	m_DeviceContext->RSSetViewports(1, &viewport);
+	
+	m_ForwardShaderProgram->Bind();
 
 	Matrix proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(m_Camera->m_FOV, m_Camera->m_AspectRatio, m_Camera->m_NearClip, m_Camera->m_FarClip); // Right-handed
 	Matrix view = Matrix::CreateTranslation(Vector3(m_Camera->Position().x, m_Camera->Position().y, -m_Camera->Position().z));
@@ -263,6 +268,8 @@ void dd::Renderer::Draw(RenderQueueCollection& rq)
 	}
 
 	m_DeviceContext->OMSetRenderTargets(1, &m_BackBuffer, nullptr);
+	m_GUIShaderProgram->Bind();
+
 	for (auto &job : rq.GUI) {
 		auto frameJob = std::dynamic_pointer_cast<FrameJob>(job);
 		if (frameJob) {

@@ -67,7 +67,8 @@ private:
 		float paddingBitch;
 	} constantBufferStruct;
 
-	ShaderProgram* shaderProgram = nullptr;
+	ShaderProgram* m_ForwardShaderProgram = nullptr;
+	ShaderProgram* m_GUIShaderProgram = nullptr;
 	ID3D11Buffer* constantBuffer = nullptr;
 
 	Model* m_UnitQuad = nullptr;
