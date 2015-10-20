@@ -75,6 +75,10 @@ protected:
 			Events::ButtonEnter e;
 			e.FrameName = m_Name;
 			EventBroker->Publish(e);
+			Events::PlaySound soundEvent;
+			soundEvent.FilePath = "Sounds/GUI/hover-n.wav";
+			EventBroker->Publish(soundEvent);
+			
 		} else if (!isOver && m_MouseIsOver) { // Leave
 			if (!m_IsDown) {
 				if (!m_TextureReleased.empty()) {

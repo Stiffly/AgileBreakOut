@@ -25,6 +25,7 @@
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
 #include "Game/EPause.h"
+#include "Game/EResume.h"
 #include "Game/EHitLag.h"
 #include "Game/EGameOver.h"
 #include "Game/ECreatePowerUp.h"
@@ -70,16 +71,18 @@ public:
     std::string& CurrentType() { return m_CurrentType; }
     void SetCurrentType(const std::string& currentType) { m_CurrentType = currentType; }
 private:
-    bool m_Pause;
-    bool m_HitLag;
+    bool m_Pause = false;
+    bool m_HitLag = false;
     float m_HitLagDuration;
     float m_HitLagTimer;
     std::string m_CurrentType;
 
     dd::EventRelay<HitLagSystem, dd::Events::Pause> m_EPause;
+	dd::EventRelay<HitLagSystem, dd::Events::Resume> m_EResume;
     dd::EventRelay<HitLagSystem, dd::Events::HitLag> m_EHitLag;
 
     bool OnPause(const dd::Events::Pause &event);
+	bool OnResume(const dd::Events::Resume &event);
     bool OnHitLag(const dd::Events::HitLag &event);
 
 };

@@ -6,6 +6,11 @@ dd::Sound::Sound(std::string path)
     m_Path = path;
 }
 
+dd::Sound::~Sound()
+{
+	alDeleteBuffers(1, &m_Buffer);
+}
+
 ALuint dd::Sound::LoadFile(std::string path)
 {
     if (m_BufferCache.find(path) != m_BufferCache.end()) {

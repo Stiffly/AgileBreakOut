@@ -7,6 +7,7 @@
 #include "GUI/EButtonRelease.h"
 #include "GUI/ESliderUpdate.h"
 #include "Core/EMouseMove.h"
+#include "Sound/EPlaySound.h"
 
 namespace dd
 {
@@ -78,6 +79,11 @@ private:
 	{
 		if (event.Button == m_SliderButton) {
 			m_IsGrabbed = true;
+		}
+		else {
+			Events::PlaySound e;
+			e.FilePath = "Sounds/GUI/click-n.wav";
+			EventBroker->Publish(e);
 		}
 
 		return true;

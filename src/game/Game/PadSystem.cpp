@@ -28,7 +28,11 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EContactPowerUp, &PadSystem::OnContactPowerUp);
     EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &PadSystem::OnStageCleared);
 	EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &PadSystem::OnResetBall);
+	EVENT_SUBSCRIBE_MEMBER(m_EResetAll, &PadSystem::OnResetAll);
+	EVENT_SUBSCRIBE_MEMBER(m_ERaiseWater, &PadSystem::OnRaiseWater);
+	EVENT_SUBSCRIBE_MEMBER(m_ERaiseWaterWall, &PadSystem::OnRaiseWaterWall);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PadSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &PadSystem::OnResume);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttack, &PadSystem::OnKrakenAttack);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &PadSystem::OnStickyPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyAttachedToPad, &PadSystem::OnStickyAttachedToPad);
@@ -47,7 +51,6 @@ void dd::Systems::PadSystem::Initialize()
         physics->Category = CollisionLayer::Type::Pad;
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::PowerUp | CollisionLayer::LifeBuoy);
         physics->Calculate = true;
-        ctransform->Sticky = true;
         auto cModel = m_World->AddComponent<Components::Model>(ent);
         cModel->ModelFile = "Models/Ship/Ship.obj";
 
@@ -72,6 +75,17 @@ void dd::Systems::PadSystem::Initialize()
 
 		m_StickTransform = transform;
 		m_StickyAim = sticky;
+
+		/*{
+			auto entChild = m_World->CreateEntity(ent);
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(entChild);
+			transform->Position = glm::vec3(0.f, 12.5f, 0.f);
+
+			transform->Scale = glm::vec3(0.1f, 25.f, 0.1f);
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(entChild);
+			sprite->SpriteFile = "Models/Brick/White.png";
+			sprite->Color = glm::vec4(0.f, 0.5f, 0.f, 0.5f);
+		}*/
 	}
 
 	m_ResetBall = true;
@@ -79,6 +93,10 @@ void dd::Systems::PadSystem::Initialize()
 
 void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
+	if (m_Pause) {
+		return;
+	}
+
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
 
@@ -175,16 +193,22 @@ void dd::Systems::PadSystem::Update(double dt)
 
 bool dd::Systems::PadSystem::OnPause(const dd::Events::Pause &event)
 {
-    if (event.Type != "PadSystem" && event.Type != "All") {
+    /*if (event.Type != "PadSystem" && event.Type != "All") {
         return false;
-    }
+    }*/
 
-    if (IsPaused()) {
-        SetPause(false);
-    } else {
-        SetPause(true);
-    }
+	m_Pause = true;
+
     return true;
+}
+
+bool dd::Systems::PadSystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "PadSystem" && event.Type != "All") {
+	return false;
+	}*/
+	m_Pause = false;
+	return true;
 }
 
 bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
@@ -204,14 +228,33 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
     } else if (val == GLFW_KEY_R) {
         Events::ResetBall e;
         EventBroker->Publish(e);
-    } else if (val == GLFW_KEY_M) {
+	} else if (val == GLFW_KEY_W) {
+		Events::RaiseWater e;
+		e.Amount = 0.2;
+		e.Speed = 0.2;
+		EventBroker->Publish(e);
+	} else if (val == GLFW_KEY_Q) {
+		Events::RaiseWaterWall e;
+		e.Amount = 0.2;
+		e.Speed = 0.2;
+		EventBroker->Publish(e);
+	} else if (val == GLFW_KEY_A) {
+		Events::ResetAll e;
+		EventBroker->Publish(e);
+	} else if (val == GLFW_KEY_M) {
         Events::MultiBall e;
         e.padTransform = Transform();
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_P) {
-        Events::Pause e;
-        e.Type = "All";
-        EventBroker->Publish(e);
+		if (IsPaused()) {
+			Events::Resume e;
+			e.Type = "All";
+			EventBroker->Publish(e);
+		} else {
+			Events::Pause e;
+			e.Type = "All";
+			EventBroker->Publish(e);
+		}
     } else if (val == GLFW_KEY_H) {
         Events::HitLag e;
         e.Time = 0.2;
@@ -226,22 +269,38 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 		e.Time = 3;
 		e.TimeTakenToCoolDown = 10;
 		EventBroker->Publish(e);
+	} else if (val == GLFW_KEY_G) {
+		Events::BrickGenerating e;
+		e.Origin = glm::vec3(-5, 7, -10);
+		e.Set = 1;
+		EventBroker->Publish(e);
+	} else if (val == GLFW_KEY_L) {
+		Events::Lifebuoy e;
+		e.Transform = Transform();
+		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_Y) {
 		Events::StickyPad e;
+		e.Times = 3;
 		EventBroker->Publish(e);
-	}
-	else if (val == GLFW_KEY_I) {
+	} else if (val == GLFW_KEY_I) {
 		Events::InkBlaster e;
+		e.Shots = 5;
+		e.Speed = 7;
 		EventBroker->Publish(e);
-	}
-	else if (val == GLFW_KEY_K) {
+	} else if (val == GLFW_KEY_K) {
 		Events::KrakenAttack e;
 		e.ChargeUpdate = 0;
 		e.KrakenStrength = 0.1;
 		e.PlayerStrength = 0.05;
 		EventBroker->Publish(e);
-	}
-	else if (val == GLFW_KEY_SPACE) {
+	} else if (val == GLFW_KEY_Q) {
+		Events::Move e;
+		e.Entity = Entity();
+		e.GoalPosition = glm::vec3(0, 0, -10);
+		e.Speed = 5;
+		e.Queue = false;
+		EventBroker->Publish(e);
+	} else if (val == GLFW_KEY_SPACE) {
         Events::ActionButton e;
 		e.Position = Transform()->Position;
         EventBroker->Publish(e);
@@ -366,6 +425,39 @@ bool dd::Systems::PadSystem::OnStageCleared(const dd::Events::StageCleared &even
 bool dd::Systems::PadSystem::OnResetBall(const dd::Events::ResetBall &event)
 {
 	m_ResetBall = true;
+	return true;
+}
+
+bool dd::Systems::PadSystem::OnResetAll(const dd::Events::ResetAll &event)
+{
+
+	return true;
+}
+
+bool dd::Systems::PadSystem::OnRaiseWater(const dd::Events::RaiseWater &event)
+{
+	RaisePad(event.Amount, event.Speed);
+
+	return true;
+}
+
+bool dd::Systems::PadSystem::OnRaiseWaterWall(const dd::Events::RaiseWaterWall &event)
+{
+	RaisePad(event.Amount, event.Speed);
+
+	return true;
+}
+
+bool dd::Systems::PadSystem::RaisePad(float amount, float speed)
+{
+	auto transform = Transform();
+	glm::vec3 raise = glm::vec3(0, amount, 0);
+	Events::Move e;
+	e.Entity = m_Entity;
+	e.GoalPosition = transform->Position + raise;
+	e.Speed = speed;
+	e.Queue = true;
+	EventBroker->Publish(e);
 	return true;
 }
 

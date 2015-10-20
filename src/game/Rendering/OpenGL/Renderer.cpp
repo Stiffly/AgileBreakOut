@@ -124,7 +124,8 @@ void dd::Renderer::CreateBuffers()
 	m_ErrorTexture = ResourceManager::Load<Texture>("Textures/Core/ErrorTexture.png");
 	m_StandardNormal = ResourceManager::Load<Texture>("Textures/Core/NeutralNormalMap.png");
 	m_StandardSpecular = ResourceManager::Load<Texture>("Textures/Core/NeutralSpecularMap.png");
-	m_WhiteSphereTexture = ResourceManager::Load<Texture>("Textures/Test/Water.png");
+	//m_WhiteSphereTexture = ResourceManager::Load<Texture>("Textures/Test/Water.png");
+	m_WhiteSphereTexture = ResourceManager::Load<Texture>("Textures/Particles/FadeBall.png");
 
 	glGenRenderbuffers(1, &m_RbDepthBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_RbDepthBuffer);
@@ -208,8 +209,8 @@ void dd::Renderer::CreateBuffers()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Resolution.Width, m_Resolution.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	//Fill water pass
 	glGenFramebuffers(1, &m_FbWater);
@@ -564,7 +565,9 @@ void dd::Renderer::DrawWater(RenderQueue &rq)
 	glClear(GL_COLOR_BUFFER_BIT);
 	m_SpWater2->Bind();
 	//TODO: Add this in water particle component. Blurradius
-	float radius = 3.f;
+
+	float radius = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Water.Radius", 0.2f);
+	radius *= 35;
 
 	glUniform2fv(glGetUniformLocation(shaderProgramHandle, "dir"), 1, glm::value_ptr(glm::vec2(1.0f, 0.0f)));
 	glUniform1f(glGetUniformLocation(shaderProgramHandle, "res"), m_Resolution.Width);

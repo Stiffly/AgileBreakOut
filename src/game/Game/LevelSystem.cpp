@@ -11,15 +11,211 @@ void dd::Systems::LevelSystem::Initialize()
 {
 	std::random_device rd;
 	m_RandomGenerator = std::mt19937(rd());
-    EVENT_SUBSCRIBE_MEMBER(m_EContact, &LevelSystem::OnContact);
-    EVENT_SUBSCRIBE_MEMBER(m_EScoreEvent, &LevelSystem::OnScoreEvent);
-    EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &LevelSystem::OnMultiBall);
-    EVENT_SUBSCRIBE_MEMBER(m_ECreatePowerUp, &LevelSystem::OnCreatePowerUp);
-    EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &LevelSystem::OnMultiBallLost);
-    EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, &LevelSystem::OnPowerUpTaken);
-    EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &LevelSystem::OnStageCleared);
-    EVENT_SUBSCRIBE_MEMBER(m_EPause, &LevelSystem::OnPause);
-    EVENT_SUBSCRIBE_MEMBER(m_EHitPad, &LevelSystem::OnHitPad);
+	EVENT_SUBSCRIBE_MEMBER(m_EContact, &LevelSystem::OnContact);
+	EVENT_SUBSCRIBE_MEMBER(m_EScoreEvent, &LevelSystem::OnScoreEvent);
+	EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &LevelSystem::OnMultiBall);
+	EVENT_SUBSCRIBE_MEMBER(m_ECreatePowerUp, &LevelSystem::OnCreatePowerUp);
+	EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &LevelSystem::OnMultiBallLost);
+	EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, &LevelSystem::OnPowerUpTaken);
+	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &LevelSystem::OnStageCleared);
+	EVENT_SUBSCRIBE_MEMBER(m_EArrivedAtNewStage, &LevelSystem::OnArrivedAtNewStage);
+	EVENT_SUBSCRIBE_MEMBER(m_EPause, &LevelSystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &LevelSystem::OnResume);
+	EVENT_SUBSCRIBE_MEMBER(m_EHitPad, &LevelSystem::OnHitPad);
+	EVENT_SUBSCRIBE_MEMBER(m_EBrickGenerating, &LevelSystem::OnBrickGenerating);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenDefeated, &LevelSystem::OnKrakenDefeated);
+
+	m_GodMode = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue("Cheat.GodMode", false);
+
+	//PointLightTest
+	{
+		auto t_Light = m_World->CreateEntity();
+		auto transform = m_World->AddComponent<Components::Transform>(t_Light);
+		transform->Position = glm::vec3(-3.f, 6.f, -5.f);
+		auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
+		pl->Radius = 20.f;
+		pl->Diffuse = glm::vec3(0.8f, 0.7f, 0.05f);
+		auto model = m_World->AddComponent<Components::Model>(t_Light);
+		model->ModelFile = "Models/Core/UnitSphere.obj";
+		m_World->CommitEntity(t_Light);
+	}
+	{
+		auto t_Light = m_World->CreateEntity();
+		auto transform = m_World->AddComponent<Components::Transform>(t_Light);
+		transform->Position = glm::vec3(3.f, -5.f, -5.f);
+		auto pl = m_World->AddComponent<Components::PointLight>(t_Light);
+		pl->Radius = 15.f;
+		pl->Diffuse = glm::vec3(0.1f, 0.5f, 0.8f);
+		auto model = m_World->AddComponent<Components::Model>(t_Light);
+		model->ModelFile = "Models/Core/UnitSphere.obj";
+		m_World->CommitEntity(t_Light);
+	}
+
+	//Halfpipe background test model.
+	{
+		auto t_halfPipe = m_World->CreateEntity();
+		auto transform = m_World->AddComponent<Components::Transform>(t_halfPipe);
+		auto background = m_World->AddComponent<Components::Background>(t_halfPipe);
+		transform->Position = glm::vec3(0.f, 0.f, -15.f);
+		transform->Scale = glm::vec3(6.f, 6.f, 10.f);
+		auto travels = m_World->AddComponent<Components::Travels>(t_halfPipe);
+		travels->CurrentlyTraveling = false;
+		auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
+		model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
+		model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.f);
+		m_World->CommitEntity(t_halfPipe);
+
+		auto t_halfPipe2 = m_World->CloneEntity(t_halfPipe);
+		auto transform2 = m_World->GetComponent<Components::Transform>(t_halfPipe);
+		transform2->Position = glm::vec3(0.f, 34.6f, -15.f); //Halfpipe Value
+	}
+
+	//Background
+
+	/*{
+		auto background = m_World->CreateEntity();
+		auto transform = m_World->AddComponent<Components::Transform>(background);
+		auto travels = m_World->AddComponent<Components::Travels>(background);
+		travels->CurrentlyTraveling = false;
+		auto backgroundComponent = m_World->AddComponent<Components::Background>(background);
+		transform->Position = glm::vec3(0.f, 0.f, -30.f);
+		transform->Scale = glm::vec3(2681.f / 50.f, 1080.f / 50.f, 1.f);
+		auto sprite = m_World->AddComponent<Components::Sprite>(background);
+		sprite->SpriteFile = "Textures/Background.png";
+		m_World->CommitEntity(background);
+	}*/
+
+	//			auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
+	
+
+	//ParticleTest
+
+
+	/*{
+	auto Pe = m_World->CreateEntity();
+	auto transform = m_World->AddComponent<Components::Transform>(Pe);
+	auto particleEmitter= m_World->AddComponent<Components::ParticleEmitter>(Pe);
+	auto emitteSprite = m_World->AddComponent<Components::Sprite>(Pe);
+
+	transform->Position = glm::vec3(0.f, 0.f, -10.f);
+	emitteSprite->SpriteFile = "Textures/Test/Brick_Normal.png";
+	particleEmitter->GravityScale = 0.0f;
+	particleEmitter->SpawnRate = 1.f;
+	particleEmitter->NumberOfTicks = 2;
+	particleEmitter->Speed = 1.f;
+	particleEmitter->ParticlesPerTick = 5;
+	particleEmitter->Spread = glm::pi<float>()*2;
+	particleEmitter->EmittingAngle = glm::pi<float>();
+	particleEmitter->LifeTime = 50;
+	
+	{
+	auto Pt = m_World->CreateEntity(Pe);
+	auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
+	auto PtSprite = m_World->AddComponent<Components::Sprite>(Pt);
+	auto PtParticle = m_World->AddComponent<Components::Particle>(Pt);
+	auto PtTemplate = m_World->AddComponent<Components::Template>(Pt);
+
+	//PtTransform->Velocity = glm::vec3(1.0f, 0.f, 0.f);
+	PtTransform->Position = transform->Position;
+	PtSprite->SpriteFile = "Textures/Background.png";
+	PtParticle->LifeTime = 3.f;
+	PtParticle->Flags = static_cast<ParticleFlags::Type>(ParticleFlags::Type::Powder | ParticleFlags::Type::ParticleContactFilter | ParticleFlags::Type::FixtureContactFilter);
+	}
+	m_World->CommitEntity(Pe);
+	}*/
+
+	//TODO: Why does the ball not collide with these bricks?
+	//BottomBox
+	{
+		EntityID BottomWall = m_World->CreateEntity();
+		auto transform = m_World->AddComponent<Components::Transform>(BottomWall);
+		auto wall = m_World->AddComponent<Components::Wall>(BottomWall);
+		transform->Position = glm::vec3(0.f, -6.f, -10.f);
+		transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
+		std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
+		sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+		std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(BottomWall);
+		rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
+		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
+		physics->CollisionType = CollisionType::Type::Static;
+		physics->Category = CollisionLayer::Wall;
+		if (m_GodMode) {
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy | CollisionLayer::Ball);
+		} else {
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy);
+		}
+		m_World->CommitEntity(BottomWall);
+
+		m_World->SetProperty(BottomWall, "Name", "BottomWall");
+	}
+
+	{
+		auto topWall = m_World->CreateEntity();
+		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(topWall);
+		transform->Position = glm::vec3(0.f, 6.f, -10.f);
+		transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
+
+		auto wall = m_World->AddComponent<Components::Wall>(topWall);
+
+		//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(topWall);
+		//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+		std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(topWall);
+		rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
+
+		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(topWall);
+		physics->CollisionType = CollisionType::Type::Static;
+		physics->Category = CollisionLayer::Wall;
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
+
+		m_World->CommitEntity(topWall);
+	}
+
+	{
+		auto leftWall = m_World->CreateEntity();
+		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
+			leftWall);
+		transform->Position = glm::vec3(-4.f, 1.f, -10.f);
+		transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
+
+		auto wall = m_World->AddComponent<Components::Wall>(leftWall);
+
+		//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(leftWall);
+		//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+		std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(leftWall);
+		rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
+
+		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(leftWall);
+		physics->CollisionType = CollisionType::Type::Static;
+		physics->Category = CollisionLayer::Wall;
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
+
+		m_World->CommitEntity(leftWall);
+	}
+
+	{
+		auto rightWall = m_World->CreateEntity();
+		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(
+			rightWall);
+		transform->Position = glm::vec3(4.f, 1.f, -10.f);
+		transform->Scale = glm::vec3(0.5f, 20.f, 1.f);
+
+		auto wall = m_World->AddComponent<Components::Wall>(rightWall);
+
+		//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(rightWall);
+		//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+
+		std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(rightWall);
+		rectangleShape->Dimensions = glm::vec2(0.5f, 20.f);
+
+		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(rightWall);
+		physics->CollisionType = CollisionType::Type::Static;
+		physics->Category = CollisionLayer::Wall;
+		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick);
+
+		m_World->CommitEntity(rightWall);
+	}
 
     m_BrickTemplate = m_World->CreateEntity();
     std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(m_BrickTemplate);
@@ -29,11 +225,14 @@ void dd::Systems::LevelSystem::Initialize()
     cRec->Dimensions = glm::vec2(0.9f, 0.35f);
     std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(m_BrickTemplate);
     std::shared_ptr<Components::Template> cTemplate = m_World->AddComponent<Components::Template>(m_BrickTemplate);
+
+	auto travels = m_World->AddComponent<Components::Travels>(m_BrickTemplate);
+	travels->CurrentlyTraveling = false;
+
     cPhys->CollisionType = CollisionType::Type::Static;
     cPhys->GravityScale = 0.f;
     cPhys->Category = CollisionLayer::Type::Brick;
     cPhys->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Ball | CollisionLayer::Type::Projectile | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
-    transform->Sticky = false;
 
     model->ModelFile = "Models/Brick/WhiteBrick.obj";
 	transform->Position = glm::vec3(50, 50, -10);
@@ -62,15 +261,19 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     if (templateCheck != nullptr){ return; }
 
     // Check the background.
-    auto model = m_World->GetComponent<Components::Model>(entity);
-    if (model != nullptr) {
-		if (model->ModelFile == "Models/Test/halfpipe/Halfpipe.obj") {
-            auto transform = m_World->GetComponent<Components::Transform>(entity);
-            if (transform->Position.y <= -34.6) {
-                transform->Position.y = 34.6;
-            }
-        }
-    }
+    auto background = m_World->GetComponent<Components::Background>(entity);
+	if (background != nullptr) {
+		auto transform = m_World->GetComponent<Components::Transform>(entity);
+		if (transform->Position.y <= -34.6) { //Halfpipe Value.
+			transform->Position.y = 34.6;
+			Events::Move e;
+			e.Entity = entity;
+			e.GoalPosition = glm::vec3(transform->Position.x, 34.6 + background->distanceLeftToCorrectTravelPosition, transform->Position.z);
+			e.Speed = 6.0f;
+			e.Queue = false;
+			EventBroker->Publish(e);
+		}
+	}
 
     auto brick = m_World->GetComponent<Components::Brick>(entity);
     if (brick != nullptr) {
@@ -88,9 +291,12 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 				EventBroker->Publish(e);
 			} else if (brick->Type == StickyBrick) {
 				Events::StickyPad e;
+				e.Times = 3;
 				EventBroker->Publish(e);
 			} else if (brick->Type == InkBlasterBrick) {
 				Events::InkBlaster e;
+				e.Shots = 5;
+				e.Speed = 7;
 				EventBroker->Publish(e);
 			} else if(brick->Type == KrakenAttackBrick) {
 				Events::KrakenAttack e;
@@ -111,6 +317,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
             Events::StageCleared ec;
             ec.ClearedStage = m_CurrentLevel;
             ec.StageCluster = m_CurrentCluster;
+			ec.StagesInCluster = m_StagesInCluster;
             EventBroker->Publish(ec);
         } else {
             if (ball != nullptr && MultiBalls() > 0) {
@@ -135,16 +342,22 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 
 bool dd::Systems::LevelSystem::OnPause(const dd::Events::Pause &event)
 {
-    if (event.Type != "LevelSystem" && event.Type != "All") {
+    /*if (event.Type != "LevelSystem" && event.Type != "All") {
         return false;
-    }
+    }*/
 
-    if (IsPaused()) {
-        SetPause(false);
-    } else {
-        SetPause(true);
-    }
+    m_Pause = true;
+
     return true;
+}
+
+bool dd::Systems::LevelSystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "LevelSystem" && event.Type != "All") {
+	return false;
+	}*/
+	m_Pause = false;
+	return true;
 }
 
 void dd::Systems::LevelSystem::CreateBasicLevel(int rows, int lines, glm::vec2 spacesBetweenBricks, float spaceToEdge)
@@ -187,17 +400,22 @@ void dd::Systems::LevelSystem::CreateLevel(int aboveBasicLevel)
     SetRestarting(false);
 }
 
-void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBetweenBricks, float spaceToEdge, int aboveLevel, int num, int typeInt, glm::vec4 colorVec)
+EntityID dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBetweenBricks, float spaceToEdge, int aboveLevel, int num, int typeInt, glm::vec4 colorVec)
 {
     if (typeInt == EmptyBrickSpace) {
         SetNumberOfBricks(NumberOfBricks() - 1);
-        return;
+        return NULL;
     }
     auto brick = m_World->CloneEntity(m_BrickTemplate);
     m_World->RemoveComponent<Components::Template>(brick);
     auto transform = m_World->GetComponent<Components::Transform>(brick);
     auto cBrick = m_World->GetComponent<Components::Brick>(brick);
 	auto model = m_World->GetComponent<Components::Model>(brick);
+
+	float x = line * spacesBetweenBricks.x;
+	float y = row * spacesBetweenBricks.y;
+	transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y + aboveLevel, -10.f);
+
     if (typeInt == StandardBrick) {
 		cBrick->Type = StandardBrick;
 		auto type = m_World->AddComponent<Components::StandardBrick>(brick);
@@ -222,16 +440,134 @@ void dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spacesBe
 	} else if (typeInt == KrakenAttackBrick) {
 		cBrick->Type = KrakenAttackBrick;
 		auto type = m_World->AddComponent<Components::KrakenAttackBrick>(brick);
-		model->Color = glm::vec4(0.f, 0.5f, 1.0f, .0f);
+		model->Color = glm::vec4(0.f, 0.5f, 1.0f, 1.0f);
+	} else if (typeInt == Kraken) {
+		Events::KrakenAppear e;
+		e.Position = transform->Position;
+		e.Health = 10;
+		EventBroker->Publish(e);
+		m_World->RemoveEntity(brick);
+		return brick;
 	}
 
-	
-    float x = line * spacesBetweenBricks.x;
-    float y = row * spacesBetweenBricks.y;
-    transform->Position = glm::vec3(x - 3, 5 - spaceToEdge - y + aboveLevel, -10.f);
     cBrick->Score = 10 * num;
-    return;
+    return brick;
 }
+
+bool dd::Systems::LevelSystem::OnBrickGenerating(const dd::Events::BrickGenerating &event)
+{
+	GetBrickSet(event.Set);
+	LOG_DEBUG("This is happening.");
+
+	int rows = 2;
+	int lines = 7;
+	int getter = 0;
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < lines; j++) {
+			auto ent = CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), -4, 1, m_BrickSet[getter], m_ColorSet[getter]);
+			if (ent != NULL) {
+				auto transform = m_World->GetComponent<Components::Transform>(ent);
+				Events::Move e;
+				e.GoalPosition = transform->Position;
+				transform->Position = event.Origin;
+				e.Entity = ent;
+				e.Speed = 6;
+				e.Queue = false;
+				EventBroker->Publish(e);
+				m_LooseBricks++;
+				SetNumberOfBricks(NumberOfBricks() + 1);
+			}
+			getter++;
+		}
+	}
+	return true;
+}
+
+void dd::Systems::LevelSystem::GetBrickSet(int set)
+{
+	std::array<int, 14> level;
+	std::array<glm::vec4, 14> color;
+	// Level array indicates type of brick.
+	// 0 is empty space.
+	// 1 is standard brick.
+	// 2 is multiball brick.
+	// 3 is lifebuoy brick.
+	// 4 is sticky brick.
+	// 5 is ink blaster brick.
+	// 6 is kraken attack brick.
+
+	// color array determines the color of standard bricks.
+	// w is white.
+	// r is red.
+	// g is green.
+	// b is blue.
+	// y is yellow.
+	// c is cyan.
+	// m is magenta.
+	// d is dark.
+	// Feel free to make your own.
+	glm::vec4 w = glm::vec4(1, 1, 1, 1);
+	glm::vec4 r = glm::vec4(1, 0, 0, 1);
+	glm::vec4 g = glm::vec4(0, 1, 0, 1);
+	glm::vec4 b = glm::vec4(0, 0, 1, 1);
+	glm::vec4 y = glm::vec4(1, 1, 0, 1);
+	glm::vec4 c = glm::vec4(0, 1, 1, 1);
+	glm::vec4 m = glm::vec4(1, 0, 1, 1);
+	glm::vec4 d = glm::vec4(0, 0, 0, 1);
+
+	if (set == 1) {
+		level =
+		{1, 1, 1, 1, 1, 1, 1,
+		 1, 1, 1, 1, 1, 1, 1 };
+		color =
+		{r, r, r, r, r, r, r,
+		 r, r, r, r, r, r, r };
+	}
+	else if (set == 2) {
+		level =
+		{2, 2, 2, 2, 2, 2, 2,
+		 2, 2, 2, 2, 2, 2, 2 };
+		color =
+		{w, w, w, w, w, w, w,
+		 w, w, w, w, w, w, w };
+	}
+	else if (set == 3) {
+		level =
+		{0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0 };
+		color =
+		{w, w, w, w, w, w, w,
+		 w, w, w, w, w, w, w };
+	}
+	else if (set == 4) {
+		level =
+		{0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0 };
+		color =
+		{w, w, w, w, w, w, w,
+		 w, w, w, w, w, w, w };
+	}
+	else if (set == 5) {
+		level =
+		{0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0 };
+		color =
+		{w, w, w, w, w, w, w,
+		 w, w, w, w, w, w, w };
+	}
+	else if (set == 6) {
+		level =
+		{0, 0, 0, 1, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0 };
+		color =
+		{w, w, w, w, w, w, w,
+		 w, w, w, w, w, w, w };
+	}
+
+	std::copy(std::begin(level), std::end(level), std::begin(m_BrickSet));
+	std::copy(std::begin(color), std::end(color), std::begin(m_ColorSet));
+}
+
 
 void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
 {
@@ -349,6 +685,7 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 					Events::InkBlaster e;
 					e.Transform = transformComponentBrick;
 					e.Shots = 5;
+					e.Speed = 7;
 					EventBroker->Publish(e);
 				}
 				else {
@@ -371,8 +708,6 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 	auto brickChildren = m_World->GetEntityChildren(entityBrick);
 	for (auto b : brickChildren)
 	{
-
-
 		auto cTransform = m_World->GetComponent<Components::Transform>(b);
 		cTransform->Position = cTransform->Position + transformComponentBrick->Position;
 		glm::vec2 ballToBrick = 4.f * glm::normalize(glm::vec2(cTransform->Position.x - transformComponentHitter->Position.x, cTransform->Position.y - transformComponentHitter->Position.y));
@@ -478,7 +813,6 @@ bool dd::Systems::LevelSystem::OnCreatePowerUp(const dd::Events::CreatePowerUp &
     cPhys->CollisionType = CollisionType::Type::Dynamic;
     cPhys->Category = CollisionLayer::Type::PowerUp;
     cPhys->Mask = CollisionLayer::Type::Pad;
-    transform->Sticky = false;
 
     std::shared_ptr<Components::PowerUp> cPow = m_World->AddComponent<Components::PowerUp>(powerUp);
 
@@ -499,6 +833,16 @@ bool dd::Systems::LevelSystem::OnPowerUpTaken(const dd::Events::PowerUpTaken &ev
     return true;
 }
 
+bool dd::Systems::LevelSystem::OnKrakenDefeated(const dd::Events::KrakenDefeated &event)
+{
+	SetNumberOfBricks(NumberOfBricks() - 1);
+	m_LooseBricks--;
+
+	std::cout << m_LooseBricks << std::endl;
+
+	return true;
+}
+
 bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &event)
 {
     if (!m_Cleared) {
@@ -510,12 +854,13 @@ bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &ev
         es.Score = 500;
         EventBroker->Publish(es);
         m_CurrentLevel++;
-        if (m_CurrentLevel < 6) {
+        if (m_CurrentLevel <= event.StagesInCluster) {
             GetNextLevel();
-            CreateLevel(12);
+            CreateLevel(12); //NextLevelDistance
 		} else {
 			// Win
 			Events::ClusterClear e;
+			e.ClusterCleared = m_CurrentCluster;
 			EventBroker->Publish(e);
 
 			Events::Pause p;
@@ -524,6 +869,12 @@ bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &ev
 		}
     }
     return true;
+}
+
+bool dd::Systems::LevelSystem::OnArrivedAtNewStage(const dd::Events::ArrivedAtNewStage &event)
+{
+	m_Cleared = false;
+	return true;
 }
 
 void dd::Systems::LevelSystem::GetNextLevel()
@@ -539,7 +890,9 @@ void dd::Systems::LevelSystem::GetNextLevel()
 	// 5 is ink blaster brick.
 	// 6 is kraken attack brick.
 
-	// wolor array determines the color of standard bricks.
+	// 100 is KRAKEN!
+
+	// color array determines the color of standard bricks.
 	// w is white.
 	// r is red.
 	// g is green.
@@ -572,70 +925,8 @@ void dd::Systems::LevelSystem::GetNextLevel()
 	glm::vec4 p4 = glm::vec4(125.f / 255.f, 0.f / 255.f, 147.f / 255.f, 1.f);
 
 
-
-
     if (m_CurrentCluster == 0) {
         if (m_CurrentLevel == 1) {
-            level =
-                    {0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 1, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0};
-			color = 
-					{w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w};
-        } else if (m_CurrentLevel == 2) {
-            level =
-                    {1, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0};
-			color = 
-					{w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w};
-        } else if (m_CurrentLevel == 3) {
-            level =
-                    {0, 0, 0, 0, 0, 0, 1,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0};
-			color = 
-					{w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w};
-        } else if (m_CurrentLevel == 4) {
-            level =
-                    {0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0,
-                     1, 0, 0, 0, 0, 0, 0};
-			color = 
-					{w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w,
-					 w, w, w, w, w, w, w};
-        } else if (m_CurrentLevel == 5) {
             level =
                     {0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
@@ -650,7 +941,82 @@ void dd::Systems::LevelSystem::GetNextLevel()
 					 w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w};
-        }
+        } else if (m_CurrentLevel == 2) {
+            level =
+                    {0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 100, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0};
+			color = 
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
+        } else if (m_CurrentLevel == 3) {
+            level =
+                    {0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     1, 0, 0, 0, 0, 0, 0};
+			color = 
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
+        } else if (m_CurrentLevel == 4) {
+            level =
+                    {0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 1};
+			color = 
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
+        } else if (m_CurrentLevel == 5) {
+            level =
+                    {0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 1, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 0};
+			color = 
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
+		} else if (m_CurrentLevel == 6) {
+					level =
+					{0, 0, 0, 1, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0};
+					color =
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
+		}
     } else if (m_CurrentCluster == 1) {
         if (m_CurrentLevel == 1) {
             level =
@@ -658,7 +1024,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 1, 1, 1, 1, 1, 1,
                      1, 0, 1, 2, 1, 0, 1,
                      0, 1, 0, 1, 0, 1, 0,
-                     1, 0, 1, 0, 1, 0, 1,
+                     0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0};
 			color = 
 					{w, w, w, w, w, w, w,
@@ -727,7 +1093,23 @@ void dd::Systems::LevelSystem::GetNextLevel()
 					 w, br, w, g, w, lb1, w,
 					 y, w, y, d, b, w, b,
 					 w, br, w, w, w, lb1, w};
-        }
+		}
+		else if (m_CurrentLevel == 6) {
+					level =
+					{0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 100, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 0, 0, 0, 0};
+					color =
+					{w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w,
+					 w, w, w, w, w, w, w};
+		}
     } else if (m_CurrentCluster == 3) {
 
     }

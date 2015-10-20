@@ -10,15 +10,17 @@
 #include "Core/ResourceManager.h"
 #include "Core/ConfigFile.h"
 #include "Sound.h"
-#include "Sound/EPlaySound.h"
-#include "Sound/EStopSound.h"
-#include "Sound/EMasterVolume.h"
 #include "Sound/CCollisionSound.h"
-#include "Physics/EContact.h"
 #include "Game/CBall.h"
 #include "Game/CBrick.h"
 #include "Game/CPad.h"
+#include "Sound/EPlaySound.h"
+#include "Sound/EStopSound.h"
+#include "Sound/EMasterVolume.h"
 #include "Physics/ECreateParticleSequence.h"
+#include "Physics/EContact.h"
+#include "Game/EGameStart.h"
+
 
 namespace dd
 {
@@ -36,11 +38,16 @@ public:
     void Update(double dt) override;
 
 private:
+	const std::string MENU_BGM = "Sounds/BGM/eastern-music.wav";
+	const std::string GAME_BGM = "Sounds/BGM/under-the-sea-n.wav";
+	const std::string WATER_BGM = "Sounds/BGM/water-flowing.wav";
+
     float m_BGMMasterVolume = 1.f;
     float m_SFXMasterVolume = 1.f;
     std::map<ALuint, Sound*> m_BGMSourcesToBuffers;
     std::map<ALuint, Sound*> m_SFXSourcesToBuffers;
     ALCdevice* m_Device = nullptr;
+	ALCcontext* m_Context = nullptr;
 
     //Events
     dd::EventRelay<SoundSystem, dd::Events::PlaySound> m_EPlaySFX;
@@ -52,6 +59,9 @@ private:
     bool OnStopSound(const dd::Events::StopSound &event);
     dd::EventRelay<SoundSystem, dd::Events::MasterVolume> m_EMasterVolume;
     bool OnMasterVolume(const dd::Events::MasterVolume &event);
+	dd::EventRelay<SoundSystem, dd::Events::GameStart> m_EGameStart;
+	bool OnGameStart(const dd::Events::GameStart &event);
+	
 
     ALuint CreateSource();
 };
