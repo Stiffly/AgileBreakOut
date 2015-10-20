@@ -53,6 +53,16 @@ file(GLOB SOURCE_FILES_Rendering
     "Rendering/*.cpp"
 )
 source_group(Rendering FILES ${SOURCE_FILES_Rendering})
+file(GLOB SOURCE_FILES_Rendering_OpenGL
+    "${INCLUDE_PATH}/Rendering/OpenGL/Rendering/*.h"
+    "Rendering/OpenGL/*.cpp"
+)
+source_group(Rendering\\OpenGL FILES ${SOURCE_FILES_Rendering_OpenGL})
+file(GLOB SOURCE_FILES_Rendering_DirectX
+    "${INCLUDE_PATH}/Rendering/DirectX/Rendering/*.h"
+    "Rendering/DirectX/*.cpp"
+)
+source_group(Rendering\\DirectX FILES ${SOURCE_FILES_Rendering_DirectX})
 
 file(GLOB SOURCE_FILES_Transform
     "${INCLUDE_PATH}/Transform/*.h"
@@ -61,8 +71,8 @@ file(GLOB SOURCE_FILES_Transform
 source_group(Transform FILES ${SOURCE_FILES_Transform})
 
 file(GLOB SOURCE_FILES_Physics
-        "${INCLUDE_PATH}/Physics/*.h"
-        "Physics/*.cpp"
+    "${INCLUDE_PATH}/Physics/*.h"
+    "Physics/*.cpp"
 )
 source_group(Physics FILES ${SOURCE_FILES_Physics})
 
@@ -102,14 +112,7 @@ set(SOURCE_FILES
     ${SOURCE_FILES_GUI}
 )
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-    set(STATIC_LIBRARY_FLAGS "${STATIC_LIBRARY_FLAGS}")
-endif()
-
-add_library(game ${SOURCE_FILES})
-target_link_libraries(game
+set(LIBRARIES
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${GLFW_LIBRARIES}
@@ -118,7 +121,33 @@ target_link_libraries(game
     ${PNG_LIBRARIES}
     ${X11_LIBRARIES}
     ${OPENAL_LIBRARY}
-	${liquidfun_LIBRARIES}
+    ${liquidfun_LIBRARIES}
+)
+    
+if(BUILD_RENDERER_OPENGL)
+    set(SOURCE_FILES ${SOURCE_FILES}
+        ${SOURCE_FILES_Rendering_OpenGL}
+    )
+endif()
+# Compiling for DirectX target
+if(BUILD_RENDERER_DIRECTX)
+    set(SOURCE_FILES ${SOURCE_FILES}
+        ${SOURCE_FILES_Rendering_DirectX}
+    )
+    set(LIBRARIES ${LIBRARIES}
+        ${CMAKE_LIBRARY_PATH}/DirectXTK.lib
+    )
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+    set(STATIC_LIBRARY_FLAGS "${STATIC_LIBRARY_FLAGS}")
+endif()
+
+add_library(game ${SOURCE_FILES})
+target_link_libraries(game
+    ${LIBRARIES}
 )
 
 add_executable(breakout 
@@ -126,14 +155,6 @@ add_executable(breakout
 )
 target_link_libraries(breakout
 	game
-    ${OPENGL_LIBRARIES}
-    ${GLEW_LIBRARIES}
-    ${GLFW_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${assimp_LIBRARIES}
-    ${PNG_LIBRARIES}
-	${X11_LIBRARIES}
-    ${OPENAL_LIBRARY}
-    ${liquidfun_LIBRARIES}
+    ${LIBRARIES}
 )
 

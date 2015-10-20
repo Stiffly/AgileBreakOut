@@ -62,7 +62,7 @@ void dd::Systems::LevelSystem::Initialize()
 		travels->CurrentlyTraveling = false;
 		auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
 		model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
-		model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 0.3f);
+		model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.f);
 		m_World->CommitEntity(t_halfPipe);
 
 		auto t_halfPipe2 = m_World->CloneEntity(t_halfPipe);
@@ -107,7 +107,7 @@ void dd::Systems::LevelSystem::Initialize()
 	particleEmitter->Spread = glm::pi<float>()*2;
 	particleEmitter->EmittingAngle = glm::pi<float>();
 	particleEmitter->LifeTime = 50;
-
+	
 	{
 	auto Pt = m_World->CreateEntity(Pe);
 	auto PtTransform = m_World->AddComponent<Components::Transform>(Pt);
@@ -443,7 +443,7 @@ EntityID dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spac
 	} else if (typeInt == KrakenAttackBrick) {
 		cBrick->Type = KrakenAttackBrick;
 		auto type = m_World->AddComponent<Components::KrakenAttackBrick>(brick);
-		model->Color = glm::vec4(0.f, 0.5f, 1.0f, .0f);
+		model->Color = glm::vec4(0.f, 0.5f, 1.0f, 1.0f);
 	} else if (typeInt == Kraken) {
 		Events::KrakenAppear e;
 		e.Position = transform->Position;
@@ -524,14 +524,14 @@ void dd::Systems::LevelSystem::GetBrickSet(int set) // These are sets the Kraken
 	// m is magenta.
 	// d is dark.
 	// Feel free to make your own.
-	glm::vec4 w = glm::vec4(1, 1, 1, 0);
-	glm::vec4 r = glm::vec4(1, 0, 0, 0);
-	glm::vec4 g = glm::vec4(0, 1, 0, 0);
-	glm::vec4 b = glm::vec4(0, 0, 1, 0);
-	glm::vec4 y = glm::vec4(1, 1, 0, 0);
-	glm::vec4 c = glm::vec4(0, 1, 1, 0);
-	glm::vec4 m = glm::vec4(1, 0, 1, 0);
-	glm::vec4 d = glm::vec4(0, 0, 0, 0);
+	glm::vec4 w = glm::vec4(1, 1, 1, 1);
+	glm::vec4 r = glm::vec4(1, 0, 0, 1);
+	glm::vec4 g = glm::vec4(0, 1, 0, 1);
+	glm::vec4 b = glm::vec4(0, 0, 1, 1);
+	glm::vec4 y = glm::vec4(1, 1, 0, 1);
+	glm::vec4 c = glm::vec4(0, 1, 1, 1);
+	glm::vec4 m = glm::vec4(1, 0, 1, 1);
+	glm::vec4 d = glm::vec4(0, 0, 0, 1);
 
 	if (set == 1) {
 		level =
@@ -975,14 +975,14 @@ void dd::Systems::LevelSystem::GetNextLevel()
 	// m is magenta.
 	// d is dark.
 	// Feel free to make your own.
-	glm::vec4 w = glm::vec4(1, 1, 1, 0);
-	glm::vec4 r = glm::vec4(1, 0, 0, 0);
-	glm::vec4 g = glm::vec4(0, 1, 0, 0);
-	glm::vec4 b = glm::vec4(0, 0, 1, 0);
-	glm::vec4 y = glm::vec4(1, 1, 0, 0);
-	glm::vec4 c = glm::vec4(0, 1, 1, 0);
-	glm::vec4 m = glm::vec4(1, 0, 1, 0);
-	glm::vec4 d = glm::vec4(0, 0, 0, 0);
+	glm::vec4 w = glm::vec4(1, 1, 1, 1);
+	glm::vec4 r = glm::vec4(1, 0, 0, 1);
+	glm::vec4 g = glm::vec4(0, 1, 0, 1);
+	glm::vec4 b = glm::vec4(0, 0, 1, 1);
+	glm::vec4 y = glm::vec4(1, 1, 0, 1);
+	glm::vec4 c = glm::vec4(0, 1, 1, 1);
+	glm::vec4 m = glm::vec4(1, 0, 1, 1);
+	glm::vec4 d = glm::vec4(0, 0, 0, 1);
 
 	//glm::vec4 p4 = glm::vec4(asd.f / 255.f, asd.f / 255.f, sad.f / 255.f, 1.f);
 	glm::vec4 br = glm::vec4(143.f / 255.f, 98.f / 255.f, 0.f / 255.f, 1.f);
