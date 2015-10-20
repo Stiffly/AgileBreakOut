@@ -121,6 +121,27 @@ bool dd::Systems::ProjectileSystem::OnActionButton(const dd::Events::ActionButto
 		transform->Position = event.Position;
 		transform->Velocity = glm::vec3(0, 7, 0);
 		m_Shots--;
+		Events::CreateParticleSequence e;
+		e.parent = ent;
+		e.EmitterLifeTime = 1.0;
+		e.EmittingAngle = glm::half_pi<float>();
+		e.Spread = 0.f;
+		e.SpawnRate = 0.2;
+		//e.NumberOfTicks = 1;
+		e.ParticleLifeTime = 0.5f;
+		e.ParticlesPerTick = 1;
+		e.Position = event.Position;
+		e.ScaleValues.clear();
+		e.ScaleValues.push_back(glm::vec3(0.1f));
+		e.RadiusDistribution = 0.3;
+		e.ScaleValues.push_back(glm::vec3(0.f, 0.f, 0.2f));
+		e.SpriteFile = "Textures/Particles/FadeBall.png";
+		e.Color = glm::vec4(0, 0, 0, 1);
+		e.AlphaValues.clear();
+		e.AlphaValues.push_back(1.f);
+		e.AlphaValues.push_back(0.f);
+		e.Speed = 20.f;
+		EventBroker->Publish(e);
 		if (m_Shots <= 0) {
 			auto ball = m_World->GetComponent<Components::Ball>(m_AttachedSquid);
 			m_InkBlaster = false;

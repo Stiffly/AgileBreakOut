@@ -910,8 +910,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
 	glm::vec4 p2 = glm::vec4(255.f / 255.f, 81.f / 255.f, 253.f / 255.f, 1.f);
 	glm::vec4 p3 = glm::vec4(189.f / 255.f, 0.f / 255.f, 187.f / 255.f, 1.f);
 	glm::vec4 p4 = glm::vec4(125.f / 255.f, 0.f / 255.f, 147.f / 255.f, 1.f);
-
-
+	m_CurrentLevel = 4;
     if (m_CurrentCluster == 0) {
         if (m_CurrentLevel == 1) {
             level =
