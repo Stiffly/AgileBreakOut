@@ -112,6 +112,17 @@ set(SOURCE_FILES
     ${SOURCE_FILES_GUI}
 )
 
+set(LIBRARIES
+${OPENGL_LIBRARIES}
+    ${GLEW_LIBRARIES}
+    ${GLFW_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${assimp_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${X11_LIBRARIES}
+    ${OPENAL_LIBRARY}
+    ${liquidfun_LIBRARIES}
+)
     
 if(BUILD_RENDERER_OPENGL)
     set(SOURCE_FILES ${SOURCE_FILES}
@@ -123,6 +134,9 @@ if(BUILD_RENDERER_DIRECTX)
     set(SOURCE_FILES ${SOURCE_FILES}
         ${SOURCE_FILES_Rendering_DirectX}
     )
+    set(LIBRARIES ${LIBRARIES}
+        ${CMAKE_LIBRARY_PATH}/DirectXTK.lib
+    )
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -132,33 +146,12 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 add_library(game ${SOURCE_FILES})
-target_link_libraries(game
-    ${OPENGL_LIBRARIES}
-    ${GLEW_LIBRARIES}
-    ${GLFW_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${assimp_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${X11_LIBRARIES}
-    ${OPENAL_LIBRARY}
-	${liquidfun_LIBRARIES}
-    ${CMAKE_LIBRARY_PATH}/DirectXTK.lib
-)
 
 add_executable(breakout 
 	main.cpp
 )
 target_link_libraries(breakout
 	game
-    ${OPENGL_LIBRARIES}
-    ${GLEW_LIBRARIES}
-    ${GLFW_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${assimp_LIBRARIES}
-    ${PNG_LIBRARIES}
-	${X11_LIBRARIES}
-    ${OPENAL_LIBRARY}
-    ${liquidfun_LIBRARIES}
-    ${CMAKE_LIBRARY_PATH}/DirectXTK.lib
+    ${LIBRARIES}
 )
 

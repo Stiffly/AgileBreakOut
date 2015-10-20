@@ -31,6 +31,7 @@ if(BUILD_RENDERER_OPENGL)
 endif()
 # Compiling for DirectX target
 if(BUILD_RENDERER_DIRECTX)
+    add_definitions(-DBUILD_RENDERER_DIRECTX)
     include_directories(${PROJECT_SOURCE_DIR}/include/Rendering/DirectX)
 endif()
 
