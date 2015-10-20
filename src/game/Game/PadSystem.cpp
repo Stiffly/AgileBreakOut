@@ -57,17 +57,6 @@ void dd::Systems::PadSystem::Initialize()
         m_World->CommitEntity(ent);
 
         SetEdge(3.2 - (ctransform->Scale.x / 2));
-
-
-		{
-			auto entArm = m_World->CreateEntity(ent);
-			auto ctransform = m_World->AddComponent<Components::Transform>(entArm);
-			ctransform->Position = glm::vec3(1.f, -3.0f, 0.f);
-			auto cModel = m_World->AddComponent<Components::Model>(entArm);
-			cModel->ModelFile = "Models/Kraken/Arm.dae";
-			auto animationComponent = m_World->AddComponent<Components::Animation>(entArm);
-			animationComponent->Speed = 1.0f;
-		}
     }
 
 	//Stick
@@ -150,15 +139,6 @@ void dd::Systems::PadSystem::Update(double dt)
 		Events::KrakenAttack e;
 		e.ChargeUpdate = m_KrakenCharge;
 		EventBroker->Publish(e);
-
-		{
-			auto m_KrakenArm = m_World->CreateEntity();
-			auto transform = m_World->AddComponent<Components::Transform>(m_KrakenArm);
-			transform->Position = glm::vec3(0.f, -3.5f, -10.f);
-			auto model = m_World->AddComponent<Components::Model>(m_KrakenArm);
-			m_World->CommitEntity(m_KrakenArm);
-		}
-
 		return;
 	}
 
@@ -466,6 +446,17 @@ bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &even
 		transform->Velocity = glm::vec3(0, 0, 0);
 		acceleration = glm::vec3(0, 0, 0);
 
+		if (!m_KrakenArm){
+			m_KrakenArm = m_World->CreateEntity(Entity());
+			auto transform = m_World->AddComponent<Components::Transform>(m_KrakenArm);
+			transform->Position = glm::vec3(1.f, -3.0f, 0.f);
+			auto model = m_World->AddComponent<Components::Model>(m_KrakenArm);
+			model->ModelFile = "Models/kraken/Arm.dae";
+			auto animation = m_World->AddComponent<Components::Animation>(m_KrakenArm);
+			animation->Speed = 1.0f;
+			m_World->CommitEntity(m_KrakenArm);
+		}
+
 		SetTransform(transform);
 		SetAcceleration(acceleration);
 	} else if (m_KrakenCharge >= 1) {
@@ -473,6 +464,10 @@ bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &even
 		m_KrakenCharge = 0;
 		m_KrakenStrength = 0;
 		m_PlayerStrength = 0;
+
+		m_World->RemoveEntity(m_KrakenArm);
+		m_KrakenArm = NULL;
+		
 	}
 	return true;
 }

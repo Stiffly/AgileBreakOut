@@ -103,6 +103,7 @@ private:
 	double m_KrakenStrength = 0;
 	double m_PlayerStrength = 0;
     float m_Edge = 2.8f;
+	EntityID m_KrakenArm;
     Components::Transform* m_Transform = nullptr;
     Components::Pad* m_Pad = nullptr;
 	std::shared_ptr<Components::Transform> m_StickTransform;
