@@ -76,17 +76,17 @@ private:
 	{
 		m_ScoreNumberFrame->SetLeft(Width / 2.f - m_ScoreNumberFrame->Width / 2.f);
 
-		m_ScoreBackMid->SetLeft(m_ScoreNumberFrame->Left());
 		m_ScoreBackMid->Width = m_ScoreNumberFrame->Width;
 		m_ScoreBackMid->Height = m_ScoreNumberFrame->Height + 35;
+		m_ScoreBackMid->SetLeft(m_ScoreNumberFrame->Left() + 4);
 
-		m_ScoreBackLeft->SetRight(m_ScoreBackMid->Left());
-		m_ScoreBackLeft->Width = 40;
+		//m_ScoreBackLeft->Width = 40;
 		m_ScoreBackLeft->Height = m_ScoreBackMid->Height;
+		m_ScoreBackLeft->SetRight(m_ScoreBackMid->Left());
 
-		m_ScoreBackRight->SetLeft(m_ScoreBackMid->Right());
-		m_ScoreBackRight->Width = 40;
+		//m_ScoreBackRight->Width = 40;
 		m_ScoreBackRight->Height = m_ScoreBackMid->Height;
+		m_ScoreBackRight->SetLeft(m_ScoreBackMid->Right());
 	}
 
 	bool OnScore(const Events::ScoreEvent& event)
