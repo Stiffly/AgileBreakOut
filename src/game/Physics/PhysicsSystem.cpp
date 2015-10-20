@@ -30,7 +30,7 @@ void dd::Systems::PhysicsSystem::Initialize()
 
 void dd::Systems::PhysicsSystem::InitializeWater()
 {
-    float radius = 0.13f;
+	float radius = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Water.Radius", 0.2f);
     float gravityScale = 1.0f;
 
     b2ParticleSystemDef m_ParticleSystemDef;
@@ -486,6 +486,7 @@ void dd::Systems::PhysicsSystem::CreateParticleGroup(EntityID e)
 
                 transformChild->Position = glm::vec3(t_ParticlePositions[i].x - transform->Position.x, t_ParticlePositions[i].y - transform->Position.y, -9.5f);
                 transformChild->Scale = glm::vec3(m_WaterParticleSystem->GetRadius())/transform->Scale;
+				transformChild->Scale *= 2;
                 m_World->CommitEntity(t_waterparticle);
 
                 m_EntitiesToWaterParticleHandle.insert(std::make_pair(t_waterparticle, m_WaterParticleSystem->GetParticleHandleFromIndex(i)));

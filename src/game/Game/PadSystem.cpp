@@ -285,7 +285,7 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 	} else if (val == GLFW_KEY_I) {
 		Events::InkBlaster e;
 		e.Shots = 5;
-		e.Speed = 5;
+		e.Speed = 7;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_K) {
 		Events::KrakenAttack e;

@@ -206,6 +206,7 @@ public:
 		m_World->ComponentFactory.Register<Components::ParticleEmitter>();
 		m_World->Initialize();
 
+		//auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
 		//EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &Engine::OnGameStart);
 		m_EGameStart = decltype(m_EGameStart)(std::bind(&Engine::OnGameStart, this, std::placeholders::_1));
 		m_EventBroker->Subscribe(m_EGameStart);

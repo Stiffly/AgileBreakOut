@@ -76,7 +76,7 @@ protected:
 			e.FrameName = m_Name;
 			EventBroker->Publish(e);
 			Events::PlaySound soundEvent;
-			soundEvent.FilePath = "Sounds/GUI/hover.wav";
+			soundEvent.FilePath = "Sounds/GUI/hover-n.wav";
 			EventBroker->Publish(soundEvent);
 			
 		} else if (!isOver && m_MouseIsOver) { // Leave

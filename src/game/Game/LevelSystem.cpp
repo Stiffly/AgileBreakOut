@@ -25,6 +25,8 @@ void dd::Systems::LevelSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EBrickGenerating, &LevelSystem::OnBrickGenerating);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenDefeated, &LevelSystem::OnKrakenDefeated);
 
+	m_GodMode = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue("Cheat.GodMode", false);
+
 	//PointLightTest
 	{
 		auto t_Light = m_World->CreateEntity();
@@ -137,8 +139,11 @@ void dd::Systems::LevelSystem::Initialize()
 		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
 		physics->CollisionType = CollisionType::Type::Static;
 		physics->Category = CollisionLayer::Wall;
-		physics->Calculate = true;
-		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy);
+		if (m_GodMode) {
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy | CollisionLayer::Ball);
+		} else {
+			physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy);
+		}
 		m_World->CommitEntity(BottomWall);
 
 		m_World->SetProperty(BottomWall, "Name", "BottomWall");
@@ -291,7 +296,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 			} else if (brick->Type == InkBlasterBrick) {
 				Events::InkBlaster e;
 				e.Shots = 5;
-				e.Speed = 5;
+				e.Speed = 7;
 				EventBroker->Publish(e);
 			} else if(brick->Type == KrakenAttackBrick) {
 				Events::KrakenAttack e;
@@ -680,7 +685,7 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 					Events::InkBlaster e;
 					e.Transform = transformComponentBrick;
 					e.Shots = 5;
-					e.Speed = 5;
+					e.Speed = 7;
 					EventBroker->Publish(e);
 				}
 				else {
@@ -1019,7 +1024,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 1, 1, 1, 1, 1, 1,
                      1, 0, 1, 2, 1, 0, 1,
                      0, 1, 0, 1, 0, 1, 0,
-                     1, 0, 1, 0, 1, 0, 1,
+                     0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0};
 			color = 
 					{w, w, w, w, w, w, w,

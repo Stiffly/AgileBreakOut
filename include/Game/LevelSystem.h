@@ -14,6 +14,8 @@
 #include "Core/CTemplate.h"
 #include "Core/EventBroker.h"
 #include "Core/World.h"
+#include "Core/ResourceManager.h"
+#include "Core/ConfigFile.h"
 #include "Rendering/CSprite.h"
 #include "Rendering/CModel.h"
 #include "Rendering/CPointLight.h"
@@ -153,6 +155,7 @@ private:
     float m_SpaceToEdge = 0.25f;
     glm::vec2 m_SpaceBetweenBricks = glm::vec2(1, 0.4);
     float m_NotResettingTheStage = 5.f;
+	bool m_GodMode = false;
 
     const int EmptyBrickSpace = 0;
     const int StandardBrick = 1;

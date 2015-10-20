@@ -5,6 +5,8 @@
 #ifndef DAYDREAM_LIFEBUOYSYSTEM_H
 #define DAYDREAM_LIFEBUOYSYSTEM_H
 
+#include <fstream>
+#include <iostream>
 #include "Core/System.h"
 #include "Core/CTransform.h"
 #include "Core/CTemplate.h"
@@ -19,8 +21,7 @@
 #include "Game/ELifebuoy.h"
 #include "Game/ELifebuoyHit.h"
 #include "Game/CLifebuoy.h"
-#include <fstream>
-#include <iostream>
+#include "Physics/ECreateParticleSequence.h"
 
 namespace dd
 {

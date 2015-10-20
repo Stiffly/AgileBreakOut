@@ -23,6 +23,7 @@
 #include "Game/EHitPad.h"
 #include "Game/CProjectile.h"
 #include "Game/CBall.h"
+#include "Rendering/CSprite.h"
 #include <fstream>
 #include <iostream>
 

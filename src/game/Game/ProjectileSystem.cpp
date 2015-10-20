@@ -31,9 +31,11 @@ void dd::Systems::ProjectileSystem::Initialize()
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Pad | CollisionLayer::Type::Brick | CollisionLayer::Type::Wall);
 		physics->Calculate = true;
 		ctransform->Position = glm::vec3(0.f, 0.f, -10.f);
-		ctransform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
-		auto cModel = m_World->AddComponent<Components::Model>(ent);
-		cModel->ModelFile = "Models/Test/Ball/Sid.obj";
+		ctransform->Scale = glm::vec3(0.6f, 0.6f, 0.6f);
+// 		auto cModel = m_World->AddComponent<Components::Model>(ent);
+// 		cModel->ModelFile = "Models/Test/Ball/Sid.obj";
+		auto cSprite = m_World->AddComponent<Components::Sprite>(ent);
+		cSprite->SpriteFile = "Textures/Particles/OilShot.png";
 		auto projectile = m_World->AddComponent<Components::Projectile>(ent);
 
 		m_World->CommitEntity(ent);
