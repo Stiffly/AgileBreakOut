@@ -139,7 +139,15 @@ void dd::Systems::PadSystem::Update(double dt)
 		Events::KrakenAttack e;
 		e.ChargeUpdate = m_KrakenCharge;
 		EventBroker->Publish(e);
-		//std::cout << "Charge: " << m_KrakenCharge << std::endl;
+
+		{
+			auto m_KrakenArm = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(m_KrakenArm);
+			transform->Position = glm::vec3(0.f, -3.5f, -10.f);
+			auto model = m_World->AddComponent<Components::Model>(m_KrakenArm);
+			m_World->CommitEntity(m_KrakenArm);
+		}
+
 		return;
 	}
 
