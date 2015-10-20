@@ -17,13 +17,18 @@
 #include "Physics/CCircleShape.h"
 #include "Physics/CPhysics.h"
 #include "Physics/EContact.h"
+#include "Physics/ESetImpulse.h"
+#include "Physics/ECreateParticleSequence.h"
 #include "Game/EPause.h"
 #include "Game/EResume.h"
 #include "Game/EKrakenAppear.h"
 #include "Game/EKrakenAttack.h"
+#include "Game/EKrakenHit.h"
+#include "Game/EKrakenDefeated.h"
 #include "Game/EBrickGenerating.h"
 #include "Game/CTravels.h"
 #include "Game/CKraken.h"
+#include "Game/CBall.h"
 #include "Sound/CCollisionSound.h"
 //#include "Core/Camera.h" Camera Component
 
@@ -69,12 +74,16 @@ private:
 	dd::EventRelay<KrakenSystem, dd::Events::Contact> m_EContact;
 	dd::EventRelay<KrakenSystem, dd::Events::KrakenAppear> m_EKrakenAppear;
 	dd::EventRelay<KrakenSystem, dd::Events::KrakenAttack> m_EKrakenAttack;
+	dd::EventRelay<KrakenSystem, dd::Events::KrakenHit> m_EKrakenHit;
+	dd::EventRelay<KrakenSystem, dd::Events::KrakenDefeated> m_EKrakenDefeated;
 	dd::EventRelay<KrakenSystem, dd::Events::BrickGenerating> m_EBrickGenerating;
     bool OnPause(const dd::Events::Pause &event);
 	bool OnResume(const dd::Events::Resume &event);
 	bool OnContact(const dd::Events::Contact &event);
 	bool OnKrakenAppear(const dd::Events::KrakenAppear &event);
 	bool OnKrakenAttack(const dd::Events::KrakenAttack &event);
+	bool OnKrakenHit(const dd::Events::KrakenHit &event);
+	bool OnKrakenDefeated(const dd::Events::KrakenDefeated &event);
 	bool OnBrickGenerating(const dd::Events::BrickGenerating &event);
 	void GetBrickSet();
 };

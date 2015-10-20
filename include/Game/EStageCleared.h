@@ -17,6 +17,7 @@ struct StageCleared : Event
 {
     int ClearedStage = 0;
     int StageCluster = 0;
+	int StagesInCluster = 6;
 };
 
 }

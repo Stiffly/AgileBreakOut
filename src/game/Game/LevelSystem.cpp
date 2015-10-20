@@ -18,10 +18,12 @@ void dd::Systems::LevelSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &LevelSystem::OnMultiBallLost);
 	EVENT_SUBSCRIBE_MEMBER(m_EPowerUpTaken, &LevelSystem::OnPowerUpTaken);
 	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &LevelSystem::OnStageCleared);
+	EVENT_SUBSCRIBE_MEMBER(m_EArrivedAtNewStage, &LevelSystem::OnArrivedAtNewStage);
 	EVENT_SUBSCRIBE_MEMBER(m_EPause, &LevelSystem::OnPause);
 	EVENT_SUBSCRIBE_MEMBER(m_EResume, &LevelSystem::OnResume);
 	EVENT_SUBSCRIBE_MEMBER(m_EHitPad, &LevelSystem::OnHitPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EBrickGenerating, &LevelSystem::OnBrickGenerating);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenDefeated, &LevelSystem::OnKrakenDefeated);
 
 	//PointLightTest
 	{
@@ -82,16 +84,7 @@ void dd::Systems::LevelSystem::Initialize()
 	}*/
 
 	//			auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
-	//Water test
-	{
-		auto t_waterBody = m_World->CreateEntity();
-		auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
-		transform->Position = glm::vec3(0.f, -3.5f, -10.f);
-		transform->Scale = glm::vec3(7.0f, 1.5f, 1.f);
-		auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
-		auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
-		m_World->CommitEntity(t_waterBody);
-	}
+	
 
 	//ParticleTest
 
@@ -132,20 +125,23 @@ void dd::Systems::LevelSystem::Initialize()
 	//TODO: Why does the ball not collide with these bricks?
 	//BottomBox
 	{
-		auto BottomWall = m_World->CreateEntity();
+		EntityID BottomWall = m_World->CreateEntity();
 		auto transform = m_World->AddComponent<Components::Transform>(BottomWall);
 		auto wall = m_World->AddComponent<Components::Wall>(BottomWall);
 		transform->Position = glm::vec3(0.f, -6.f, -10.f);
 		transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
-		//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
-		//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+		std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
+		sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 		std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(BottomWall);
 		rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
 		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
 		physics->CollisionType = CollisionType::Type::Static;
 		physics->Category = CollisionLayer::Wall;
+		physics->Calculate = true;
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::LifeBuoy);
 		m_World->CommitEntity(BottomWall);
+
+		m_World->SetProperty(BottomWall, "Name", "BottomWall");
 	}
 
 	{
@@ -295,6 +291,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 			} else if (brick->Type == InkBlasterBrick) {
 				Events::InkBlaster e;
 				e.Shots = 5;
+				e.Speed = 5;
 				EventBroker->Publish(e);
 			} else if(brick->Type == KrakenAttackBrick) {
 				Events::KrakenAttack e;
@@ -315,6 +312,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
             Events::StageCleared ec;
             ec.ClearedStage = m_CurrentLevel;
             ec.StageCluster = m_CurrentCluster;
+			ec.StagesInCluster = m_StagesInCluster;
             EventBroker->Publish(ec);
         } else {
             if (ball != nullptr && MultiBalls() > 0) {
@@ -682,6 +680,7 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 					Events::InkBlaster e;
 					e.Transform = transformComponentBrick;
 					e.Shots = 5;
+					e.Speed = 5;
 					EventBroker->Publish(e);
 				}
 				else {
@@ -704,8 +703,6 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 	auto brickChildren = m_World->GetEntityChildren(entityBrick);
 	for (auto b : brickChildren)
 	{
-
-
 		auto cTransform = m_World->GetComponent<Components::Transform>(b);
 		cTransform->Position = cTransform->Position + transformComponentBrick->Position;
 		glm::vec2 ballToBrick = 4.f * glm::normalize(glm::vec2(cTransform->Position.x - transformComponentHitter->Position.x, cTransform->Position.y - transformComponentHitter->Position.y));
@@ -831,6 +828,16 @@ bool dd::Systems::LevelSystem::OnPowerUpTaken(const dd::Events::PowerUpTaken &ev
     return true;
 }
 
+bool dd::Systems::LevelSystem::OnKrakenDefeated(const dd::Events::KrakenDefeated &event)
+{
+	SetNumberOfBricks(NumberOfBricks() - 1);
+	m_LooseBricks--;
+
+	std::cout << m_LooseBricks << std::endl;
+
+	return true;
+}
+
 bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &event)
 {
     if (!m_Cleared) {
@@ -842,12 +849,13 @@ bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &ev
         es.Score = 500;
         EventBroker->Publish(es);
         m_CurrentLevel++;
-        if (m_CurrentLevel < 6) {
+        if (m_CurrentLevel <= event.StagesInCluster) {
             GetNextLevel();
             CreateLevel(12); //NextLevelDistance
 		} else {
 			// Win
 			Events::ClusterClear e;
+			e.ClusterCleared = m_CurrentCluster;
 			EventBroker->Publish(e);
 
 			Events::Pause p;
@@ -856,6 +864,12 @@ bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &ev
 		}
     }
     return true;
+}
+
+bool dd::Systems::LevelSystem::OnArrivedAtNewStage(const dd::Events::ArrivedAtNewStage &event)
+{
+	m_Cleared = false;
+	return true;
 }
 
 void dd::Systems::LevelSystem::GetNextLevel()

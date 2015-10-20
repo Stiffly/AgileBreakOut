@@ -15,7 +15,7 @@ namespace Components
 
 struct Projectile : Component
 {
-
+	float Speed = 5;
 };
 
 }

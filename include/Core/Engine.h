@@ -59,6 +59,7 @@
 #include "Game/LifebuoySystem.h"
 #include "Game/ProjectileSystem.h"
 #include "Game/KrakenSystem.h"
+#include "Game/WaterSystem.h"
 #include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Game/BrickComponents.h"
@@ -164,7 +165,7 @@ public:
 		m_World->ComponentFactory.Register<Components::KrakenAttackBrick>();
 
 		m_World->SystemFactory.Register<Systems::LevelSystem>(
-				[this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
+			[this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LevelSystem>();
 		m_World->SystemFactory.Register<Systems::PadSystem>(
 				[this]() { return new Systems::PadSystem(m_World.get(), m_EventBroker); });
@@ -193,6 +194,9 @@ public:
 		m_World->SystemFactory.Register<Systems::KrakenSystem>(
 			[this]() { return new Systems::KrakenSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::KrakenSystem>();
+		m_World->SystemFactory.Register<Systems::WaterSystem>(
+			[this]() { return new Systems::WaterSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::WaterSystem>();
 
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
