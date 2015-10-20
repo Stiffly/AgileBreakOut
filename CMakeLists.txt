@@ -2,9 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(daydream)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${PROJECT_SOURCE_DIR}/deps/include")
-
 
 if(MINGW)
     set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${PROJECT_SOURCE_DIR}/deps/lib/mingw/x64")
@@ -24,6 +22,18 @@ endif()
 
 set(BUILD_SHARED_LIBS FALSE)
 include_directories(${PROJECT_SOURCE_DIR}/include)
+
+option(BUILD_RENDERER_OPENGL "Build with OpenGL 4.4 renderer" ON)
+option(BUILD_RENDERER_DIRECTX "Build with DirectX 11 renderer" OFF)
+# Compiling for OpenGL target
+if(BUILD_RENDERER_OPENGL)
+    include_directories(${PROJECT_SOURCE_DIR}/include/Rendering/OpenGL)
+endif()
+# Compiling for DirectX target
+if(BUILD_RENDERER_DIRECTX)
+    add_definitions(-DBUILD_RENDERER_DIRECTX)
+    include_directories(${PROJECT_SOURCE_DIR}/include/Rendering/DirectX)
+endif()
 
 #set(GLEW_INCLUDE_DIR ${daydream_SOURCE_DIR}/libs/glew-1.11.0/include)
 #set(GLEW_LIBRARY ${daydream_SOURCE_DIR}/libs/glew-1.11.0/lib/Release/glew32.lib)

@@ -4,13 +4,19 @@ SET DeployLocation=bin\
 
 ECHO Deploying resources to %DeployLocation%
 :: Asset folders
+RMDIR "%DeployLocation%\Models"
+RMDIR "%DeployLocation%\Textures"
+RMDIR "%DeployLocation%\Sounds"
 MKLINK "%DeployLocation%\Models\" "assets\Models" /J
 MKLINK "%DeployLocation%\Textures\" "assets\Textures\" /J
 MKLINK "%DeployLocation%\Sounds\" "assets\Sounds\" /J
 :: Configuration files
 MKLINK "%DeployLocation%\DefaultConfig.ini" "assets\DefaultConfig.ini" /H
 :: Shaders
-MKLINK "%DeployLocation%\Shaders\" "src\game\Core\Shaders\" /J
+RMDIR /S /Q "%DeployLocation%\Shaders"
+MKDIR "%DeployLocation%\Shaders"
+MKLINK "%DeployLocation%\Shaders\OpenGL\" "src\game\Rendering\OpenGL\Shaders\" /J
+MKLINK "%DeployLocation%\Shaders\DirectX\" "src\game\Rendering\DirectX\Shaders\" /J
 :: Platform specific binaries
 IF "%~1"=="" GOTO :EOF
 ECHO Deploying %1 binaries to %DeployLocation%

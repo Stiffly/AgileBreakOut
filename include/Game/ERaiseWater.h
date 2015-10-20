@@ -16,6 +16,7 @@ namespace Events
 struct RaiseWater : Event
 {
 	float Amount;
+	float Speed;
 };
 
 }

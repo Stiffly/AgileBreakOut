@@ -2,7 +2,7 @@
 #define GUI_TextureFrame_h__
 
 #include "GUI/Frame.h"
-#include "Core/Texture.h"
+#include "Rendering/Texture.h"
 
 namespace dd
 {
@@ -29,7 +29,7 @@ public:
 			job.Scissor = (m_ScissorEnabled) ? m_Parent->AbsoluteRectangle() : Rectangle();
 			job.Viewport = Rectangle(Left(), Top(), Width, Height);
 			job.TextureID = m_FadeTexture->ResourceID;
-			job.DiffuseTexture = *m_FadeTexture;
+			job.DiffuseTexture = m_FadeTexture;
 			job.Color = glm::vec4(m_Color.r, m_Color.g, m_Color.b, m_Color.a);
 			job.Name = Name();
 			rq.GUI.Add(job);
@@ -41,7 +41,7 @@ public:
 			job.Scissor = (m_ScissorEnabled) ? m_Parent->AbsoluteRectangle() : Rectangle();
 			job.Viewport = Rectangle(Left(), Top(), Width, Height);
 			job.TextureID = m_Texture->ResourceID;
-			job.DiffuseTexture = *m_Texture;
+			job.DiffuseTexture = m_Texture;
 			job.Color = glm::vec4(m_Color.r, m_Color.g, m_Color.b, m_Color.a * m_CurrentFade);
 			job.Name = Name();
 			rq.GUI.Add(job);

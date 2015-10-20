@@ -27,7 +27,13 @@
 // OpenGL
 #include <GL/glew.h>
 #define GLFW_INCLUDE_GLU
+#define NOMINMAX
 #include <GLFW/glfw3.h>
+#ifdef BUILD_RENDERER_DIRECTX
+	#define GLFW_EXPOSE_NATIVE_WIN32
+	#define GLFW_EXPOSE_NATIVE_WGL
+	#include <GLFW/glfw3native.h>
+#endif
 #include <glext.h>
 #include "Core/Util/GLError.h"
 

@@ -20,7 +20,7 @@
 #define Components_PointLight_h__
 
 #include "Core/Component.h"
-#include "Core/Color.h"
+#include "Rendering/Color.h"
 
 namespace dd
 {
