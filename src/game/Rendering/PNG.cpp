@@ -75,8 +75,6 @@ dd::PNG::PNG(std::string path)
 	}
 	switch (color_type) {
 		case PNG_COLOR_TYPE_RGB:
-			Format = Image::ImageFormat::RGB;
-			break;
 		case PNG_COLOR_TYPE_RGBA:
 			Format = Image::ImageFormat::RGBA;
 			break;
@@ -84,8 +82,15 @@ dd::PNG::PNG(std::string path)
 			LOG_ERROR("libpng: Unsupported color format \"%i\" of image \"%s\"", color_type, path.c_str());
 			return;
 	}
-	unsigned int row_bytes = png_get_rowbytes(png_ptr, info_ptr);
 
+	// Convert RGB to RGBA, since DirectX rather treat them all the same way
+	if (color_type == PNG_COLOR_TYPE_RGB) {
+		LOG_DEBUG("Converting RGB to RGBA for \"%s\"", path.c_str());
+		png_set_add_alpha(png_ptr, 0xff, PNG_FILLER_AFTER);
+		png_read_update_info(png_ptr, info_ptr);
+	}
+	
+	unsigned int row_bytes = png_get_rowbytes(png_ptr, info_ptr);
 	this->Data = new unsigned char[height * row_bytes];
 	png_bytep* row_pointers = new png_bytep[height];
 
