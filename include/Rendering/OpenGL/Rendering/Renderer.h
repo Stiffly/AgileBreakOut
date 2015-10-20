@@ -30,6 +30,8 @@
 #include "Core/EventBroker.h"
 #include "Core/World.h"
 #include "Game/EScreenShake.h"
+#include "Rendering/Model.h"
+#include "Rendering/Texture.h"
 
 namespace dd
 {

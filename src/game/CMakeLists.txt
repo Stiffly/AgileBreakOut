@@ -104,8 +104,8 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Core_Util}
     ${SOURCE_FILES_Input}
     ${SOURCE_FILES_Rendering}
-    #${SOURCE_FILES_Rendering_OpenGL}
-    ${SOURCE_FILES_Rendering_DirectX}
+    ${SOURCE_FILES_Rendering_OpenGL}
+    #${SOURCE_FILES_Rendering_DirectX}
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Physics}
     ${SOURCE_FILES_Game}

@@ -37,8 +37,6 @@ public:
 	GLuint VAO;
 	GLuint ElementBuffer;
 
-	glm::mat4 m_Matrix;
-
 private:
 	GLuint VertexBuffer;
 	GLuint DiffuseVertexColorBuffer;

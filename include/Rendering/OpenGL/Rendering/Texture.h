@@ -36,9 +36,6 @@ public:
 
 	void Bind(GLenum textureUnit = GL_TEXTURE0);
 
-	operator GLuint() const { return m_Texture; }
-
-private:
 	GLuint m_Texture = 0;
 };
 
