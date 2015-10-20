@@ -13,20 +13,31 @@
 #include "Core/EventBroker.h"
 #include "Core/EKeyDown.h"
 #include "Core/EKeyUp.h"
+
 #include "Input/EBindKey.h"
+
 #include "Physics/EContact.h"
 #include "Physics/CRectangleShape.h"
+#include "Physics/CWaterVolume.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/ESetImpulse.h"
+
 #include "Rendering/CSprite.h"
 #include "Rendering/CModel.h"
+
+#include "Transform/EMove.h"
+#include "Transform/ERotate.h"
+
 #include "Game/CBall.h"
 #include "Game/CPad.h"
 #include "Game/CPowerUp.h"
 #include "Game/CStickyAim.h"
 #include "Game/EResetBall.h"
+#include "Game/EResetAll.h"
+#include "Game/ERaiseWater.h"
 #include "Game/EMultiBall.h"
+#include "Game/ELifebuoy.h"
 #include "Game/EStickyPad.h"
 #include "Game/EStickyAttachedToPad.h"
 #include "Game/EInkBlaster.h"
@@ -34,10 +45,13 @@
 #include "Game/EPowerUpTaken.h"
 #include "Game/EStageCleared.h"
 #include "Game/EPause.h"
+#include "Game/EResume.h"
 #include "Game/EHitLag.h"
 #include "Game/EScreenShake.h"
 #include "Game/EActionButton.h"
 #include "Rendering/CAnimation.h"
+
+#include "Game/EBrickGenerating.h"
 
 
 namespace dd
@@ -103,7 +117,10 @@ private:
     dd::EventRelay<PadSystem, dd::Events::Contact> m_EContactPowerUp;
     dd::EventRelay<PadSystem, dd::Events::StageCleared> m_EStageCleared;
 	dd::EventRelay<PadSystem, dd::Events::ResetBall> m_EResetBall;
+	dd::EventRelay<PadSystem, dd::Events::ResetAll> m_EResetAll;
+	dd::EventRelay<PadSystem, dd::Events::RaiseWater> m_ERaiseWater;
     dd::EventRelay<PadSystem, dd::Events::Pause> m_EPause;
+	dd::EventRelay<PadSystem, dd::Events::Resume> m_EResume;
 	dd::EventRelay<PadSystem, dd::Events::KrakenAttack> m_EKrakenAttack;
 	dd::EventRelay<PadSystem, dd::Events::StickyPad> m_EStickyPad;
 	dd::EventRelay<PadSystem, dd::Events::StickyAttachedToPad> m_EStickyAttachedToPad;
@@ -115,7 +132,10 @@ private:
     bool OnContactPowerUp(const dd::Events::Contact &event);
     bool OnStageCleared(const dd::Events::StageCleared &event);
 	bool OnResetBall(const dd::Events::ResetBall &event);
+	bool OnResetAll(const dd::Events::ResetAll &event);
+	bool OnRaiseWater(const dd::Events::RaiseWater &event);
     bool OnPause(const dd::Events::Pause &event);
+	bool OnResume(const dd::Events::Resume &event);
 	bool OnKrakenAttack(const dd::Events::KrakenAttack &event);
 	bool OnStickyPad(const dd::Events::StickyPad &event);
 	bool OnStickyAttachedToPad(const dd::Events::StickyAttachedToPad &event);

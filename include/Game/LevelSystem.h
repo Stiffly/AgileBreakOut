@@ -14,14 +14,22 @@
 #include "Core/CTemplate.h"
 #include "Core/EventBroker.h"
 #include "Core/World.h"
+#include "Core/ResourceManager.h"
+#include "Core/ConfigFile.h"
 #include "Rendering/CSprite.h"
 #include "Rendering/CModel.h"
+#include "Rendering/CPointLight.h"
+
+#include "Transform/EMove.h"
 
 #include "Game/CBrick.h"
 #include "Game/CBall.h"
 #include "Game/CLife.h"
+#include "Game/CWall.h"
+#include "Game/CBackground.h"
 #include "Game/CProjectile.h"
 #include "Game/CPowerUp.h"
+#include "Game/CTravels.h"
 
 #include "Game/BrickComponents.h"
 
@@ -38,14 +46,19 @@
 #include "Game/EMultiBall.h"
 #include "Game/EMultiBallLost.h"
 #include "Game/EPause.h"
+#include "Game/EResume.h"
 #include "Game/EGameOver.h"
 #include "Game/EClusterClear.h"
 #include "Game/ECreatePowerUp.h"
 #include "Game/EPowerUpTaken.h"
 
+#include "Game/EKrakenAppear.h"
+#include "Game/EBrickGenerating.h"
+
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/CRectangleShape.h"
+#include "Physics/CWaterVolume.h"
 #include "Physics/ESetImpulse.h"
 #include "Physics/EContact.h"
 #include "Sound/CCollisionSound.h"
@@ -82,7 +95,7 @@ public:
 
     void CreateBasicLevel(int, int, glm::vec2, float);
     void CreateLevel(int);
-    void CreateBrick(int, int, glm::vec2, float, int, int, int, glm::vec4);
+    EntityID CreateBrick(int, int, glm::vec2, float, int, int, int, glm::vec4);
 	void BrickHit(EntityID, EntityID, int);
 
     void OnEntityRemoved(EntityID entity);
@@ -137,6 +150,7 @@ private:
     float m_SpaceToEdge = 0.25f;
     glm::vec2 m_SpaceBetweenBricks = glm::vec2(1, 0.4);
     float m_NotResettingTheStage = 5.f;
+	bool m_GodMode = false;
 
     const int EmptyBrickSpace = 0;
     const int StandardBrick = 1;
@@ -146,10 +160,15 @@ private:
 	const int InkBlasterBrick = 5;
 	const int KrakenAttackBrick = 6;
 
+	const int Kraken = 100;
+
     EntityID m_BrickTemplate;
 
     std::array<int, 42> m_Bricks;
 	std::array<glm::vec4, 42> m_Colors;
+
+	std::array<int, 14> m_BrickSet;
+	std::array<glm::vec4, 14> m_ColorSet;
 
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::ScoreEvent> m_EScoreEvent;
@@ -159,7 +178,9 @@ private:
     dd::EventRelay<LevelSystem, dd::Events::PowerUpTaken> m_EPowerUpTaken;
     dd::EventRelay<LevelSystem, dd::Events::StageCleared> m_EStageCleared;
     dd::EventRelay<LevelSystem, dd::Events::Pause> m_EPause;
+	dd::EventRelay<LevelSystem, dd::Events::Resume> m_EResume;
     dd::EventRelay<LevelSystem, dd::Events::HitPad> m_EHitPad;
+	dd::EventRelay<LevelSystem, dd::Events::BrickGenerating> m_EBrickGenerating;
 
     bool OnContact(const dd::Events::Contact &event);
     bool OnScoreEvent(const dd::Events::ScoreEvent &event);
@@ -169,7 +190,10 @@ private:
     bool OnPowerUpTaken(const dd::Events::PowerUpTaken &event);
     bool OnStageCleared(const dd::Events::StageCleared &event);
     bool OnPause(const dd::Events::Pause &event);
+	bool OnResume(const dd::Events::Resume &event);
     bool OnHitPad(const dd::Events::HitPad &event);
+	bool OnBrickGenerating(const dd::Events::BrickGenerating &event);
+	void GetBrickSet(int Set);
 
     void GetNextLevel();
 	void SetBrokenModel(EntityID entity);

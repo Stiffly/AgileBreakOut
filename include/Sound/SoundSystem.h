@@ -38,6 +38,10 @@ public:
     void Update(double dt) override;
 
 private:
+	const std::string MENU_BGM = "Sounds/BGM/eastern-music.wav";
+	const std::string GAME_BGM = "Sounds/BGM/under-the-sea-n.wav";
+	const std::string WATER_BGM = "Sounds/BGM/water-flowing.wav";
+
     float m_BGMMasterVolume = 1.f;
     float m_SFXMasterVolume = 1.f;
     std::map<ALuint, Sound*> m_BGMSourcesToBuffers;

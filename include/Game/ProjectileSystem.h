@@ -16,12 +16,14 @@
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Game/EPause.h"
+#include "Game/EResume.h"
 #include "Game/EInkBlaster.h"
 #include "Game/EInkBlasterOver.h"
 #include "Game/EActionButton.h"
 #include "Game/EHitPad.h"
 #include "Game/CProjectile.h"
 #include "Game/CBall.h"
+#include "Rendering/CSprite.h"
 #include <fstream>
 #include <iostream>
 
@@ -56,12 +58,14 @@ private:
 
 	dd::EventRelay<ProjectileSystem, dd::Events::Contact> m_EContact;
 	dd::EventRelay<ProjectileSystem, dd::Events::Pause> m_EPause;
+	dd::EventRelay<ProjectileSystem, dd::Events::Resume> m_EResume;
 	dd::EventRelay<ProjectileSystem, dd::Events::InkBlaster> m_EInkBlaster;
 	dd::EventRelay<ProjectileSystem, dd::Events::HitPad> m_EHitPad;
 	dd::EventRelay<ProjectileSystem, dd::Events::ActionButton> m_EActionButton;
 
     bool OnContact(const dd::Events::Contact &event);
 	bool OnPause(const dd::Events::Pause &event);
+	bool OnResume(const dd::Events::Resume &event);
 	bool OnInkBlaster(const dd::Events::InkBlaster &event);
 	bool OnHitPad(const dd::Events::HitPad &event);
 	bool OnActionButton(const dd::Events::ActionButton &event);

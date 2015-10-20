@@ -11,6 +11,7 @@ void dd::Systems::LifebuoySystem::Initialize()
 {
     EVENT_SUBSCRIBE_MEMBER(m_EContact, &LifebuoySystem::OnContact);
 	EVENT_SUBSCRIBE_MEMBER(m_EPause, &LifebuoySystem::OnPause);
+	EVENT_SUBSCRIBE_MEMBER(m_EResume, &LifebuoySystem::OnResume);
 	EVENT_SUBSCRIBE_MEMBER(m_ELifebuoy, &LifebuoySystem::OnLifebuoy);
 	EVENT_SUBSCRIBE_MEMBER(m_ELifebuoyHit, &LifebuoySystem::OnLifebuoyHit);
 
@@ -29,7 +30,6 @@ void dd::Systems::LifebuoySystem::Initialize()
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::Brick | CollisionLayer::LifeBuoy | CollisionLayer::Pad | CollisionLayer::Water);
 		physics->Density = 1.0f;
 		physics->GravityScale = 1;
-		ctransform->Sticky = true;
 		auto cModel = m_World->AddComponent<Components::Model>(ent);
 		cModel->ModelFile = "Models/Lifebuoy/Lifebuoy1.obj";
 		auto lifebuoy = m_World->AddComponent<Components::Lifebuoy>(ent);
@@ -89,18 +89,23 @@ void dd::Systems::LifebuoySystem::UpdateEntity(double dt, EntityID entity, Entit
 
 bool dd::Systems::LifebuoySystem::OnPause(const dd::Events::Pause &event)
 {
-    if (event.Type != "LifebuoySystem" && event.Type != "All") {
+    /*if (event.Type != "LifebuoySystem" && event.Type != "All") {
         return false;
-    }
+    }*/
 
-    if (IsPaused()) {
-        SetPause(false);
-    } else {
-        SetPause(true);
-    }
+    m_Pause = true;
+
     return true;
 }
 
+bool dd::Systems::LifebuoySystem::OnResume(const dd::Events::Resume &event)
+{
+	/*if (event.Type != "LifebuoySystem" && event.Type != "All") {
+	return false;
+	}*/
+	m_Pause = false;
+	return true;
+}
 
 bool dd::Systems::LifebuoySystem::OnContact(const dd::Events::Contact &event)
 {
@@ -127,9 +132,30 @@ bool dd::Systems::LifebuoySystem::OnLifebuoy(const dd::Events::Lifebuoy &event)
 
 bool dd::Systems::LifebuoySystem::OnLifebuoyHit(const dd::Events::LifebuoyHit &event)
 {
+	auto transformComponent = m_World->GetComponent<Components::Transform>(event.Lifebuoy);
 	auto lifebuoyComponent = m_World->GetComponent<Components::Lifebuoy>(event.Lifebuoy);
 	lifebuoyComponent->Hits -= 1;
 	auto modelComponent = m_World->GetComponent<Components::Model>(event.Lifebuoy);
 	modelComponent->ModelFile = "Models/Lifebuoy/Lifebuoy" + std::to_string(5 - lifebuoyComponent->Hits) + ".obj";
+
+	Events::CreateParticleSequence e;
+	e.EmitterLifeTime = 4;
+	e.EmittingAngle = glm::half_pi<float>();
+	e.Spread = 0.5f;
+	e.NumberOfTicks = 1;
+	e.ParticleLifeTime = 1.f;
+	e.ParticlesPerTick = 1;
+	e.Position = transformComponent->Position;
+	e.ScaleValues.clear();
+	e.ScaleValues.push_back(glm::vec3(0.5f));
+	e.ScaleValues.push_back(glm::vec3(2.f, 2.f, 0.2f));
+	e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
+	e.Color = glm::vec4(1, 0, 0, 1);
+	e.AlphaValues.clear();
+	e.AlphaValues.push_back(1.f);
+	e.AlphaValues.push_back(0.f);
+	e.Speed = 10.f;
+	EventBroker->Publish(e);
+
 	return true;
 }
