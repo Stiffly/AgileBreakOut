@@ -229,6 +229,8 @@ public:
 		//ResourceManager::Update();
 		if (m_GameIsRunning) {
 			m_World->Update(dt);
+		} else {
+			m_EventBroker->Process<Systems::SoundSystem>();
 		}
 		m_EventBroker->Process<GUI::Frame>();
 		m_FrameStack->UpdateLayered(dt);
@@ -428,17 +430,17 @@ private:
 		m_GameIsRunning = true;
 		//Todo: Move this
 		{
-			dd::Events::PlaySound e;
-			e.FilePath = "Sounds/BGM/under-the-sea-instrumental.wav";
-			e.IsAmbient = true;
-			m_EventBroker->Publish(e);
+// 			dd::Events::PlaySound e;
+// 			e.FilePath = "Sounds/BGM/under-the-sea-instrumental.wav";
+// 			e.IsAmbient = true;
+// 			m_EventBroker->Publish(e);
 		}
 		{
-			dd::Events::PlaySound e;
-			e.FilePath = "Sounds/BGM/water-flowing.wav";
-			e.Gain = 0.3f;
-			e.IsAmbient = true;
-			m_EventBroker->Publish(e);
+// 			dd::Events::PlaySound e;
+// 			e.FilePath = "Sounds/BGM/water-flowing.wav";
+// 			e.Gain = 0.3f;
+// 			e.IsAmbient = true;
+// 			m_EventBroker->Publish(e);
 		}
 
 		return true;
