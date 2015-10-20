@@ -45,7 +45,7 @@ void dd::Renderer::Initialize()
 	glGetIntegerv(GL_MINOR_VERSION, &m_GLVersion[1]);
 	m_GLVendor = (GLchar*)glGetString(GL_VENDOR);
 	std::stringstream ss;
-	ss << m_GLVendor << " OpenGL " << m_GLVersion[0] << "." << m_GLVersion[1];
+	ss << "Squidout! (" << m_GLVendor << " OpenGL " << m_GLVersion[0] << "." << m_GLVersion[1] << ")";
 #ifdef DEBUG
 	ss << " DEBUG";
 #endif

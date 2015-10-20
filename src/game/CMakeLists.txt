@@ -104,8 +104,6 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Core_Util}
     ${SOURCE_FILES_Input}
     ${SOURCE_FILES_Rendering}
-    ${SOURCE_FILES_Rendering_OpenGL}
-    #${SOURCE_FILES_Rendering_DirectX}
     ${SOURCE_FILES_Transform}
     ${SOURCE_FILES_Physics}
     ${SOURCE_FILES_Game}
@@ -113,6 +111,19 @@ set(SOURCE_FILES
     ${SOURCE_FILES_Sound}
     ${SOURCE_FILES_GUI}
 )
+
+    
+if(BUILD_RENDERER_OPENGL)
+    set(SOURCE_FILES ${SOURCE_FILES}
+        ${SOURCE_FILES_Rendering_OpenGL}
+    )
+endif()
+# Compiling for DirectX target
+if(BUILD_RENDERER_DIRECTX)
+    set(SOURCE_FILES ${SOURCE_FILES}
+        ${SOURCE_FILES_Rendering_DirectX}
+    )
+endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
