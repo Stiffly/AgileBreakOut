@@ -113,7 +113,7 @@ set(SOURCE_FILES
 )
 
 set(LIBRARIES
-${OPENGL_LIBRARIES}
+    ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${GLFW_LIBRARIES}
     ${Boost_LIBRARIES}
@@ -146,6 +146,9 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 add_library(game ${SOURCE_FILES})
+target_link_libraries(game
+    ${LIBRARIES}
+)
 
 add_executable(breakout 
 	main.cpp
