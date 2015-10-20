@@ -49,6 +49,7 @@
 #include "Game/EHitLag.h"
 #include "Game/EScreenShake.h"
 #include "Game/EActionButton.h"
+#include "Rendering/CAnimation.h"
 
 #include "Game/EBrickGenerating.h"
 
