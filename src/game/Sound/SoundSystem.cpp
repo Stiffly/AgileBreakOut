@@ -190,6 +190,11 @@ bool dd::Systems::SoundSystem::OnGameStart(const dd::Events::GameStart &event)
 {
 	{
 		dd::Events::StopSound e;
+		e.FilePath = STORY_VOICE;
+		EventBroker->Publish(e);
+	}
+	{
+		dd::Events::StopSound e;
 		e.FilePath = MENU_BGM;
 		EventBroker->Publish(e);
 	}
