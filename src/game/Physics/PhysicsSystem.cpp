@@ -845,18 +845,23 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 
 	if (PowerFriend) {
 		se.FilePath = "Sounds/jap-awesome.wav";
+		EventBroker->Publish(se);
 		e.SpriteFile = "Textures/PowerUps/Friends.png";
 	} else if (PowerSaviour) {
 		se.FilePath = "Sounds/jap-awesome.wav";
+		EventBroker->Publish(se);
 		e.SpriteFile = "Textures/PowerUps/Saviour.png";
 	} else if (PowerSticky) {
 		se.FilePath = "Sounds/jap-awesome.wav";
+		EventBroker->Publish(se);
 		e.SpriteFile = "Textures/PowerUps/Sticky.png";
 	} else if (PowerInkBlaster){
 		se.FilePath = "Sounds/jap-awesome.wav";
+		EventBroker->Publish(se);
 		e.SpriteFile = "Textures/PowerUps/InkBlaster.png";
 	} else if (PowerKraken) { 
 		se.FilePath = "Sounds/jap-awesome.wav";
+		EventBroker->Publish(se);
 		e.SpriteFile = "Textures/PowerUps/RealeaseTheKraken.png";
 	}
 	else {
@@ -879,7 +884,6 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 	}
 
 	EventBroker->Publish(e);
-	EventBroker->Publish(se);
 	return true;
 
 	

@@ -238,7 +238,7 @@ void dd::Systems::LevelSystem::Initialize()
 	transform->Position = glm::vec3(50, 50, -10);
 	//sound
 	auto collisionSound = m_World->AddComponent<Components::CollisionSound>(m_BrickTemplate);
-	collisionSound->FilePath = "Sounds/Brick/shortbrickbreak.wav";
+	collisionSound->FilePath = "Sounds/Brick/brick-hit.wav";
 	m_World->CommitEntity(m_BrickTemplate);
     return;
 }

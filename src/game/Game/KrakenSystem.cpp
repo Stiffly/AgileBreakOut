@@ -40,7 +40,7 @@ void dd::Systems::KrakenSystem::Initialize()
 	transform->Position = glm::vec3(50, 50, -10);
 	//sound
 	auto collisionSound = m_World->AddComponent<Components::CollisionSound>(ent);
-	collisionSound->FilePath = "Sounds/Brick/LTTP_Boss_Hit.wav";
+	collisionSound->FilePath = "Sounds/Boss/boss-hit.wav";
 	m_World->CommitEntity(ent);
 
 	m_KrakenTemplate = ent;
