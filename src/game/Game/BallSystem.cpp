@@ -318,17 +318,20 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 			particleEvent.EmittingAngle = glm::half_pi<float>();
 			particleEvent.Spread = 0.f;
 			particleEvent.NumberOfTicks = 1;
-			particleEvent.ParticleLifeTime = 2.f;
+			particleEvent.ParticleLifeTime = 1.3f;
 			particleEvent.ParticlesPerTick = 1;
-			particleEvent.Position = glm::vec3(ballTransform->Position.x, -3.f, -3.f);
-			if (ballTransform->Position.x >= 2.7f) {
-				particleEvent.Position = glm::vec3(2.7f, -3.f, -3.f);
-			} else if (ballTransform->Position.x <= -2.7f) {
-				particleEvent.Position = glm::vec3(-2.7f, -3.f, -3.f);
+			particleEvent.Position = glm::vec3(ballTransform->Position.x, -3.5f, -3.f);
+			if (ballTransform->Position.x >= 2.5f) {
+				particleEvent.Position = glm::vec3(2.5f, -3.5f, -3.f);
+			} else if (ballTransform->Position.x <= -2.5f) {
+				particleEvent.Position = glm::vec3(-2.5f, -3.5f, -3.f);
 			}
-			particleEvent.ScaleValues.push_back(glm::vec3(1.f));
+			particleEvent.ScaleValues.push_back(glm::vec3(1.5f));
+			particleEvent.ScaleValues.push_back(glm::vec3(2.f));
 			particleEvent.Color = glm::vec4(1.f);
-			particleEvent.Speed = 0;
+			particleEvent.Speed = 1.f;
+			particleEvent.AlphaValues.push_back(1.f);
+			particleEvent.AlphaValues.push_back(0.7f);
 
 			if (ballComponent->Combo <= 9) {
 				particleEvent.SpriteFile = "Textures/Combo/Combo00" + std::to_string(ballComponent->Combo) + ".png";
@@ -340,7 +343,7 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 			EventBroker->Publish(particleEvent);
 		}
 		
-		ballComponent->Combo = 0;
+		ballComponent->Combo = 10;
 		if (!ballComponent->Waiting) {
 			if (m_InkBlaster) {
 				if (!m_InkAttached) {

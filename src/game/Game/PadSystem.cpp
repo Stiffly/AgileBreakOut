@@ -295,7 +295,7 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 	} else if (val == GLFW_KEY_Q) {
 		Events::Move e;
 		e.Entity = Entity();
-		e.GoalPosition = glm::vec3(0, 0, -10);
+		e.GoalPosition = glm::vec3(0, 0, -10); 
 		e.Speed = 5;
 		e.Queue = false;
 		EventBroker->Publish(e);
