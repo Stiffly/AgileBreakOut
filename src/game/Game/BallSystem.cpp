@@ -343,7 +343,7 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 			EventBroker->Publish(particleEvent);
 		}
 		
-		ballComponent->Combo = 10;
+		ballComponent->Combo = 0;
 		if (!ballComponent->Waiting) {
 			if (m_InkBlaster) {
 				if (!m_InkAttached) {
