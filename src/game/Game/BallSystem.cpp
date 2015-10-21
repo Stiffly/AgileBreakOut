@@ -21,6 +21,8 @@ void dd::Systems::BallSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &BallSystem::OnStickyPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EInkBlaster, &BallSystem::OnInkBlaster);
 	EVENT_SUBSCRIBE_MEMBER(m_EInkBlasterOver, &BallSystem::OnInkBlasterOver);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttack, &BallSystem::OnKrakenAttack);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttackEnd, &BallSystem::OnKrakenAttackEnd);
 	EVENT_SUBSCRIBE_MEMBER(m_EPause, &BallSystem::OnPause); 
 	EVENT_SUBSCRIBE_MEMBER(m_EResume, &BallSystem::OnResume);
     EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &BallSystem::OnActionButton);
@@ -72,6 +74,11 @@ void dd::Systems::BallSystem::Update(double dt)
 {
     if (Lives() == 0)
     {
+		if (m_KrakenAttack) {
+			Events::KrakenAttackEnd e;
+			EventBroker->Publish(e);
+		}
+
         Events::GameOver e;
         EventBroker->Publish(e);
 
@@ -526,11 +533,25 @@ bool dd::Systems::BallSystem::OnInkBlasterOver(const dd::Events::InkBlasterOver 
 	return true;
 }
 
+bool dd::Systems::BallSystem::OnKrakenAttack(const dd::Events::KrakenAttack &event)
+{
+	m_KrakenAttack = true;
+	return true;
+}
+
+bool dd::Systems::BallSystem::OnKrakenAttackEnd(const dd::Events::KrakenAttackEnd &event)
+{
+	m_KrakenAttack = false;
+	return true;
+}
+
 bool dd::Systems::BallSystem::OnActionButton(const dd::Events::ActionButton &event)
 {
-	if (!m_StageBlockedWaiting) {
-		if (!m_InkBlockedWaiting) {
-			m_Waiting = false;
+	if (!m_KrakenAttack) {
+		if (!m_StageBlockedWaiting) {
+			if (!m_InkBlockedWaiting) {
+				m_Waiting = false;
+			}
 		}
 	}
     return true;

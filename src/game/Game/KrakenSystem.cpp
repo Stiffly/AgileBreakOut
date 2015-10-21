@@ -95,6 +95,7 @@ void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityI
 			}
 			break;
 		case 2: // Grabbing
+			m_NumberOfActions++;
 			kraken->CurrentAction = 5;
 			krakenAttack.ChargeUpdate = 0;
 			krakenAttack.KrakenStrength = 0.1;
@@ -103,6 +104,7 @@ void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityI
 			break;
 		case 3: // Brick Generating
 			{
+				m_NumberOfActions++;
 				kraken->CurrentAction = 1;
 				Events::BrickGenerating e;
 				e.Origin1 = glm::vec3(-5, 7, -10);
@@ -187,6 +189,11 @@ bool dd::Systems::KrakenSystem::OnContact(const dd::Events::Contact &event)
 	
 	auto ball = m_World->GetComponent<Components::Ball>(otherEntitiy);
 	if (ball != nullptr) {
+		ball->Combo += 1;
+		Events::ComboEvent ec;
+		ec.Combo = ball->Combo;
+		ec.Ball = otherEntitiy;
+		EventBroker->Publish(ec);
 		Events::KrakenHit e;
 		e.Kraken = krakenEntity;
 		e.Hitter = otherEntitiy;

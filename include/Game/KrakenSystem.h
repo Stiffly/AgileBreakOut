@@ -21,6 +21,7 @@
 #include "Physics/ECreateParticleSequence.h"
 #include "Game/EPause.h"
 #include "Game/EResume.h"
+#include "Game/EComboEvent.h"
 #include "Game/EKrakenAppear.h"
 #include "Game/EKrakenAttack.h"
 #include "Game/EKrakenHit.h"
