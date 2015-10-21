@@ -33,7 +33,9 @@
 
 #include "Game/BrickComponents.h"
 
+#include "Game/ERelevantObjectCreated.h"
 #include "Game/EStageCleared.h"
+#include "Game/EArrivedAtNewStage.h"
 #include "Game/ELifeLost.h"
 #include "Game/EResetBall.h"
 #include "Game/EScoreEvent.h"
@@ -52,7 +54,9 @@
 #include "Game/ECreatePowerUp.h"
 #include "Game/EPowerUpTaken.h"
 
+#include "Game/CKraken.h"
 #include "Game/EKrakenAppear.h"
+#include "Game/EKrakenDefeated.h"
 #include "Game/EBrickGenerating.h"
 
 #include "Physics/CPhysics.h"
@@ -147,6 +151,7 @@ private:
     int m_NumberOfBricks;
     int m_Rows = 6;
     int m_Lines = 7;
+	int m_StagesInCluster = 6;
     float m_SpaceToEdge = 0.25f;
     glm::vec2 m_SpaceBetweenBricks = glm::vec2(1, 0.4);
     float m_NotResettingTheStage = 5.f;
@@ -167,8 +172,12 @@ private:
     std::array<int, 42> m_Bricks;
 	std::array<glm::vec4, 42> m_Colors;
 
-	std::array<int, 14> m_BrickSet;
-	std::array<glm::vec4, 14> m_ColorSet;
+	std::array<int, 42> m_BrickSet;
+	std::array<glm::vec4, 42> m_ColorSet;
+	std::array<bool, 42> m_KrakenBricks;
+
+	bool m_BrickGenerating = false;
+	dd::Events::BrickGenerating m_BrickGeneratingEvent;
 
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::ScoreEvent> m_EScoreEvent;
@@ -177,10 +186,12 @@ private:
     dd::EventRelay<LevelSystem, dd::Events::CreatePowerUp> m_ECreatePowerUp;
     dd::EventRelay<LevelSystem, dd::Events::PowerUpTaken> m_EPowerUpTaken;
     dd::EventRelay<LevelSystem, dd::Events::StageCleared> m_EStageCleared;
+	dd::EventRelay<LevelSystem, dd::Events::ArrivedAtNewStage> m_EArrivedAtNewStage;
     dd::EventRelay<LevelSystem, dd::Events::Pause> m_EPause;
 	dd::EventRelay<LevelSystem, dd::Events::Resume> m_EResume;
     dd::EventRelay<LevelSystem, dd::Events::HitPad> m_EHitPad;
 	dd::EventRelay<LevelSystem, dd::Events::BrickGenerating> m_EBrickGenerating;
+	dd::EventRelay<LevelSystem, dd::Events::KrakenDefeated> m_EKrakenDefeated;
 
     bool OnContact(const dd::Events::Contact &event);
     bool OnScoreEvent(const dd::Events::ScoreEvent &event);
@@ -189,11 +200,14 @@ private:
     bool OnCreatePowerUp(const dd::Events::CreatePowerUp &event);
     bool OnPowerUpTaken(const dd::Events::PowerUpTaken &event);
     bool OnStageCleared(const dd::Events::StageCleared &event);
+	bool OnArrivedAtNewStage(const dd::Events::ArrivedAtNewStage &event);
     bool OnPause(const dd::Events::Pause &event);
 	bool OnResume(const dd::Events::Resume &event);
     bool OnHitPad(const dd::Events::HitPad &event);
 	bool OnBrickGenerating(const dd::Events::BrickGenerating &event);
+	bool BrickGenerating(const dd::Events::BrickGenerating &event);
 	void GetBrickSet(int Set);
+	bool OnKrakenDefeated(const dd::Events::KrakenDefeated &event);
 
     void GetNextLevel();
 	void SetBrokenModel(EntityID entity);

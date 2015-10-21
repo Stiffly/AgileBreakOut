@@ -11,8 +11,11 @@ void dd::Systems::KrakenSystem::Initialize()
 	m_RandomGenerator = std::mt19937(rd());
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &KrakenSystem::OnPause);
 	EVENT_SUBSCRIBE_MEMBER(m_EResume, &KrakenSystem::OnResume);
+	EVENT_SUBSCRIBE_MEMBER(m_EContact, &KrakenSystem::OnContact);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAppear, &KrakenSystem::OnKrakenAppear);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttack, &KrakenSystem::OnKrakenAttack);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenHit, &KrakenSystem::OnKrakenHit);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenDefeated, &KrakenSystem::OnKrakenDefeated);
 	EVENT_SUBSCRIBE_MEMBER(m_EBrickGenerating, &KrakenSystem::OnBrickGenerating);
 
 	EntityID ent = m_World->CreateEntity();
@@ -59,7 +62,7 @@ void dd::Systems::KrakenSystem::Update(double dt)
 
 void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
 {
-    if (IsPaused()) {
+    if (IsPaused() || !m_KrakenBattle) {
         return;
     }
 
@@ -68,18 +71,27 @@ void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityI
 
 	auto kraken = m_World->GetComponent<Components::Kraken>(entity);
 	if (kraken != nullptr) {
+		auto transform = m_World->GetComponent<Components::Transform>(entity);
+		if (transform->Position.y < -10) {
+			m_World->RemoveEntity(entity);
+			return;
+		}
 		Events::KrakenAttack krakenAttack;
 		switch (kraken->CurrentAction)
 		{
 		case 1: // Idle
-			//m_KrakenTimer += dt;
+			m_KrakenTimer += dt;
 			if (m_KrakenTimer > m_KrakenSecondsToAction) {
+				if (m_NumberOfActions == 0) {
+					kraken->CurrentAction = 3;
+					break;
+				}
 				m_KrakenTimer = 0;
-				std::uniform_real_distribution<float> dist(1, 2.999f);
+				std::uniform_real_distribution<float> dist(1, 4.999f);
 				float random = dist(m_RandomGenerator);
-				std::cout << random << std::endl;
+				//std::cout << random << std::endl;
 				kraken->CurrentAction = random;
-				std::cout << kraken->CurrentAction << std::endl;
+				//std::cout << kraken->CurrentAction << std::endl;
 			}
 			break;
 		case 2: // Grabbing
@@ -90,9 +102,29 @@ void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityI
 			EventBroker->Publish(krakenAttack);
 			break;
 		case 3: // Brick Generating
-			break;
-		case 4: // Moving
-			break;
+			{
+				kraken->CurrentAction = 1;
+				Events::BrickGenerating e;
+				e.Origin1 = glm::vec3(-5, 7, -10);
+				e.Origin2 = glm::vec3(5, 7, -10);
+				std::uniform_real_distribution<float> dist(1, 5.999f);
+				float random = dist(m_RandomGenerator);
+				e.Set = random;
+				EventBroker->Publish(e);
+				break;
+			}
+		case 4: // Brick Generating second case
+			{
+				kraken->CurrentAction = 1;
+				Events::BrickGenerating e;
+				e.Origin1 = glm::vec3(-5, 7, -10);
+				e.Origin2 = glm::vec3(5, 7, -10);
+				std::uniform_real_distribution<float> dist(1, 5.999f);
+				float random = dist(m_RandomGenerator);
+				e.Set = random;
+				EventBroker->Publish(e);
+				break;
+			}
 		case 5: // Taunting
 			if (m_ReturnToIdle) {
 				m_ReturnToIdle = false;
@@ -126,6 +158,45 @@ bool dd::Systems::KrakenSystem::OnResume(const dd::Events::Resume &event)
 	return true;
 }
 
+bool dd::Systems::KrakenSystem::OnContact(const dd::Events::Contact &event)
+{
+	Components::Kraken* kraken1 = m_World->GetComponent<Components::Kraken>(event.Entity1);
+	Components::Kraken* kraken2 = m_World->GetComponent<Components::Kraken>(event.Entity2);
+	Components::Kraken* kraken;
+
+	if (kraken1 != nullptr && kraken2 != nullptr) {
+		return false;
+	}
+
+	EntityID krakenEntity, otherEntitiy;
+
+	//Which is the ball?
+	if (kraken1 != nullptr) {
+		krakenEntity = event.Entity1;
+		otherEntitiy = event.Entity2;
+		kraken = kraken1;
+	}
+	else if (kraken2 != nullptr) {
+		krakenEntity = event.Entity2;
+		otherEntitiy = event.Entity1;
+		kraken = kraken2;
+	}
+	else {
+		return false;
+	}
+	
+	auto ball = m_World->GetComponent<Components::Ball>(otherEntitiy);
+	if (ball != nullptr) {
+		Events::KrakenHit e;
+		e.Kraken = krakenEntity;
+		e.Hitter = otherEntitiy;
+		e.MaxHealth = kraken->MaxHealth;
+		e.CurrentHealth = kraken->Health;
+		e.NewHealth = kraken->Health - 1;
+		EventBroker->Publish(e);
+	}
+}
+
 bool dd::Systems::KrakenSystem::OnKrakenAppear(const dd::Events::KrakenAppear &event)
 {
 	auto ent = m_World->CloneEntity(m_KrakenTemplate);
@@ -141,6 +212,103 @@ bool dd::Systems::KrakenSystem::OnKrakenAttack(const dd::Events::KrakenAttack &e
 	if (event.ChargeUpdate >= 1) {
 		m_ReturnToIdle = true;
 	}
+	return true;
+}
+
+bool dd::Systems::KrakenSystem::OnKrakenHit(const dd::Events::KrakenHit &event)
+{
+	auto kraken = m_World->GetComponent<Components::Kraken>(event.Kraken);
+	kraken->Health--;
+	//std::cout << kraken->Health << std::endl;
+	//kraken->Health = -1;
+	if (kraken->Health < 0) {
+		Events::KrakenDefeated e;
+		e.Kraken = event.Kraken;
+		e.Hitter = event.Hitter;
+		EventBroker->Publish(e);
+	}
+	return false;
+}
+
+bool dd::Systems::KrakenSystem::OnKrakenDefeated(const dd::Events::KrakenDefeated &event)
+{
+	m_KrakenBattle = false;
+
+	auto kraken = m_World->GetComponent<Components::Kraken>(event.Kraken);
+	auto physicsComponent = m_World->GetComponent<Components::Physics>(event.Kraken);
+	/*physicsComponent->CollisionType = CollisionType::Type::Dynamic;
+	physicsComponent->GravityScale = 1.f;*/
+	physicsComponent->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Water | CollisionLayer::Wall);
+	/*physicsComponent->Calculate = false;*/
+
+	auto transformComponentBrick = m_World->GetComponent<Components::Transform>(event.Kraken);
+	auto transformComponentHitter = m_World->GetComponent<Components::Transform>(event.Hitter);
+
+
+	auto brickModel = m_World->GetComponent<Components::Model>(event.Kraken);
+
+	auto cTransform = m_World->GetComponent<Components::Transform>(event.Kraken);
+	/*cTransform->Position = cTransform->Position + transformComponentBrick->Position;
+	glm::vec2 ballToBrick = 4.f * glm::normalize(glm::vec2(cTransform->Position.x - transformComponentHitter->Position.x, cTransform->Position.y - transformComponentHitter->Position.y));
+	cTransform->Velocity = glm::vec3(ballToBrick.x, ballToBrick.y, 0.f);
+
+	std::uniform_real_distribution<float> dist(-1.5f, 1.5f);
+	int impulseStrength = dist(m_RandomGenerator);
+
+	Events::SetImpulse i;
+	i.Entity = event.Kraken;
+	i.Impulse = glm::vec2(impulseStrength, 0.f);
+	i.Point = glm::vec2(cTransform->Position.x, cTransform->Position.y + 0.5f);
+	EventBroker->Publish(i);*/
+
+	auto cModel = m_World->GetComponent<Components::Model>(event.Kraken);
+	cModel->Color = brickModel->Color;
+	cModel->Color *= 0.5f;
+
+	/*m_World->RemoveComponent<Components::Template>(event.Kraken);
+	m_World->SetEntityParent(event.Kraken, 0);
+	m_World->CommitEntity(event.Kraken);*/
+
+	//Particle trail
+	Events::CreateParticleSequence trail;
+	trail.parent = event.Kraken;
+	trail.AlphaValues.push_back(1.f);
+	trail.AlphaValues.push_back(0.f);
+	trail.ScaleValues.push_back(glm::vec3(0.08f));
+	trail.ScaleValues.push_back(glm::vec3(0.f));
+	trail.RadiusDistribution = 1;
+	trail.EmitterLifeTime = 2.f;
+	trail.ParticleLifeTime = 1.f;
+	trail.ParticlesPerTick = 1;
+	trail.SpawnRate = 0.1f;
+	trail.Speed = 10.f;
+	trail.EmittingAngle = glm::half_pi<float>();
+	trail.SpriteFile = "Textures/Particles/FadeBall.png";
+	trail.Color = brickModel->Color;
+	//p.Spread = ...
+	EventBroker->Publish(trail);
+
+	//ParticlePoof
+	Events::CreateParticleSequence poof;
+	poof.EmitterLifeTime = 4;
+	poof.EmittingAngle = glm::half_pi<float>();
+	poof.Spread = 0.5f;
+	poof.NumberOfTicks = 1;
+	poof.ParticleLifeTime = 1.5f;
+	poof.ParticlesPerTick = 1;
+	poof.Position = cTransform->Position;
+	poof.ScaleValues.clear();
+	poof.ScaleValues.push_back(glm::vec3(0.5f));
+	poof.ScaleValues.push_back(glm::vec3(2.f, 2.f, 0.2f));
+	poof.SpriteFile = "Textures/Particles/Cloud_Particle.png";
+	poof.Color = brickModel->Color;
+	poof.AlphaValues.clear();
+	poof.AlphaValues.push_back(1.f);
+	poof.AlphaValues.push_back(0.f);
+	poof.Speed = 10;
+	EventBroker->Publish(poof);
+
+
 	return true;
 }
 

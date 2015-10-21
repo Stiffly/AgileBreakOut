@@ -100,6 +100,7 @@ bool dd::Systems::ProjectileSystem::OnInkBlaster(const dd::Events::InkBlaster &e
 {
 	m_InkBlaster = true;
 	m_Shots = event.Shots;
+	m_InkBlasterSpeed = event.Speed;
 	return true;
 }
 
@@ -117,9 +118,11 @@ bool dd::Systems::ProjectileSystem::OnActionButton(const dd::Events::ActionButto
 	if (m_InkBlaster && m_SquidLoaded) {
 		auto ent = m_World->CloneEntity(m_InkBlastTemplate);
 		m_World->RemoveComponent<Components::Template>(ent);
+		auto projectile = m_World->GetComponent<Components::Projectile>(ent);
+		projectile->Speed = m_InkBlasterSpeed;
 		auto transform = m_World->GetComponent<Components::Transform>(ent);
 		transform->Position = event.Position;
-		transform->Velocity = glm::vec3(0, 7, 0);
+		transform->Velocity = glm::vec3(0, projectile->Speed, 0);
 		m_Shots--;
 		if (m_Shots <= 0) {
 			auto ball = m_World->GetComponent<Components::Ball>(m_AttachedSquid);

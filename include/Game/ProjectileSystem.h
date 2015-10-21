@@ -53,6 +53,7 @@ private:
 	bool m_InkBlaster = false;
 	bool m_SquidLoaded = false;
 	int m_Shots = 0;
+	float m_InkBlasterSpeed = 5;
 	EntityID m_InkBlastTemplate;
 	EntityID m_AttachedSquid;
 

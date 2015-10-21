@@ -15,7 +15,8 @@ namespace Components
 
 struct Kraken : Component {
 
-    int Health = 10;
+    int MaxHealth = 30;
+	int Health = MaxHealth;
 	int CurrentAction = 1;
 	
 	const int Idle = 1;

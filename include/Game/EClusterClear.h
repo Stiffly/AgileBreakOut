@@ -12,7 +12,7 @@ namespace Events
 
 struct ClusterClear : Event
 {
-
+	int ClusterCleared;
 };
 
 }

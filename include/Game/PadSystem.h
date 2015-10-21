@@ -36,6 +36,7 @@
 #include "Game/EResetBall.h"
 #include "Game/EResetAll.h"
 #include "Game/ERaiseWater.h"
+#include "Game/ERaiseWaterWall.h"
 #include "Game/EMultiBall.h"
 #include "Game/ELifebuoy.h"
 #include "Game/EStickyPad.h"
@@ -103,6 +104,7 @@ private:
 	double m_KrakenStrength = 0;
 	double m_PlayerStrength = 0;
     float m_Edge = 2.8f;
+	EntityID m_KrakenArm;
     Components::Transform* m_Transform = nullptr;
     Components::Pad* m_Pad = nullptr;
 	std::shared_ptr<Components::Transform> m_StickTransform;
@@ -119,6 +121,7 @@ private:
 	dd::EventRelay<PadSystem, dd::Events::ResetBall> m_EResetBall;
 	dd::EventRelay<PadSystem, dd::Events::ResetAll> m_EResetAll;
 	dd::EventRelay<PadSystem, dd::Events::RaiseWater> m_ERaiseWater;
+	dd::EventRelay<PadSystem, dd::Events::RaiseWaterWall> m_ERaiseWaterWall;
     dd::EventRelay<PadSystem, dd::Events::Pause> m_EPause;
 	dd::EventRelay<PadSystem, dd::Events::Resume> m_EResume;
 	dd::EventRelay<PadSystem, dd::Events::KrakenAttack> m_EKrakenAttack;
@@ -134,6 +137,8 @@ private:
 	bool OnResetBall(const dd::Events::ResetBall &event);
 	bool OnResetAll(const dd::Events::ResetAll &event);
 	bool OnRaiseWater(const dd::Events::RaiseWater &event);
+	bool OnRaiseWaterWall(const dd::Events::RaiseWaterWall &event);
+	bool RaisePad(float amount, float speed);
     bool OnPause(const dd::Events::Pause &event);
 	bool OnResume(const dd::Events::Resume &event);
 	bool OnKrakenAttack(const dd::Events::KrakenAttack &event);
