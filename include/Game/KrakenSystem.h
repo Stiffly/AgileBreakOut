@@ -62,12 +62,13 @@ private:
 	bool m_ReturnToIdle = false;
 	EntityID m_KrakenTemplate;
 	std::string m_Action = "Idle";
+	int m_NumberOfActions;
 	float m_KrakenTimer = 0;
-	float m_KrakenSecondsToAction = 1;
+	float m_KrakenSecondsToAction = 10;
 	const int Idle = 1;
 
-	std::array<int, 14> m_Bricks;
-	std::array<int, 14> m_Colors;
+	std::array<int, 42> m_Bricks;
+	std::array<int, 42> m_Colors;
 
     dd::EventRelay<KrakenSystem, dd::Events::Pause> m_EPause;
 	dd::EventRelay<KrakenSystem, dd::Events::Resume> m_EResume;

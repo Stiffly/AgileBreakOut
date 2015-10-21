@@ -270,7 +270,8 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_G) {
 		Events::BrickGenerating e;
-		e.Origin = glm::vec3(-5, 7, -10);
+		e.Origin1 = glm::vec3(-5, 7, -10);
+		e.Origin2 = glm::vec3(5, 7, -10);
 		e.Set = 1;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_L) {

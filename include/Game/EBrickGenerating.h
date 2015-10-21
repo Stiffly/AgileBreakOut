@@ -15,7 +15,8 @@ namespace Events
 
 struct BrickGenerating : Event
 {
-	glm::vec3 Origin;
+	glm::vec3 Origin1;
+	glm::vec3 Origin2;
 	int TargetLine;
 	int Set;
 };
