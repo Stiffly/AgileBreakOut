@@ -21,6 +21,8 @@ void dd::Systems::BallSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &BallSystem::OnStickyPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EInkBlaster, &BallSystem::OnInkBlaster);
 	EVENT_SUBSCRIBE_MEMBER(m_EInkBlasterOver, &BallSystem::OnInkBlasterOver);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttack, &BallSystem::OnKrakenAttack);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttackEnd, &BallSystem::OnKrakenAttackEnd);
 	EVENT_SUBSCRIBE_MEMBER(m_EPause, &BallSystem::OnPause); 
 	EVENT_SUBSCRIBE_MEMBER(m_EResume, &BallSystem::OnResume);
     EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &BallSystem::OnActionButton);
@@ -74,6 +76,11 @@ void dd::Systems::BallSystem::Update(double dt)
 {
     if (Lives() == 0)
     {
+		if (m_KrakenAttack) {
+			Events::KrakenAttackEnd e;
+			EventBroker->Publish(e);
+		}
+
         Events::GameOver e;
         EventBroker->Publish(e);
 
@@ -323,17 +330,20 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 			particleEvent.EmittingAngle = glm::half_pi<float>();
 			particleEvent.Spread = 0.f;
 			particleEvent.NumberOfTicks = 1;
-			particleEvent.ParticleLifeTime = 2.f;
+			particleEvent.ParticleLifeTime = 1.3f;
 			particleEvent.ParticlesPerTick = 1;
-			particleEvent.Position = glm::vec3(ballTransform->Position.x, -3.f, -3.f);
-			if (ballTransform->Position.x >= 2.7f) {
-				particleEvent.Position = glm::vec3(2.7f, -3.f, -3.f);
-			} else if (ballTransform->Position.x <= -2.7f) {
-				particleEvent.Position = glm::vec3(-2.7f, -3.f, -3.f);
+			particleEvent.Position = glm::vec3(ballTransform->Position.x, -3.5f, -3.f);
+			if (ballTransform->Position.x >= 2.5f) {
+				particleEvent.Position = glm::vec3(2.5f, -3.5f, -3.f);
+			} else if (ballTransform->Position.x <= -2.5f) {
+				particleEvent.Position = glm::vec3(-2.5f, -3.5f, -3.f);
 			}
-			particleEvent.ScaleValues.push_back(glm::vec3(1.f));
+			particleEvent.ScaleValues.push_back(glm::vec3(1.5f));
+			particleEvent.ScaleValues.push_back(glm::vec3(2.f));
 			particleEvent.Color = glm::vec4(1.f);
-			particleEvent.Speed = 0;
+			particleEvent.Speed = 1.f;
+			particleEvent.AlphaValues.push_back(1.f);
+			particleEvent.AlphaValues.push_back(0.7f);
 
 			if (ballComponent->Combo <= 9) {
 				particleEvent.SpriteFile = "Textures/Combo/Combo00" + std::to_string(ballComponent->Combo) + ".png";
@@ -531,11 +541,25 @@ bool dd::Systems::BallSystem::OnInkBlasterOver(const dd::Events::InkBlasterOver 
 	return true;
 }
 
+bool dd::Systems::BallSystem::OnKrakenAttack(const dd::Events::KrakenAttack &event)
+{
+	m_KrakenAttack = true;
+	return true;
+}
+
+bool dd::Systems::BallSystem::OnKrakenAttackEnd(const dd::Events::KrakenAttackEnd &event)
+{
+	m_KrakenAttack = false;
+	return true;
+}
+
 bool dd::Systems::BallSystem::OnActionButton(const dd::Events::ActionButton &event)
 {
-	if (!m_StageBlockedWaiting) {
-		if (!m_InkBlockedWaiting) {
-			m_Waiting = false;
+	if (!m_KrakenAttack) {
+		if (!m_StageBlockedWaiting) {
+			if (!m_InkBlockedWaiting) {
+				m_Waiting = false;
+			}
 		}
 	}
     return true;

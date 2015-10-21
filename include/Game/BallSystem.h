@@ -30,6 +30,8 @@
 #include "Game/EStickyAttachedToPad.h"
 #include "Game/EInkBlaster.h"
 #include "Game/EInkBlasterOver.h"
+#include "Game/EKrakenAttack.h"
+#include "Game/EKrakenAttackEnd.h"
 #include "Game/EStageCleared.h"
 #include "Game/EArrivedAtNewStage.h"
 #include "Game/EGameOver.h"
@@ -111,6 +113,8 @@ private:
 	bool m_InkBlaster = false;
 	bool m_InkAttached = false;
 	bool m_InkBlockedWaiting = false;
+	bool m_KrakenAttack = false;
+	double m_KrakenCharge = 0;
 	bool m_Restarting = false;
 	int m_StickyCounter = 3;
 	bool m_GodMode = false;
@@ -132,6 +136,8 @@ private:
 	dd::EventRelay<BallSystem, dd::Events::StickyPad> m_EStickyPad;
 	dd::EventRelay<BallSystem, dd::Events::InkBlaster> m_EInkBlaster;
 	dd::EventRelay<BallSystem, dd::Events::InkBlasterOver> m_EInkBlasterOver;
+	dd::EventRelay<BallSystem, dd::Events::KrakenAttack> m_EKrakenAttack;
+	dd::EventRelay<BallSystem, dd::Events::KrakenAttackEnd> m_EKrakenAttackEnd;
     dd::EventRelay<BallSystem, dd::Events::Pause> m_EPause;
 	dd::EventRelay<BallSystem, dd::Events::Resume> m_EResume;
     dd::EventRelay<BallSystem, dd::Events::Contact> m_Contact;
@@ -147,6 +153,8 @@ private:
 	bool OnStickyPad(const dd::Events::StickyPad &event);
 	bool OnInkBlaster(const dd::Events::InkBlaster &event);
 	bool OnInkBlasterOver(const dd::Events::InkBlasterOver &event);
+	bool OnKrakenAttack(const dd::Events::KrakenAttack &event);
+	bool OnKrakenAttackEnd(const dd::Events::KrakenAttackEnd &event);
     bool OnPause(const dd::Events::Pause &event);
 	bool OnResume(const dd::Events::Resume &event);
     bool OnActionButton(const dd::Events::ActionButton &event);

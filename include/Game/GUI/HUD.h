@@ -51,6 +51,7 @@ public:
 		EVENT_SUBSCRIBE_MEMBER(m_EGameOver, &HUD::OnGameOver);
 		EVENT_SUBSCRIBE_MEMBER(m_ClusterClear, &HUD::OnClusterClear);
 		EVENT_SUBSCRIBE_MEMBER(m_KrakenAttack, &HUD::OnKrakenAttack);
+		EVENT_SUBSCRIBE_MEMBER(m_KrakenAttackEnd, &HUD::OnKrakenAttackEnd);
 
 		updateScore();
 	}
@@ -71,6 +72,7 @@ private:
 	EventRelay<Frame, Events::GameOver> m_EGameOver;
 	EventRelay<Frame, Events::ClusterClear> m_ClusterClear;
 	EventRelay<Frame, Events::KrakenAttack> m_KrakenAttack;
+	EventRelay<Frame, Events::KrakenAttackEnd> m_KrakenAttackEnd;
 
 	void updateScore()
 	{
@@ -120,6 +122,13 @@ private:
 			m_KrakenAttackSlider->SetPercentage(event.ChargeUpdate);
 		}
 		
+		return true;
+	}
+
+	bool OnKrakenAttackEnd(const Events::KrakenAttackEnd& event)
+	{
+		m_KrakenAttackSlider->Hide();
+
 		return true;
 	}
 };

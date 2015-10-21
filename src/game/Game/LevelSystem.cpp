@@ -278,6 +278,15 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 		}
 	}
 
+	auto brickPart = m_World->GetComponent<Components::BrickPart>(entity);
+	if (brickPart != nullptr) {
+		auto transform = m_World->GetComponent<Components::Transform>(entity);
+		if (transform->Position.y < -10) {
+			m_World->RemoveEntity(entity);
+			return;
+		}
+	}
+
     auto brick = m_World->GetComponent<Components::Brick>(entity);
     if (brick != nullptr) {
         auto transform = m_World->GetComponent<Components::Transform>(entity);
@@ -310,6 +319,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 			}
 			m_LooseBricks--;
 			m_World->RemoveEntity(entity);
+			return;
         }
     }
 
@@ -908,6 +918,7 @@ bool dd::Systems::LevelSystem::OnPowerUpTaken(const dd::Events::PowerUpTaken &ev
 
 bool dd::Systems::LevelSystem::OnKrakenDefeated(const dd::Events::KrakenDefeated &event)
 {
+	m_BrickGenerating = false;
 	SetNumberOfBricks(NumberOfBricks() - 1);
 	m_LooseBricks--;
 
@@ -1239,6 +1250,7 @@ void dd::Systems::LevelSystem::CreateBrokenModelPart(EntityID Parent, std::strin
 	auto ent = m_World->CreateEntity(Parent);
 	auto cTemplate = m_World->AddComponent<Components::Template>(ent);
 	auto cTransform = m_World->AddComponent<Components::Transform>(ent);
+	auto cBrickPart = m_World->AddComponent<Components::BrickPart>(ent);
 
 	cTransform->Position = RelativePosition;
 

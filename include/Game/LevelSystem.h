@@ -23,6 +23,7 @@
 #include "Transform/EMove.h"
 
 #include "Game/CBrick.h"
+#include "Game/CBrickPart.h"
 #include "Game/CBall.h"
 #include "Game/CLife.h"
 #include "Game/CWall.h"
