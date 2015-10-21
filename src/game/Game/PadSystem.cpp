@@ -151,7 +151,6 @@ void dd::Systems::PadSystem::Update(double dt)
 		Events::KrakenAttack e;
 		e.ChargeUpdate = m_KrakenCharge;
 		EventBroker->Publish(e);
-		//std::cout << "Charge: " << m_KrakenCharge << std::endl;
 		return;
 	}
 
@@ -271,7 +270,8 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_G) {
 		Events::BrickGenerating e;
-		e.Origin = glm::vec3(-5, 7, -10);
+		e.Origin1 = glm::vec3(-5, 7, -10);
+		e.Origin2 = glm::vec3(5, 7, -10);
 		e.Set = 1;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_L) {
@@ -296,7 +296,7 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 	} else if (val == GLFW_KEY_Q) {
 		Events::Move e;
 		e.Entity = Entity();
-		e.GoalPosition = glm::vec3(0, 0, -10);
+		e.GoalPosition = glm::vec3(0, 0, -10); 
 		e.Speed = 5;
 		e.Queue = false;
 		EventBroker->Publish(e);
@@ -474,6 +474,17 @@ bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &even
 		transform->Velocity = glm::vec3(0, 0, 0);
 		acceleration = glm::vec3(0, 0, 0);
 
+		if (!m_KrakenArm){
+			m_KrakenArm = m_World->CreateEntity(Entity());
+			auto transform = m_World->AddComponent<Components::Transform>(m_KrakenArm);
+			transform->Position = glm::vec3(1.f, -3.0f, 0.f);
+			auto model = m_World->AddComponent<Components::Model>(m_KrakenArm);
+			model->ModelFile = "Models/kraken/Arm.dae";
+			auto animation = m_World->AddComponent<Components::Animation>(m_KrakenArm);
+			animation->Speed = 1.0f;
+			m_World->CommitEntity(m_KrakenArm);
+		}
+
 		SetTransform(transform);
 		SetAcceleration(acceleration);
 	} else if (m_KrakenCharge >= 1) {
@@ -481,6 +492,10 @@ bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &even
 		m_KrakenCharge = 0;
 		m_KrakenStrength = 0;
 		m_PlayerStrength = 0;
+
+		m_World->RemoveEntity(m_KrakenArm);
+		m_KrakenArm = NULL;
+		
 	}
 	return true;
 }

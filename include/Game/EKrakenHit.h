@@ -17,6 +17,9 @@ struct KrakenHit : Event
 {
 	EntityID Kraken;
 	EntityID Hitter;
+	int MaxHealth;
+	int CurrentHealth;
+	int NewHealth;
 };
 
 }

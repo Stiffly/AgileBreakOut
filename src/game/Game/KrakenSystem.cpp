@@ -80,10 +80,14 @@ void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityI
 		switch (kraken->CurrentAction)
 		{
 		case 1: // Idle
-			//m_KrakenTimer += dt;
+			m_KrakenTimer += dt;
 			if (m_KrakenTimer > m_KrakenSecondsToAction) {
+				if (m_NumberOfActions == 0) {
+					kraken->CurrentAction = 3;
+					break;
+				}
 				m_KrakenTimer = 0;
-				std::uniform_real_distribution<float> dist(1, 2.999f);
+				std::uniform_real_distribution<float> dist(1, 4.999f);
 				float random = dist(m_RandomGenerator);
 				//std::cout << random << std::endl;
 				kraken->CurrentAction = random;
@@ -98,9 +102,29 @@ void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityI
 			EventBroker->Publish(krakenAttack);
 			break;
 		case 3: // Brick Generating
-			break;
-		case 4: // Moving
-			break;
+			{
+				kraken->CurrentAction = 1;
+				Events::BrickGenerating e;
+				e.Origin1 = glm::vec3(-5, 7, -10);
+				e.Origin2 = glm::vec3(5, 7, -10);
+				std::uniform_real_distribution<float> dist(1, 5.999f);
+				float random = dist(m_RandomGenerator);
+				e.Set = random;
+				EventBroker->Publish(e);
+				break;
+			}
+		case 4: // Brick Generating second case
+			{
+				kraken->CurrentAction = 1;
+				Events::BrickGenerating e;
+				e.Origin1 = glm::vec3(-5, 7, -10);
+				e.Origin2 = glm::vec3(5, 7, -10);
+				std::uniform_real_distribution<float> dist(1, 5.999f);
+				float random = dist(m_RandomGenerator);
+				e.Set = random;
+				EventBroker->Publish(e);
+				break;
+			}
 		case 5: // Taunting
 			if (m_ReturnToIdle) {
 				m_ReturnToIdle = false;
@@ -166,6 +190,9 @@ bool dd::Systems::KrakenSystem::OnContact(const dd::Events::Contact &event)
 		Events::KrakenHit e;
 		e.Kraken = krakenEntity;
 		e.Hitter = otherEntitiy;
+		e.MaxHealth = kraken->MaxHealth;
+		e.CurrentHealth = kraken->Health;
+		e.NewHealth = kraken->Health - 1;
 		EventBroker->Publish(e);
 	}
 }
@@ -191,9 +218,9 @@ bool dd::Systems::KrakenSystem::OnKrakenAttack(const dd::Events::KrakenAttack &e
 bool dd::Systems::KrakenSystem::OnKrakenHit(const dd::Events::KrakenHit &event)
 {
 	auto kraken = m_World->GetComponent<Components::Kraken>(event.Kraken);
-	//kraken->Health--;
+	kraken->Health--;
 	//std::cout << kraken->Health << std::endl;
-	kraken->Health = -1;
+	//kraken->Health = -1;
 	if (kraken->Health < 0) {
 		Events::KrakenDefeated e;
 		e.Kraken = event.Kraken;
@@ -210,9 +237,9 @@ bool dd::Systems::KrakenSystem::OnKrakenDefeated(const dd::Events::KrakenDefeate
 	auto kraken = m_World->GetComponent<Components::Kraken>(event.Kraken);
 	auto physicsComponent = m_World->GetComponent<Components::Physics>(event.Kraken);
 	/*physicsComponent->CollisionType = CollisionType::Type::Dynamic;
-	physicsComponent->GravityScale = 1.f;
+	physicsComponent->GravityScale = 1.f;*/
 	physicsComponent->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Water | CollisionLayer::Wall);
-	physicsComponent->Calculate = false;*/
+	/*physicsComponent->Calculate = false;*/
 
 	auto transformComponentBrick = m_World->GetComponent<Components::Transform>(event.Kraken);
 	auto transformComponentHitter = m_World->GetComponent<Components::Transform>(event.Hitter);

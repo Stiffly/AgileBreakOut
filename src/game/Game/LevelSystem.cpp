@@ -248,6 +248,9 @@ void dd::Systems::LevelSystem::Update(double dt)
     if (!m_Initialized) {
         GetNextLevel();
         CreateLevel(0);
+		for (int i = 0; i < m_KrakenBricks.size(); i++) {
+			m_KrakenBricks[i] = false;
+		}
         m_Initialized = true;
     }
 }
@@ -456,26 +459,41 @@ EntityID dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spac
 
 bool dd::Systems::LevelSystem::OnBrickGenerating(const dd::Events::BrickGenerating &event)
 {
-	GetBrickSet(event.Set);
-	LOG_DEBUG("This is happening.");
+	m_BrickGenerating = true;
+	m_BrickGeneratingEvent = event;
+	return true;
+}
 
-	int rows = 2;
+bool dd::Systems::LevelSystem::BrickGenerating(const dd::Events::BrickGenerating &event)
+{
+	GetBrickSet(event.Set);
+
+	int rows = 6;
 	int lines = 7;
 	int getter = 0;
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < lines; j++) {
-			auto ent = CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), -4, 1, m_BrickSet[getter], m_ColorSet[getter]);
-			if (ent != NULL) {
-				auto transform = m_World->GetComponent<Components::Transform>(ent);
-				Events::Move e;
-				e.GoalPosition = transform->Position;
-				transform->Position = event.Origin;
-				e.Entity = ent;
-				e.Speed = 6;
-				e.Queue = false;
-				EventBroker->Publish(e);
-				m_LooseBricks++;
-				SetNumberOfBricks(NumberOfBricks() + 1);
+			if (!m_KrakenBricks[getter]) {
+				auto ent = CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), -3.2, 1, m_BrickSet[getter], m_ColorSet[getter]);
+				if (ent != NULL) {
+					auto brick = m_World->GetComponent<Components::Brick>(ent);
+					brick->Number = getter;
+					m_KrakenBricks[getter] = true;
+					auto transform = m_World->GetComponent<Components::Transform>(ent);
+					Events::Move e;
+					e.GoalPosition = transform->Position;
+					if (j < 4) {
+						transform->Position = event.Origin1;
+					} else {
+						transform->Position = event.Origin2;
+					}
+					e.Entity = ent;
+					e.Speed = 6;
+					e.Queue = false;
+					EventBroker->Publish(e);
+					m_LooseBricks++;
+					SetNumberOfBricks(NumberOfBricks() + 1);
+				}
 			}
 			getter++;
 		}
@@ -483,10 +501,10 @@ bool dd::Systems::LevelSystem::OnBrickGenerating(const dd::Events::BrickGenerati
 	return true;
 }
 
-void dd::Systems::LevelSystem::GetBrickSet(int set)
+void dd::Systems::LevelSystem::GetBrickSet(int set) // These are sets the Kraken gets!
 {
-	std::array<int, 14> level;
-	std::array<glm::vec4, 14> color;
+	std::array<int, 42> level;
+	std::array<glm::vec4, 42> color;
 	// Level array indicates type of brick.
 	// 0 is empty space.
 	// 1 is standard brick.
@@ -517,51 +535,99 @@ void dd::Systems::LevelSystem::GetBrickSet(int set)
 
 	if (set == 1) {
 		level =
-		{1, 1, 1, 1, 1, 1, 1,
-		 1, 1, 1, 1, 1, 1, 1 };
+		{1, 0, 0, 0, 0, 0, 1,
+		 1, 0, 0, 0, 0, 0, 1,
+		 1, 0, 0, 0, 0, 0, 1,
+		 1, 1, 1, 1, 1, 1, 2,
+		 1, 1, 1, 1, 1, 1, 1,
+		 0, 0, 0, 0, 0, 0, 0};
 		color =
 		{r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r };
+		 r, r, r, r, r, r, r,
+		 r, r, r, r, r, r, r,
+		 r, r, r, r, r, r, r,
+		 r, r, r, r, r, r, r, 
+		 r, r, r, r, r, r, r};
 	}
 	else if (set == 2) {
 		level =
-		{2, 2, 2, 2, 2, 2, 2,
-		 2, 2, 2, 2, 2, 2, 2 };
+		{0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0,
+		 3, 0, 1, 0, 1, 0, 1,
+		 0, 1, 0, 1, 0, 1, 0,
+		 1, 0, 1, 0, 1, 0, 1,
+		 0, 0, 0, 0, 0, 0, 0};
 		color =
-		{w, w, w, w, w, w, w,
-		 w, w, w, w, w, w, w };
+		{y, y, y, y, y, y, y,
+		 y, y, y, y, y, y, y,
+		 y, y, y, y, y, y, y,
+		 y, y, y, y, y, y, y,
+		 y, y, y, y, y, y, y, 
+		 y, y, y, y, y, y, y};
 	}
 	else if (set == 3) {
 		level =
 		{0, 0, 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0 };
+		 0, 0, 0, 0, 0, 0, 0,
+		 1, 0, 1, 0, 1, 0, 1,
+		 0, 1, 1, 1, 1, 1, 0,
+		 0, 0, 4, 1, 1, 0, 0,
+		 0, 0, 0, 1, 0, 0, 0};
 		color =
-		{w, w, w, w, w, w, w,
-		 w, w, w, w, w, w, w };
+		{b, b, b, b, b, b, b,
+		 b, b, b, b, b, b, b,
+		 b, b, b, b, b, b, b,
+		 b, b, b, b, b, b, b,
+		 b, b, b, b, b, b, b, 
+		 b, b, b, b, b, b, b};
 	}
 	else if (set == 4) {
 		level =
 		{0, 0, 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0 };
+		 1, 1, 1, 1, 1, 3, 1,
+		 0, 0, 0, 0, 0, 0, 0,
+		 1, 1, 1, 1, 1, 1, 1,
+		 0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0};
 		color =
-		{w, w, w, w, w, w, w,
-		 w, w, w, w, w, w, w };
+		{m, m, m, m, m, m, m,
+		 m, m, m, m, m, m, m,
+		 m, m, m, m, m, m, m,
+		 m, m, m, m, m, m, m,
+		 m, m, m, m, m, m, m, 
+		 m, m, m, m, m, m, m};
 	}
 	else if (set == 5) {
 		level =
 		{0, 0, 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0 };
+		 0, 1, 1, 0, 1, 1, 0,
+		 0, 1, 2, 0, 1, 1, 0,
+		 0, 1, 1, 0, 1, 1, 0,
+		 0, 1, 1, 0, 1, 1, 0,
+		 0, 0, 0, 0, 0, 0, 0};
 		color =
-		{w, w, w, w, w, w, w,
-		 w, w, w, w, w, w, w };
+		{g, g, g, g, g, g, g,
+		 g, g, g, g, g, g, g,
+		 g, g, g, g, g, g, g,
+		 g, g, g, g, g, g, g,
+		 g, g, g, g, g, g, g, 
+		 g, g, g, g, g, g, g};
 	}
 	else if (set == 6) {
 		level =
-		{0, 0, 0, 1, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0 };
+		{0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0,
+		 1, 1, 1, 1, 1, 1, 1,
+		 1, 1, 1, 1, 1, 1, 1,
+		 0, 0, 0, 0, 0, 0, 0};
 		color =
-		{w, w, w, w, w, w, w,
-		 w, w, w, w, w, w, w };
+		{r, r, r, r, r, r, r, 
+		 r, r, r, r, r, r, r,
+		 r, r, r, r, r, r, r,
+		 r, r, r, r, r, r, r,
+		 r, r, r, r, r, r, r, 
+		 r, r, r, r, r, r, r};
 	}
 
 	std::copy(std::begin(level), std::end(level), std::begin(m_BrickSet));
@@ -576,6 +642,11 @@ void dd::Systems::LevelSystem::OnEntityRemoved(EntityID entity)
 
 bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 {
+	auto templateCheck = m_World->GetComponent<Components::Template>(event.Entity1);
+	if (templateCheck != nullptr){ return false; }
+	templateCheck = m_World->GetComponent<Components::Template>(event.Entity2);
+	if (templateCheck != nullptr){ return false; }
+
     EntityID entityBrick;
     EntityID entityBall;
 	EntityID entityShot = 0;
@@ -653,9 +724,11 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 
 	auto transformComponentBrick = m_World->GetComponent<Components::Transform>(entityBrick);
 	auto transformComponentHitter = m_World->GetComponent<Components::Transform>(entityHitter);
-		
-
 	auto brickModel = m_World->GetComponent<Components::Model>(entityBrick);
+
+	if (brick->Number < 50) {
+		m_KrakenBricks[brick->Number] = false;
+	}
 
 	// Check if the brick is any kind of special.
 	auto multi = m_World->GetComponent<Components::MultiBallBrick>(entityBrick);
@@ -1121,6 +1194,10 @@ void dd::Systems::LevelSystem::GetNextLevel()
 bool dd::Systems::LevelSystem::OnHitPad(const dd::Events::HitPad &event)
 {
     m_Cleared = false;
+	if (m_BrickGenerating) {
+		m_BrickGenerating = false;
+		BrickGenerating(m_BrickGeneratingEvent);
+	}
     return true;
 }
 

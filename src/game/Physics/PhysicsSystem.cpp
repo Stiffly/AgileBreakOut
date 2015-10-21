@@ -820,6 +820,7 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 
 		model = m_World->GetComponent<Components::Model>(event.Entity1);
 	}
+	Events::PlaySound se;
 
 	//Spawn a particle when a brick collides with somthing
 	Events::CreateParticleSequence e;
@@ -843,14 +844,19 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 	auto PowerKraken = m_World->GetComponent<Components::KrakenAttackBrick>(entity);
 
 	if (PowerFriend) {
+		se.FilePath = "Sounds/jap-awesome.wav";
 		e.SpriteFile = "Textures/PowerUps/Friends.png";
 	} else if (PowerSaviour) {
+		se.FilePath = "Sounds/jap-awesome.wav";
 		e.SpriteFile = "Textures/PowerUps/Saviour.png";
 	} else if (PowerSticky) {
+		se.FilePath = "Sounds/jap-awesome.wav";
 		e.SpriteFile = "Textures/PowerUps/Sticky.png";
 	} else if (PowerInkBlaster){
+		se.FilePath = "Sounds/jap-awesome.wav";
 		e.SpriteFile = "Textures/PowerUps/InkBlaster.png";
 	} else if (PowerKraken) { 
+		se.FilePath = "Sounds/jap-awesome.wav";
 		e.SpriteFile = "Textures/PowerUps/RealeaseTheKraken.png";
 	}
 	else {
@@ -873,6 +879,7 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 	}
 
 	EventBroker->Publish(e);
+	EventBroker->Publish(se);
 	return true;
 
 	

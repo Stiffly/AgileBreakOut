@@ -40,6 +40,7 @@
 #include "Game/EActionButton.h"
 #include "Game/ELifebuoyHit.h"
 #include "Physics/ECreateParticleSequence.h"
+#include "Sound/CCollisionSound.h"
 
 namespace dd
 {

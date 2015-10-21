@@ -172,8 +172,12 @@ private:
     std::array<int, 42> m_Bricks;
 	std::array<glm::vec4, 42> m_Colors;
 
-	std::array<int, 14> m_BrickSet;
-	std::array<glm::vec4, 14> m_ColorSet;
+	std::array<int, 42> m_BrickSet;
+	std::array<glm::vec4, 42> m_ColorSet;
+	std::array<bool, 42> m_KrakenBricks;
+
+	bool m_BrickGenerating = false;
+	dd::Events::BrickGenerating m_BrickGeneratingEvent;
 
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::ScoreEvent> m_EScoreEvent;
@@ -201,6 +205,7 @@ private:
 	bool OnResume(const dd::Events::Resume &event);
     bool OnHitPad(const dd::Events::HitPad &event);
 	bool OnBrickGenerating(const dd::Events::BrickGenerating &event);
+	bool BrickGenerating(const dd::Events::BrickGenerating &event);
 	void GetBrickSet(int Set);
 	bool OnKrakenDefeated(const dd::Events::KrakenDefeated &event);
 
