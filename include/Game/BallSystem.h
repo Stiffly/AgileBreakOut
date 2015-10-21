@@ -41,6 +41,7 @@
 #include "Game/ELifebuoyHit.h"
 #include "Physics/ECreateParticleSequence.h"
 #include "Sound/CCollisionSound.h"
+#include "Sound/EPlaySound.h"
 
 namespace dd
 {

@@ -176,6 +176,9 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 Events::LifeLost e;
                 e.Entity = entity;
                 EventBroker->Publish(e);
+				Events::PlaySound se;
+				se.FilePath = "Sounds/jap-lose-life.wav";
+				EventBroker->Publish(se);
                 return;
             }
         } //Removing this made the wall collisions work again
