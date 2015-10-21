@@ -361,13 +361,11 @@ public:
 			job.ModelMatrix = modelMatrix * model->m_Matrix;
 			job.Color = modelComponent->Color;
 			
-			if (model->m_Skeleton != nullptr) {
+			if (model->m_Skeleton != nullptr && animationComponent != nullptr) {
 				job.Skeleton = model->m_Skeleton;
-				if (animationComponent != nullptr) {
-					job.AnimationName = animationComponent->Name;
-					job.AnimationTime = animationComponent->Time;
-					job.NoRootMotion = animationComponent->NoRootMotion;
-				}
+				job.AnimationName = animationComponent->Name;
+				job.AnimationTime = animationComponent->Time;
+				job.NoRootMotion = animationComponent->NoRootMotion;
 			}
 
 			m_RendererQueue.Deferred.Add(job);
