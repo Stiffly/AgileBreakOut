@@ -4,6 +4,9 @@
 #include "Core/System.h"
 #include "Core/World.h"
 #include "Rendering/CAnimation.h"
+#include "Rendering/EAnimationComplete.h"
+#include "Rendering/CModel.h"
+#include "Rendering/Model.h"
 #include "Game/EPause.h"
 #include "Game/EResume.h"
 
