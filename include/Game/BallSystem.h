@@ -6,6 +6,8 @@
 #include "Core/EventBroker.h"
 #include "Core/CTransform.h"
 #include "Core/CTemplate.h"
+#include "Core/ResourceManager.h"
+#include "Core/ConfigFile.h"
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/CRectangleShape.h"
@@ -110,6 +112,7 @@ private:
 	bool m_InkBlockedWaiting = false;
 	bool m_Restarting = false;
 	int m_StickyCounter = 3;
+	bool m_GodMode = false;
 
 	bool m_StageBlockedWaiting = false;
 

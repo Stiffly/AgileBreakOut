@@ -97,7 +97,7 @@ bool dd::Systems::TravellingSystem::OnResume(const dd::Events::Resume &event)
 
 bool dd::Systems::TravellingSystem::OnStageCleared(const dd::Events::StageCleared &event)
 {
-	if (event.ClearedStage < 5) {
+	if (event.ClearedStage < event.StagesInCluster) {
 		m_Travelling = true;
 	}
 	return true;

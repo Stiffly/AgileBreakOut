@@ -21,12 +21,12 @@
 #include <Sound/CCollisionSound.h>
 
 #include "ResourceManager.h"
-#include "OBJ.h"
-#include "Model.h"
-#include "Texture.h"
+#include "Rendering/OBJ.h"
+#include "Rendering/Model.h"
+#include "Rendering/Texture.h"
 #include "EventBroker.h"
-#include "RenderQueue.h"
-#include "Renderer.h"
+#include "Rendering/RenderQueue.h"
+#include "Rendering/Renderer.h"
 #include "InputManager.h"
 //TODO: Remove includes that are only here for the temporary draw solution.
 #include "World.h"
@@ -59,6 +59,7 @@
 #include "Game/LifebuoySystem.h"
 #include "Game/ProjectileSystem.h"
 #include "Game/KrakenSystem.h"
+#include "Game/WaterSystem.h"
 #include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Game/BrickComponents.h"
@@ -164,7 +165,7 @@ public:
 		m_World->ComponentFactory.Register<Components::KrakenAttackBrick>();
 
 		m_World->SystemFactory.Register<Systems::LevelSystem>(
-				[this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
+			[this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LevelSystem>();
 		m_World->SystemFactory.Register<Systems::PadSystem>(
 				[this]() { return new Systems::PadSystem(m_World.get(), m_EventBroker); });
@@ -193,6 +194,9 @@ public:
 		m_World->SystemFactory.Register<Systems::KrakenSystem>(
 			[this]() { return new Systems::KrakenSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::KrakenSystem>();
+		m_World->SystemFactory.Register<Systems::WaterSystem>(
+			[this]() { return new Systems::WaterSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::WaterSystem>();
 
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
@@ -348,11 +352,10 @@ public:
 		{
 			ModelJob job;
 			job.TextureID = (texGroup.Texture) ? texGroup.Texture->ResourceID : 0;
-			job.DiffuseTexture = (texGroup.Texture) ? *texGroup.Texture : 0;
-			job.NormalTexture = (texGroup.NormalMap) ? *texGroup.NormalMap : 0;
-			job.SpecularTexture = (texGroup.SpecularMap) ? *texGroup.SpecularMap : 0;
-			job.VAO = model->VAO;
-			job.ElementBuffer = model->ElementBuffer;
+			job.DiffuseTexture = texGroup.Texture.get();
+			job.NormalTexture = texGroup.NormalMap.get();
+			job.SpecularTexture = texGroup.SpecularMap.get();
+			job.Model = model;
 			job.StartIndex = texGroup.StartIndex;
 			job.EndIndex = texGroup.EndIndex;
 			job.ModelMatrix = modelMatrix * model->m_Matrix;
@@ -376,13 +379,12 @@ public:
 	{
 		SpriteJob job;
 		job.TextureID = texture->ResourceID;
-		job.DiffuseTexture = *texture;
-		job.NormalTexture = *normalTexture;
-		job.SpecularTexture = *specularTexture;
+		job.DiffuseTexture = texture;
+		job.NormalTexture = normalTexture;
+		job.SpecularTexture = specularTexture;
 		job.ModelMatrix = modelMatrix;
 		job.Color = color;
 		job.Depth = depth;
-
 
 		m_RendererQueue.Forward.Add(job);
 	}
