@@ -187,6 +187,20 @@ bool dd::Systems::KrakenSystem::OnContact(const dd::Events::Contact &event)
 		return false;
 	}
 	
+	auto projectile = m_World->GetComponent<Components::Projectile>(otherEntitiy);
+	if (projectile != nullptr) {
+		Events::ScoreEvent es;
+		es.Score = 23;
+		Events::KrakenHit e;
+		e.Kraken = krakenEntity;
+		e.Hitter = otherEntitiy;
+		e.MaxHealth = kraken->MaxHealth;
+		e.CurrentHealth = kraken->Health;
+		e.NewHealth = kraken->Health - 1;
+		EventBroker->Publish(e);
+		m_World->RemoveEntity(otherEntitiy);
+		return true;
+	}
 	auto ball = m_World->GetComponent<Components::Ball>(otherEntitiy);
 	if (ball != nullptr) {
 		ball->Combo += 1;
@@ -194,6 +208,8 @@ bool dd::Systems::KrakenSystem::OnContact(const dd::Events::Contact &event)
 		ec.Combo = ball->Combo;
 		ec.Ball = otherEntitiy;
 		EventBroker->Publish(ec);
+		Events::ScoreEvent es;
+		es.Score = ball->Combo * 23;
 		Events::KrakenHit e;
 		e.Kraken = krakenEntity;
 		e.Hitter = otherEntitiy;
@@ -202,6 +218,7 @@ bool dd::Systems::KrakenSystem::OnContact(const dd::Events::Contact &event)
 		e.NewHealth = kraken->Health - 1;
 		EventBroker->Publish(e);
 	}
+	return true;
 }
 
 bool dd::Systems::KrakenSystem::OnKrakenAppear(const dd::Events::KrakenAppear &event)

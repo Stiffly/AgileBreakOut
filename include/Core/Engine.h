@@ -48,6 +48,7 @@
 #include "Game/CLifebuoy.h"
 #include "Game/CProjectile.h"
 #include "Game/CBrick.h"
+#include "Game/CBrickPart.h"
 #include "Game/CWall.h"
 #include "Game/CKraken.h"
 #include "Game/CBackground.h"
@@ -144,6 +145,7 @@ public:
 		m_World->ComponentFactory.Register<Components::Physics>();
 		m_World->ComponentFactory.Register<Components::Ball>();
 		m_World->ComponentFactory.Register<Components::Brick>();
+		m_World->ComponentFactory.Register<Components::BrickPart>();
 		m_World->ComponentFactory.Register<Components::Pad>();
 		m_World->ComponentFactory.Register<Components::Wall>();
 		m_World->ComponentFactory.Register<Components::Background>();
@@ -207,6 +209,9 @@ public:
 		m_World->Initialize();
 
 		//auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
+
+
+		
 		//EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &Engine::OnGameStart);
 		m_EGameStart = decltype(m_EGameStart)(std::bind(&Engine::OnGameStart, this, std::placeholders::_1));
 		m_EventBroker->Subscribe(m_EGameStart);

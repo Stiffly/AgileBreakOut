@@ -22,6 +22,7 @@
 #include "Game/EPause.h"
 #include "Game/EResume.h"
 #include "Game/EComboEvent.h"
+#include "Game/EScoreEvent.h"
 #include "Game/EKrakenAppear.h"
 #include "Game/EKrakenAttack.h"
 #include "Game/EKrakenHit.h"
@@ -30,6 +31,7 @@
 #include "Game/CTravels.h"
 #include "Game/CKraken.h"
 #include "Game/CBall.h"
+#include "Game/CProjectile.h"
 #include "Sound/CCollisionSound.h"
 //#include "Core/Camera.h" Camera Component
 

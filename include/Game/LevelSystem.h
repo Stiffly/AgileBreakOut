@@ -23,6 +23,7 @@
 #include "Transform/EMove.h"
 
 #include "Game/CBrick.h"
+#include "Game/CBrickPart.h"
 #include "Game/CBall.h"
 #include "Game/CLife.h"
 #include "Game/CWall.h"
@@ -143,7 +144,7 @@ private:
     bool m_Initialized = false;
     bool m_Pause = false;
     int m_LooseBricks = 0;
-    int m_CurrentCluster = 0;
+    int m_CurrentCluster = 1;
     int m_CurrentLevel = 1;
     int m_MultiBalls = 0;
     int m_PowerUps = 0;

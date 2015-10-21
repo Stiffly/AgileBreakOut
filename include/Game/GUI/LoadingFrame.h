@@ -5,6 +5,7 @@
 #include "GUI/Slider.h"
 #include "Core/ResourceManager.h"
 #include "Game/GUI/ELoadingFrameComplete.h"
+#include "Sound/EPlaySound.h"
 
 namespace dd
 {
@@ -56,6 +57,9 @@ public:
 				e.FrameName = Name();
 				e.Frame = this;
 				EventBroker->Publish(e); 
+				Events::PlaySound se;
+				se.FilePath = "Sounds/jap-story.wav";
+				EventBroker->Publish(se);
 			}
 		}
 	}
