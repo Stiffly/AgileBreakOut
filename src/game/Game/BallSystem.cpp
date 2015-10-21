@@ -12,7 +12,8 @@ void dd::Systems::BallSystem::RegisterComponents(ComponentFactory *cf)
 
 void dd::Systems::BallSystem::Initialize()
 {
-
+	std::random_device rd;
+	m_RandomGenerator = std::mt19937(rd());
     EVENT_SUBSCRIBE_MEMBER(m_Contact, &BallSystem::Contact);
     EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, &BallSystem::OnLifeLost);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &BallSystem::OnMultiBallLost);
@@ -37,6 +38,7 @@ void dd::Systems::BallSystem::Initialize()
         transform->Position = glm::vec3(-20.f, 0.26f, -10.f);
         transform->Scale = glm::vec3(0.3f, 0.3f, 0.3f);
         transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
+		transform->Orientation = glm::quat();
         auto model = m_World->AddComponent<Components::Model>(ent);
         model->ModelFile = "Models/Sid/Sid.dae";
 		auto animation = m_World->AddComponent<Components::Animation>(ent);
@@ -69,13 +71,14 @@ void dd::Systems::BallSystem::Initialize()
         CreateLife(i);
     }
 
+	SetReplaceBall(true);
+
 	m_GodMode = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<bool>("Cheat.GodMode", false);
 }
 
 void dd::Systems::BallSystem::Update(double dt)
 {
-    if (Lives() == 0)
-    {
+    if (Lives() == 0) {
 		if (m_KrakenAttack) {
 			Events::KrakenAttackEnd e;
 			EventBroker->Publish(e);
@@ -133,7 +136,11 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 		if (ReplaceBall()) {
 			SetReplaceBall(false);
 			m_Waiting = true;
+			std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
+			float random = dist(m_RandomGenerator);
+			ballComponent->SavedSpeed = glm::vec3(random, 1, 0.f);
 			ballComponent->Waiting = true;
+			auto transform = m_World->GetComponent<Components::Transform>(entity);
 		}
 
         if (ballComponent->Waiting) {
@@ -141,12 +148,17 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 				m_Restarting = false;
                 ballComponent->Waiting = false;
 				auto transform = m_World->GetComponent<Components::Transform>(entity);
-                transform->Velocity = glm::normalize(glm::vec3(0.5f, 1, 0.f)) * ballComponent->Speed;
+				/*std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
+				float random = dist(m_RandomGenerator);*/
+                transform->Velocity = glm::normalize(ballComponent->SavedSpeed) * ballComponent->Speed;
             } else if (!ballComponent->Sticky) {
                 auto transform = m_World->GetComponent<Components::Transform>(entity);
                 transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
                 //transform->Position = glm::vec3(0.0f, -3.f, -10.f);
-                transform->Orientation = glm::quat();
+				if (m_First) {
+					transform->Orientation = glm::quat();
+					m_First = false;
+				}
                 return;
             }
         }

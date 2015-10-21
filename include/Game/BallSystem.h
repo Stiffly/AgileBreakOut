@@ -1,6 +1,8 @@
 #ifndef DAYDREAM_BALLSYSTEM_H
 #define DAYDREAM_BALLSYSTEM_H
 
+#include <random>
+
 #include "Core/System.h"
 #include "Core/World.h"
 #include "Core/EventBroker.h"
@@ -99,6 +101,8 @@ public:
     void SetPause(const bool& pause) { m_Pause = pause; }
 
 private:
+	std::mt19937 m_RandomGenerator;
+
     float m_XMovementMultiplier = 2.f;
     float m_EdgeX = 3.4f; //Actually 3.2, but anyways.
     float m_EdgeY = 5.2f;
@@ -117,6 +121,8 @@ private:
 	bool m_Restarting = false;
 	int m_StickyCounter = 3;
 	bool m_GodMode = false;
+
+	bool m_First = true;
 
 	bool m_StageBlockedWaiting = false;
 
