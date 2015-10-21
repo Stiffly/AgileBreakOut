@@ -154,7 +154,7 @@ int dd::Skeleton::GetKeyframe(const Animation& animation, double time)
 
 	for (int keyframe = 0; keyframe < animation.Keyframes.size(); ++keyframe) {
 		if (animation.Keyframes[keyframe].Time > time)
-			return glm::max(0, keyframe - 1); // HACK: If the time is less than the first keyframe, don
+			return (keyframe - 1) % animation.Keyframes.size();
 	}
 
 	return 0;

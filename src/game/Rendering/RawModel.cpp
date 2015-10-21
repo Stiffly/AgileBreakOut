@@ -293,6 +293,10 @@ dd::RawModel::RawModel(std::string fileName)
 			Skeleton::Animation::Keyframe animationFrame;
 			animationFrame.Index = keyframe;
 			animationFrame.Time = frameTimes[keyframe] / animation->mTicksPerSecond;
+			// HACK: For some reason Blender likes to create a first frame that doesn't start at time 0
+			if (keyframe == 0) {
+				animationFrame.Time = 0;
+			}
 			for (auto &kv2 : kv.second) {
 				int boneID = kv2.first;
 				auto &property = kv2.second;
