@@ -54,7 +54,7 @@ private:
 	float m_SubmergedOriginalHeight = -4.5;
 	float m_SubmergedHeight = m_SubmergedOriginalHeight;
 
-	bool m_RaiseWater = true;
+	bool m_RaiseWater = false;
 	bool m_RemoveWater = false;
 
 	std::array<int, 10> m_BrickPartCounters;
