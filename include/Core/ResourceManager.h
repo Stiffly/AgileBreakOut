@@ -22,7 +22,9 @@
 #include <string>
 #include <functional>
 #include <vector>
+#include <set>
 #include <unordered_map>
+#include <fstream>
 
 #include "Util/UnorderedMapPair.h"
 #include "Util/Factory.h"
@@ -70,13 +72,8 @@ public:
 	return s;
 	}*/
 
-	/** Registers the factory function of a resource type
-
-		@tparam T Resource type.
-		@param factoryFunction Lambda function that creates a new instance of the resource.
-	*/
 	template <typename T>
-	static void RegisterType(std::function<Resource*(std::string)> factoryFunction);
+	static void RegisterType(std::string typeName);
 
 	/** Preloads a resource and caches it for future use
 
@@ -85,6 +82,7 @@ public:
 	*/
 	template <typename T>
 	static void Preload(std::string resourceName);
+	static void Preload(std::string resourceType, std::string resourceName);
 
 	/** Checks if a resource is in cache
 
@@ -101,14 +99,7 @@ public:
 	*/
 	template <typename T>
 	static T* Load(std::string resourceName, Resource* parent = nullptr);
-
-	/** Fetches a loaded resource
-
-		@tparam T Resource type.
-		@param resourceName Fully qualified name of the resource to fetch.
-	*/
-	template <typename T>
-	static T* Fetch(std::string resourceName);
+	static Resource* Load(std::string resourceType, std::string resourceName, Resource* parent = nullptr);
 
 	/** Reloads an already loaded resource, keeping its resource ID intact.
 
@@ -116,14 +107,19 @@ public:
 	 	@param resourceName Fully qualified name of the resource to reload.
 	*/
     static void Reload(std::string resourceName);
+	
+	static void LoadPreloadsFromFile();
+	static const std::set<std::pair<std::string, std::string>>& GetPreloads() { return m_Preloads; }
 
 	static void Update();
 
 private:
+	static std::unordered_map<std::string, std::string> m_CompilerTypenameToResourceType;
     static std::unordered_map<std::string, std::function<Resource*(std::string)>> m_FactoryFunctions; // type -> factory function
 	static std::unordered_map<std::pair<std::string, std::string>, Resource*> m_ResourceCache; // (type, name) -> resource
 	static std::unordered_map<std::string, Resource*> m_ResourceFromName; // name -> resource
 	static std::unordered_map<Resource*, Resource*> m_ResourceParents; // resource -> parent resource
+	static std::set<std::pair<std::string, std::string>> m_Preloads; // (type, name)
 
 	// TODO: Getters for IDs
 	static unsigned int m_CurrentResourceTypeID;
@@ -140,93 +136,40 @@ private:
 	static unsigned int GetNewResourceID(unsigned int typeID);
 
 	// Internal: Create a resource and cache it
-	template <typename T>
-	static T* CreateResource(std::string resourceName, Resource* parent);
+	static Resource* CreateResource(std::string resourceType, std::string resourceName, Resource* parent);
 };
 
 template <typename T>
 T* ResourceManager::Load(std::string resourceName, Resource* parent /* = nullptr */)
 {
-	auto resourceType = typeid(T).name();
-	auto it = m_ResourceCache.find(std::make_pair(resourceType, resourceName));
-	if (it != m_ResourceCache.end())
-		return static_cast<T*>(it->second);
-
-	if (m_Preloading) {
-		LOG_INFO("Preloading resource \"%s\"", resourceName.c_str());
-	} else {
-		LOG_WARNING("Hot-loading resource \"%s\"", resourceName.c_str());
-	}
-
-	return CreateResource<T>(resourceName, parent);
-}
-
-template <typename T>
-T* ResourceManager::Fetch(std::string resourceName)
-{
-	auto resourceType = typeid(T).name();
-	auto it = m_ResourceCache.find(std::make_pair(resourceType, resourceName));
-	if (it == m_ResourceCache.end())
-	{
-		LOG_ERROR("Failed to fetch resource \"%s\": Resource not loaded!", resourceName.c_str());
+	auto resourceTypename = typeid(T).name();
+	auto it = m_CompilerTypenameToResourceType.find(resourceTypename);
+	if (it == m_CompilerTypenameToResourceType.end()) {
+		LOG_ERROR("Failed to load resource \"%s\" of type \"%s\": type not registered", resourceName.c_str(), resourceTypename);
 		return nullptr;
-	} else
-	{
-		return static_cast<T*>(it->second);
 	}
+
+	return static_cast<T*>(Load(it->second, resourceName, parent));
 }
 
 template <typename T>
-void ResourceManager::RegisterType(std::function<Resource*(std::string)> factoryFunction)
+void ResourceManager::RegisterType(std::string typeName)
 {
-	m_FactoryFunctions[typeid(T).name()] = factoryFunction;
+	m_CompilerTypenameToResourceType[typeid(T).name()] = typeName;
+	m_FactoryFunctions[typeName] = [](std::string resourceName) { return new T(resourceName); };
 }
 
 template <typename T>
 void ResourceManager::Preload(std::string resourceName)
 {
-	auto resourceType = typeid(T).name();
-	if (IsResourceLoaded(resourceType, resourceName))
-	{
-		LOG_WARNING("Attempted to preload resource \"%s\" multiple times!", resourceName.c_str());
+	auto resourceTypename = typeid(T).name();
+	auto it = m_CompilerTypenameToResourceType.find(resourceTypename);
+	if (it == m_CompilerTypenameToResourceType.end()) {
+		LOG_ERROR("Failed to load resource \"%s\" of type \"%s\": type not registered", resourceName.c_str(), resourceTypename);
 		return;
 	}
 
-	m_Preloading = true;
-	LOG_INFO("Preloading resource \"%s\"", resourceName.c_str());
-	CreateResource<T>(resourceName, nullptr);
-	m_Preloading = false;
-}
-
-template <typename T>
-T* ResourceManager::CreateResource(std::string resourceName, Resource* parent)
-{
-	const char* resourceType = typeid(T).name();
-	/*auto facIt = m_FactoryFunctions.find(resourceType);
-	if (facIt == m_FactoryFunctions.end())
-	{
-	LOG_ERROR("Failed to load resource \"%s\" of type \"%s\": Type not registered", resourceName.c_str(), resourceType);
-	return nullptr;
-	}*/
-
-	// Call the factory function
-	T* resource = new T(resourceName);
-	// Store IDs
-	resource->TypeID = GetTypeID(resourceType);
-	resource->ResourceID = GetNewResourceID(resource->TypeID);
-	// Cache
-	m_ResourceCache[std::make_pair(resourceType, resourceName)] = resource;
-	m_ResourceFromName[resourceName] = resource;
-	if (parent != nullptr)
-	{
-		m_ResourceParents[resource] = parent;
-	}
-	if (!boost::filesystem::is_directory(resourceName))
-	{
-		LOG_DEBUG("Adding watch for %s", resourceName.c_str());
-		m_FileWatcher.AddWatch(resourceName, fileWatcherCallback);
-	}
-	return resource;
+	Preload(it->second, resourceName);
 }
 
 }

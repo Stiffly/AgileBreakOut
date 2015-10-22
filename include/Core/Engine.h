@@ -86,6 +86,8 @@
 #include "GUI/Button.h"
 #include "Game/GUI/MainMenu.h"
 #include "Game/GUI/HUD.h"
+#include "Game/GUI/ELoadingFrameComplete.h"
+#include "Game/GUI/LoadingFrame.h"
 
 namespace dd
 {
@@ -94,9 +96,18 @@ class Engine
 {
 
 public:
-	Engine(int argc, char* argv[]) {
-		auto config = ResourceManager::Load<ConfigFile>("Config.ini");
+	Engine(int argc, char* argv[]) 
+	{
+		ResourceManager::RegisterType<Texture>("Texture");
+		ResourceManager::RegisterType<Model>("Model");
+		ResourceManager::RegisterType<Sound>("Sound");
+		ResourceManager::RegisterType<ConfigFile>("ConfigFile");
+		ResourceManager::RegisterType<ShaderProgram>("ShaderProgram");
+		ResourceManager::RegisterType<VertexShader>("VertexShader");
+		ResourceManager::RegisterType<FragmentShader>("FragmentShader");
+		ResourceManager::LoadPreloadsFromFile();
 
+		auto config = ResourceManager::Load<ConfigFile>("Config.ini");
 		LOG_LEVEL = static_cast<_LOG_LEVEL>(config->GetValue<int>("Debug.LogLevel", 1));
 
 		m_EventBroker = std::make_shared<EventBroker>();
@@ -114,15 +125,11 @@ public:
 		m_FrameStack = new GUI::Frame(m_EventBroker.get());
 		m_FrameStack->Width = 675;
 		m_FrameStack->Height = 1080;
-
-		if (config->GetValue<bool>("Debug.SkipStory", false)) {
-			Events::GameStart e;
-			m_EventBroker->Publish(e);
-			auto hud = new GUI::HUD(m_FrameStack, "HUD");
-		}
-		else {
-			auto menu = new GUI::MainMenu(m_FrameStack, "MainMenu");
-		}
+		m_MainMenu = new GUI::MainMenu(m_FrameStack, "MainMenu");
+		m_MainMenu->Hide();
+		m_LoadingFrame = new GUI::LoadingFrame(m_FrameStack, "Loading");
+		m_LoadingFrame->SetTexture("Textures/GUI/Loading.png");
+		PreloadAllTheShit();
 
 		m_InputManager = std::make_shared<InputManager>(m_Renderer->Window(), m_EventBroker);
 
@@ -216,13 +223,26 @@ public:
 
 		//auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
 
-
-		
-		//EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &Engine::OnGameStart);
 		m_EGameStart = decltype(m_EGameStart)(std::bind(&Engine::OnGameStart, this, std::placeholders::_1));
 		m_EventBroker->Subscribe(m_EGameStart);
+		m_ELoadingFrameComplete = decltype(m_ELoadingFrameComplete)(std::bind(&Engine::OnLoadingFrameComplete, this, std::placeholders::_1));
+		m_EventBroker->Subscribe(m_ELoadingFrameComplete);
 
 		m_LastTime = glfwGetTime();
+	}
+
+	void PreloadAllTheShit()
+	{
+		if (ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<bool>("Debug.SkipPreload", false)) {
+			m_LoadingFrame->Hide();
+			m_MainMenu->Show();
+			return;
+		}
+
+		for (auto& pair : ResourceManager::GetPreloads()) {
+			m_LoadingFrame->AddResource(pair.first, pair.second);
+		}
+		m_LoadingFrame->Preload();
 	}
 
 	bool Running() const { return !glfwWindowShouldClose(m_Renderer->Window()); }
@@ -424,6 +444,8 @@ public:
 private:
 	std::shared_ptr<EventBroker> m_EventBroker;
 	GUI::Frame* m_FrameStack = nullptr;
+	GUI::MainMenu* m_MainMenu = nullptr;
+	GUI::LoadingFrame* m_LoadingFrame = nullptr;
 	std::shared_ptr<Renderer> m_Renderer;
 	RenderQueueCollection m_RendererQueue;
 	std::shared_ptr<InputManager> m_InputManager;
@@ -453,6 +475,17 @@ private:
 
 		return true;
 	};
+
+	EventRelay<Engine, Events::LoadingFrameComplete> m_ELoadingFrameComplete;
+	bool OnLoadingFrameComplete(const Events::LoadingFrameComplete& event)
+	{
+		if (event.FrameName == "Loading") {
+			event.Frame->Hide();
+			m_MainMenu->Show();
+		}
+		return true;
+	}
+
 	double m_LastTime;
 };
 
