@@ -28,6 +28,7 @@
 #include "Rendering/CSprite.h"
 #include <fstream>
 #include <iostream>
+#include "Rendering/CAnimation.h"
 
 namespace dd
 {

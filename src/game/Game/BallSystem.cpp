@@ -39,7 +39,7 @@ void dd::Systems::BallSystem::Initialize()
         transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
 		transform->Orientation = glm::quat();
         auto model = m_World->AddComponent<Components::Model>(ent);
-        model->ModelFile = "Models/Sid/Sid.dae";
+        model->ModelFile = "Models/Sid/Sid_Flying.dae";
 		auto animation = m_World->AddComponent<Components::Animation>(ent);
 		animation->Speed = 1.0;
         std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);

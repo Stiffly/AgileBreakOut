@@ -22,6 +22,7 @@ struct Ball : Component
     bool Waiting = true;
 	bool InkBlaster = false;
 	bool Sticky = false;
+	bool Loaded = false;
 	glm::vec3 StickyPlacement = glm::vec3(0, 0, 0);
     glm::vec3 SavedSpeed = glm::vec3(0, 1, 0);
 };
