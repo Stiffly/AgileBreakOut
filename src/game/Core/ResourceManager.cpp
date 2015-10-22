@@ -19,10 +19,12 @@
 #include "PrecompiledHeader.h"
 #include "Core/ResourceManager.h"
 
+std::unordered_map<std::string, std::string> dd::ResourceManager::m_CompilerTypenameToResourceType;
 std::unordered_map<std::string, std::function<dd::Resource*(std::string)>> dd::ResourceManager::m_FactoryFunctions;
 std::unordered_map<std::pair<std::string, std::string>, dd::Resource*> dd::ResourceManager::m_ResourceCache;
 std::unordered_map<std::string, dd::Resource*> dd::ResourceManager::m_ResourceFromName;
 std::unordered_map<dd::Resource*, dd::Resource*> dd::ResourceManager::m_ResourceParents;
+std::set<std::pair<std::string, std::string>> dd::ResourceManager::m_Preloads; // (type, name)
 unsigned int dd::ResourceManager::m_CurrentResourceTypeID = 0;
 std::unordered_map<std::string, unsigned int> dd::ResourceManager::m_ResourceTypeIDs;
 std::unordered_map<unsigned int, unsigned int> dd::ResourceManager::m_ResourceCount;
@@ -82,4 +84,83 @@ void dd::ResourceManager::fileWatcherCallback(std::string path, FileWatcher::Fil
 void dd::ResourceManager::Update()
 {
 	m_FileWatcher.Check();
+}
+
+void dd::ResourceManager::LoadPreloadsFromFile()
+{
+	std::ifstream f("PreloadResources");
+	while (f.good()) {
+		std::string resourceType;
+		std::string resourceName;
+		f >> resourceType >> resourceName;
+		if (!resourceType.empty() && !resourceType.empty()) {
+			m_Preloads.insert(std::make_pair(resourceType, resourceName));
+		}
+	}
+	f.close();
+}
+
+void dd::ResourceManager::Preload(std::string resourceType, std::string resourceName)
+{
+	if (IsResourceLoaded(resourceType, resourceName))
+	{
+		//LOG_WARNING("Attempted to preload resource \"%s\" multiple times!", resourceName.c_str());
+		return;
+	}
+
+	m_Preloading = true;
+	LOG_INFO("Preloading resource \"%s\"", resourceName.c_str());
+	CreateResource(resourceType, resourceName, nullptr);
+	m_Preloading = false;
+}
+
+dd::Resource* dd::ResourceManager::Load(std::string resourceType, std::string resourceName, dd::Resource* parent /*= nullptr*/)
+{
+	auto it = m_ResourceCache.find(std::make_pair(resourceType, resourceName));
+	if (it != m_ResourceCache.end())
+		return it->second;
+
+	if (m_Preloading) {
+		LOG_INFO("Preloading resource \"%s\"", resourceName.c_str());
+	} else {
+		LOG_WARNING("Hot-loading resource \"%s\"", resourceName.c_str());
+
+		if (m_Preloads.find(std::make_pair(resourceType, resourceName)) == m_Preloads.end()) {
+			std::ofstream f("PreloadResources", std::ofstream::app);
+			f << resourceType << " " << resourceName << std::endl;
+			f.close();
+			m_Preloads.insert(std::make_pair(resourceType, resourceName));
+		}
+	}
+
+	return CreateResource(resourceType, resourceName, parent);
+}
+
+dd::Resource* dd::ResourceManager::CreateResource(std::string resourceType, std::string resourceName, dd::Resource* parent)
+{
+	auto facIt = m_FactoryFunctions.find(resourceType);
+	if (facIt == m_FactoryFunctions.end())
+	{
+		LOG_ERROR("Failed to load resource \"%s\" of type \"%s\": type not registered", resourceName.c_str(), resourceType);
+		return nullptr;
+	}
+
+	// Call the factory function
+	Resource* resource = facIt->second(resourceName);
+	// Store IDs
+	resource->TypeID = GetTypeID(resourceType);
+	resource->ResourceID = GetNewResourceID(resource->TypeID);
+	// Cache
+	m_ResourceCache[std::make_pair(resourceType, resourceName)] = resource;
+	m_ResourceFromName[resourceName] = resource;
+	if (parent != nullptr)
+	{
+		m_ResourceParents[resource] = parent;
+	}
+	if (!boost::filesystem::is_directory(resourceName))
+	{
+		LOG_DEBUG("Adding watch for %s", resourceName.c_str());
+		m_FileWatcher.AddWatch(resourceName, fileWatcherCallback);
+	}
+	return resource;
 }
