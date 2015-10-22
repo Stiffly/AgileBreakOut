@@ -439,8 +439,9 @@ EntityID dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spac
 		auto type = m_World->AddComponent<Components::StickyBrick>(brick);
 		model->ModelFile = "Models/Brick/StickyBrick.obj";
 	} else if (typeInt == InkBlasterBrick) {
-		cBrick->Type = InkBlasterBrick;
+		cBrick->Type = InkBlasterBrick; 
 		auto type = m_World->AddComponent<Components::InkBlasterBrick>(brick);
+		//model->ModelFile = "Models/Brick/InkBrick.obj";
 		model->Color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 	} else if (typeInt == KrakenAttackBrick) {
 		cBrick->Type = KrakenAttackBrick;
@@ -1100,7 +1101,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 1, 1, 1, 1, 1, 1,
                      1, 0, 1, 2, 1, 0, 1,
                      0, 1, 0, 1, 0, 1, 0,
-                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 0, 0, 0, 6,
                      0, 0, 0, 0, 0, 0, 0};
 			color = 
 					{w, w, w, w, w, w, w,
