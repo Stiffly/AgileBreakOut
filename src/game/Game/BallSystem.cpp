@@ -15,7 +15,6 @@ void dd::Systems::BallSystem::Initialize()
 	std::random_device rd;
 	m_RandomGenerator = std::mt19937(rd());
     EVENT_SUBSCRIBE_MEMBER(m_Contact, &BallSystem::Contact);
-    EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, &BallSystem::OnLifeLost);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &BallSystem::OnMultiBallLost);
     EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &BallSystem::OnResetBall);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &BallSystem::OnMultiBall);
@@ -67,33 +66,11 @@ void dd::Systems::BallSystem::Initialize()
         transform2->Velocity = glm::vec3(0.0f, -10.f, 0.f);
     }
 
-    for (int i = 0; i < Lives(); i++) {
-        CreateLife(i);
-    }
-
 	SetReplaceBall(true);
-
-	m_GodMode = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<bool>("Cheat.GodMode", false);
 }
 
 void dd::Systems::BallSystem::Update(double dt)
 {
-    if (Lives() == 0) {
-		if (m_KrakenAttack) {
-			Events::KrakenAttackEnd e;
-			EventBroker->Publish(e);
-		}
-
-        Events::GameOver e;
-        EventBroker->Publish(e);
-
-		Events::Pause p;
-		p.Type = "All";
-		EventBroker->Publish(p);
-
-		//TODO: Make this not so ugly
-		SetLives(-1);
-    }
     ResolveContacts();
 }
 
@@ -189,7 +166,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 m_World->RemoveEntity(entity);
                 Events::MultiBallLost e;
                 EventBroker->Publish(e);
-            } else if (Lives() == PastLives() && !m_Restarting) {
+            } else if (!m_Restarting) { //If we lose lives when we shouldn't, look here.
                 Events::ResetBall be;
                 EventBroker->Publish(be);
                 Events::LifeLost e;
@@ -214,16 +191,6 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 transformBall->Velocity = glm::vec3(reflectedVelocity, 0.f);
             }
         }*/
-    }
-
-    if (Lives() != PastLives()) {
-        auto life = m_World->GetComponent<Components::Life>(entity);
-        if (life != nullptr) {
-            if (life->Number + 1 == PastLives()) {
-                m_World->RemoveEntity(entity);
-                SetPastLives(Lives());
-            }
-        }
     }
 
     if (ballComponent != nullptr) {
@@ -450,31 +417,6 @@ EntityID dd::Systems::BallSystem::CreateBall()
     m_World->RemoveComponent<Components::Template>(ent);
 
     return ent;
-}
-
-void dd::Systems::BallSystem::CreateLife(int number)
-{
-    auto life = m_World->CreateEntity();
-    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(life);
-    transform->Position = glm::vec3(-1.5f + number * 0.15f, -2.f, -5.f);
-    transform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
-
-    std::shared_ptr<Components::Life> lifeNr = m_World->AddComponent<Components::Life>(life);
-    lifeNr->Number = number;
-
-    auto model = m_World->AddComponent<Components::Model>(life);
-    model->ModelFile = "Models/Sid/Sid.dae";
-
-
-    m_World->CommitEntity(life);
-}
-
-bool dd::Systems::BallSystem::OnLifeLost(const dd::Events::LifeLost &event)
-{
-	if (!m_GodMode){
-		SetLives(Lives() - 1);
-	}
-    return true;
 }
 
 bool dd::Systems::BallSystem::OnMultiBallLost(const dd::Events::MultiBallLost &event)
