@@ -21,6 +21,10 @@
 
 void dd::Renderer::Initialize()
 {
+	ResourceManager::RegisterType<ShaderProgram>("ShaderProgram");
+	ResourceManager::RegisterType<VertexShader>("VertexShader");
+	ResourceManager::RegisterType<FragmentShader>("FragmentShader");
+
 	// Initialize GLFW
 	if (!glfwInit()) {
 		LOG_ERROR("GLFW: Initialization failed");

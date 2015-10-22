@@ -37,6 +37,7 @@ void dd::Systems::PhysicsSystem::InitializeWater()
     m_ParticleSystemDef.radius = radius;
     m_ParticleSystemDef.gravityScale = gravityScale;
 	m_ParticleSystemDef.density = 4.f;
+	m_ParticleSystemDef.surfaceTensionNormalStrength = 0.07;
 
     m_WaterParticleSystem = m_PhysicsWorld->CreateParticleSystem(&m_ParticleSystemDef);
 }

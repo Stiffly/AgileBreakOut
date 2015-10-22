@@ -33,6 +33,8 @@
 #include "Game/CBall.h"
 #include "Game/CProjectile.h"
 #include "Sound/CCollisionSound.h"
+#include "Rendering/CAnimation.h"
+#include "Rendering/CSprite.h"
 //#include "Core/Camera.h" Camera Component
 
 

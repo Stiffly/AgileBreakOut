@@ -3,11 +3,11 @@
 
 #include "Core/ResourceManager.h"
 #include "Game/GUI/StoryboardFrame.h"
-#include "Game/GUI/ELoadingFrameComplete.h"
-#include "Game/GUI/LoadingFrame.h"
 #include "Game/EGameStart.h"
 #include "Core/EKeyDown.h"
 #include "Game/GUI/HUD.h"
+#include "Sound/EPlaySound.h"
+#include "Sound/EStopSound.h"
 
 namespace dd
 {
@@ -20,36 +20,7 @@ public:
 	Story1(Frame* parent, std::string name)
 		: StoryboardFrame(parent, name) 
 	{
-		EVENT_SUBSCRIBE_MEMBER(m_ELoadingFrameComplete, &Story1::OnLoadingFrameComplete);
 		EVENT_SUBSCRIBE_MEMBER(m_EKeyDown, &Story1::OnKeyDown);
-
-		m_LoadingFrame = new GUI::LoadingFrame(this, "Story1LoadingFrame");
-		m_LoadingFrame->SetTexture("Textures/GUI/Loading.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/Brunn1.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/Brunn2.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/Brunn3.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/Brunn4.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/Brunn5.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene1.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene2.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene3.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene4.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene5.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene6.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene7.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene8.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene9.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene10.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene11.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene12.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene13.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene14.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene15.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene16.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene17.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene18.png");
-		m_LoadingFrame->AddTexturePreload("Textures/Story/SubScene19.png");
-		m_LoadingFrame->Preload();
 
 		m_Spacebar = new TextureFrame(this, "ZZZSpacebar");
 		m_Spacebar->SetTexture("Textures/GUI/SpacebarSkip.png");
@@ -196,6 +167,14 @@ public:
 		AddTransition(t);
 	}
 
+	virtual void Play() override
+	{
+		StoryboardFrame::Play();
+		Events::PlaySound se;
+		se.FilePath = "Sounds/jap-story.wav";
+		EventBroker->Publish(se);
+	}
+
 	void Update(double dt) override
 	{
 		StoryboardFrame::Update(dt);
@@ -209,7 +188,6 @@ public:
 	}
 
 private:
-	GUI::LoadingFrame* m_LoadingFrame = nullptr;
 	TextureFrame* m_Spacebar = nullptr;
 
 	EventRelay<Frame, Events::KeyDown> m_EKeyDown;
@@ -220,25 +198,17 @@ private:
 		}
 
 		if (event.KeyCode == GLFW_KEY_SPACE) {
-			m_LoadingFrame->CancelPreload();
 			Events::GameStart e;
 			EventBroker->Publish(e);
+			Events::StopSound se;
+			se.FilePath = "Sounds/jap-story.wav";
+			EventBroker->Publish(se);
 			Hide();
 			auto hud = new GUI::HUD(BaseFrame, "HUD");
 		}
 		return true;
 	}
 
-	EventRelay<Frame, Events::LoadingFrameComplete> m_ELoadingFrameComplete;
-	bool OnLoadingFrameComplete(const Events::LoadingFrameComplete& event)
-	{
-		if (event.FrameName == "Story1LoadingFrame") {
-			event.Frame->Hide();
-			m_Spacebar->Hide();
-			Play();
-		}
-		return true;
-	}
 };
 
 }

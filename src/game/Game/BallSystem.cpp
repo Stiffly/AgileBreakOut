@@ -12,9 +12,9 @@ void dd::Systems::BallSystem::RegisterComponents(ComponentFactory *cf)
 
 void dd::Systems::BallSystem::Initialize()
 {
-
+	std::random_device rd;
+	m_RandomGenerator = std::mt19937(rd());
     EVENT_SUBSCRIBE_MEMBER(m_Contact, &BallSystem::Contact);
-    EVENT_SUBSCRIBE_MEMBER(m_ELifeLost, &BallSystem::OnLifeLost);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBallLost, &BallSystem::OnMultiBallLost);
     EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &BallSystem::OnResetBall);
     EVENT_SUBSCRIBE_MEMBER(m_EMultiBall, &BallSystem::OnMultiBall);
@@ -35,8 +35,9 @@ void dd::Systems::BallSystem::Initialize()
         auto ent = m_World->CreateEntity();
         std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
         transform->Position = glm::vec3(-20.f, 0.26f, -10.f);
-        transform->Scale = glm::vec3(0.3f, 0.3f, 0.3f);
+        transform->Scale = glm::vec3(.3f, 0.3f, 0.3f);
         transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
+		transform->Orientation = glm::quat();
         auto model = m_World->AddComponent<Components::Model>(ent);
         model->ModelFile = "Models/Sid/Sid.dae";
 		auto animation = m_World->AddComponent<Components::Animation>(ent);
@@ -63,34 +64,20 @@ void dd::Systems::BallSystem::Initialize()
         auto transform2 = m_World->GetComponent<Components::Transform>(ent2);
         transform2->Position = glm::vec3(-0.f, 0.26f, -10.f);
         transform2->Velocity = glm::vec3(0.0f, -10.f, 0.f);
+
+		/*auto PosterBoy = CreateBall();
+		auto PosterBall = m_World->GetComponent<Components::Ball>(PosterBoy);
+		PosterBall->PosterBoy = 1;
+		auto Postertran = m_World->GetComponent<Components::Transform>(PosterBoy);
+		Postertran->Position = glm::vec3(-3.f, -3.f, -10.f);
+		Postertran->Velocity = glm::vec3(0.0f, 0.f, 0.f);*/
     }
 
-    for (int i = 0; i < Lives(); i++) {
-        CreateLife(i);
-    }
-
-	m_GodMode = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<bool>("Cheat.GodMode", false);
+	SetReplaceBall(true);
 }
 
 void dd::Systems::BallSystem::Update(double dt)
 {
-    if (Lives() == 0)
-    {
-		if (m_KrakenAttack) {
-			Events::KrakenAttackEnd e;
-			EventBroker->Publish(e);
-		}
-
-        Events::GameOver e;
-        EventBroker->Publish(e);
-
-		Events::Pause p;
-		p.Type = "All";
-		EventBroker->Publish(p);
-
-		//TODO: Make this not so ugly
-		SetLives(-1);
-    }
     ResolveContacts();
 }
 
@@ -103,36 +90,24 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 	}
 
     auto ballComponent = m_World->GetComponent<Components::Ball>(entity);
-	
-    /*if (IsPaused()) {
-        if (ballComponent != nullptr) {
-            auto transform = m_World->GetComponent<Components::Transform>(entity);
-
-            if (!ballComponent->Paused) {
-                ballComponent->Paused = true;
-                ballComponent->SavedSpeed = transform->Velocity;
-                transform->Velocity = glm::vec3(0, 0, 0);
-            }
-        }
-        return;
-    } else {
-        if (ballComponent != nullptr) {
-            auto transform = m_World->GetComponent<Components::Transform>(entity);
-
-            if (ballComponent->Paused) {
-                transform->Velocity = ballComponent->SavedSpeed;
-                ballComponent->Paused = false;
-            }
-        }
-    }*/
 
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
 
     if (ballComponent != nullptr) {
+		auto transformBall = m_World->GetComponent<Components::Transform>(entity);
+		if (ballComponent->PosterBoy == 1) {
+			transformBall->Position = glm::vec3(-3, 3, -10);
+		}
+
 		if (ReplaceBall()) {
+			m_First = true;
 			SetReplaceBall(false);
 			m_Waiting = true;
+			std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
+			float random = dist(m_RandomGenerator);
+			ballComponent->SavedSpeed = glm::vec3(random, 1, 0.f);
+			//ballComponent->SavedSpeed = glm::vec3(0.f, 1, 0.f);
 			ballComponent->Waiting = true;
 		}
 
@@ -140,13 +115,17 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
             if (!m_Waiting) {
 				m_Restarting = false;
                 ballComponent->Waiting = false;
-				auto transform = m_World->GetComponent<Components::Transform>(entity);
-                transform->Velocity = glm::normalize(glm::vec3(0.5f, 1, 0.f)) * ballComponent->Speed;
+				/*std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
+				float random = dist(m_RandomGenerator);*/
+                transformBall->Velocity = glm::normalize(ballComponent->SavedSpeed) * ballComponent->Speed;
+				//transform->Velocity = glm::normalize(glm::vec3(0, 1, 0)) * ballComponent->Speed;
             } else if (!ballComponent->Sticky) {
-                auto transform = m_World->GetComponent<Components::Transform>(entity);
-                transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
+                transformBall->Velocity = glm::vec3(0.f, 0.f, 0.f);
                 //transform->Position = glm::vec3(0.0f, -3.f, -10.f);
-                transform->Orientation = glm::quat();
+				if (m_First) {
+					transformBall->Orientation = glm::quat();
+					m_First = false;
+				}
                 return;
             }
         }
@@ -154,8 +133,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 			//TODO - Ball can stick to same pad just after detaching.
 			if (!m_Waiting)
 			{
-				auto transform = m_World->GetComponent<Components::Transform>(entity);
-				transform->Velocity = ballComponent->SavedSpeed;
+				transformBall->Velocity = ballComponent->SavedSpeed;
 				m_StickyCounter--;
 				if (m_StickyCounter > 0) {
 					m_Sticky = true;
@@ -164,7 +142,6 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 			}
 		}
         
-        auto transformBall = m_World->GetComponent<Components::Transform>(entity);
         if (glm::abs(transformBall->Velocity.y) < 2) {
             if (transformBall->Velocity.y > 0) {
                 transformBall->Velocity.y = 2;
@@ -177,7 +154,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 m_World->RemoveEntity(entity);
                 Events::MultiBallLost e;
                 EventBroker->Publish(e);
-            } else if (Lives() == PastLives() && !m_Restarting) {
+            } else if (!m_Restarting) { //If we lose lives when we shouldn't, look here.
                 Events::ResetBall be;
                 EventBroker->Publish(be);
                 Events::LifeLost e;
@@ -202,16 +179,6 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 transformBall->Velocity = glm::vec3(reflectedVelocity, 0.f);
             }
         }*/
-    }
-
-    if (Lives() != PastLives()) {
-        auto life = m_World->GetComponent<Components::Life>(entity);
-        if (life != nullptr) {
-            if (life->Number + 1 == PastLives()) {
-                m_World->RemoveEntity(entity);
-                SetPastLives(Lives());
-            }
-        }
     }
 
     if (ballComponent != nullptr) {
@@ -438,31 +405,6 @@ EntityID dd::Systems::BallSystem::CreateBall()
     m_World->RemoveComponent<Components::Template>(ent);
 
     return ent;
-}
-
-void dd::Systems::BallSystem::CreateLife(int number)
-{
-    auto life = m_World->CreateEntity();
-    std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(life);
-    transform->Position = glm::vec3(-1.5f + number * 0.15f, -2.f, -5.f);
-    transform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
-
-    std::shared_ptr<Components::Life> lifeNr = m_World->AddComponent<Components::Life>(life);
-    lifeNr->Number = number;
-
-    auto model = m_World->AddComponent<Components::Model>(life);
-    model->ModelFile = "Models/Sid/Sid.dae";
-
-
-    m_World->CommitEntity(life);
-}
-
-bool dd::Systems::BallSystem::OnLifeLost(const dd::Events::LifeLost &event)
-{
-	if (!m_GodMode){
-		SetLives(Lives() - 1);
-	}
-    return true;
 }
 
 bool dd::Systems::BallSystem::OnMultiBallLost(const dd::Events::MultiBallLost &event)
