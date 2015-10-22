@@ -6,12 +6,12 @@ dd::Systems::SoundSystem::~SoundSystem()
 	for (auto &bgm : m_BGMSourcesToBuffers) {
 		alSourceStop(bgm.first);
 		alDeleteSources(1, &bgm.first);
-		bgm.second->~Sound();
+		//bgm.second->~Sound();
 	}
 	for (auto &sfx : m_SFXSourcesToBuffers) {
 		alSourceStop(sfx.first);
 		alDeleteSources(1, &sfx.first);
-		sfx.second->~Sound();
+		//sfx.second->~Sound();
 	}
 	m_BGMSourcesToBuffers.clear();
 	m_SFXSourcesToBuffers.clear();
@@ -46,11 +46,11 @@ void dd::Systems::SoundSystem::Initialize()
 	m_BGMMasterVolume = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Audio.BGMVolume", 1.f);
 
 	//TODO: Move this
-// 	Events::PlaySound e;
-// 	e.FilePath = MENU_BGM;
-// 	e.IsAmbient = true;
-// 	e.Gain = 0.2f;
-// 	EventBroker->Publish(e);
+	Events::PlaySound e;
+	e.FilePath = MENU_BGM;
+	e.IsAmbient = true;
+	e.Gain = 0.2f;
+	EventBroker->Publish(e);
 }
 
 void dd::Systems::SoundSystem::Update(double dt)

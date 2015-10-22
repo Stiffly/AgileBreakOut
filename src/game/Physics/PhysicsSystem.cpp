@@ -822,7 +822,7 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 	}
 	Events::PlaySound se;
 
-	//Spawn a particle when a brick collides with somthing
+	//Spawn a particle when a brick collides with something
 	Events::CreateParticleSequence e;
 	e.EmitterLifeTime = 3;
 	e.EmittingAngle = glm::half_pi<float>();
