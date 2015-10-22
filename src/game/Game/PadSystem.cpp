@@ -61,7 +61,7 @@ void dd::Systems::PadSystem::Initialize()
         SetEdge(3.2 - (ctransform->Scale.x / 2));
     }
 
-
+	/*
 	{
 		auto entBody = m_World->CreateEntity();
 		auto ctransform = m_World->AddComponent<Components::Transform>(entBody);
@@ -72,6 +72,7 @@ void dd::Systems::PadSystem::Initialize()
 		auto animationComponent = m_World->AddComponent<Components::Animation>(entBody);
 		animationComponent->Speed = 0.6f;
 	}
+	*/
 
 	//Stick
 	{
