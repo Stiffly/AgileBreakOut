@@ -48,12 +48,14 @@
 #include "Game/CLifebuoy.h"
 #include "Game/CProjectile.h"
 #include "Game/CBrick.h"
+#include "Game/CBrickPart.h"
 #include "Game/CWall.h"
 #include "Game/CKraken.h"
 #include "Game/CBackground.h"
 #include "Game/CTravels.h"
 #include "Game/CStickyAim.h"
 #include "Game/BallSystem.h"
+#include "Game/LifeSystem.h"
 #include "Game/HitLagSystem.h"
 #include "Game/TravellingSystem.h"
 #include "Game/LifebuoySystem.h"
@@ -144,6 +146,7 @@ public:
 		m_World->ComponentFactory.Register<Components::Physics>();
 		m_World->ComponentFactory.Register<Components::Ball>();
 		m_World->ComponentFactory.Register<Components::Brick>();
+		m_World->ComponentFactory.Register<Components::BrickPart>();
 		m_World->ComponentFactory.Register<Components::Pad>();
 		m_World->ComponentFactory.Register<Components::Wall>();
 		m_World->ComponentFactory.Register<Components::Background>();
@@ -197,6 +200,9 @@ public:
 		m_World->SystemFactory.Register<Systems::WaterSystem>(
 			[this]() { return new Systems::WaterSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::WaterSystem>();
+		m_World->SystemFactory.Register<Systems::LifeSystem>(
+			[this]() { return new Systems::LifeSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::LifeSystem>();
 
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
