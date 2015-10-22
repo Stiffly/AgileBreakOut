@@ -125,11 +125,14 @@ dd::Resource* dd::ResourceManager::Load(std::string resourceType, std::string re
 	} else {
 		LOG_WARNING("Hot-loading resource \"%s\"", resourceName.c_str());
 
-		if (m_Preloads.find(std::make_pair(resourceType, resourceName)) == m_Preloads.end()) {
-			std::ofstream f("PreloadResources", std::ofstream::app);
-			f << resourceType << " " << resourceName << std::endl;
-			f.close();
-			m_Preloads.insert(std::make_pair(resourceType, resourceName));
+		if (!resourceType.empty() && !resourceName.empty()) {
+			std::replace(resourceName.begin(), resourceName.end(), '\\', '/');
+			if (m_Preloads.find(std::make_pair(resourceType, resourceName)) == m_Preloads.end()) {
+				std::ofstream f("PreloadResources", std::ofstream::app);
+				f << resourceType << " " << resourceName << std::endl;
+				f.close();
+				m_Preloads.insert(std::make_pair(resourceType, resourceName));
+			}
 		}
 	}
 
@@ -141,7 +144,7 @@ dd::Resource* dd::ResourceManager::CreateResource(std::string resourceType, std:
 	auto facIt = m_FactoryFunctions.find(resourceType);
 	if (facIt == m_FactoryFunctions.end())
 	{
-		LOG_ERROR("Failed to load resource \"%s\" of type \"%s\": type not registered", resourceName.c_str(), resourceType);
+		LOG_ERROR("Failed to load resource \"%s\" of type \"%s\": type not registered", resourceName.c_str(), resourceType.c_str());
 		return nullptr;
 	}
 
