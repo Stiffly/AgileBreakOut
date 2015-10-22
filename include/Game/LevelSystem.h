@@ -23,6 +23,7 @@
 #include "Transform/EMove.h"
 
 #include "Game/CBrick.h"
+#include "Game/CBrickPart.h"
 #include "Game/CBall.h"
 #include "Game/CLife.h"
 #include "Game/CWall.h"
@@ -211,7 +212,7 @@ private:
 
     void GetNextLevel();
 	void SetBrokenModel(EntityID entity);
-	void CreateBrokenModelPart(EntityID Parent, std::string ModelPath, glm::vec3 RelativePosition, glm::vec2 Hitbox);
+	void CreateBrokenModelPart(EntityID Parent, std::string ModelPath, glm::vec3 RelativePosition, glm::vec2 Hitbox, int NumberOfParts);
 };
 
 }

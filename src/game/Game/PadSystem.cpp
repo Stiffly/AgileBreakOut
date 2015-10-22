@@ -34,6 +34,7 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PadSystem::OnPause);
 	EVENT_SUBSCRIBE_MEMBER(m_EResume, &PadSystem::OnResume);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttack, &PadSystem::OnKrakenAttack);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttackEnd, &PadSystem::OnKrakenAttackEnd);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &PadSystem::OnStickyPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyAttachedToPad, &PadSystem::OnStickyAttachedToPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &PadSystem::OnActionButton);
@@ -43,7 +44,7 @@ void dd::Systems::PadSystem::Initialize()
         auto ent = m_World->CreateEntity();
         m_World->SetProperty(ent, "Name", "Pad");
         auto ctransform = m_World->AddComponent<Components::Transform>(ent);
-        ctransform->Position = glm::vec3(0.f, -4.8f, -10.f);
+        ctransform->Position = glm::vec3(0.f, m_PadHeight, -10.f);
         auto rectangleShape = m_World->AddComponent<Components::RectangleShape>(ent);
         rectangleShape->Dimensions = glm::vec2(1.f, 0.1f);
         auto physics = m_World->AddComponent<Components::Physics>(ent);
@@ -158,6 +159,13 @@ void dd::Systems::PadSystem::Update(double dt)
 	auto pad = Pad();
 	auto acceleration = Acceleration();
 
+	if (glm::abs(transform->Position.y - m_PadHeight) > m_PadRiseSpeed) {
+		if (transform->Position.y < m_PadHeight) {
+			transform->Position.y += m_PadRiseSpeed * (float)dt;
+		} else if (transform->Position.y > m_PadHeight) {
+			transform->Position.y -= m_PadRiseSpeed * 5 * (float)dt;
+		}
+	}
     if (transform->Velocity.x < -pad->MaxSpeed) {
         transform->Velocity.x = -pad->MaxSpeed;
     }
@@ -419,6 +427,7 @@ bool dd::Systems::PadSystem::OnStageCleared(const dd::Events::StageCleared &even
 {
     //auto entity = CreateBall();
 	m_StickyAim->Aiming = false;
+	m_PadHeight = m_PadOriginalHeight;
     return true;
 }
 
@@ -450,14 +459,8 @@ bool dd::Systems::PadSystem::OnRaiseWaterWall(const dd::Events::RaiseWaterWall &
 
 bool dd::Systems::PadSystem::RaisePad(float amount, float speed)
 {
-	auto transform = Transform();
-	glm::vec3 raise = glm::vec3(0, amount, 0);
-	Events::Move e;
-	e.Entity = m_Entity;
-	e.GoalPosition = transform->Position + raise;
-	e.Speed = speed;
-	e.Queue = true;
-	EventBroker->Publish(e);
+	m_PadHeight += amount;
+	m_PadRiseSpeed = speed;
 	return true;
 }
 
@@ -473,30 +476,60 @@ bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &even
 
 		transform->Velocity = glm::vec3(0, 0, 0);
 		acceleration = glm::vec3(0, 0, 0);
-
+		LOG_INFO("Kraken arm duuude");
 		if (!m_KrakenArm){
+			LOG_INFO("InKrakenArmDuuude");
 			m_KrakenArm = m_World->CreateEntity(Entity());
 			auto transform = m_World->AddComponent<Components::Transform>(m_KrakenArm);
 			transform->Position = glm::vec3(1.f, -3.0f, 0.f);
 			auto model = m_World->AddComponent<Components::Model>(m_KrakenArm);
-			model->ModelFile = "Models/kraken/Arm.dae";
-			auto animation = m_World->AddComponent<Components::Animation>(m_KrakenArm);
-			animation->Speed = 1.0f;
+			model->ModelFile = "Models/Kraken/Arm.dae";
+ 			auto animation = m_World->AddComponent<Components::Animation>(m_KrakenArm);
+ 			animation->Speed = 1.0f;
+			animation->Loop = false;
 			m_World->CommitEntity(m_KrakenArm);
+
+			m_KrakenArmHitbox = m_World->CreateEntity();
+			auto hb_transform = m_World->AddComponent<Components::Transform>(m_KrakenArmHitbox);
+			hb_transform->Position = transform->Position + glm::vec3(-1.f, -5.0f, -10.f);
+			//hb_transform->Position = glm::vec3(-2.f, -8.0f, -10.f);
+			hb_transform->Scale = glm::vec3(2.5f, 2.5f, 1.f);
+			hb_transform->Velocity = glm::vec3(0.f, 10.f, 0.f);
+			//auto hb_sprite = m_World->AddComponent<Components::Sprite>(m_KrakenArmHitbox);
+			//hb_sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			auto hb_physics = m_World->AddComponent<Components::Physics>(m_KrakenArmHitbox);
+			hb_physics->Calculate = true;
+			hb_physics->CollisionType = CollisionType::Type::Static;
+			hb_physics->Category = CollisionLayer::Type::Other;
+			hb_physics->Mask = CollisionLayer::Type::Water;
+			hb_physics->GravityScale = 0.f;
+			auto hb_HitBox = m_World->AddComponent<Components::CircleShape>(m_KrakenArmHitbox);
+			hb_HitBox->Radius = 1.25f;
+			m_World->CommitEntity(m_KrakenArmHitbox);
 		}
 
 		SetTransform(transform);
 		SetAcceleration(acceleration);
 	} else if (m_KrakenCharge >= 1) {
 		m_KrakenAttack = false;
-		m_KrakenCharge = 0;
-		m_KrakenStrength = 0;
-		m_PlayerStrength = 0;
+		Events::KrakenAttackEnd e;
+		EventBroker->Publish(e);
+	}
+	return true;
+}
+
+bool dd::Systems::PadSystem::OnKrakenAttackEnd(const dd::Events::KrakenAttackEnd &event)
+{
+	m_KrakenAttack = false;
+	m_KrakenCharge = 0;
+	m_KrakenStrength = 0;
+	m_PlayerStrength = 0;
 
 		m_World->RemoveEntity(m_KrakenArm);
+		m_World->RemoveEntity(m_KrakenArmHitbox);
 		m_KrakenArm = NULL;
+		m_KrakenArmHitbox = NULL;
 		
-	}
 	return true;
 }
 

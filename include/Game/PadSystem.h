@@ -43,6 +43,7 @@
 #include "Game/EStickyAttachedToPad.h"
 #include "Game/EInkBlaster.h"
 #include "Game/EKrakenAttack.h"
+#include "Game/EKrakenAttackEnd.h"
 #include "Game/EPowerUpTaken.h"
 #include "Game/EStageCleared.h"
 #include "Game/EPause.h"
@@ -104,7 +105,11 @@ private:
 	double m_KrakenStrength = 0;
 	double m_PlayerStrength = 0;
     float m_Edge = 2.8f;
-	EntityID m_KrakenArm;
+	float m_PadOriginalHeight = -4.8;
+	float m_PadHeight = m_PadOriginalHeight;
+	EntityID m_KrakenArm = NULL;
+	EntityID m_KrakenArmHitbox = NULL;
+	float m_PadRiseSpeed = 0.2;
     Components::Transform* m_Transform = nullptr;
     Components::Pad* m_Pad = nullptr;
 	std::shared_ptr<Components::Transform> m_StickTransform;
@@ -125,6 +130,7 @@ private:
     dd::EventRelay<PadSystem, dd::Events::Pause> m_EPause;
 	dd::EventRelay<PadSystem, dd::Events::Resume> m_EResume;
 	dd::EventRelay<PadSystem, dd::Events::KrakenAttack> m_EKrakenAttack;
+	dd::EventRelay<PadSystem, dd::Events::KrakenAttackEnd> m_EKrakenAttackEnd;
 	dd::EventRelay<PadSystem, dd::Events::StickyPad> m_EStickyPad;
 	dd::EventRelay<PadSystem, dd::Events::StickyAttachedToPad> m_EStickyAttachedToPad;
 	dd::EventRelay<PadSystem, dd::Events::ActionButton> m_EActionButton;
@@ -142,6 +148,7 @@ private:
     bool OnPause(const dd::Events::Pause &event);
 	bool OnResume(const dd::Events::Resume &event);
 	bool OnKrakenAttack(const dd::Events::KrakenAttack &event);
+	bool OnKrakenAttackEnd(const dd::Events::KrakenAttackEnd &event);
 	bool OnStickyPad(const dd::Events::StickyPad &event);
 	bool OnStickyAttachedToPad(const dd::Events::StickyAttachedToPad &event);
 	bool OnActionButton(const dd::Events::ActionButton &event);

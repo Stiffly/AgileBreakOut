@@ -11,9 +11,13 @@
 #include "Core/CTemplate.h"
 #include "Core/EventBroker.h"
 #include "Core/World.h"
+#include "Core/ConfigFile.h"
 #include "Transform/EMove.h"
+#include "Physics/CPhysics.h"
 #include "Physics/CWaterVolume.h"
 #include "Physics/CRectangleShape.h"
+#include "Game/CBrickPart.h"
+#include "Game/CNewWaterVolume.h"
 #include "Game/EPause.h"
 #include "Game/EResume.h"
 #include "Game/ERelevantObjectCreated.h"
@@ -47,6 +51,13 @@ public:
 private:
 	bool m_Pause = false;
 	EntityID m_BottomWall = 0;
+	float m_SubmergedOriginalHeight = -4.5;
+	float m_SubmergedHeight = m_SubmergedOriginalHeight;
+
+	bool m_RaiseWater = false;
+	bool m_RemoveWater = false;
+
+	std::array<int, 10> m_BrickPartCounters;
 
     dd::EventRelay<WaterSystem, dd::Events::Pause> m_EPause;
 	dd::EventRelay<WaterSystem, dd::Events::Resume> m_EResume;
