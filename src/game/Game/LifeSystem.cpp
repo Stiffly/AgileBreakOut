@@ -85,7 +85,8 @@ void dd::Systems::LifeSystem::CreateLife(int number)
 	transform->Position = glm::vec3(-1.5f + number * 0.15f, -2.f, -5.f);
 	//transform->Position = glm::vec3(-1.5f + number * 1.5f, -3.f, -10.f);
 	transform->Scale = glm::vec3(0.1f, 0.1f, 0.1f);
-	//transform->Scale = glm::vec3(0.2f, 0.2f, 0.2f);
+	/*transform->Scale = glm::vec3(0.2f, 0.2f, 0.2f);
+	transform->Velocity.x = m_LifeSpeed;*/
 
 	std::shared_ptr<Components::Life> lifeNr = m_World->AddComponent<Components::Life>(life);
 	lifeNr->Number = number;
