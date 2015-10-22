@@ -25,7 +25,7 @@ void dd::Systems::LevelSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EBrickGenerating, &LevelSystem::OnBrickGenerating);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenDefeated, &LevelSystem::OnKrakenDefeated);
 
-	m_GodMode = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue("Cheat.GodMode", false);
+	m_GodMode = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<bool>("Cheat.GodMode", false);
 
 	//PointLightTest
 	{
@@ -61,8 +61,8 @@ void dd::Systems::LevelSystem::Initialize()
 		auto travels = m_World->AddComponent<Components::Travels>(t_halfPipe);
 		travels->CurrentlyTraveling = false;
 		auto model = m_World->AddComponent<Components::Model>(t_halfPipe);
-		model->ModelFile = "Models/Test/halfpipe/Halfpipe.obj";
-		model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.f);
+		model->ModelFile = "Models/Halfpipe.obj";
+		//model->Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.f);
 		m_World->CommitEntity(t_halfPipe);
 
 		auto t_halfPipe2 = m_World->CloneEntity(t_halfPipe);
@@ -240,6 +240,7 @@ void dd::Systems::LevelSystem::Initialize()
 	auto collisionSound = m_World->AddComponent<Components::CollisionSound>(m_BrickTemplate);
 	collisionSound->FilePath = "Sounds/Brick/brick-hit.wav";
 	m_World->CommitEntity(m_BrickTemplate);
+
     return;
 }
 
@@ -278,18 +279,21 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 		}
 	}
 
-	auto brickPart = m_World->GetComponent<Components::BrickPart>(entity);
-	if (brickPart != nullptr) {
-		auto transform = m_World->GetComponent<Components::Transform>(entity);
-		if (transform->Position.y < -10) {
-			m_World->RemoveEntity(entity);
-			return;
-		}
-	}
-
     auto brick = m_World->GetComponent<Components::Brick>(entity);
     if (brick != nullptr) {
-        auto transform = m_World->GetComponent<Components::Transform>(entity);
+
+		auto transform = m_World->GetComponent<Components::Transform>(entity);
+		if (brick->BeingGenerated) {
+			if (transform->Position == brick->GenerationGoal) {
+				brick->BeingGenerated = false;
+				auto cPhys = m_World->AddComponent<Components::Physics>(entity);
+				cPhys->CollisionType = CollisionType::Type::Static;
+				cPhys->GravityScale = 0.f;
+				cPhys->Category = CollisionLayer::Type::Brick;
+				cPhys->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Ball | CollisionLayer::Type::Projectile | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
+			}
+		}
+        
         //Removes bricks that falls out of the stage.
 		if (transform->Position.y < -10) {
 			if (brick->Type == StandardBrick) {
@@ -447,13 +451,15 @@ EntityID dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spac
 		auto type = m_World->AddComponent<Components::StickyBrick>(brick);
 		model->ModelFile = "Models/Brick/StickyBrick.obj";
 	} else if (typeInt == InkBlasterBrick) {
-		cBrick->Type = InkBlasterBrick;
+		cBrick->Type = InkBlasterBrick; 
 		auto type = m_World->AddComponent<Components::InkBlasterBrick>(brick);
-		model->Color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+		model->ModelFile = "Models/Brick/InkBrick.obj";
+		model->Color = glm::vec4(0.7f, 0.7f, 0.7f, 1.f);
 	} else if (typeInt == KrakenAttackBrick) {
 		cBrick->Type = KrakenAttackBrick;
 		auto type = m_World->AddComponent<Components::KrakenAttackBrick>(brick);
-		model->Color = glm::vec4(0.f, 0.5f, 1.0f, 1.0f);
+		model->ModelFile = "Models/Brick/KrakenBrick.obj";
+
 	} else if (typeInt == Kraken) {
 		Events::KrakenAppear e;
 		e.Position = transform->Position;
@@ -487,6 +493,8 @@ bool dd::Systems::LevelSystem::BrickGenerating(const dd::Events::BrickGenerating
 				auto ent = CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), -3.2, 1, m_BrickSet[getter], m_ColorSet[getter]);
 				if (ent != NULL) {
 					auto brick = m_World->GetComponent<Components::Brick>(ent);
+					brick->BeingGenerated = true;
+					m_World->RemoveComponent<Components::Physics>(ent);
 					brick->Number = getter;
 					m_KrakenBricks[getter] = true;
 					auto transform = m_World->GetComponent<Components::Transform>(ent);
@@ -497,6 +505,7 @@ bool dd::Systems::LevelSystem::BrickGenerating(const dd::Events::BrickGenerating
 					} else {
 						transform->Position = event.Origin2;
 					}
+					brick->GenerationGoal = e.GoalPosition;
 					e.Entity = ent;
 					e.Speed = 6;
 					e.Queue = false;
@@ -696,7 +705,11 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
     brick = m_World->GetComponent<Components::Brick>(entityBrick);
     if (brick == nullptr) {
         return false;
-    }
+	}
+
+	if (brick->BeingGenerated) {
+		return false;
+	}
 
 	if (entityShot != 0) {
 		// For when a brick gets shot.
@@ -1008,7 +1021,6 @@ void dd::Systems::LevelSystem::GetNextLevel()
 	glm::vec4 p3 = glm::vec4(189.f / 255.f, 0.f / 255.f, 187.f / 255.f, 1.f);
 	glm::vec4 p4 = glm::vec4(125.f / 255.f, 0.f / 255.f, 147.f / 255.f, 1.f);
 
-
     if (m_CurrentCluster == 0) {
         if (m_CurrentLevel == 1) {
             level =
@@ -1181,11 +1193,11 @@ void dd::Systems::LevelSystem::GetNextLevel()
 		else if (m_CurrentLevel == 6) {
 					level =
 					{0, 0, 0, 0, 0, 0, 0,
-					 0, 0, 0, 100, 0, 0, 0,
 					 0, 0, 0, 0, 0, 0, 0,
 					 0, 0, 0, 0, 0, 0, 0,
 					 0, 0, 0, 0, 0, 0, 0,
-					 0, 0, 0, 0, 0, 0, 0};
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 100, 0, 0, 0 };
 					color =
 					{w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w,
@@ -1217,40 +1229,45 @@ void dd::Systems::LevelSystem::SetBrokenModel(EntityID entity)
 	std::uniform_int_distribution<int> dist(0, 2);
 	int index = dist(m_RandomGenerator);
 
+	int parts = 0;
+
 	switch (index)
 	{
 	case 0:
-		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/1/WhiteBrickBreak1.obj", glm::vec3(-0.29912f, 0.0082f, 0.f), glm::vec2(0.281f, 0.351f));
-		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/1/WhiteBrickBreak2.obj", glm::vec3(0.07597f, -0.02899f, 0.f), glm::vec2(0.559f, 0.351f));
-		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/1/WhiteBrickBreak3.obj", glm::vec3(0.3227f, 0.05632, 0.f), glm::vec2(0.25f, 0.25f));
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/1/WhiteBrickBreak1.obj", glm::vec3(-0.29912f, 0.0082f, 0.f), glm::vec2(0.281f, 0.351f), 3);
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/1/WhiteBrickBreak2.obj", glm::vec3(0.07597f, -0.02899f, 0.f), glm::vec2(0.559f, 0.351f), 3);
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/1/WhiteBrickBreak3.obj", glm::vec3(0.3227f, 0.05632, 0.f), glm::vec2(0.25f, 0.25f), 3);
 		break;
 
 	case 1:
-		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/2/WhiteBrickBreak1.obj", glm::vec3(-0.3236f, 0.0159f, 0.f), glm::vec2(0.237f, 0.327f));
-		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/2/WhiteBrickBreak2.obj", glm::vec3(0.07645f, 0.03131f, 0.f), glm::vec2(0.594f, 0.211f));
-		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/2/WhiteBrickBreak3.obj", glm::vec3(0.09468f, -0.11792f, 0.f), glm::vec2(0.692f, 0.112f));
-		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/2/WhiteBrickBreak4.obj", glm::vec3(0.33957f, 0.13079f, 0.f), glm::vec2(0.208f, 0.085f));
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/2/WhiteBrickBreak1.obj", glm::vec3(-0.3236f, 0.0159f, 0.f), glm::vec2(0.237f, 0.327f), 4);
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/2/WhiteBrickBreak2.obj", glm::vec3(0.07645f, 0.03131f, 0.f), glm::vec2(0.594f, 0.211f), 4);
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/2/WhiteBrickBreak3.obj", glm::vec3(0.09468f, -0.11792f, 0.f), glm::vec2(0.692f, 0.112f), 4);
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/2/WhiteBrickBreak4.obj", glm::vec3(0.33957f, 0.13079f, 0.f), glm::vec2(0.208f, 0.085f), 4);
 		break;
 
 	case 2:
-		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/3/WhiteBrickBreak1.obj", glm::vec3(-0.34882f, 0.0564f, 0.f), glm::vec2(0.175f, 0.228f));
-		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/3/WhiteBrickBreak2.obj", glm::vec3(0.0678f, 0.07679f, 0.f), glm::vec2(0.699f, 0.183f));
-		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/3/WhiteBrickBreak3.obj", glm::vec3(-0.11862f, -0.10342, 0.f), glm::vec2(0.563f, 0.164f));
-		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/3/WhiteBrickBreak4.obj", glm::vec3(0.31479f, -0.06351f, 0.f), glm::vec2(0.261f, 0.21f));
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/3/WhiteBrickBreak1.obj", glm::vec3(-0.34882f, 0.0564f, 0.f), glm::vec2(0.175f, 0.228f), 4);
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/3/WhiteBrickBreak2.obj", glm::vec3(0.0678f, 0.07679f, 0.f), glm::vec2(0.699f, 0.183f), 4);
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/3/WhiteBrickBreak3.obj", glm::vec3(-0.11862f, -0.10342, 0.f), glm::vec2(0.563f, 0.164f), 4);
+		CreateBrokenModelPart(entity, "Models/Brick/BrickBreak/3/WhiteBrickBreak4.obj", glm::vec3(0.31479f, -0.06351f, 0.f), glm::vec2(0.261f, 0.21f), 4);
 		break;
 
 	default:
 		LOG_INFO("Something went wrong with the random generator in SetBrokenModel");
 		break;
 	}
+
+	return;
 }
 
-void dd::Systems::LevelSystem::CreateBrokenModelPart(EntityID Parent, std::string ModelPath, glm::vec3 RelativePosition, glm::vec2 Hitbox)
+void dd::Systems::LevelSystem::CreateBrokenModelPart(EntityID Parent, std::string ModelPath, glm::vec3 RelativePosition, glm::vec2 Hitbox, int NumberOfParts)
 {
 	auto ent = m_World->CreateEntity(Parent);
 	auto cTemplate = m_World->AddComponent<Components::Template>(ent);
 	auto cTransform = m_World->AddComponent<Components::Transform>(ent);
 	auto cBrickPart = m_World->AddComponent<Components::BrickPart>(ent);
+	cBrickPart->NumberOfPartsInBrick = NumberOfParts;
 
 	cTransform->Position = RelativePosition;
 
@@ -1263,6 +1280,7 @@ void dd::Systems::LevelSystem::CreateBrokenModelPart(EntityID Parent, std::strin
 	auto cPhys = m_World->AddComponent<Components::Physics>(ent);
 	cPhys->CollisionType = CollisionType::Type::Dynamic;
 	cPhys->GravityScale = 1.f;
+	cPhys->Density = 30;
 	cPhys->Category = CollisionLayer::Type::Brick;
 	cPhys->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Wall);
 }

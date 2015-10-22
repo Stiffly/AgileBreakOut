@@ -1,14 +1,14 @@
-# Blender MTL File: 'None'
+# Blender MTL File: 'Background.blend'
 # Material Count: 1
 
 newmtl Material.001
-Ns 96.078431
+Ns 92.156863
 Ka 0.000000 0.000000 0.000000
-Kd 0.640000 0.640000 0.640000
+Kd 0.512000 0.512000 0.512000
 Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd Test/Brick_Diffuse.png
-map_Bump Test/Brick_Normal.png
-map_Ks Test/Brick_Specular.png
+map_Kd Brunn_Diffuse.png
+map_Bump Brunn_Normals.png
+map_Ks Brunn_Specular.png

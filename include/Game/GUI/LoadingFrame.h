@@ -5,7 +5,6 @@
 #include "GUI/Slider.h"
 #include "Core/ResourceManager.h"
 #include "Game/GUI/ELoadingFrameComplete.h"
-#include "Sound/EPlaySound.h"
 
 namespace dd
 {
@@ -29,9 +28,9 @@ public:
 		m_Slider->X = Width / 2.f - m_Slider->Width / 2.f;
 	}
 
-	void AddTexturePreload(std::string resourceName)
+	void AddResource(std::string resourceType, std::string resourceName)
 	{
-		m_Items.push_back(resourceName);
+		m_Preload.push_back(std::make_pair(resourceType, resourceName));
 	}
 
 	void Preload()
@@ -48,18 +47,15 @@ public:
 	void Update(double dt) override
 	{
 		if (m_Preloading) {
-			ResourceManager::Preload<dd::Texture>(m_Items[m_CurrentItem]);
-			m_Slider->SetPercentage((m_CurrentItem + 1) / (float)m_Items.size());
+			ResourceManager::Preload(m_Preload[m_CurrentItem].first, m_Preload[m_CurrentItem].second);
+			m_Slider->SetPercentage((m_CurrentItem + 1) / (float)m_Preload.size());
 			m_CurrentItem++;
-			if (m_CurrentItem >= m_Items.size()) {
+			if (m_CurrentItem >= m_Preload.size()) {
 				m_Preloading = false;
 				dd::Events::LoadingFrameComplete e;
 				e.FrameName = Name();
 				e.Frame = this;
 				EventBroker->Publish(e); 
-				Events::PlaySound se;
-				se.FilePath = "Sounds/jap-story.wav";
-				EventBroker->Publish(se);
 			}
 		}
 	}
@@ -67,7 +63,7 @@ public:
 private:
 	bool m_Preloading = false;
 	int m_CurrentItem = 0;
-	std::vector<std::string> m_Items;
+	std::vector<std::pair<std::string, std::string>> m_Preload;
 	GUI::Slider* m_Slider = nullptr;
 };
 

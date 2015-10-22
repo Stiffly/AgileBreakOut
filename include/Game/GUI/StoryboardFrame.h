@@ -33,12 +33,12 @@ public:
 		m_Timeline.push_back(transition);
 	}
 
-	void Play()
+	virtual void Play()
 	{
 		m_Playing = true;
 	}
 
-	void Skip()
+	virtual void Skip()
 	{
 		m_Playing = false;
 		OnComplete();

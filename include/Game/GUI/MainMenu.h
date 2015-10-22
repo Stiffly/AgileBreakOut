@@ -2,9 +2,11 @@
 #define GUI_MAINMENU_H__
 
 #include "GUI/TextureFrame.h"
+#include "Game/GUI/LoadingFrame.h"
 #include "Game/GUI/MainMenuMain.h"
 #include "Game/GUI/MainMenuOptions.h"
 #include "Core/EKeyUp.h"
+#include "Game/EGameStart.h"
 
 namespace dd
 {
@@ -35,6 +37,18 @@ public:
 		m_MainMenuOptions->SetTop(m_MainMenuMain->Bottom());
 
 		//EVENT_SUBSCRIBE_MEMBER(m_EKeyUp, &MainMenu::OnKeyUp);
+	}
+
+	void Show() override
+	{
+		if (ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<bool>("Debug.SkipMenu", false)) {
+			Events::GameStart e;
+			EventBroker->Publish(e);
+			Hide();
+			auto hud = new GUI::HUD(BaseFrame, "HUD");
+		} else {
+			TextureFrame::Show();
+		}
 	}
 
 private:

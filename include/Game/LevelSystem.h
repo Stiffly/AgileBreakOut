@@ -212,7 +212,7 @@ private:
 
     void GetNextLevel();
 	void SetBrokenModel(EntityID entity);
-	void CreateBrokenModelPart(EntityID Parent, std::string ModelPath, glm::vec3 RelativePosition, glm::vec2 Hitbox);
+	void CreateBrokenModelPart(EntityID Parent, std::string ModelPath, glm::vec3 RelativePosition, glm::vec2 Hitbox, int NumberOfParts);
 };
 
 }

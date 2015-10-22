@@ -26,6 +26,7 @@ struct CreateParticleSequence : public Event
 	glm::vec4 Color = glm::vec4(0);
 	EntityID parent = 0;
 	// values to interpolate between.
+	bool DefaultScale = false;
 	std::vector<glm::vec3> ScaleValues;
 	std::vector<float> AlphaValues;
 
