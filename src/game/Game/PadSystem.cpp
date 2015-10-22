@@ -473,16 +473,35 @@ bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &even
 
 		transform->Velocity = glm::vec3(0, 0, 0);
 		acceleration = glm::vec3(0, 0, 0);
-
+		LOG_INFO("Kraken arm duuude");
 		if (!m_KrakenArm){
+			LOG_INFO("InKrakenArmDuuude");
 			m_KrakenArm = m_World->CreateEntity(Entity());
 			auto transform = m_World->AddComponent<Components::Transform>(m_KrakenArm);
 			transform->Position = glm::vec3(1.f, -3.0f, 0.f);
 			auto model = m_World->AddComponent<Components::Model>(m_KrakenArm);
-			model->ModelFile = "Models/kraken/Arm.dae";
-			auto animation = m_World->AddComponent<Components::Animation>(m_KrakenArm);
-			animation->Speed = 1.0f;
+			model->ModelFile = "Models/Kraken/Arm.dae";
+ 			auto animation = m_World->AddComponent<Components::Animation>(m_KrakenArm);
+ 			animation->Speed = 1.0f;
 			m_World->CommitEntity(m_KrakenArm);
+
+			m_KrakenArmHitbox = m_World->CreateEntity();
+			auto hb_transform = m_World->AddComponent<Components::Transform>(m_KrakenArmHitbox);
+			hb_transform->Position = transform->Position + glm::vec3(-1.f, -5.0f, -10.f);
+			//hb_transform->Position = glm::vec3(-2.f, -8.0f, -10.f);
+			hb_transform->Scale = glm::vec3(2.5f, 2.5f, 1.f);
+			hb_transform->Velocity = glm::vec3(0.f, 10.f, 0.f);
+			//auto hb_sprite = m_World->AddComponent<Components::Sprite>(m_KrakenArmHitbox);
+			//hb_sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+			auto hb_physics = m_World->AddComponent<Components::Physics>(m_KrakenArmHitbox);
+			hb_physics->Calculate = true;
+			hb_physics->CollisionType = CollisionType::Type::Static;
+			hb_physics->Category = CollisionLayer::Type::Other;
+			hb_physics->Mask = CollisionLayer::Type::Water;
+			hb_physics->GravityScale = 0.f;
+			auto hb_HitBox = m_World->AddComponent<Components::CircleShape>(m_KrakenArmHitbox);
+			hb_HitBox->Radius = 1.25f;
+			m_World->CommitEntity(m_KrakenArmHitbox);
 		}
 
 		SetTransform(transform);
@@ -494,7 +513,9 @@ bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &even
 		m_PlayerStrength = 0;
 
 		m_World->RemoveEntity(m_KrakenArm);
+		m_World->RemoveEntity(m_KrakenArmHitbox);
 		m_KrakenArm = NULL;
+		m_KrakenArmHitbox = NULL;
 		
 	}
 	return true;
