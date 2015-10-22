@@ -329,7 +329,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 
     auto ball = m_World->GetComponent<Components::Ball>(entity);
 
-    if (NumberOfBricks() <= 0 && m_LooseBricks <= 0 && !Restarting()) {
+    if (NumberOfBricks() <= 0 && m_LooseBricks <= 0 && !Restarting() && !m_Cleared) {
         if (MultiBalls() <= 0 && PowerUps() <= 0) {
             Events::StageCleared ec;
             ec.ClearedStage = m_CurrentLevel;

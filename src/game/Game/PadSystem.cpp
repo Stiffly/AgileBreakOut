@@ -58,7 +58,7 @@ void dd::Systems::PadSystem::Initialize()
         auto pad = m_World->AddComponent<Components::Pad>(ent);
         m_World->CommitEntity(ent);
 
-        SetEdge(3.2 - (ctransform->Scale.x / 2));
+        m_Edge = 3.2 - (ctransform->Scale.x / 2);
     }
 
 	//Stick
@@ -110,7 +110,7 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 				m_ResetBall = false;
 			}
 			auto ballTransform = m_World->GetComponent<Components::Transform>(entity);
-			ballTransform->Position = Transform()->Position;
+			ballTransform->Position = m_PadTransform->Position;
 			ballTransform->Position += ball->StickyPlacement;
 			glm::vec2 dir = glm::normalize(glm::vec2(ball->SavedSpeed.x, ball->SavedSpeed.y));
 			glm::vec2 up = glm::vec2(0.f, 1.f);
@@ -133,12 +133,12 @@ void dd::Systems::PadSystem::Update(double dt)
         return;
     }
 
-    if (Entity() == 0) {
+    if (m_PadEntity == 0) {
         for (auto it = m_World->GetEntities()->begin(); it != m_World->GetEntities()->end(); it++) {
             if (m_World->GetProperty<std::string>(it->first, "Name") == "Pad") {
-                SetEntity(it->first);
-                SetTransform(m_World->GetComponent<Components::Transform>(Entity()));
-                SetPad(m_World->GetComponent<Components::Pad>(Entity()));
+                m_PadEntity = it->first;
+                m_PadTransform = m_World->GetComponent<Components::Transform>(m_PadEntity);
+                m_PadComponent = m_World->GetComponent<Components::Pad>(m_PadEntity);
                 break;
             }
         }
@@ -155,9 +155,9 @@ void dd::Systems::PadSystem::Update(double dt)
 		return;
 	}
 
-	auto transform = Transform();
-	auto pad = Pad();
-	auto acceleration = Acceleration();
+	auto transform = m_PadTransform;
+	auto pad = m_PadComponent;
+	auto acceleration = m_PadAcceleration;
 
 	if (glm::abs(transform->Position.y - m_PadHeight) > m_PadRiseSpeed) {
 		if (transform->Position.y < m_PadHeight) {
@@ -173,27 +173,27 @@ void dd::Systems::PadSystem::Update(double dt)
         transform->Velocity.x = pad->MaxSpeed;
     }
     transform->Position += transform->Velocity * (float)dt;
-    if (transform->Position.x > Edge()) {
-        transform->Position.x = Edge();
-    } else if (transform->Position.x < -Edge()) {
-        transform->Position.x = -Edge();
+    if (transform->Position.x > m_Edge) {
+        transform->Position.x = m_Edge;
+    } else if (transform->Position.x < -m_Edge) {
+        transform->Position.x = -m_Edge;
     }
-    transform->Velocity += acceleration  * (float)dt;
-    if (glm::abs(transform->Velocity.x) > 1 || (!Left() && !Right())) {
+    transform->Velocity += acceleration * (float)dt;
+    if (glm::abs(transform->Velocity.x) > 1 || (!m_Left && !m_Right)) {
         transform->Velocity -= transform->Velocity * pad->SlowdownModifier * (float) dt;
     }
 
-    if (Left()) {
+    if (m_Left) {
         acceleration.x = -pad->AccelerationSpeed;
-    } else if (Right()) {
+    } else if (m_Right) {
         acceleration.x = pad->AccelerationSpeed;
     } else {
         acceleration.x = 0.f;
     }
 
-    SetTransform(transform);
-    SetPad(pad);
-    SetAcceleration(acceleration);
+    m_PadTransform = transform;
+    m_PadComponent = pad;
+    m_PadAcceleration = acceleration;
 
     return;
 }
@@ -227,11 +227,11 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
     } else if (val == GLFW_KEY_LEFT) {
         //std::cout << "Left!" << std::endl;
         //acceleration.x = -0.01f;
-        SetLeft(true);
+        m_Left = true;
     } else if (val == GLFW_KEY_RIGHT) {
         //std::cout << "Right!" << std::endl;
         //acceleration.x = 0.01f;
-        SetRight(true);
+        m_Right = true;
     } else if (val == GLFW_KEY_R) {
         Events::ResetBall e;
         EventBroker->Publish(e);
@@ -250,7 +250,7 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_M) {
         Events::MultiBall e;
-        e.padTransform = Transform();
+        e.padTransform = m_PadTransform;
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_P) {
 		if (IsPaused()) {
@@ -284,7 +284,7 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_L) {
 		Events::Lifebuoy e;
-		e.Transform = Transform();
+		e.Transform = m_PadTransform;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_Y) {
 		Events::StickyPad e;
@@ -303,14 +303,14 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_Q) {
 		Events::Move e;
-		e.Entity = Entity();
+		e.Entity = m_PadEntity;
 		e.GoalPosition = glm::vec3(0, 0, -10); 
 		e.Speed = 5;
 		e.Queue = false;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_SPACE) {
         Events::ActionButton e;
-		e.Position = Transform()->Position;
+		e.Position = m_PadTransform->Position;
         EventBroker->Publish(e);
     } else if (val == GLFW_KEY_D) {
         return false;
@@ -326,9 +326,9 @@ bool dd::Systems::PadSystem::OnKeyUp(const dd::Events::KeyUp &event)
     } else if (val == GLFW_KEY_DOWN) {
 
     } else if (val == GLFW_KEY_LEFT) {
-        SetLeft(false);
+        m_Left = false;
     } else if (val == GLFW_KEY_RIGHT) {
-        SetRight(false);
+        m_Right = false;
     }
     return true;
 }
@@ -471,15 +471,15 @@ bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &even
 		m_PlayerStrength = event.PlayerStrength;
 		m_KrakenCharge = event.ChargeUpdate;
 		m_KrakenAttack = true;
-		auto transform = Transform();
-		auto acceleration = Acceleration();
+		auto transform = m_PadTransform;
+		auto acceleration = m_PadAcceleration;
 
 		transform->Velocity = glm::vec3(0, 0, 0);
 		acceleration = glm::vec3(0, 0, 0);
 		LOG_INFO("Kraken arm duuude");
 		if (!m_KrakenArm){
 			LOG_INFO("InKrakenArmDuuude");
-			m_KrakenArm = m_World->CreateEntity(Entity());
+			m_KrakenArm = m_World->CreateEntity(m_PadEntity);
 			auto transform = m_World->AddComponent<Components::Transform>(m_KrakenArm);
 			transform->Position = glm::vec3(1.f, -3.0f, 0.f);
 			auto model = m_World->AddComponent<Components::Model>(m_KrakenArm);
@@ -508,8 +508,8 @@ bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &even
 			m_World->CommitEntity(m_KrakenArmHitbox);
 		}
 
-		SetTransform(transform);
-		SetAcceleration(acceleration);
+		m_PadTransform = transform;
+		m_PadAcceleration = acceleration;
 	} else if (m_KrakenCharge >= 1) {
 		m_KrakenAttack = false;
 		Events::KrakenAttackEnd e;
