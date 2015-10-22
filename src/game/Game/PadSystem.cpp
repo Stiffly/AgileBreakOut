@@ -34,6 +34,7 @@ void dd::Systems::PadSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PadSystem::OnPause);
 	EVENT_SUBSCRIBE_MEMBER(m_EResume, &PadSystem::OnResume);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttack, &PadSystem::OnKrakenAttack);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttackEnd, &PadSystem::OnKrakenAttackEnd);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &PadSystem::OnStickyPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyAttachedToPad, &PadSystem::OnStickyAttachedToPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &PadSystem::OnActionButton);
@@ -508,16 +509,24 @@ bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &even
 		SetAcceleration(acceleration);
 	} else if (m_KrakenCharge >= 1) {
 		m_KrakenAttack = false;
-		m_KrakenCharge = 0;
-		m_KrakenStrength = 0;
-		m_PlayerStrength = 0;
+		Events::KrakenAttackEnd e;
+		EventBroker->Publish(e);
+	}
+	return true;
+}
+
+bool dd::Systems::PadSystem::OnKrakenAttackEnd(const dd::Events::KrakenAttackEnd &event)
+{
+	m_KrakenAttack = false;
+	m_KrakenCharge = 0;
+	m_KrakenStrength = 0;
+	m_PlayerStrength = 0;
 
 		m_World->RemoveEntity(m_KrakenArm);
 		m_World->RemoveEntity(m_KrakenArmHitbox);
 		m_KrakenArm = NULL;
 		m_KrakenArmHitbox = NULL;
 		
-	}
 	return true;
 }
 
