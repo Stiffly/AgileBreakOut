@@ -51,6 +51,7 @@
 #include "Game/CBrickPart.h"
 #include "Game/CWall.h"
 #include "Game/CKraken.h"
+#include "Game/CNewWaterVolume.h"
 #include "Game/CBackground.h"
 #include "Game/CTravels.h"
 #include "Game/CStickyAim.h"
@@ -149,6 +150,7 @@ public:
 		m_World->ComponentFactory.Register<Components::BrickPart>();
 		m_World->ComponentFactory.Register<Components::Pad>();
 		m_World->ComponentFactory.Register<Components::Wall>();
+		m_World->ComponentFactory.Register<Components::NewWaterVolume>();
 		m_World->ComponentFactory.Register<Components::Background>();
 		m_World->ComponentFactory.Register<Components::Life>();
 		m_World->ComponentFactory.Register<Components::Lifebuoy>();

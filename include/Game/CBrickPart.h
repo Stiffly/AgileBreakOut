@@ -15,7 +15,8 @@ namespace Components
 
 struct BrickPart : Component
 {
-    
+	bool Submerged = false;
+	int NumberOfPartsInBrick;
 };
 
 }
