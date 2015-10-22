@@ -484,6 +484,7 @@ bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &even
 			model->ModelFile = "Models/Kraken/Arm.dae";
  			auto animation = m_World->AddComponent<Components::Animation>(m_KrakenArm);
  			animation->Speed = 1.0f;
+			animation->Loop = false;
 			m_World->CommitEntity(m_KrakenArm);
 
 			m_KrakenArmHitbox = m_World->CreateEntity();
