@@ -18,6 +18,7 @@
 #include "Game/EStageCleared.h"
 #include "Game/CTravels.h"
 #include "Game/CBackground.h"
+#include "Game/CNewWaterVolume.h"
 
 
 namespace dd

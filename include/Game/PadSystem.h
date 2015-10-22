@@ -105,6 +105,9 @@ private:
 	double m_KrakenStrength = 0;
 	double m_PlayerStrength = 0;
     float m_Edge = 2.8f;
+	float m_PadOriginalHeight = -4.8;
+	float m_PadHeight = m_PadOriginalHeight;
+	float m_PadRiseSpeed = 0.2;
 	EntityID m_KrakenArm;
     Components::Transform* m_Transform = nullptr;
     Components::Pad* m_Pad = nullptr;

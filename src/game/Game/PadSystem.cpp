@@ -44,7 +44,7 @@ void dd::Systems::PadSystem::Initialize()
         auto ent = m_World->CreateEntity();
         m_World->SetProperty(ent, "Name", "Pad");
         auto ctransform = m_World->AddComponent<Components::Transform>(ent);
-        ctransform->Position = glm::vec3(0.f, -4.8f, -10.f);
+        ctransform->Position = glm::vec3(0.f, m_PadHeight, -10.f);
         auto rectangleShape = m_World->AddComponent<Components::RectangleShape>(ent);
         rectangleShape->Dimensions = glm::vec2(1.f, 0.1f);
         auto physics = m_World->AddComponent<Components::Physics>(ent);
@@ -159,6 +159,13 @@ void dd::Systems::PadSystem::Update(double dt)
 	auto pad = Pad();
 	auto acceleration = Acceleration();
 
+	if (glm::abs(transform->Position.y - m_PadHeight) > m_PadRiseSpeed) {
+		if (transform->Position.y < m_PadHeight) {
+			transform->Position.y += m_PadRiseSpeed * (float)dt;
+		} else if (transform->Position.y > m_PadHeight) {
+			transform->Position.y -= m_PadRiseSpeed * 5 * (float)dt;
+		}
+	}
     if (transform->Velocity.x < -pad->MaxSpeed) {
         transform->Velocity.x = -pad->MaxSpeed;
     }
@@ -420,6 +427,7 @@ bool dd::Systems::PadSystem::OnStageCleared(const dd::Events::StageCleared &even
 {
     //auto entity = CreateBall();
 	m_StickyAim->Aiming = false;
+	m_PadHeight = m_PadOriginalHeight;
     return true;
 }
 
@@ -451,14 +459,8 @@ bool dd::Systems::PadSystem::OnRaiseWaterWall(const dd::Events::RaiseWaterWall &
 
 bool dd::Systems::PadSystem::RaisePad(float amount, float speed)
 {
-	auto transform = Transform();
-	glm::vec3 raise = glm::vec3(0, amount, 0);
-	Events::Move e;
-	e.Entity = m_Entity;
-	e.GoalPosition = transform->Position + raise;
-	e.Speed = speed;
-	e.Queue = true;
-	EventBroker->Publish(e);
+	m_PadHeight += amount;
+	m_PadRiseSpeed = speed;
 	return true;
 }
 

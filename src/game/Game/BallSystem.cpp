@@ -83,39 +83,19 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 	}
 
     auto ballComponent = m_World->GetComponent<Components::Ball>(entity);
-	
-    /*if (IsPaused()) {
-        if (ballComponent != nullptr) {
-            auto transform = m_World->GetComponent<Components::Transform>(entity);
-
-            if (!ballComponent->Paused) {
-                ballComponent->Paused = true;
-                ballComponent->SavedSpeed = transform->Velocity;
-                transform->Velocity = glm::vec3(0, 0, 0);
-            }
-        }
-        return;
-    } else {
-        if (ballComponent != nullptr) {
-            auto transform = m_World->GetComponent<Components::Transform>(entity);
-
-            if (ballComponent->Paused) {
-                transform->Velocity = ballComponent->SavedSpeed;
-                ballComponent->Paused = false;
-            }
-        }
-    }*/
 
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
 
     if (ballComponent != nullptr) {
 		if (ReplaceBall()) {
+			m_First = true;
 			SetReplaceBall(false);
 			m_Waiting = true;
 			std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
 			float random = dist(m_RandomGenerator);
 			ballComponent->SavedSpeed = glm::vec3(random, 1, 0.f);
+			//ballComponent->SavedSpeed = glm::vec3(0.f, 1, 0.f);
 			ballComponent->Waiting = true;
 			auto transform = m_World->GetComponent<Components::Transform>(entity);
 		}
@@ -128,6 +108,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 				/*std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
 				float random = dist(m_RandomGenerator);*/
                 transform->Velocity = glm::normalize(ballComponent->SavedSpeed) * ballComponent->Speed;
+				//transform->Velocity = glm::normalize(glm::vec3(0, 1, 0)) * ballComponent->Speed;
             } else if (!ballComponent->Sticky) {
                 auto transform = m_World->GetComponent<Components::Transform>(entity);
                 transform->Velocity = glm::vec3(0.f, 0.f, 0.f);

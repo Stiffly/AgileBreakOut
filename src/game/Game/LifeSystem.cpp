@@ -79,8 +79,9 @@ bool dd::Systems::LifeSystem::OnLifeLost(const dd::Events::LifeLost &event)
 {
 	if (!m_GodMode){
 		SetLives(Lives() - 1);
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool dd::Systems::LifeSystem::OnPause(const dd::Events::Pause &event)

@@ -82,16 +82,16 @@ void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityI
 		case 1: // Idle
 			m_KrakenTimer += dt;
 			if (m_KrakenTimer > m_KrakenSecondsToAction) {
+				m_KrakenTimer = 0;
 				if (m_NumberOfActions == 0) {
 					kraken->CurrentAction = 3;
-					break;
+				} else {
+					std::uniform_real_distribution<float> dist(1, 4.999f);
+					float random = dist(m_RandomGenerator);
+					//std::cout << random << std::endl;
+					kraken->CurrentAction = random;
+					//std::cout << kraken->CurrentAction << std::endl;
 				}
-				m_KrakenTimer = 0;
-				std::uniform_real_distribution<float> dist(1, 4.999f);
-				float random = dist(m_RandomGenerator);
-				//std::cout << random << std::endl;
-				kraken->CurrentAction = random;
-				//std::cout << kraken->CurrentAction << std::endl;
 			}
 			break;
 		case 2: // Grabbing
