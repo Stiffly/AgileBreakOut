@@ -61,19 +61,6 @@ void dd::Systems::PadSystem::Initialize()
         SetEdge(3.2 - (ctransform->Scale.x / 2));
     }
 
-	/*
-	{
-		auto entBody = m_World->CreateEntity();
-		auto ctransform = m_World->AddComponent<Components::Transform>(entBody);
-		ctransform->Position = glm::vec3(0.f, 3.0f, -10.f);
-		ctransform->Scale = glm::vec3(3.f);
-		auto cModel = m_World->AddComponent<Components::Model>(entBody);
-		cModel->ModelFile = "Models/Kraken/Body.dae";
-		auto animationComponent = m_World->AddComponent<Components::Animation>(entBody);
-		animationComponent->Speed = 0.6f;
-	}
-	*/
-
 	//Stick
 	{
 		auto ent = m_World->CreateEntity();

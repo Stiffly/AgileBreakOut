@@ -1175,11 +1175,11 @@ void dd::Systems::LevelSystem::GetNextLevel()
 		else if (m_CurrentLevel == 6) {
 					level =
 					{0, 0, 0, 0, 0, 0, 0,
-					 0, 0, 0, 100, 0, 0, 0,
 					 0, 0, 0, 0, 0, 0, 0,
 					 0, 0, 0, 0, 0, 0, 0,
 					 0, 0, 0, 0, 0, 0, 0,
-					 0, 0, 0, 0, 0, 0, 0};
+					 0, 0, 0, 0, 0, 0, 0,
+					 0, 0, 0, 100, 0, 0, 0 };
 					color =
 					{w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w,
