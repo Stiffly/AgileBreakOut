@@ -165,7 +165,7 @@ void ResourceManager::Preload(std::string resourceName)
 	auto resourceTypename = typeid(T).name();
 	auto it = m_CompilerTypenameToResourceType.find(resourceTypename);
 	if (it == m_CompilerTypenameToResourceType.end()) {
-		LOG_ERROR("Failed to load resource \"%s\" of type \"%s\": type not registered", resourceName.c_str(), resourceType);
+		LOG_ERROR("Failed to load resource \"%s\" of type \"%s\": type not registered", resourceName.c_str(), resourceTypename);
 		return;
 	}
 
