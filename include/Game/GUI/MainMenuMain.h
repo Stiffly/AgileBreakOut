@@ -58,6 +58,7 @@ private:
 		if (event.Button == m_SquidoutButton) {
 			m_Parent->Hide();
 			auto story = new GUI::Story1(BaseFrame, "Story1");
+			story->Play();
 		}
 
 		return true;

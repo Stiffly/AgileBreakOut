@@ -20,31 +20,36 @@ void dd::Systems::KrakenSystem::Initialize()
 
 	EntityID ent = m_World->CreateEntity();
 	auto transform = m_World->AddComponent<Components::Transform>(ent);
+	transform->Position = glm::vec3(50, 50, -10);
 	auto model = m_World->AddComponent<Components::Model>(ent);
+	model->ModelFile = "Models/Kraken/Body.dae";
+	auto animationComponent = m_World->AddComponent<Components::Animation>(ent);
+	animationComponent->Speed = 0.6f;
+
 	auto kraken = m_World->AddComponent<Components::Kraken>(ent);
-	std::shared_ptr<Components::RectangleShape> cCircle = m_World->AddComponent<Components::RectangleShape>(ent);
-	cCircle->Dimensions = glm::vec2(2, 4);
+
+	std::shared_ptr<Components::RectangleShape> cRect = m_World->AddComponent<Components::RectangleShape>(ent);
+	cRect->Dimensions = glm::vec2(10.f, 4.f);
+
 	//cCircle->Radius = 2;
 	std::shared_ptr<Components::Physics> cPhys = m_World->AddComponent<Components::Physics>(ent);
-	std::shared_ptr<Components::Template> cTemplate = m_World->AddComponent<Components::Template>(ent);
-
-	auto travels = m_World->AddComponent<Components::Travels>(ent);
-	travels->CurrentlyTraveling = false;
-
 	cPhys->CollisionType = CollisionType::Type::Static;
 	cPhys->GravityScale = 0.f;
 	cPhys->Category = CollisionLayer::Type::Brick;
 	cPhys->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Ball | CollisionLayer::Type::Projectile | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
 
-	model->ModelFile = "Models/Test/Ball/Sid.obj";
-	transform->Position = glm::vec3(50, 50, -10);
+	std::shared_ptr<Components::Template> cTemplate = m_World->AddComponent<Components::Template>(ent);
+
+	auto travels = m_World->AddComponent<Components::Travels>(ent);
+	travels->CurrentlyTraveling = false;
+
+	
 	//sound
 	auto collisionSound = m_World->AddComponent<Components::CollisionSound>(ent);
 	collisionSound->FilePath = "Sounds/Brick/LTTP_Boss_Hit.wav";
 	m_World->CommitEntity(ent);
 
 	m_KrakenTemplate = ent;
-
 	InitializeObjects();
 }
 
@@ -227,6 +232,7 @@ bool dd::Systems::KrakenSystem::OnKrakenAppear(const dd::Events::KrakenAppear &e
 	m_World->RemoveComponent<Components::Template>(ent);
 	auto transform = m_World->GetComponent<Components::Transform>(ent);
 	transform->Position = event.Position;
+	transform->Position.y += 3.f;
 	m_KrakenBattle = true;
 	return true;
 }
