@@ -59,6 +59,10 @@ void dd::Systems::PadSystem::Initialize()
         m_World->CommitEntity(ent);
 
         m_Edge = 3.2 - (ctransform->Scale.x / 2);
+		
+		m_PadEntity = ent;
+		m_PadTransform = ctransform.get();
+		m_PadComponent = pad.get();
     }
 
 	//Stick
@@ -77,16 +81,29 @@ void dd::Systems::PadSystem::Initialize()
 		m_StickTransform = transform;
 		m_StickyAim = sticky;
 
-		/*{
-			auto entChild = m_World->CreateEntity(ent);
-			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(entChild);
-			transform->Position = glm::vec3(0.f, 12.5f, 0.f);
+			/*{
+		auto entChild = m_World->CreateEntity(ent);
+		std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(entChild);
+		transform->Position = glm::vec3(0.f, 12.5f, 0.f);
 
-			transform->Scale = glm::vec3(0.1f, 25.f, 0.1f);
-			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(entChild);
-			sprite->SpriteFile = "Models/Brick/White.png";
-			sprite->Color = glm::vec4(0.f, 0.5f, 0.f, 0.5f);
+		transform->Scale = glm::vec3(0.1f, 25.f, 0.1f);
+		std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(entChild);
+		sprite->SpriteFile = "Models/Brick/White.png";
+		sprite->Color = glm::vec4(0.f, 0.5f, 0.f, 0.5f);
 		}*/
+	}
+
+	// Kraken arm
+	{
+		m_KrakenArm = m_World->CreateEntity(m_PadEntity);
+		auto transform = m_World->AddComponent<Components::Transform>(m_KrakenArm);
+		transform->Position = glm::vec3(1.f, -3.0f, 0.f);
+		auto model = m_World->AddComponent<Components::Model>(m_KrakenArm);
+		model->ModelFile = "Models/Kraken/Arm.dae";
+		auto animation = m_World->AddComponent<Components::Animation>(m_KrakenArm);
+		animation->Speed = 0.0f;
+		animation->Loop = false;
+		m_World->CommitEntity(m_KrakenArm);
 	}
 
 	m_ResetBall = true;
@@ -131,17 +148,6 @@ void dd::Systems::PadSystem::Update(double dt)
 {
     if (IsPaused()) {
         return;
-    }
-
-    if (m_PadEntity == 0) {
-        for (auto it = m_World->GetEntities()->begin(); it != m_World->GetEntities()->end(); it++) {
-            if (m_World->GetProperty<std::string>(it->first, "Name") == "Pad") {
-                m_PadEntity = it->first;
-                m_PadTransform = m_World->GetComponent<Components::Transform>(m_PadEntity);
-                m_PadComponent = m_World->GetComponent<Components::Pad>(m_PadEntity);
-                break;
-            }
-        }
     }
 
 	if (m_KrakenAttack) {
@@ -476,18 +482,10 @@ bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &even
 
 		transform->Velocity = glm::vec3(0, 0, 0);
 		acceleration = glm::vec3(0, 0, 0);
-		LOG_INFO("Kraken arm duuude");
-		if (!m_KrakenArm){
-			LOG_INFO("InKrakenArmDuuude");
-			m_KrakenArm = m_World->CreateEntity(m_PadEntity);
-			auto transform = m_World->AddComponent<Components::Transform>(m_KrakenArm);
-			transform->Position = glm::vec3(1.f, -3.0f, 0.f);
-			auto model = m_World->AddComponent<Components::Model>(m_KrakenArm);
-			model->ModelFile = "Models/Kraken/Arm.dae";
- 			auto animation = m_World->AddComponent<Components::Animation>(m_KrakenArm);
- 			animation->Speed = 1.0f;
-			animation->Loop = false;
-			m_World->CommitEntity(m_KrakenArm);
+		if (m_KrakenArmHitbox == 0) {
+			auto animation = m_World->GetComponent<Components::Animation>(m_KrakenArm);
+			animation->Time = 0.0;
+			animation->Speed = 1.0;
 
 			m_KrakenArmHitbox = m_World->CreateEntity();
 			auto hb_transform = m_World->AddComponent<Components::Transform>(m_KrakenArmHitbox);
@@ -525,10 +523,14 @@ bool dd::Systems::PadSystem::OnKrakenAttackEnd(const dd::Events::KrakenAttackEnd
 	m_KrakenStrength = 0;
 	m_PlayerStrength = 0;
 
-		m_World->RemoveEntity(m_KrakenArm);
-		m_World->RemoveEntity(m_KrakenArmHitbox);
-		m_KrakenArm = NULL;
-		m_KrakenArmHitbox = NULL;
+		//m_World->RemoveEntity(m_KrakenArm);
+
+	auto animation = m_World->GetComponent<Components::Animation>(m_KrakenArm);
+	animation->Time = 0.0;
+	animation->Speed = -1.5;
+	m_World->RemoveEntity(m_KrakenArmHitbox);
+	//m_KrakenArm = NULL;
+	m_KrakenArmHitbox = 0;
 		
 	return true;
 }
