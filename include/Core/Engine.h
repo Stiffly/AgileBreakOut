@@ -102,9 +102,6 @@ public:
 		ResourceManager::RegisterType<Model>("Model");
 		ResourceManager::RegisterType<Sound>("Sound");
 		ResourceManager::RegisterType<ConfigFile>("ConfigFile");
-		ResourceManager::RegisterType<ShaderProgram>("ShaderProgram");
-		ResourceManager::RegisterType<VertexShader>("VertexShader");
-		ResourceManager::RegisterType<FragmentShader>("FragmentShader");
 		ResourceManager::LoadPreloadsFromFile();
 
 		auto config = ResourceManager::Load<ConfigFile>("Config.ini");

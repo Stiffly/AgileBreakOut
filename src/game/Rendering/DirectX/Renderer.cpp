@@ -8,6 +8,7 @@
 void dd::Renderer::Initialize()
 {
 	StaticSystem::Set(this);
+	ResourceManager::RegisterType<ShaderProgram>("ShaderProgram");
 
 	// Initialize GLFW
 	if (!glfwInit()) {
