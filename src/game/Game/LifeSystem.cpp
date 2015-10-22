@@ -72,6 +72,8 @@ void dd::Systems::LifeSystem::CreateLife(int number)
 	auto model = m_World->AddComponent<Components::Model>(life);
 	model->ModelFile = "Models/Sid/Sid.dae";
 
+	auto anim = m_World->AddComponent<Components::Animation>(life);
+	anim->Speed = 0.f;
 	m_World->CommitEntity(life);
 }
 

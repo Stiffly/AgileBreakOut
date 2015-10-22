@@ -24,6 +24,8 @@
 #include "Game/EGameOver.h"
 #include "Game/EKrakenAttackEnd.h"
 
+#include "Rendering/CAnimation.h"
+
 
 namespace dd
 {
