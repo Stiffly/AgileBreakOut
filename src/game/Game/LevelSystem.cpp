@@ -439,11 +439,13 @@ EntityID dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spac
 	} else if (typeInt == InkBlasterBrick) {
 		cBrick->Type = InkBlasterBrick;
 		auto type = m_World->AddComponent<Components::InkBlasterBrick>(brick);
-		model->Color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+		model->ModelFile = "Models/Brick/InkBrick.obj";
+		model->Color = glm::vec4(0.7f, 0.7f, 0.7f, 1.f);
 	} else if (typeInt == KrakenAttackBrick) {
 		cBrick->Type = KrakenAttackBrick;
 		auto type = m_World->AddComponent<Components::KrakenAttackBrick>(brick);
-		model->Color = glm::vec4(0.f, 0.5f, 1.0f, 1.0f);
+		model->ModelFile = "Models/Brick/KrakenBrick.obj";
+
 	} else if (typeInt == Kraken) {
 		Events::KrakenAppear e;
 		e.Position = transform->Position;
@@ -1098,7 +1100,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 0, 1, 2, 1, 0, 1,
                      0, 1, 0, 1, 0, 1, 0,
                      0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0};
+                     0, 0, 0, 6, 0, 0, 0};
 			color = 
 					{w, w, w, w, w, w, w,
 					 lb4, lb4, lb4, lb4, lb4, lb4, lb4,

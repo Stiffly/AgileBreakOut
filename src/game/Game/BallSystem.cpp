@@ -33,13 +33,12 @@ void dd::Systems::BallSystem::Initialize()
         auto ent = m_World->CreateEntity();
         std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(ent);
         transform->Position = glm::vec3(-20.f, 0.26f, -10.f);
-        transform->Scale = glm::vec3(.3f, 0.3f, 0.3f) * 3.f;
+        transform->Scale = glm::vec3(.3f, 0.3f, 0.3f);
         transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
         auto model = m_World->AddComponent<Components::Model>(ent);
-        model->ModelFile = "Models/Sid/Sid.fbx";
+        model->ModelFile = "Models/Sid/Sid.dae";
 		auto animation = m_World->AddComponent<Components::Animation>(ent);
 		animation->Speed = 1.0;
-		animation->Name = "AnimStack::Armature.001|Flying";
         std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
         circleShape->Radius = 0.4f;
         std::shared_ptr<Components::Ball> ball = m_World->AddComponent<Components::Ball>(ent);
