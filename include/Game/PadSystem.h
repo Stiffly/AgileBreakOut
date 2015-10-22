@@ -107,8 +107,8 @@ private:
     float m_Edge = 2.8f;
 	float m_PadOriginalHeight = -4.8;
 	float m_PadHeight = m_PadOriginalHeight;
-	EntityID m_KrakenArm = NULL;
-	EntityID m_KrakenArmHitbox = NULL;
+	EntityID m_KrakenArm = 0;
+	EntityID m_KrakenArmHitbox = 0;
 	float m_PadRiseSpeed = 0.2;
     Components::Transform* m_Transform = nullptr;
     Components::Pad* m_Pad = nullptr;
