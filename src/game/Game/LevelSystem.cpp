@@ -281,7 +281,19 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 
     auto brick = m_World->GetComponent<Components::Brick>(entity);
     if (brick != nullptr) {
-        auto transform = m_World->GetComponent<Components::Transform>(entity);
+
+		auto transform = m_World->GetComponent<Components::Transform>(entity);
+		if (brick->BeingGenerated) {
+			if (transform->Position == brick->GenerationGoal) {
+				brick->BeingGenerated = false;
+				auto cPhys = m_World->AddComponent<Components::Physics>(entity);
+				cPhys->CollisionType = CollisionType::Type::Static;
+				cPhys->GravityScale = 0.f;
+				cPhys->Category = CollisionLayer::Type::Brick;
+				cPhys->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Ball | CollisionLayer::Type::Projectile | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
+			}
+		}
+        
         //Removes bricks that falls out of the stage.
 		if (transform->Position.y < -10) {
 			if (brick->Type == StandardBrick) {
@@ -317,7 +329,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 
     auto ball = m_World->GetComponent<Components::Ball>(entity);
 
-    if (NumberOfBricks() <= 0 && m_LooseBricks <= 0 && !Restarting()) {
+    if (NumberOfBricks() <= 0 && m_LooseBricks <= 0 && !Restarting() && !m_Cleared) {
         if (MultiBalls() <= 0 && PowerUps() <= 0) {
             Events::StageCleared ec;
             ec.ClearedStage = m_CurrentLevel;
@@ -481,6 +493,8 @@ bool dd::Systems::LevelSystem::BrickGenerating(const dd::Events::BrickGenerating
 				auto ent = CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), -3.2, 1, m_BrickSet[getter], m_ColorSet[getter]);
 				if (ent != NULL) {
 					auto brick = m_World->GetComponent<Components::Brick>(ent);
+					brick->BeingGenerated = true;
+					m_World->RemoveComponent<Components::Physics>(ent);
 					brick->Number = getter;
 					m_KrakenBricks[getter] = true;
 					auto transform = m_World->GetComponent<Components::Transform>(ent);
@@ -491,6 +505,7 @@ bool dd::Systems::LevelSystem::BrickGenerating(const dd::Events::BrickGenerating
 					} else {
 						transform->Position = event.Origin2;
 					}
+					brick->GenerationGoal = e.GoalPosition;
 					e.Entity = ent;
 					e.Speed = 6;
 					e.Queue = false;
@@ -690,7 +705,11 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
     brick = m_World->GetComponent<Components::Brick>(entityBrick);
     if (brick == nullptr) {
         return false;
-    }
+	}
+
+	if (brick->BeingGenerated) {
+		return false;
+	}
 
 	if (entityShot != 0) {
 		// For when a brick gets shot.
@@ -1002,7 +1021,6 @@ void dd::Systems::LevelSystem::GetNextLevel()
 	glm::vec4 p3 = glm::vec4(189.f / 255.f, 0.f / 255.f, 187.f / 255.f, 1.f);
 	glm::vec4 p4 = glm::vec4(125.f / 255.f, 0.f / 255.f, 147.f / 255.f, 1.f);
 
-
     if (m_CurrentCluster == 0) {
         if (m_CurrentLevel == 1) {
             level =
@@ -1102,7 +1120,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 1, 1, 1, 1, 1, 1,
                      1, 0, 1, 2, 1, 0, 1,
                      0, 1, 0, 1, 0, 1, 0,
-                     0, 0, 0, 0, 0, 0, 6,
+                     0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0};
 			color = 
 					{w, w, w, w, w, w, w,

@@ -14,6 +14,7 @@
 #include "Core/CTemplate.h"
 #include "Core/CTransform.h"
 #include "Core/CTemplate.h"
+#include "Rendering/Texture.h"
 
 #include "Physics/EContact.h"
 #include "Physics/ESetImpulse.h"

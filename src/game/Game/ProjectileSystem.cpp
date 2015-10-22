@@ -139,6 +139,7 @@ bool dd::Systems::ProjectileSystem::OnActionButton(const dd::Events::ActionButto
 			transform->Position = event.Position;
 			transform->Velocity = glm::vec3(0, projectile->Speed, 0);
 			m_Shots--;
+		
 			if (m_Shots <= 0) {
 				auto ball = m_World->GetComponent<Components::Ball>(m_AttachedSquid);
 				m_InkBlaster = false;

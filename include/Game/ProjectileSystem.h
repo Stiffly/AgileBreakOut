@@ -5,6 +5,10 @@
 #ifndef DAYDREAM_PROJECTILESYSTEM_H
 #define DAYDREAM_PROJECTILESYSTEM_H
 
+
+#include <fstream>
+#include <iostream>
+
 #include "Core/System.h"
 #include "Core/CTransform.h"
 #include "Core/CTemplate.h"
@@ -26,8 +30,6 @@
 #include "Game/CProjectile.h"
 #include "Game/CBall.h"
 #include "Rendering/CSprite.h"
-#include <fstream>
-#include <iostream>
 
 namespace dd
 {
