@@ -235,7 +235,12 @@ void dd::Systems::PhysicsSystem::Update(double dt)
 				auto particle = m_World->GetComponent<Components::Particle>(entity);
 
                 transform->Position = glm::vec3(position.x, position.y, transform->Position.z);
-				transform->Scale = particle->Scale;//glm::vec3(particle->Radius * 2.f, particle->Radius * 2.f, 1);
+				EntityID emitter = m_ParticleEmitters.ParticleEmitter[e];
+				auto cEmitter = m_World->GetComponent<Components::ParticleEmitter>(emitter);
+				if (!cEmitter->DefaultScale)
+				{
+					transform->Scale = particle->Scale;
+				}
             }
         }
 
@@ -271,7 +276,7 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
                 m_World->RemoveEntity(entity);
             }
         }
-		//Update alpha
+		//Update alpha & scale
 		auto sprite = m_World->GetComponent<Components::Sprite>(entity);
 		float timeProgress = particle->TimeLived / (particle->LifeTime - 0.1);
 		if (timeProgress > 1) {
@@ -280,7 +285,9 @@ void dd::Systems::PhysicsSystem::UpdateEntity(double dt, EntityID entity, Entity
 		auto emitter = m_World->GetComponent<Components::ParticleEmitter>(particle->ParticleSystem);
 		if (emitter) {
 			sprite->Color.w = ScalarInterpolation(timeProgress, emitter->AlphaValues);
-			particle->Scale = VectorInterpolation(timeProgress, emitter->ScaleValues);
+			if (!emitter->DefaultScale) {
+				particle->Scale = VectorInterpolation(timeProgress, emitter->ScaleValues);
+			}
 			
 		}
     }
@@ -719,8 +726,9 @@ bool dd::Systems::PhysicsSystem::CreateParticleSequence(const Events::CreatePart
     particleEmitter->EmittingAngle = event.EmittingAngle;
     particleEmitter->LifeTime = event.EmitterLifeTime;
 	particleEmitter->AlphaValues = event.AlphaValues;
-	particleEmitter->ScaleValues = event.ScaleValues;
 	particleEmitter->RadiusDistribution = event.RadiusDistribution;
+	particleEmitter->DefaultScale = event.DefaultScale;
+	particleEmitter->ScaleValues = event.ScaleValues;
 	{
 		//Creating Particle Template
 		auto particle = m_World->CreateEntity(emitter);
@@ -730,10 +738,17 @@ bool dd::Systems::PhysicsSystem::CreateParticleSequence(const Events::CreatePart
 		m_World->AddComponent<Components::Template>(particle);
 		particleTransform->Position = emitterTransform->Position;
 		sprite->SpriteFile = event.SpriteFile;
+		if (particleEmitter->DefaultScale == true)
+		{
+			Texture* texture = ResourceManager::Load<Texture>(event.SpriteFile);
+			particleEmitter->ScaleValues.clear();
+			particleEmitter->ScaleValues.push_back(glm::vec3(texture->Width / 100, texture->Height / 100, 1));
+			
+		} 
 		sprite->Color = event.Color;
 		particleComponent->LifeTime = event.ParticleLifeTime;
 		particleComponent->Flags = event.Flags;
-		particleComponent->Scale = event.ScaleValues[0];
+		particleComponent->Scale = particleEmitter->ScaleValues[0];
 		particleComponent->ParticleSystem = emitter;
     }
     m_World->CommitEntity(emitter);
@@ -834,8 +849,9 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 	e.Color = glm::vec4(1.f);
 	e.AlphaValues.push_back(1.f);
 	e.AlphaValues.push_back(0.f);
-	e.ScaleValues.push_back(glm::vec3(1.f));
+	e.ScaleValues.push_back(glm::vec3(4));
 	e.Speed = 0;
+	e.DefaultScale = true;
 
 	auto PowerFriend = m_World->GetComponent<Components::MultiBallBrick>(entity);
 	auto PowerSaviour = m_World->GetComponent<Components::LifebuoyBrick>(entity);
@@ -860,6 +876,7 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 		e.SpriteFile = "Textures/PowerUps/RealeaseTheKraken.png";
 	}
 	else {
+		e.DefaultScale = false;
 		e.EmitterLifeTime = 4;
 		e.EmittingAngle = glm::half_pi<float>();
 		e.Spread = 0.5f;
