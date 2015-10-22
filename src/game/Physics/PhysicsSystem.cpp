@@ -860,7 +860,7 @@ bool dd::Systems::PhysicsSystem::OnContact(const dd::Events::Contact &event)
 		EventBroker->Publish(se);
 		e.SpriteFile = "Textures/PowerUps/InkBlaster.png";
 	} else if (PowerKraken) { 
-		se.FilePath = "Sounds/jap-awesome.wav";
+		se.FilePath = "Sounds/jap-huh.wav";
 		EventBroker->Publish(se);
 		e.SpriteFile = "Textures/PowerUps/RealeaseTheKraken.png";
 	}
