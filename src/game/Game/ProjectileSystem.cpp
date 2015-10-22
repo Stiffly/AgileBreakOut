@@ -13,6 +13,8 @@ void dd::Systems::ProjectileSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EPause, &ProjectileSystem::OnPause);
 	EVENT_SUBSCRIBE_MEMBER(m_EResume, &ProjectileSystem::OnResume);
 	EVENT_SUBSCRIBE_MEMBER(m_EInkBlaster, &ProjectileSystem::OnInkBlaster);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttack, &ProjectileSystem::OnKrakenAttack);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttackEnd, &ProjectileSystem::OnKrakenAttackEnd);
 	EVENT_SUBSCRIBE_MEMBER(m_EHitPad, &ProjectileSystem::OnHitPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &ProjectileSystem::OnActionButton);
 
@@ -100,6 +102,7 @@ bool dd::Systems::ProjectileSystem::OnInkBlaster(const dd::Events::InkBlaster &e
 {
 	m_InkBlaster = true;
 	m_Shots = event.Shots;
+	m_InkBlasterSpeed = event.Speed;
 	return true;
 }
 
@@ -112,15 +115,30 @@ bool dd::Systems::ProjectileSystem::OnHitPad(const dd::Events::HitPad &event)
 	return true;
 }
 
+bool dd::Systems::ProjectileSystem::OnKrakenAttack(const dd::Events::KrakenAttack &event)
+{
+	m_KrakenAttack = true;
+	return true;
+}
+
+bool dd::Systems::ProjectileSystem::OnKrakenAttackEnd(const dd::Events::KrakenAttackEnd &event)
+{
+	m_KrakenAttack = false;
+	return true;
+}
+
 bool dd::Systems::ProjectileSystem::OnActionButton(const dd::Events::ActionButton &event)
 {
-	if (m_InkBlaster && m_SquidLoaded) {
-		auto ent = m_World->CloneEntity(m_InkBlastTemplate);
-		m_World->RemoveComponent<Components::Template>(ent);
-		auto transform = m_World->GetComponent<Components::Transform>(ent);
-		transform->Position = event.Position;
-		transform->Velocity = glm::vec3(0, 7, 0);
-		m_Shots--;
+	if (!m_KrakenAttack) {
+		if (m_InkBlaster && m_SquidLoaded) {
+			auto ent = m_World->CloneEntity(m_InkBlastTemplate);
+			m_World->RemoveComponent<Components::Template>(ent);
+			auto projectile = m_World->GetComponent<Components::Projectile>(ent);
+			projectile->Speed = m_InkBlasterSpeed;
+			auto transform = m_World->GetComponent<Components::Transform>(ent);
+			transform->Position = event.Position;
+			transform->Velocity = glm::vec3(0, projectile->Speed, 0);
+			m_Shots--;
 		Events::CreateParticleSequence e;
 		e.parent = ent;
 		e.EmitterLifeTime = 1.0;
@@ -142,22 +160,23 @@ bool dd::Systems::ProjectileSystem::OnActionButton(const dd::Events::ActionButto
 		e.AlphaValues.push_back(0.f);
 		e.Speed = 20.f;
 		EventBroker->Publish(e);
-		if (m_Shots <= 0) {
-			auto ball = m_World->GetComponent<Components::Ball>(m_AttachedSquid);
-			m_InkBlaster = false;
-			m_SquidLoaded = false;
-			ball->InkBlaster = false;
-			ball->Sticky = false;
-			ball->Waiting = true;
-			
-			{
-				Events::InkBlasterOver e;
-				e.Ball = m_AttachedSquid;
-				EventBroker->Publish(e);
-			}
+			if (m_Shots <= 0) {
+				auto ball = m_World->GetComponent<Components::Ball>(m_AttachedSquid);
+				m_InkBlaster = false;
+				m_SquidLoaded = false;
+				ball->InkBlaster = false;
+				ball->Sticky = false;
+				ball->Waiting = true;
+
+				{
+					Events::InkBlasterOver e;
+					e.Ball = m_AttachedSquid;
+					EventBroker->Publish(e);
+				}
 			{
 				Events::ActionButton e;
 				EventBroker->Publish(e);
+			}
 			}
 		}
 	}

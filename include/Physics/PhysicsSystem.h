@@ -42,6 +42,8 @@
 #include "Rendering/CSprite.h"
 #include "Rendering/CModel.h"
 
+#include "Sound/EPlaySound.h"
+
 
 namespace dd
 {

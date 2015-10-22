@@ -13,6 +13,7 @@ struct Animation : Component
 	std::string Name;
 	double Time = 0.0;
 	double Speed = 0.0;
+	bool Loop = true;
 	bool NoRootMotion = true;
 };
 

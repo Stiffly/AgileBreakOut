@@ -21,12 +21,12 @@
 #include <Sound/CCollisionSound.h>
 
 #include "ResourceManager.h"
-#include "OBJ.h"
-#include "Model.h"
-#include "Texture.h"
+#include "Rendering/OBJ.h"
+#include "Rendering/Model.h"
+#include "Rendering/Texture.h"
 #include "EventBroker.h"
-#include "RenderQueue.h"
-#include "Renderer.h"
+#include "Rendering/RenderQueue.h"
+#include "Rendering/Renderer.h"
 #include "InputManager.h"
 //TODO: Remove includes that are only here for the temporary draw solution.
 #include "World.h"
@@ -48,6 +48,7 @@
 #include "Game/CLifebuoy.h"
 #include "Game/CProjectile.h"
 #include "Game/CBrick.h"
+#include "Game/CBrickPart.h"
 #include "Game/CWall.h"
 #include "Game/CKraken.h"
 #include "Game/CBackground.h"
@@ -59,6 +60,7 @@
 #include "Game/LifebuoySystem.h"
 #include "Game/ProjectileSystem.h"
 #include "Game/KrakenSystem.h"
+#include "Game/WaterSystem.h"
 #include "Game/Bricks/CPowerUpBrick.h"
 
 #include "Game/BrickComponents.h"
@@ -143,6 +145,7 @@ public:
 		m_World->ComponentFactory.Register<Components::Physics>();
 		m_World->ComponentFactory.Register<Components::Ball>();
 		m_World->ComponentFactory.Register<Components::Brick>();
+		m_World->ComponentFactory.Register<Components::BrickPart>();
 		m_World->ComponentFactory.Register<Components::Pad>();
 		m_World->ComponentFactory.Register<Components::Wall>();
 		m_World->ComponentFactory.Register<Components::Background>();
@@ -164,7 +167,7 @@ public:
 		m_World->ComponentFactory.Register<Components::KrakenAttackBrick>();
 
 		m_World->SystemFactory.Register<Systems::LevelSystem>(
-				[this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
+			[this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LevelSystem>();
 		m_World->SystemFactory.Register<Systems::PadSystem>(
 				[this]() { return new Systems::PadSystem(m_World.get(), m_EventBroker); });
@@ -193,6 +196,9 @@ public:
 		m_World->SystemFactory.Register<Systems::KrakenSystem>(
 			[this]() { return new Systems::KrakenSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::KrakenSystem>();
+		m_World->SystemFactory.Register<Systems::WaterSystem>(
+			[this]() { return new Systems::WaterSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::WaterSystem>();
 
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
@@ -203,6 +209,9 @@ public:
 		m_World->Initialize();
 
 		//auto particleEmitter= m_World->AddComponent<Components::Emitter>(Pe);
+
+
+		
 		//EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &Engine::OnGameStart);
 		m_EGameStart = decltype(m_EGameStart)(std::bind(&Engine::OnGameStart, this, std::placeholders::_1));
 		m_EventBroker->Subscribe(m_EGameStart);
@@ -348,23 +357,20 @@ public:
 		{
 			ModelJob job;
 			job.TextureID = (texGroup.Texture) ? texGroup.Texture->ResourceID : 0;
-			job.DiffuseTexture = (texGroup.Texture) ? *texGroup.Texture : 0;
-			job.NormalTexture = (texGroup.NormalMap) ? *texGroup.NormalMap : 0;
-			job.SpecularTexture = (texGroup.SpecularMap) ? *texGroup.SpecularMap : 0;
-			job.VAO = model->VAO;
-			job.ElementBuffer = model->ElementBuffer;
+			job.DiffuseTexture = texGroup.Texture.get();
+			job.NormalTexture = texGroup.NormalMap.get();
+			job.SpecularTexture = texGroup.SpecularMap.get();
+			job.Model = model;
 			job.StartIndex = texGroup.StartIndex;
 			job.EndIndex = texGroup.EndIndex;
 			job.ModelMatrix = modelMatrix * model->m_Matrix;
 			job.Color = modelComponent->Color;
 			
-			if (model->m_Skeleton != nullptr) {
+			if (model->m_Skeleton != nullptr && animationComponent != nullptr) {
 				job.Skeleton = model->m_Skeleton;
-				if (animationComponent != nullptr) {
-					job.AnimationName = animationComponent->Name;
-					job.AnimationTime = animationComponent->Time;
-					job.NoRootMotion = animationComponent->NoRootMotion;
-				}
+				job.AnimationName = animationComponent->Name;
+				job.AnimationTime = animationComponent->Time;
+				job.NoRootMotion = animationComponent->NoRootMotion;
 			}
 
 			m_RendererQueue.Deferred.Add(job);
@@ -376,13 +382,12 @@ public:
 	{
 		SpriteJob job;
 		job.TextureID = texture->ResourceID;
-		job.DiffuseTexture = *texture;
-		job.NormalTexture = *normalTexture;
-		job.SpecularTexture = *specularTexture;
+		job.DiffuseTexture = texture;
+		job.NormalTexture = normalTexture;
+		job.SpecularTexture = specularTexture;
 		job.ModelMatrix = modelMatrix;
 		job.Color = color;
 		job.Depth = depth;
-
 
 		m_RendererQueue.Forward.Add(job);
 	}

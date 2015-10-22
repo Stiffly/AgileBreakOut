@@ -23,8 +23,8 @@
 #include <forward_list>
 
 #include "Core/Util/Rectangle.h"
-#include "Core/Texture.h"
-#include "Core/Model.h"
+#include "Rendering/Texture.h"
+#include "Rendering/Model.h"
 
 namespace dd
 {
@@ -76,20 +76,6 @@ struct ModelJob : RenderJob
 	{
 		Hash = TextureID;
 	}
-};
-
-struct BlendMapModelJob : ModelJob
-{
-	GLuint BlendMapTextureRed;
-	GLuint BlendMapTextureRedNormal;
-	GLuint BlendMapTextureRedSpecular;
-	GLuint BlendMapTextureGreen;
-	GLuint BlendMapTextureGreenNormal;
-	GLuint BlendMapTextureGreenSpecular;
-	GLuint BlendMapTextureBlue;
-	GLuint BlendMapTextureBlueNormal;
-	GLuint BlendMapTextureBlueSpecular;
-	float TextureRepeat;
 };
 
 struct SpriteJob : RenderJob

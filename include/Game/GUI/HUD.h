@@ -51,6 +51,7 @@ public:
 		EVENT_SUBSCRIBE_MEMBER(m_EGameOver, &HUD::OnGameOver);
 		EVENT_SUBSCRIBE_MEMBER(m_ClusterClear, &HUD::OnClusterClear);
 		EVENT_SUBSCRIBE_MEMBER(m_KrakenAttack, &HUD::OnKrakenAttack);
+		EVENT_SUBSCRIBE_MEMBER(m_KrakenAttackEnd, &HUD::OnKrakenAttackEnd);
 
 		updateScore();
 	}
@@ -71,22 +72,23 @@ private:
 	EventRelay<Frame, Events::GameOver> m_EGameOver;
 	EventRelay<Frame, Events::ClusterClear> m_ClusterClear;
 	EventRelay<Frame, Events::KrakenAttack> m_KrakenAttack;
+	EventRelay<Frame, Events::KrakenAttackEnd> m_KrakenAttackEnd;
 
 	void updateScore()
 	{
 		m_ScoreNumberFrame->SetLeft(Width / 2.f - m_ScoreNumberFrame->Width / 2.f);
 
-		m_ScoreBackMid->SetLeft(m_ScoreNumberFrame->Left());
 		m_ScoreBackMid->Width = m_ScoreNumberFrame->Width;
 		m_ScoreBackMid->Height = m_ScoreNumberFrame->Height + 35;
+		m_ScoreBackMid->SetLeft(m_ScoreNumberFrame->Left() + 4);
 
-		m_ScoreBackLeft->SetRight(m_ScoreBackMid->Left());
-		m_ScoreBackLeft->Width = 40;
+		//m_ScoreBackLeft->Width = 40;
 		m_ScoreBackLeft->Height = m_ScoreBackMid->Height;
+		m_ScoreBackLeft->SetRight(m_ScoreBackMid->Left());
 
-		m_ScoreBackRight->SetLeft(m_ScoreBackMid->Right());
-		m_ScoreBackRight->Width = 40;
+		//m_ScoreBackRight->Width = 40;
 		m_ScoreBackRight->Height = m_ScoreBackMid->Height;
+		m_ScoreBackRight->SetLeft(m_ScoreBackMid->Right());
 	}
 
 	bool OnScore(const Events::ScoreEvent& event)
@@ -120,6 +122,13 @@ private:
 			m_KrakenAttackSlider->SetPercentage(event.ChargeUpdate);
 		}
 		
+		return true;
+	}
+
+	bool OnKrakenAttackEnd(const Events::KrakenAttackEnd& event)
+	{
+		m_KrakenAttackSlider->Hide();
+
 		return true;
 	}
 };

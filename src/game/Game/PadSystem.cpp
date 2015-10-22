@@ -30,9 +30,11 @@ void dd::Systems::PadSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EResetBall, &PadSystem::OnResetBall);
 	EVENT_SUBSCRIBE_MEMBER(m_EResetAll, &PadSystem::OnResetAll);
 	EVENT_SUBSCRIBE_MEMBER(m_ERaiseWater, &PadSystem::OnRaiseWater);
+	EVENT_SUBSCRIBE_MEMBER(m_ERaiseWaterWall, &PadSystem::OnRaiseWaterWall);
     EVENT_SUBSCRIBE_MEMBER(m_EPause, &PadSystem::OnPause);
 	EVENT_SUBSCRIBE_MEMBER(m_EResume, &PadSystem::OnResume);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttack, &PadSystem::OnKrakenAttack);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAttackEnd, &PadSystem::OnKrakenAttackEnd);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &PadSystem::OnStickyPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyAttachedToPad, &PadSystem::OnStickyAttachedToPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &PadSystem::OnActionButton);
@@ -74,6 +76,17 @@ void dd::Systems::PadSystem::Initialize()
 
 		m_StickTransform = transform;
 		m_StickyAim = sticky;
+
+		/*{
+			auto entChild = m_World->CreateEntity(ent);
+			std::shared_ptr<Components::Transform> transform = m_World->AddComponent<Components::Transform>(entChild);
+			transform->Position = glm::vec3(0.f, 12.5f, 0.f);
+
+			transform->Scale = glm::vec3(0.1f, 25.f, 0.1f);
+			std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(entChild);
+			sprite->SpriteFile = "Models/Brick/White.png";
+			sprite->Color = glm::vec4(0.f, 0.5f, 0.f, 0.5f);
+		}*/
 	}
 
 	m_ResetBall = true;
@@ -139,7 +152,6 @@ void dd::Systems::PadSystem::Update(double dt)
 		Events::KrakenAttack e;
 		e.ChargeUpdate = m_KrakenCharge;
 		EventBroker->Publish(e);
-		//std::cout << "Charge: " << m_KrakenCharge << std::endl;
 		return;
 	}
 
@@ -219,8 +231,14 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 	} else if (val == GLFW_KEY_W) {
 		Events::RaiseWater e;
 		e.Amount = 0.2;
+		e.Speed = 0.2;
 		EventBroker->Publish(e);
-	}  else if (val == GLFW_KEY_A) {
+	} else if (val == GLFW_KEY_Q) {
+		Events::RaiseWaterWall e;
+		e.Amount = 0.2;
+		e.Speed = 0.2;
+		EventBroker->Publish(e);
+	} else if (val == GLFW_KEY_A) {
 		Events::ResetAll e;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_M) {
@@ -253,7 +271,8 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_G) {
 		Events::BrickGenerating e;
-		e.Origin = glm::vec3(-5, 7, -10);
+		e.Origin1 = glm::vec3(-5, 7, -10);
+		e.Origin2 = glm::vec3(5, 7, -10);
 		e.Set = 1;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_L) {
@@ -267,6 +286,7 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 	} else if (val == GLFW_KEY_I) {
 		Events::InkBlaster e;
 		e.Shots = 5;
+		e.Speed = 7;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_K) {
 		Events::KrakenAttack e;
@@ -277,7 +297,7 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 	} else if (val == GLFW_KEY_Q) {
 		Events::Move e;
 		e.Entity = Entity();
-		e.GoalPosition = glm::vec3(0, 0, -10);
+		e.GoalPosition = glm::vec3(0, 0, -10); 
 		e.Speed = 5;
 		e.Queue = false;
 		EventBroker->Publish(e);
@@ -417,20 +437,28 @@ bool dd::Systems::PadSystem::OnResetAll(const dd::Events::ResetAll &event)
 
 bool dd::Systems::PadSystem::OnRaiseWater(const dd::Events::RaiseWater &event)
 {
+	RaisePad(event.Amount, event.Speed);
+
+	return true;
+}
+
+bool dd::Systems::PadSystem::OnRaiseWaterWall(const dd::Events::RaiseWaterWall &event)
+{
+	RaisePad(event.Amount, event.Speed);
+
+	return true;
+}
+
+bool dd::Systems::PadSystem::RaisePad(float amount, float speed)
+{
 	auto transform = Transform();
-	glm::vec3 raise = glm::vec3(0, event.Amount, 0);
-	transform->Position += raise;
-
-	{
-		auto t_waterBody = m_World->CreateEntity();
-		auto transform = m_World->AddComponent<Components::Transform>(t_waterBody);
-		transform->Position = glm::vec3(0.f, -3.5f, -10.f);
-		transform->Scale = glm::vec3(7.0f, event.Amount * 1.6f, 1.f);
-		auto water = m_World->AddComponent<Components::WaterVolume>(t_waterBody);
-		auto body = m_World->AddComponent<Components::RectangleShape>(t_waterBody);
-		m_World->CommitEntity(t_waterBody);
-	}
-
+	glm::vec3 raise = glm::vec3(0, amount, 0);
+	Events::Move e;
+	e.Entity = m_Entity;
+	e.GoalPosition = transform->Position + raise;
+	e.Speed = speed;
+	e.Queue = true;
+	EventBroker->Publish(e);
 	return true;
 }
 
@@ -447,14 +475,37 @@ bool dd::Systems::PadSystem::OnKrakenAttack(const dd::Events::KrakenAttack &even
 		transform->Velocity = glm::vec3(0, 0, 0);
 		acceleration = glm::vec3(0, 0, 0);
 
+		if (!m_KrakenArm){
+			m_KrakenArm = m_World->CreateEntity(Entity());
+			auto transform = m_World->AddComponent<Components::Transform>(m_KrakenArm);
+			transform->Position = glm::vec3(1.f, -3.0f, 0.f);
+			auto model = m_World->AddComponent<Components::Model>(m_KrakenArm);
+			model->ModelFile = "Models/kraken/Arm.dae";
+			auto animation = m_World->AddComponent<Components::Animation>(m_KrakenArm);
+			animation->Speed = 1.0f;
+			m_World->CommitEntity(m_KrakenArm);
+		}
+
 		SetTransform(transform);
 		SetAcceleration(acceleration);
 	} else if (m_KrakenCharge >= 1) {
 		m_KrakenAttack = false;
-		m_KrakenCharge = 0;
-		m_KrakenStrength = 0;
-		m_PlayerStrength = 0;
+		Events::KrakenAttackEnd e;
+		EventBroker->Publish(e);
 	}
+	return true;
+}
+
+bool dd::Systems::PadSystem::OnKrakenAttackEnd(const dd::Events::KrakenAttackEnd &event)
+{
+	m_KrakenAttack = false;
+	m_KrakenCharge = 0;
+	m_KrakenStrength = 0;
+	m_PlayerStrength = 0;
+
+		m_World->RemoveEntity(m_KrakenArm);
+		m_KrakenArm = NULL;
+		
 	return true;
 }
 

@@ -17,6 +17,7 @@ struct InkBlaster : Event
 {
     Components::Transform* Transform;
 	int Shots;
+	float Speed = 5;
 };
 
 }

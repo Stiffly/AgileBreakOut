@@ -143,7 +143,7 @@ bool dd::Systems::LifebuoySystem::OnLifebuoyHit(const dd::Events::LifebuoyHit &e
 	e.EmittingAngle = glm::half_pi<float>();
 	e.Spread = 0.5f;
 	e.NumberOfTicks = 1;
-	e.ParticleLifeTime = 1.f;
+	e.ParticleLifeTime = 2.f;
 	e.ParticlesPerTick = 1;
 	e.Position = transformComponent->Position;
 	e.ScaleValues.clear();

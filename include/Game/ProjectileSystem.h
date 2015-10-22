@@ -23,6 +23,8 @@
 #include "Game/EResume.h"
 #include "Game/EInkBlaster.h"
 #include "Game/EInkBlasterOver.h"
+#include "Game/EKrakenAttack.h"
+#include "Game/EKrakenAttackEnd.h"
 #include "Game/EActionButton.h"
 #include "Game/EHitPad.h"
 #include "Game/CProjectile.h"
@@ -55,7 +57,9 @@ private:
 	bool m_Pause = false;
 	bool m_InkBlaster = false;
 	bool m_SquidLoaded = false;
+	bool m_KrakenAttack = false;
 	int m_Shots = 0;
+	float m_InkBlasterSpeed = 5;
 	EntityID m_InkBlastTemplate;
 	EntityID m_AttachedSquid;
 
@@ -63,6 +67,8 @@ private:
 	dd::EventRelay<ProjectileSystem, dd::Events::Pause> m_EPause;
 	dd::EventRelay<ProjectileSystem, dd::Events::Resume> m_EResume;
 	dd::EventRelay<ProjectileSystem, dd::Events::InkBlaster> m_EInkBlaster;
+	dd::EventRelay<ProjectileSystem, dd::Events::KrakenAttack> m_EKrakenAttack;
+	dd::EventRelay<ProjectileSystem, dd::Events::KrakenAttackEnd> m_EKrakenAttackEnd;
 	dd::EventRelay<ProjectileSystem, dd::Events::HitPad> m_EHitPad;
 	dd::EventRelay<ProjectileSystem, dd::Events::ActionButton> m_EActionButton;
 
@@ -70,6 +76,8 @@ private:
 	bool OnPause(const dd::Events::Pause &event);
 	bool OnResume(const dd::Events::Resume &event);
 	bool OnInkBlaster(const dd::Events::InkBlaster &event);
+	bool OnKrakenAttack(const dd::Events::KrakenAttack &event);
+	bool OnKrakenAttackEnd(const dd::Events::KrakenAttackEnd &event);
 	bool OnHitPad(const dd::Events::HitPad &event);
 	bool OnActionButton(const dd::Events::ActionButton &event);
 };
