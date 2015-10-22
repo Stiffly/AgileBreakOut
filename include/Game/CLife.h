@@ -13,10 +13,11 @@ namespace dd
 namespace Components
 {
 
-struct Life : Component {
-
+struct Life : Component 
+{
     int Number = 0;
-
+	float SinusAltitude = 1;
+	bool Left = false;
 };
 
 }

@@ -56,6 +56,7 @@ private:
 	bool m_Pause = false;
 	int m_Lives = 3;
 	int m_PastLives = 3;
+	float m_LifeSpeed = 0.8;
 
 	bool m_GodMode = false;
 
