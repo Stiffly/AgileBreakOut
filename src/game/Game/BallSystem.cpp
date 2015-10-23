@@ -546,7 +546,6 @@ bool dd::Systems::BallSystem::OnArrivedToNewStage(const dd::Events::ArrivedAtNew
 
 bool dd::Systems::BallSystem::OnAnimationComplete(const dd::Events::AnimationComplete &event)
 {
-	LOG_INFO("ANIMATION DONE");
 	auto model = m_World->GetComponent<Components::Model>(event.Entity);
 	if (model) {
 		if (model->ModelFile == "Models/Sid/Sid_Jump.dae") {
