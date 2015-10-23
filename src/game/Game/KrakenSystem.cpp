@@ -93,12 +93,14 @@ void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityI
 			return;
 		}
 		Events::KrakenAttack krakenAttack;
-		switch (kraken->CurrentAction)
-		{
+		switch (kraken->CurrentAction) {
 		case 1: // Idle
-			m_KrakenTimer += dt;
+			if (m_RandomKraken) {
+				m_KrakenTimer += dt;
+			}
 			if (m_KrakenTimer > m_KrakenCurrentSecondsToAction) {
 				m_KrakenTimer = 0;
+				kraken->CurrentAction = 3;
 				if (m_NumberOfActions == 0) {
 					kraken->CurrentAction = 3;
 				} else {
@@ -112,11 +114,12 @@ void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityI
 			break;
 		case 2: // Grabbing
 			m_NumberOfActions++;
-			kraken->CurrentAction = 5;
-			krakenAttack.ChargeUpdate = 0;
+			kraken->CurrentAction = 3;
+			/*krakenAttack.ChargeUpdate = 0;
 			krakenAttack.KrakenStrength = 0.1;
 			krakenAttack.PlayerStrength = 0.05;
-			EventBroker->Publish(krakenAttack);
+			EventBroker->Publish(krakenAttack);*/
+			
 			break;
 		case 3: // Brick Generating
 			{
@@ -125,35 +128,60 @@ void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityI
 				Events::BrickGenerating e;
 				e.Origin1 = glm::vec3(-5, 7, -10);
 				e.Origin2 = glm::vec3(5, 7, -10);
-				if (kraken->Health > 20) {
+				e.Speed = 10;
+				if (m_RandomKraken) {
+					if (kraken->Health > 20) {
 					e.SetCluster = 0;
-				} else if (kraken->Health > 10) {
+					} else if (kraken->Health > 10) {
 					e.SetCluster = 1;
-				} else {
+					} else {
 					e.SetCluster = 2;
+					}
+					std::uniform_real_distribution<float> dist(1, 6.999f);
+					float random = dist(m_RandomGenerator);
+					e.Set = random;
+				} else {
+					e.Set = m_Set;
+					e.SetCluster = m_SetCluster;
+					m_Set++;
+					if (m_Set > 6) {
+						m_SetCluster++;
+						m_Set = 1;
+					}
 				}
-				std::uniform_real_distribution<float> dist(1, 6.999f);
-				float random = dist(m_RandomGenerator);
-				e.Set = random;
+
 				EventBroker->Publish(e);
 				break;
 			}
 		case 4: // Brick Generating second case
 			{
+				m_NumberOfActions++;
 				kraken->CurrentAction = 1;
 				Events::BrickGenerating e;
 				e.Origin1 = glm::vec3(-5, 7, -10);
 				e.Origin2 = glm::vec3(5, 7, -10);
-				if (kraken->Health > 20) {
-					e.SetCluster = 0;
-				} else if (kraken->Health > 10) {
-					e.SetCluster = 1;
+				e.Speed = 10;
+				if (m_RandomKraken) {
+					if (kraken->Health > 20) {
+						e.SetCluster = 0;
+					} else if (kraken->Health > 10) {
+						e.SetCluster = 1;
+					} else {
+						e.SetCluster = 2;
+					}
+					std::uniform_real_distribution<float> dist(1, 6.999f);
+					float random = dist(m_RandomGenerator);
+					e.Set = random;
 				} else {
-					e.SetCluster = 2;
+					e.Set = m_Set;
+					e.SetCluster = m_SetCluster;
+					m_Set++;
+					if (m_Set > 6) {
+					m_SetCluster++;
+					m_Set = 1;
+					}
 				}
-				std::uniform_real_distribution<float> dist(1, 6.999f);
-				float random = dist(m_RandomGenerator);
-				e.Set = random;
+
 				EventBroker->Publish(e);
 				break;
 			}
@@ -277,6 +305,7 @@ bool dd::Systems::KrakenSystem::OnKrakenHit(const dd::Events::KrakenHit &event)
 	auto kraken = m_World->GetComponent<Components::Kraken>(event.Kraken);
 	auto transform = m_World->GetComponent<Components::Transform>(event.Hitter);
 	kraken->Health--;
+	kraken->CurrentAction = 3;
 	//kraken->Health -= 15;
 	//kraken->Health = -1; //To defeat the kraken instantly.
 
@@ -345,6 +374,8 @@ bool dd::Systems::KrakenSystem::OnKrakenHit(const dd::Events::KrakenHit &event)
 bool dd::Systems::KrakenSystem::OnKrakenDefeated(const dd::Events::KrakenDefeated &event)
 {
 	m_KrakenBattle = false;
+	m_Set = 0;
+	m_SetCluster = 0;
 
 	auto kraken = m_World->GetComponent<Components::Kraken>(event.Kraken);
 	auto physicsComponent = m_World->GetComponent<Components::Physics>(event.Kraken);

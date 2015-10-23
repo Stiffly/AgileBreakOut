@@ -67,6 +67,7 @@ private:
 	bool m_KrakenBattle = false;
 	bool m_KrakenHasArrived = false;
 	bool m_ReturnToIdle = false;
+	bool m_RandomKraken = false;
 	EntityID m_KrakenTemplate;
 	std::string m_Action = "Idle";
 	int m_NumberOfActions;
@@ -75,6 +76,9 @@ private:
 	float m_KrakenMinSecondsToAction = 10;
 	float m_KrakenCurrentSecondsToAction = 15;
 	const int Idle = 1;
+
+	int m_Set = 0;
+	int m_SetCluster = 0;
 
 	std::array<int, 42> m_Bricks;
 	std::array<int, 42> m_Colors;

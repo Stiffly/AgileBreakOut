@@ -59,6 +59,7 @@
 #include "Game/EKrakenAppear.h"
 #include "Game/EKrakenDefeated.h"
 #include "Game/EBrickGenerating.h"
+#include "Game/EBreakAllBricks.h"
 
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
@@ -101,7 +102,7 @@ public:
     void CreateBasicLevel(int, int, glm::vec2, float);
     void CreateLevel(int);
     EntityID CreateBrick(int, int, glm::vec2, float, int, int, int, glm::vec4);
-	void BrickHit(EntityID, EntityID, int);
+	void BrickHit(EntityID, EntityID, int, bool);
 
     void OnEntityRemoved(EntityID entity);
 
@@ -145,7 +146,7 @@ private:
     bool m_Pause = false;
     int m_LooseBricks = 0;
     int m_CurrentCluster = 1;
-    int m_CurrentLevel = 1;
+    int m_CurrentLevel = 6;
     int m_MultiBalls = 0;
     int m_PowerUps = 0;
     int m_Score = 0;
@@ -180,6 +181,7 @@ private:
 	bool m_BrickGenerating = false;
 	dd::Events::BrickGenerating m_BrickGeneratingEvent;
 
+	bool m_KrakenBattle = false;
 	bool m_BreakAllBricks = false;
 
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
@@ -194,6 +196,7 @@ private:
 	dd::EventRelay<LevelSystem, dd::Events::Resume> m_EResume;
     dd::EventRelay<LevelSystem, dd::Events::HitPad> m_EHitPad;
 	dd::EventRelay<LevelSystem, dd::Events::BrickGenerating> m_EBrickGenerating;
+	dd::EventRelay<LevelSystem, dd::Events::BreakAllBricks> m_EBreakAllBricks;
 	dd::EventRelay<LevelSystem, dd::Events::KrakenDefeated> m_EKrakenDefeated;
 
     bool OnContact(const dd::Events::Contact &event);
@@ -209,6 +212,7 @@ private:
     bool OnHitPad(const dd::Events::HitPad &event);
 	bool OnBrickGenerating(const dd::Events::BrickGenerating &event);
 	bool BrickGenerating(const dd::Events::BrickGenerating &event);
+	bool OnBreakAllBricks(const dd::Events::BreakAllBricks &event);
 	void GetBrickSet(int Set, int SetCluster);
 	bool OnKrakenDefeated(const dd::Events::KrakenDefeated &event);
 
