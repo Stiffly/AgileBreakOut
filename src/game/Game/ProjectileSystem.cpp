@@ -108,11 +108,12 @@ bool dd::Systems::ProjectileSystem::OnInkBlaster(const dd::Events::InkBlaster &e
 
 bool dd::Systems::ProjectileSystem::OnHitPad(const dd::Events::HitPad &event)
 {
-	if (m_InkBlaster) {
+	if (m_InkBlaster && m_AttachedSquid == 0) {
 		auto ball = m_World->GetComponent<Components::Ball>(event.Ball);
 		ball->Loaded = true;
 		m_SquidLoaded = true;
 		m_AttachedSquid = event.Ball;
+
 
 		auto model = m_World->GetComponent<Components::Model>(m_AttachedSquid);
 		model->ModelFile = "Models/Sid/Sid_Shoot.dae";
@@ -120,6 +121,7 @@ bool dd::Systems::ProjectileSystem::OnHitPad(const dd::Events::HitPad &event)
 		auto anim = m_World->GetComponent<Components::Animation>(m_AttachedSquid);
 		anim->Loop = false;
 		anim->Speed = 0.f;
+		anim->Time = 0.f;
 	}
 	return true;
 }
@@ -151,7 +153,7 @@ bool dd::Systems::ProjectileSystem::OnActionButton(const dd::Events::ActionButto
 
 			auto anim = m_World->GetComponent<Components::Animation>(m_AttachedSquid);
 			anim->Loop = false;
-			anim->Speed = 1.f;
+			anim->Speed = 2.f;
 			anim->Time = 0.f;
 
 			if (m_Shots <= 0) {
@@ -166,6 +168,7 @@ bool dd::Systems::ProjectileSystem::OnActionButton(const dd::Events::ActionButto
 				{
 					Events::InkBlasterOver e;
 					e.Ball = m_AttachedSquid;
+					
 					EventBroker->Publish(e);
 
 					auto model = m_World->GetComponent<Components::Model>(m_AttachedSquid);
@@ -174,6 +177,7 @@ bool dd::Systems::ProjectileSystem::OnActionButton(const dd::Events::ActionButto
 					auto anim = m_World->GetComponent<Components::Animation>(m_AttachedSquid);
 					anim->Loop = true;
 					anim->Speed = 1.f;
+					m_AttachedSquid = 0;
 				}
 			{
 				Events::ActionButton e;

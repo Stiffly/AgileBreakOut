@@ -123,7 +123,7 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 		if (ball->Waiting || ball->Sticky) {
 			if (m_ResetBall && ball->Waiting) {
 				ball->StickyPlacement = glm::vec3(0.f, 0.f, 0.f);
-				ball->StickyPlacement.y += 0.45f;
+				ball->StickyPlacement.y += 0.25f;
 				m_ResetBall = false;
 			}
 			auto ballTransform = m_World->GetComponent<Components::Transform>(entity);

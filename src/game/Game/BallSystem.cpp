@@ -133,7 +133,8 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 
 				auto cAnim = m_World->GetComponent<Components::Animation>(entity);
 				cAnim->Speed = 0.f;
-				//cAnim->Time = 0.f; //Maybe not the best but it works;
+				cAnim->Time = 0.f;
+				cAnim->Loop = false;
 
 				if (!ballComponent->Sticky) {
 					auto transform = m_World->GetComponent<Components::Transform>(entity);
@@ -157,6 +158,12 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 				if (m_StickyCounter > 0) {
 					m_Sticky = true;
 				}
+
+				auto cAnim = m_World->GetComponent<Components::Animation>(entity);
+				cAnim->Speed = 2.f;
+				cAnim->Time = 0.f;
+				cAnim->Loop = false;
+
 				ballComponent->Sticky = false;
 			}
 		}
@@ -364,6 +371,14 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 				ballTransform->Velocity *= -1;
 				Events::StickyAttachedToPad e;
 				EventBroker->Publish(e);
+
+
+				auto cModel = m_World->GetComponent<Components::Model>(ballEntity);
+				cModel->ModelFile = "Models/Sid/Sid_Jump.dae";
+				auto cAnim = m_World->GetComponent<Components::Animation>(ballEntity);
+				cAnim->Loop = false;
+				cAnim->Speed = 0.f;
+				cAnim->Time = 0.f;
 				return true;
 			}
 		}

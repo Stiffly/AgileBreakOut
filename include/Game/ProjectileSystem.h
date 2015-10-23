@@ -61,7 +61,7 @@ private:
 	int m_Shots = 0;
 	float m_InkBlasterSpeed = 5;
 	EntityID m_InkBlastTemplate;
-	EntityID m_AttachedSquid;
+	EntityID m_AttachedSquid = 0;
 
 	dd::EventRelay<ProjectileSystem, dd::Events::Contact> m_EContact;
 	dd::EventRelay<ProjectileSystem, dd::Events::Pause> m_EPause;
