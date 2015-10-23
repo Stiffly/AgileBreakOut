@@ -22,6 +22,7 @@
 #include "Physics/CPhysics.h"
 #include "Physics/CCircleShape.h"
 #include "Physics/ESetImpulse.h"
+#include "Physics/ECreateParticleSequence.h"
 
 #include "Rendering/CSprite.h"
 #include "Rendering/CModel.h"

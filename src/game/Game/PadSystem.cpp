@@ -38,33 +38,49 @@ void dd::Systems::PadSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyPad, &PadSystem::OnStickyPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EStickyAttachedToPad, &PadSystem::OnStickyAttachedToPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &PadSystem::OnActionButton);
-    //EVENT_SUBSCRIBE_MEMBER(m_EBindKey, &PadSystem::OnBindKey);
+	//EVENT_SUBSCRIBE_MEMBER(m_EBindKey, &PadSystem::OnBindKey);
 
-    {
-        auto ent = m_World->CreateEntity();
-        m_World->SetProperty(ent, "Name", "Pad");
-        auto ctransform = m_World->AddComponent<Components::Transform>(ent);
-        ctransform->Position = glm::vec3(0.f, m_PadHeight, -10.f);
-        auto rectangleShape = m_World->AddComponent<Components::RectangleShape>(ent);
-        rectangleShape->Dimensions = glm::vec2(1.f, 0.1f);
-        auto physics = m_World->AddComponent<Components::Physics>(ent);
-        physics->CollisionType = CollisionType::Type::Kinematic;
-        physics->Category = CollisionLayer::Type::Pad;
+	{
+		auto ent = m_World->CreateEntity();
+		m_World->SetProperty(ent, "Name", "Pad");
+		auto ctransform = m_World->AddComponent<Components::Transform>(ent);
+		ctransform->Position = glm::vec3(0.f, m_PadHeight, -10.f);
+		auto rectangleShape = m_World->AddComponent<Components::RectangleShape>(ent);
+		rectangleShape->Dimensions = glm::vec2(1.f, 0.1f);
+		auto physics = m_World->AddComponent<Components::Physics>(ent);
+		physics->CollisionType = CollisionType::Type::Kinematic;
+		physics->Category = CollisionLayer::Type::Pad;
 		physics->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Ball | CollisionLayer::PowerUp | CollisionLayer::LifeBuoy);
-        physics->Calculate = true;
-        auto cModel = m_World->AddComponent<Components::Model>(ent);
-        cModel->ModelFile = "Models/Ship/Ship.obj";
+		physics->Calculate = true;
+		auto cModel = m_World->AddComponent<Components::Model>(ent);
+		cModel->ModelFile = "Models/Ship/Ship.obj";
 
-        auto pad = m_World->AddComponent<Components::Pad>(ent);
+		auto pad = m_World->AddComponent<Components::Pad>(ent);
 		pad->SlowdownModifier = 10.f;
-        m_World->CommitEntity(ent);
+		m_World->CommitEntity(ent);
 
-        m_Edge = 3.2 - (ctransform->Scale.x / 2);
-		
+		m_Edge = 3.2 - (ctransform->Scale.x / 2);
+
 		m_PadEntity = ent;
 		m_PadTransform = ctransform.get();
 		m_PadComponent = pad.get();
-    }
+
+		Events::CreateParticleSequence e;
+		e.SpriteFile = "Textures/Particles/FadeBall.png";
+		e.Color = glm::vec4(0, 0, 1, 1);
+		e.EmitterLifeTime = 9999999999;
+		e.EmittingAngle = glm::two_pi<float>();
+		e.ParticleLifeTime = 0.5f;
+		e.ParticlesPerTick = 2;
+		e.ScaleValues.push_back(glm::vec3(2));
+		e.AlphaValues.push_back(1.f);
+		e.SpawnRate = 0.1;
+		e.Spread = glm::half_pi<float>();
+		e.Speed = 10;
+		e.parent = m_PadEntity;
+		EventBroker->Publish(e);
+
+	}
 
 	//Stick
 	{
