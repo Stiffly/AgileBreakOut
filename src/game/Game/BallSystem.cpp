@@ -216,7 +216,8 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 			auto transform = m_World->GetComponent<Components::Transform>(entity);
 			glm::vec2 dir = glm::normalize(glm::vec2(transform->Velocity.x, transform->Velocity.y));
 			glm::vec2 up = glm::vec2(0.f, 1.f);
-			float angle = glm::acos(glm::dot<float>(dir, up)) * glm::sign(dir.x);
+			
+			float angle = atan2(dir.x, dir.y);
 			transform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, -1.f));
 		}
     }
