@@ -43,6 +43,7 @@ void dd::Systems::AnimationSystem::Update(double dt)
 					Events::AnimationComplete e;
 					e.Entity = ent;
 					e.Animation = animationComponent->Name;
+					EventBroker->Publish(e);
 				}
 			}
 			animationComponent->Time = nextTime;

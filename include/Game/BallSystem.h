@@ -49,6 +49,7 @@
 
 #include "Physics/ECreateParticleSequence.h"
 #include "Sound/CCollisionSound.h"
+#include "Rendering/EAnimationComplete.h"
 
 namespace dd
 {
@@ -144,6 +145,7 @@ private:
     dd::EventRelay<BallSystem, dd::Events::ActionButton> m_EActionButton;
 	dd::EventRelay<BallSystem, dd::Events::StageCleared> m_EStageCleared;
 	dd::EventRelay<BallSystem, dd::Events::ArrivedAtNewStage> m_EArrivedAtNewStage;
+	dd::EventRelay<BallSystem, dd::Events::AnimationComplete> m_EAnimationComplete;
 
     bool Contact(const Events::Contact &event);
     bool OnMultiBallLost(const dd::Events::MultiBallLost &event);
@@ -159,6 +161,7 @@ private:
     bool OnActionButton(const dd::Events::ActionButton &event);
 	bool OnStageCleared(const dd::Events::StageCleared &event);
 	bool OnArrivedToNewStage(const dd::Events::ArrivedAtNewStage &event);
+	bool OnAnimationComplete(const dd::Events::AnimationComplete &event);
 };
 
 }
