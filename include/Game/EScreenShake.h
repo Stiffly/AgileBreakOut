@@ -15,9 +15,9 @@ namespace Events
 
 struct ScreenShake : Event
 {
-    float Time;
-	int Intensity;
-	float TimeTakenToCoolDown;
+    float Time = 1.f;
+	float Intensity = 1.f;
+	float TimeTakenToCoolDown = 1.f;
 };
 
 }
