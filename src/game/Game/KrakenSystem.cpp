@@ -247,16 +247,20 @@ bool dd::Systems::KrakenSystem::OnContact(const dd::Events::Contact &event)
 	
 	auto projectile = m_World->GetComponent<Components::Projectile>(otherEntitiy);
 	if (projectile != nullptr) {
-		Events::ScoreEvent es;
-		es.Score = 23;
-		EventBroker->Publish(es);
-		Events::KrakenHit e;
-		e.Kraken = krakenEntity;
-		e.Hitter = otherEntitiy;
-		e.MaxHealth = kraken->MaxHealth;
-		e.CurrentHealth = kraken->Health;
-		e.NewHealth = kraken->Health - 1;
-		EventBroker->Publish(e);
+		if (m_RandomKraken) {
+			Events::ScoreEvent es;
+			es.Score = 23;
+			EventBroker->Publish(es);
+			Events::KrakenHit e;
+			e.Kraken = krakenEntity;
+			e.Hitter = otherEntitiy;
+			auto transform = m_World->GetComponent<Components::Transform>(otherEntitiy);
+			e.PlaceHit = transform->Position;
+			e.MaxHealth = kraken->MaxHealth;
+			e.CurrentHealth = kraken->Health;
+			e.NewHealth = kraken->Health - 1;
+			EventBroker->Publish(e);
+		}
 		m_World->RemoveEntity(otherEntitiy);
 		return true;
 	}
@@ -273,6 +277,8 @@ bool dd::Systems::KrakenSystem::OnContact(const dd::Events::Contact &event)
 		Events::KrakenHit e;
 		e.Kraken = krakenEntity;
 		e.Hitter = otherEntitiy;
+		auto transform = m_World->GetComponent<Components::Transform>(otherEntitiy);
+		e.PlaceHit = transform->Position;
 		e.MaxHealth = kraken->MaxHealth;
 		e.CurrentHealth = kraken->Health;
 		e.NewHealth = kraken->Health - 1;
@@ -317,7 +323,6 @@ bool dd::Systems::KrakenSystem::OnKrakenAttack(const dd::Events::KrakenAttack &e
 bool dd::Systems::KrakenSystem::OnKrakenHit(const dd::Events::KrakenHit &event)
 {
 	auto kraken = m_World->GetComponent<Components::Kraken>(event.Kraken);
-	auto transform = m_World->GetComponent<Components::Transform>(event.Hitter);
 	kraken->Health--;
 	kraken->CurrentAction = 3;
 	//kraken->Health -= 15;
@@ -362,7 +367,7 @@ bool dd::Systems::KrakenSystem::OnKrakenHit(const dd::Events::KrakenHit &event)
 	poof.NumberOfTicks = 1;
 	poof.ParticleLifeTime = 1.5f;
 	poof.ParticlesPerTick = 2;
-	poof.Position = transform->Position;
+	poof.Position = event.PlaceHit;
 	poof.ScaleValues.clear();
 	poof.ScaleValues.push_back(glm::vec3(0.5f));
 	poof.ScaleValues.push_back(glm::vec3(2.f, 2.f, 0.2f));

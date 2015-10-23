@@ -733,7 +733,7 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 			 0, 0, 0, 0, 0, 0, 0,
 			 6, 0, 1, 0, 1, 0, 6,
 			 0, 1, 1, 1, 1, 1, 0,
-			 0, 0, 4, 1, 1, 0, 0,
+			 0, 0, 5, 1, 1, 0, 0,
 			 0, 0, 0, 1, 0, 0, 0 };
 			color =
 			{b, b, b, b, b, b, b,
@@ -856,7 +856,7 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 			 0, 0, 1, 1, 1, 0, 0,
 			 1, 1, 1, 0, 1, 1, 1,
 			 3, 6, 1, 0, 1, 6, 1,
-			 1, 1, 1, 0, 1, 1, 1 };
+			 1, 1, 1, 0, 1, 1, 5 };
 			color =
 			{g, g, g, g, g, g, g,
 			 g, g, g, g, g, g, g,
@@ -1023,8 +1023,13 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 						if (kraken != nullptr) {
 							Events::KrakenAttack e;
 							e.ChargeUpdate = 0;
-							e.KrakenStrength = 0.1;
-							e.PlayerStrength = 0.05;
+							if (m_KrakenBattle) {
+								e.KrakenStrength = 0.1;
+								e.PlayerStrength = 0.12;
+							} else {
+								e.KrakenStrength = 0.1;
+								e.PlayerStrength = 0.05;
+							}
 							EventBroker->Publish(e);
 						}
 						else {
