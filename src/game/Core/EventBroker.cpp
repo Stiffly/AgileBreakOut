@@ -91,8 +91,11 @@ int dd::EventBroker::Process(std::string contextTypeName)
 void dd::EventBroker::Swap()
 {
 	std::swap(m_EventQueueRead, m_EventQueueWrite);
-	m_EventQueueWrite->clear();
+}
 
+void dd::EventBroker::Clear()
+{
+	m_EventQueueWrite->clear();
 }
 
 void dd::EventBroker::subscribeImmediate(dd::BaseEventRelay& relay)
