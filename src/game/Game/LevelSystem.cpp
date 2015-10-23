@@ -1137,7 +1137,7 @@ bool dd::Systems::LevelSystem::OnKrakenDefeated(const dd::Events::KrakenDefeated
 	e.Score = 1000;
 	EventBroker->Publish(e);
 
-	std::cout << m_LooseBricks << std::endl;
+	//std::cout << m_LooseBricks << std::endl;
 
 	return true;
 }

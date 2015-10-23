@@ -282,7 +282,7 @@ bool dd::Systems::KrakenSystem::OnKrakenHit(const dd::Events::KrakenHit &event)
 
 	auto model = m_World->GetComponent<Components::Model>(event.Kraken);
 	float modifier = ((float)kraken->MaxHealth - (float)kraken->Health) / (float)kraken->MaxHealth; // 1 is almost no life left, 0 is max life left.
-	std::cout << modifier << std::endl;
+	//std::cout << modifier << std::endl;
 	model->Color = glm::vec4(1, 1 - modifier, 1 - modifier, 1);
 
 	int timeDifferenceBetweenMaxAndMin = m_KrakenMaxSecondsToAction - m_KrakenMinSecondsToAction;
