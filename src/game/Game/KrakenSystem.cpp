@@ -289,6 +289,13 @@ bool dd::Systems::KrakenSystem::OnKrakenAppear(const dd::Events::KrakenAppear &e
 	transform->Position = event.Position;
 	transform->Position.y += 3.f;
 	m_KrakenBattle = true;
+
+	Events::ScreenShake e;
+	e.Intensity = 10;
+	e.Time = 2;
+	e.TimeTakenToCoolDown = 6;
+	EventBroker->Publish(e);
+
 	return true;
 }
 
@@ -297,6 +304,13 @@ bool dd::Systems::KrakenSystem::OnKrakenAttack(const dd::Events::KrakenAttack &e
 	if (event.ChargeUpdate >= 1) {
 		m_ReturnToIdle = true;
 	}
+
+	Events::ScreenShake e;
+	e.Intensity = 2;
+	e.Time = 0.5f;
+	e.TimeTakenToCoolDown = 3.f;
+	EventBroker->Publish(e);
+
 	return true;
 }
 
@@ -368,6 +382,13 @@ bool dd::Systems::KrakenSystem::OnKrakenHit(const dd::Events::KrakenHit &event)
 		e.Hitter = event.Hitter;
 		EventBroker->Publish(e);
 	}
+
+	Events::ScreenShake e;
+	e.Intensity = 2;
+	e.Time = 0.2f;
+	e.TimeTakenToCoolDown = 1.5f;
+	EventBroker->Publish(e);
+
 	return false;
 }
 

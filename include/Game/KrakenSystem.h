@@ -33,6 +33,7 @@
 #include "Game/CKraken.h"
 #include "Game/CBall.h"
 #include "Game/CProjectile.h"
+#include "Game/EScreenShake.h"
 #include "Sound/CCollisionSound.h"
 #include "Rendering/CAnimation.h"
 #include "Rendering/CSprite.h"

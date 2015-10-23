@@ -5,6 +5,7 @@
 #include "PrecompiledHeader.h"
 #include "Game/ScreenShakeSystem.h"
 
+
 void dd::Systems::ScreenShakeSystem::Initialize()
 {
 	std::random_device rd;
