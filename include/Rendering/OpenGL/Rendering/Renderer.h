@@ -43,7 +43,6 @@ class Renderer : public BaseRenderer
 public:
 	void Initialize() override;
 	void Draw(RenderQueueCollection& rq) override;
-	void PlaceCamera(glm::vec3 position);
 
 private:
 	int m_GLVersion[2];
@@ -97,12 +96,6 @@ private:
 	void DrawWater(RenderQueue &objects);
 	void DrawGUI(RenderQueue& rq);
 	void DebugKeys();
-
-	dd::EventRelay<Renderer, dd::Events::ScreenShake> m_EScreenShake;
-	bool OnScreenShake(dd::Events::ScreenShake &event);
-	bool m_ScreenShake = false;
-	float m_ShakeIntensity = 0;
-	float m_ShakeTimer = 0;
 };
 
 }

@@ -19,6 +19,7 @@
 #include "Rendering/CSprite.h"
 #include "Rendering/CModel.h"
 #include "Rendering/CPointLight.h"
+#include "Rendering/CCamera.h"
 
 #include "Transform/EMove.h"
 

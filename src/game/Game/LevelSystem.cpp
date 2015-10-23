@@ -27,6 +27,15 @@ void dd::Systems::LevelSystem::Initialize()
 
 	m_GodMode = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<bool>("Cheat.GodMode", false);
 
+	// Camera
+	{
+		auto ent = m_World->CreateEntity();
+		auto transform = m_World->AddComponent<Components::Transform>(ent);
+		auto camera = m_World->AddComponent<Components::Camera>(ent);
+		camera->FOV = glm::radians(58.31f);
+		m_World->CommitEntity(ent);
+	}
+
 	//PointLightTest
 	{
 		auto t_Light = m_World->CreateEntity();
@@ -132,8 +141,8 @@ void dd::Systems::LevelSystem::Initialize()
 		auto wall = m_World->AddComponent<Components::Wall>(BottomWall);
 		transform->Position = glm::vec3(0.f, -6.f, -10.f);
 		transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
-		std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
-		sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+		//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
+		//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 		std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(BottomWall);
 		rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
 		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
