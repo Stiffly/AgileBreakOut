@@ -40,6 +40,7 @@ void dd::Systems::SoundSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EStopSound, &SoundSystem::OnStopSound);
     EVENT_SUBSCRIBE_MEMBER(m_EMasterVolume, &SoundSystem::OnMasterVolume);
 	EVENT_SUBSCRIBE_MEMBER(m_EGameStart, &SoundSystem::OnGameStart);
+	EVENT_SUBSCRIBE_MEMBER(m_EKrakenAppear, &SoundSystem::OnKrakenAppear);
 
 	m_SFXMasterVolume = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Audio.SFXVolume", 1.f);
 	m_BGMMasterVolume = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<float>("Audio.BGMVolume", 1.f);
@@ -211,6 +212,33 @@ bool dd::Systems::SoundSystem::OnGameStart(const dd::Events::GameStart &event)
         e.IsAmbient = true;
         EventBroker->Publish(e);
     }
+	return true;
+}
+
+bool dd::Systems::SoundSystem::OnKrakenAppear(const dd::Events::KrakenAppear &event)
+{
+	{
+		dd::Events::StopSound e;
+		e.FilePath = GAME_BGM;
+		EventBroker->Publish(e);
+	}
+	{
+		dd::Events::StopSound e;
+		e.FilePath = WATER_BGM;
+		EventBroker->Publish(e);
+	}
+	{
+		dd::Events::PlaySound e;
+		e.FilePath = BOSS_BGM;
+		e.IsAmbient = true;
+		e.Gain = 0.4f;
+		EventBroker->Publish(e);
+	}
+	{
+		dd::Events::PlaySound e;
+		e.FilePath = "Sounds/Boss/boss-roar.wav";
+		EventBroker->Publish(e);
+	}
 	return true;
 }
 

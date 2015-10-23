@@ -22,7 +22,7 @@ struct ParticleEmitter : public Component
     float Speed = 2.f;
     double LifeTime = 100;
 	float RadiusDistribution = 0;
-
+	bool DefaultScale = false;
 	//values to interpolate between.
 	std::vector<glm::vec3> ScaleValues;
 	std::vector<float> AlphaValues;

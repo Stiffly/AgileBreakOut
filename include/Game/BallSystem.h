@@ -49,6 +49,7 @@
 
 #include "Physics/ECreateParticleSequence.h"
 #include "Sound/CCollisionSound.h"
+#include "Sound/EPlaySound.h"
 #include "Rendering/EAnimationComplete.h"
 
 namespace dd

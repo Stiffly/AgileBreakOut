@@ -69,7 +69,7 @@ std::vector<glm::mat4> dd::Skeleton::GetFrameBones(const Animation& animation, d
 	int currentKeyframeIndex = GetKeyframe(animation, time);
 
 	const Animation::Keyframe& currentFrame = animation.Keyframes[currentKeyframeIndex];
-	const Animation::Keyframe& nextFrame = animation.Keyframes[currentKeyframeIndex + 1];
+	const Animation::Keyframe&	nextFrame = animation.Keyframes[(currentKeyframeIndex + 1) % animation.Keyframes.size()];
 	float alpha = (time - currentFrame.Time) / (nextFrame.Time - currentFrame.Time);
 
 	//auto animationFrame = Animations[""].Keyframes[frame];
@@ -149,7 +149,7 @@ int dd::Skeleton::GetKeyframe(const Animation& animation, double time)
 {
 	if (time < 0)
 		time = 0;
-	if (time > animation.Duration)
+	if (time >= animation.Duration)
 		return animation.Keyframes.size() - 1;
 
 	for (int keyframe = 0; keyframe < animation.Keyframes.size(); ++keyframe) {

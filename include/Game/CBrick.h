@@ -20,6 +20,8 @@ struct Brick : Component
     int Type = 0;
     bool Removed = false;
 	int Number = 100; // For the Kraken to keep track of which bricks needs replacing.
+	bool BeingGenerated = false;
+	glm::vec3 GenerationGoal;
 
 	//What number of types each is.
 	const int EmptyBrickSpace = 0;

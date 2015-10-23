@@ -72,29 +72,12 @@ public:
     void Update(double dt) override;
     void UpdateEntity(double dt, EntityID entity, EntityID parent) override;
 
-    EntityID& Entity() { return m_Entity; }
-    void SetEntity(const EntityID& ent) { m_Entity = ent; }
-    glm::vec3 Acceleration() const { return m_Acceleration; }
-    void SetAcceleration(const glm::vec3& acceleration) { m_Acceleration = acceleration; }
-
-    bool Left() const { return m_Left; }
-    void SetLeft(const bool& left) { m_Left = left; }
-    bool Right() const { return m_Right; }
-    void SetRight(const bool& right) { m_Right = right; }
-    float Edge() const { return m_Edge; }
-    void SetEdge(const float& edge) { m_Edge = edge; }
-
-    Components::Transform* Transform() const { return m_Transform; }
-    void SetTransform(Components::Transform* transform) { m_Transform = transform; }
-    Components::Pad* Pad() const { return m_Pad; }
-    void SetPad(Components::Pad* pad) { m_Pad = pad; }
-
     bool IsPaused() const { return m_Pause; }
     void SetPause(const bool& pause) { m_Pause = pause; }
 
 private:
-    EntityID m_Entity = 0;
-    glm::vec3 m_Acceleration = glm::vec3(0.f, 0.f, 0.f);
+    EntityID m_PadEntity = 0;
+    glm::vec3 m_PadAcceleration = glm::vec3(0.f, 0.f, 0.f);
     bool m_Left = false;
     bool m_Right = false;
     bool m_ReplaceBall = false;
@@ -107,11 +90,11 @@ private:
     float m_Edge = 2.8f;
 	float m_PadOriginalHeight = -4.8;
 	float m_PadHeight = m_PadOriginalHeight;
-	EntityID m_KrakenArm = NULL;
-	EntityID m_KrakenArmHitbox = NULL;
+	EntityID m_KrakenArm = 0;
+	EntityID m_KrakenArmHitbox = 0;
 	float m_PadRiseSpeed = 0.2;
-    Components::Transform* m_Transform = nullptr;
-    Components::Pad* m_Pad = nullptr;
+    Components::Transform* m_PadTransform = nullptr;
+    Components::Pad* m_PadComponent = nullptr;
 	std::shared_ptr<Components::Transform> m_StickTransform;
 	std::shared_ptr<Components::StickyAim> m_StickyAim;
 

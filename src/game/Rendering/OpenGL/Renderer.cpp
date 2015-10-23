@@ -21,6 +21,10 @@
 
 void dd::Renderer::Initialize()
 {
+	ResourceManager::RegisterType<ShaderProgram>("ShaderProgram");
+	ResourceManager::RegisterType<VertexShader>("VertexShader");
+	ResourceManager::RegisterType<FragmentShader>("FragmentShader");
+
 	// Initialize GLFW
 	if (!glfwInit()) {
 		LOG_ERROR("GLFW: Initialization failed");
@@ -59,7 +63,7 @@ void dd::Renderer::Initialize()
 	}
 
 	// Create default camera
-	m_DefaultCamera = std::unique_ptr<dd::Camera>(new dd::Camera((float)m_Resolution.Width / m_Resolution.Height, 45.f, 0.01f, 5000.f));
+	m_DefaultCamera = std::unique_ptr<dd::Camera>(new dd::Camera((float)m_Resolution.Width / m_Resolution.Height, glm::radians(45.f), 0.01f, 5000.f));
 	m_DefaultCamera->SetPosition(glm::vec3(0, 0, 0));
 	if (m_Camera == nullptr) {
 		m_Camera = m_DefaultCamera.get();
@@ -385,11 +389,6 @@ void dd::Renderer::DrawForward(RenderQueue &objects, RenderQueue &lights)
 	glClear(GL_COLOR_BUFFER_BIT);
 	m_SpWater->Bind();
 	DrawWater(objects);
-}
-
-void dd::Renderer::PlaceCamera(glm::vec3 position)
-{
-	m_DefaultCamera->SetPosition(position);
 }
 
 void dd::Renderer::DrawScene(RenderQueue &objects, ShaderProgram &program)

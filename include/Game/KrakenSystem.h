@@ -28,6 +28,7 @@
 #include "Game/EKrakenHit.h"
 #include "Game/EKrakenDefeated.h"
 #include "Game/EBrickGenerating.h"
+#include "Game/EArrivedAtNewStage.h"
 #include "Game/CTravels.h"
 #include "Game/CKraken.h"
 #include "Game/CBall.h"
@@ -64,12 +65,15 @@ private:
 
 	bool m_Pause = false;
 	bool m_KrakenBattle = false;
+	bool m_KrakenHasArrived = false;
 	bool m_ReturnToIdle = false;
 	EntityID m_KrakenTemplate;
 	std::string m_Action = "Idle";
 	int m_NumberOfActions;
 	float m_KrakenTimer = 0;
-	float m_KrakenSecondsToAction = 10;
+	float m_KrakenMaxSecondsToAction = 10;
+	float m_KrakenMinSecondsToAction = 10;
+	float m_KrakenCurrentSecondsToAction = 15;
 	const int Idle = 1;
 
 	std::array<int, 42> m_Bricks;
@@ -83,6 +87,7 @@ private:
 	dd::EventRelay<KrakenSystem, dd::Events::KrakenHit> m_EKrakenHit;
 	dd::EventRelay<KrakenSystem, dd::Events::KrakenDefeated> m_EKrakenDefeated;
 	dd::EventRelay<KrakenSystem, dd::Events::BrickGenerating> m_EBrickGenerating;
+	dd::EventRelay<KrakenSystem, dd::Events::ArrivedAtNewStage> m_EArrivedAtNewStage;
     bool OnPause(const dd::Events::Pause &event);
 	bool OnResume(const dd::Events::Resume &event);
 	bool OnContact(const dd::Events::Contact &event);
@@ -91,6 +96,7 @@ private:
 	bool OnKrakenHit(const dd::Events::KrakenHit &event);
 	bool OnKrakenDefeated(const dd::Events::KrakenDefeated &event);
 	bool OnBrickGenerating(const dd::Events::BrickGenerating &event);
+	bool OnArrivedAtNewStage(const dd::Events::ArrivedAtNewStage &event);
 	void GetBrickSet();
 };
 

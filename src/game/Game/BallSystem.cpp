@@ -65,6 +65,13 @@ void dd::Systems::BallSystem::Initialize()
         auto transform2 = m_World->GetComponent<Components::Transform>(ent2);
         transform2->Position = glm::vec3(-0.f, 0.26f, -10.f);
         transform2->Velocity = glm::vec3(0.0f, -10.f, 0.f);
+
+		/*auto PosterBoy = CreateBall();
+		auto PosterBall = m_World->GetComponent<Components::Ball>(PosterBoy);
+		PosterBall->PosterBoy = 1;
+		auto Postertran = m_World->GetComponent<Components::Transform>(PosterBoy);
+		Postertran->Position = glm::vec3(-3.f, -3.f, -10.f);
+		Postertran->Velocity = glm::vec3(0.0f, 0.f, 0.f);*/
     }
 
 	SetReplaceBall(true);
@@ -89,6 +96,11 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
     if (templateCheck != nullptr){ return; }
 
     if (ballComponent != nullptr) {
+		auto transformBall = m_World->GetComponent<Components::Transform>(entity);
+		if (ballComponent->PosterBoy == 1) {
+			transformBall->Position = glm::vec3(-3, 3, -10);
+		}
+
 		if (ReplaceBall()) {
 			m_First = true;
 			SetReplaceBall(false);
@@ -98,17 +110,15 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 			ballComponent->SavedSpeed = glm::vec3(random, 1, 0.f);
 			//ballComponent->SavedSpeed = glm::vec3(0.f, 1, 0.f);
 			ballComponent->Waiting = true;
-			auto transform = m_World->GetComponent<Components::Transform>(entity);
 		}
 
         if (ballComponent->Waiting) {
             if (!m_Waiting) {
 				m_Restarting = false;
                 ballComponent->Waiting = false;
-				auto transform = m_World->GetComponent<Components::Transform>(entity);
 				/*std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
 				float random = dist(m_RandomGenerator);*/
-                transform->Velocity = glm::normalize(ballComponent->SavedSpeed) * ballComponent->Speed;
+                transformBall->Velocity = glm::normalize(ballComponent->SavedSpeed) * ballComponent->Speed;
 
 				auto cAnim = m_World->GetComponent<Components::Animation>(entity);
 				cAnim->Loop = false;
@@ -116,6 +126,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 				cAnim->Time = 0.f; 
 				//transform->Velocity = glm::normalize(glm::vec3(0, 1, 0)) * ballComponent->Speed;
 			} else {
+                transformBall->Velocity = glm::vec3(0.f, 0.f, 0.f);
 
 				auto cModel = m_World->GetComponent<Components::Model>(entity);
 				cModel->ModelFile = "Models/Sid/Sid_Jump.dae";
@@ -141,8 +152,7 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 			//TODO - Ball can stick to same pad just after detaching.
 			if (!m_Waiting)
 			{
-				auto transform = m_World->GetComponent<Components::Transform>(entity);
-				transform->Velocity = ballComponent->SavedSpeed;
+				transformBall->Velocity = ballComponent->SavedSpeed;
 				m_StickyCounter--;
 				if (m_StickyCounter > 0) {
 					m_Sticky = true;
@@ -151,7 +161,6 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 			}
 		}
         
-        auto transformBall = m_World->GetComponent<Components::Transform>(entity);
         if (glm::abs(transformBall->Velocity.y) < 2) {
             if (transformBall->Velocity.y > 0) {
                 transformBall->Velocity.y = 2;
@@ -170,6 +179,9 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
                 Events::LifeLost e;
                 e.Entity = entity;
                 EventBroker->Publish(e);
+				Events::PlaySound se;
+				se.FilePath = "Sounds/jap-lose-life.wav";
+				EventBroker->Publish(se);
                 return;
             }
         } //Removing this made the wall collisions work again

@@ -27,6 +27,15 @@ void dd::Systems::LevelSystem::Initialize()
 
 	m_GodMode = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<bool>("Cheat.GodMode", false);
 
+	// Camera
+	{
+		auto ent = m_World->CreateEntity();
+		auto transform = m_World->AddComponent<Components::Transform>(ent);
+		auto camera = m_World->AddComponent<Components::Camera>(ent);
+		camera->FOV = glm::radians(58.31f);
+		m_World->CommitEntity(ent);
+	}
+
 	//PointLightTest
 	{
 		auto t_Light = m_World->CreateEntity();
@@ -132,8 +141,8 @@ void dd::Systems::LevelSystem::Initialize()
 		auto wall = m_World->AddComponent<Components::Wall>(BottomWall);
 		transform->Position = glm::vec3(0.f, -6.f, -10.f);
 		transform->Scale = glm::vec3(20.f, 0.5f, 1.f);
-		std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
-		sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
+		//std::shared_ptr<Components::Sprite> sprite = m_World->AddComponent<Components::Sprite>(BottomWall);
+		//sprite->SpriteFile = "Textures/Core/ErrorTexture.png";
 		std::shared_ptr<Components::RectangleShape> rectangleShape = m_World->AddComponent<Components::RectangleShape>(BottomWall);
 		rectangleShape->Dimensions = glm::vec2(20.f, 0.5f);
 		std::shared_ptr<Components::Physics> physics = m_World->AddComponent<Components::Physics>(BottomWall);
@@ -238,7 +247,7 @@ void dd::Systems::LevelSystem::Initialize()
 	transform->Position = glm::vec3(50, 50, -10);
 	//sound
 	auto collisionSound = m_World->AddComponent<Components::CollisionSound>(m_BrickTemplate);
-	collisionSound->FilePath = "Sounds/Brick/shortbrickbreak.wav";
+	collisionSound->FilePath = "Sounds/Brick/brick-hit.wav";
 	m_World->CommitEntity(m_BrickTemplate);
 
     return;
@@ -281,7 +290,25 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 
     auto brick = m_World->GetComponent<Components::Brick>(entity);
     if (brick != nullptr) {
-        auto transform = m_World->GetComponent<Components::Transform>(entity);
+		if (m_BreakAllBricks) {
+			if (!brick->Removed) {
+				brick->Removed = true;
+				BrickHit(entity, entity, 1);
+			}
+		}
+
+		auto transform = m_World->GetComponent<Components::Transform>(entity);
+		if (brick->BeingGenerated) {
+			if (transform->Position == brick->GenerationGoal) {
+				brick->BeingGenerated = false;
+				auto cPhys = m_World->AddComponent<Components::Physics>(entity);
+				cPhys->CollisionType = CollisionType::Type::Static;
+				cPhys->GravityScale = 0.f;
+				cPhys->Category = CollisionLayer::Type::Brick;
+				cPhys->Mask = static_cast<CollisionLayer::Type>(CollisionLayer::Type::Ball | CollisionLayer::Type::Projectile | CollisionLayer::Type::Wall | CollisionLayer::LifeBuoy);
+			}
+		}
+        
         //Removes bricks that falls out of the stage.
 		if (transform->Position.y < -10) {
 			if (brick->Type == StandardBrick) {
@@ -317,7 +344,17 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 
     auto ball = m_World->GetComponent<Components::Ball>(entity);
 
-    if (NumberOfBricks() <= 0 && m_LooseBricks <= 0 && !Restarting()) {
+	if (ball != nullptr) {
+		if (m_BrickGenerating) {
+			auto transform = m_World->GetComponent<Components::Transform>(entity);
+			if (transform->Position.y < 0 && transform->Velocity.y < 0) {
+				m_BrickGenerating = false;
+				BrickGenerating(m_BrickGeneratingEvent);
+			}
+		}
+	}
+
+    if (NumberOfBricks() <= 0 && m_LooseBricks <= 0 && !Restarting() && !m_Cleared) {
         if (MultiBalls() <= 0 && PowerUps() <= 0) {
             Events::StageCleared ec;
             ec.ClearedStage = m_CurrentLevel;
@@ -470,7 +507,7 @@ bool dd::Systems::LevelSystem::OnBrickGenerating(const dd::Events::BrickGenerati
 
 bool dd::Systems::LevelSystem::BrickGenerating(const dd::Events::BrickGenerating &event)
 {
-	GetBrickSet(event.Set);
+	GetBrickSet(event.Set, event.SetCluster);
 
 	int rows = 6;
 	int lines = 7;
@@ -481,6 +518,8 @@ bool dd::Systems::LevelSystem::BrickGenerating(const dd::Events::BrickGenerating
 				auto ent = CreateBrick(i, j, SpaceBetweenBricks(), SpaceToEdge(), -3.2, 1, m_BrickSet[getter], m_ColorSet[getter]);
 				if (ent != NULL) {
 					auto brick = m_World->GetComponent<Components::Brick>(ent);
+					brick->BeingGenerated = true;
+					m_World->RemoveComponent<Components::Physics>(ent);
 					brick->Number = getter;
 					m_KrakenBricks[getter] = true;
 					auto transform = m_World->GetComponent<Components::Transform>(ent);
@@ -491,6 +530,7 @@ bool dd::Systems::LevelSystem::BrickGenerating(const dd::Events::BrickGenerating
 					} else {
 						transform->Position = event.Origin2;
 					}
+					brick->GenerationGoal = e.GoalPosition;
 					e.Entity = ent;
 					e.Speed = 6;
 					e.Queue = false;
@@ -505,7 +545,7 @@ bool dd::Systems::LevelSystem::BrickGenerating(const dd::Events::BrickGenerating
 	return true;
 }
 
-void dd::Systems::LevelSystem::GetBrickSet(int set) // These are sets the Kraken gets!
+void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are sets the Kraken gets!
 {
 	std::array<int, 42> level;
 	std::array<glm::vec4, 42> color;
@@ -537,101 +577,282 @@ void dd::Systems::LevelSystem::GetBrickSet(int set) // These are sets the Kraken
 	glm::vec4 m = glm::vec4(1, 0, 1, 1);
 	glm::vec4 d = glm::vec4(0, 0, 0, 1);
 
-	if (set == 1) {
-		level =
-		{1, 0, 0, 0, 0, 0, 1,
-		 1, 0, 0, 0, 0, 0, 1,
-		 1, 0, 0, 0, 0, 0, 1,
-		 1, 1, 1, 1, 1, 1, 2,
-		 1, 1, 1, 1, 1, 1, 1,
-		 0, 0, 0, 0, 0, 0, 0};
-		color =
-		{r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r, 
-		 r, r, r, r, r, r, r};
-	}
-	else if (set == 2) {
-		level =
-		{0, 0, 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0,
-		 3, 0, 1, 0, 1, 0, 1,
-		 0, 1, 0, 1, 0, 1, 0,
-		 1, 0, 1, 0, 1, 0, 1,
-		 0, 0, 0, 0, 0, 0, 0};
-		color =
-		{y, y, y, y, y, y, y,
-		 y, y, y, y, y, y, y,
-		 y, y, y, y, y, y, y,
-		 y, y, y, y, y, y, y,
-		 y, y, y, y, y, y, y, 
-		 y, y, y, y, y, y, y};
-	}
-	else if (set == 3) {
-		level =
-		{0, 0, 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0,
-		 1, 0, 1, 0, 1, 0, 1,
-		 0, 1, 1, 1, 1, 1, 0,
-		 0, 0, 4, 1, 1, 0, 0,
-		 0, 0, 0, 1, 0, 0, 0};
-		color =
-		{b, b, b, b, b, b, b,
-		 b, b, b, b, b, b, b,
-		 b, b, b, b, b, b, b,
-		 b, b, b, b, b, b, b,
-		 b, b, b, b, b, b, b, 
-		 b, b, b, b, b, b, b};
-	}
-	else if (set == 4) {
-		level =
-		{0, 0, 0, 0, 0, 0, 0,
-		 1, 1, 1, 1, 1, 3, 1,
-		 0, 0, 0, 0, 0, 0, 0,
-		 1, 1, 1, 1, 1, 1, 1,
-		 0, 0, 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0};
-		color =
-		{m, m, m, m, m, m, m,
-		 m, m, m, m, m, m, m,
-		 m, m, m, m, m, m, m,
-		 m, m, m, m, m, m, m,
-		 m, m, m, m, m, m, m, 
-		 m, m, m, m, m, m, m};
-	}
-	else if (set == 5) {
-		level =
-		{0, 0, 0, 0, 0, 0, 0,
-		 0, 1, 1, 0, 1, 1, 0,
-		 0, 1, 2, 0, 1, 1, 0,
-		 0, 1, 1, 0, 1, 1, 0,
-		 0, 1, 1, 0, 1, 1, 0,
-		 0, 0, 0, 0, 0, 0, 0};
-		color =
-		{g, g, g, g, g, g, g,
-		 g, g, g, g, g, g, g,
-		 g, g, g, g, g, g, g,
-		 g, g, g, g, g, g, g,
-		 g, g, g, g, g, g, g, 
-		 g, g, g, g, g, g, g};
-	}
-	else if (set == 6) {
-		level =
-		{0, 0, 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0,
-		 1, 1, 1, 1, 1, 1, 1,
-		 1, 1, 1, 1, 1, 1, 1,
-		 0, 0, 0, 0, 0, 0, 0};
-		color =
-		{r, r, r, r, r, r, r, 
-		 r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r, 
-		 r, r, r, r, r, r, r};
+	if (setCluster == 0) {
+		if (set == 1) {
+			level = // The Charge
+			{1, 0, 0, 0, 0, 0, 1,
+			 0, 1, 0, 0, 0, 1, 0,
+			 0, 0, 1, 0, 1, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r };
+		} else if (set == 2) {
+			level = // The Audience
+			{0, 0, 0, 0, 0, 0, 0,
+			 1, 0, 0, 0, 0, 0, 1,
+			 1, 0, 0, 0, 0, 0, 1,
+			 1, 0, 0, 0, 0, 0, 1,
+			 1, 0, 0, 0, 0, 0, 1,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y };
+		} else if (set == 3) {
+			level = // The Alien Defense
+			{0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 1, 0, 0, 0, 1, 0,
+			 1, 1, 1, 0, 1, 1, 1,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b };
+		} else if (set == 4) {
+			level = // The Scales (right)
+			{1, 1, 1, 0, 0, 0, 0,
+			 1, 1, 1, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 1, 1, 1,
+			 0, 0, 0, 0, 1, 1, 1 };
+			color =
+			{m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m };
+		} else if (set == 5) {
+			level = // The Scales (left)
+			{0, 0, 0, 0, 1, 1, 1,
+			 0, 0, 0, 0, 1, 1, 1,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 1, 1, 1, 0, 0, 0, 0,
+			 1, 1, 1, 0, 0, 0, 0 };
+			color =
+			{g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g };
+		} else if (set == 6) {
+			level = // The Sword
+			{0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 1, 1, 1, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0 };
+			color =
+			{c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c };
+		}
+	} else if (setCluster == 1) {
+		if (set == 1) {
+			level = // The Wall
+			{1, 0, 0, 0, 0, 0, 1,
+			 1, 0, 0, 0, 0, 0, 1,
+			 1, 0, 0, 0, 0, 0, 1,
+			 1, 1, 1, 1, 1, 1, 2,
+			 1, 1, 1, 1, 1, 1, 1,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r };
+		} else if (set == 2) {
+			level = // The Checkerboard
+			{0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 3, 0, 1, 0, 1, 0, 1,
+			 0, 1, 0, 1, 0, 1, 0,
+			 1, 0, 1, 0, 1, 0, 1,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y };
+		} else if (set == 3) {
+			level = // The Fighter Jet
+			{0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 1, 0, 1, 0, 1, 0, 1,
+			 0, 1, 1, 1, 1, 1, 0,
+			 0, 0, 4, 1, 1, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0 };
+			color =
+			{b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b };
+		} else if (set == 4) {
+			level = // The Formation
+			{0, 0, 0, 0, 0, 0, 0,
+			 1, 1, 1, 1, 1, 3, 1,
+			 0, 0, 0, 0, 0, 0, 0,
+			 1, 1, 1, 1, 1, 1, 1,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color = 
+			{m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m };
+		} else if (set == 5) {
+			level = // The Pillars
+			{0, 0, 0, 0, 0, 0, 0,
+			 0, 1, 1, 0, 1, 1, 0,
+			 0, 1, 2, 0, 1, 1, 0,
+			 0, 1, 1, 0, 1, 1, 0,
+			 0, 1, 1, 0, 1, 1, 0,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g };
+		} else if (set == 6) {
+			level = // The Treasure Chest
+			{0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 1, 1, 1, 0, 0,
+			 0, 1, 1, 5, 1, 1, 0,
+			 0, 0, 1, 1, 1, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c };
+		}
+	} else if (setCluster == 2) {
+		if (set == 1) {
+			level = // The Butterfly
+			{1, 0, 0, 1, 0, 0, 1,
+			 1, 1, 0, 1, 0, 1, 1,
+			 1, 1, 1, 1, 1, 1, 1,
+			 1, 1, 0, 1, 0, 1, 1, 
+			 1, 0, 0, 2, 0, 0, 1,
+			 1, 0, 0, 1, 0, 0, 3 };
+			color =
+			{r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r };
+		} else if (set == 2) {
+			level = // The Cross
+			{1, 1, 0, 0, 0, 1, 1,
+			 0, 4, 1, 0, 1, 1, 0,
+			 0, 0, 1, 1, 1, 0, 0,
+			 0, 0, 1, 3, 1, 0, 0,
+			 0, 1, 1, 0, 1, 1, 0,
+			 1, 1, 0, 0, 0, 1, 1 };
+			color =
+			{y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y };
+		} else if (set == 3) {
+			level = // The Inverted Cross
+			{0, 0, 1, 6, 1, 0, 0,
+			 1, 0, 0, 1, 0, 0, 1,
+			 1, 1, 0, 0, 0, 1, 3,
+			 1, 1, 0, 0, 0, 1, 1,
+			 1, 0, 0, 1, 0, 0, 1,
+			 0, 0, 1, 1, 1, 0, 0 };
+			color =
+			{b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b };
+		} else if (set == 4) {
+			level = // The Great Wall
+			{1, 1, 1, 1, 1, 1, 1,
+			 1, 1, 1, 1, 1, 1, 1,
+			 0, 0, 0, 0, 0, 0, 0,
+			 1, 1, 1, 1, 1, 5, 1,
+			 0, 0, 0, 0, 0, 0, 0,
+			 1, 3, 1, 1, 1, 1, 1 };
+			color =
+			{m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m };
+		} else if (set == 5) {
+			level = // The Champion
+			{0, 0, 1, 1, 1, 0, 0,
+			 0, 0, 1, 1, 2, 0, 0,
+			 0, 0, 1, 1, 1, 0, 0,
+			 1, 1, 1, 0, 1, 1, 1,
+			 5, 1, 1, 0, 1, 1, 1,
+			 1, 1, 1, 0, 1, 1, 1 };
+			color =
+			{g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g };
+		} else if (set == 6) {
+			level = // The Dog. What, you can't see it? XD
+			{0, 1, 1, 1, 1, 1, 0,
+			 1, 1, 2, 1, 2, 1, 1,
+			 1, 1, 1, 1, 1, 1, 1,
+			 1, 0, 1, 1, 1, 0, 1,
+			 1, 0, 1, 1, 1, 0, 1,
+			 0, 0, 0, 3, 0, 0, 0 };
+			color =
+			{c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c };
+		}
 	}
 
 	std::copy(std::begin(level), std::end(level), std::begin(m_BrickSet));
@@ -690,7 +911,11 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
     brick = m_World->GetComponent<Components::Brick>(entityBrick);
     if (brick == nullptr) {
         return false;
-    }
+	}
+
+	if (brick->BeingGenerated) {
+		return false;
+	}
 
 	if (entityShot != 0) {
 		// For when a brick gets shot.
@@ -913,10 +1138,15 @@ bool dd::Systems::LevelSystem::OnPowerUpTaken(const dd::Events::PowerUpTaken &ev
 bool dd::Systems::LevelSystem::OnKrakenDefeated(const dd::Events::KrakenDefeated &event)
 {
 	m_BrickGenerating = false;
+	m_BreakAllBricks = true;
 	SetNumberOfBricks(NumberOfBricks() - 1);
 	m_LooseBricks--;
 
-	std::cout << m_LooseBricks << std::endl;
+	Events::ScoreEvent e;
+	e.Score = 1000;
+	EventBroker->Publish(e);
+
+	//std::cout << m_LooseBricks << std::endl;
 
 	return true;
 }
@@ -924,6 +1154,7 @@ bool dd::Systems::LevelSystem::OnKrakenDefeated(const dd::Events::KrakenDefeated
 bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &event)
 {
     if (!m_Cleared) {
+		m_BreakAllBricks = false;
         m_Cleared = true;
         SetRestarting(true);
         Events::ResetBall e;
@@ -1002,7 +1233,6 @@ void dd::Systems::LevelSystem::GetNextLevel()
 	glm::vec4 p3 = glm::vec4(189.f / 255.f, 0.f / 255.f, 187.f / 255.f, 1.f);
 	glm::vec4 p4 = glm::vec4(125.f / 255.f, 0.f / 255.f, 147.f / 255.f, 1.f);
 
-
     if (m_CurrentCluster == 0) {
         if (m_CurrentLevel == 1) {
             level =
@@ -1023,10 +1253,10 @@ void dd::Systems::LevelSystem::GetNextLevel()
             level =
                     {0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 100, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0};
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 100, 0, 0, 0};
 			color = 
 					{w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w,
@@ -1102,7 +1332,7 @@ void dd::Systems::LevelSystem::GetNextLevel()
                      1, 1, 1, 1, 1, 1, 1,
                      1, 0, 1, 2, 1, 0, 1,
                      0, 1, 0, 1, 0, 1, 0,
-                     0, 0, 0, 0, 0, 0, 6,
+                     0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0};
 			color = 
 					{w, w, w, w, w, w, w,
@@ -1199,10 +1429,6 @@ void dd::Systems::LevelSystem::GetNextLevel()
 bool dd::Systems::LevelSystem::OnHitPad(const dd::Events::HitPad &event)
 {
     m_Cleared = false;
-	if (m_BrickGenerating) {
-		m_BrickGenerating = false;
-		BrickGenerating(m_BrickGeneratingEvent);
-	}
     return true;
 }
 

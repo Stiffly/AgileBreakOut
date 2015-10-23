@@ -37,7 +37,7 @@ void dd::Systems::ScreenShakeSystem::UpdateEntity(double dt, EntityID entity, En
         return;
     }
 
-	/*auto camera = m_World->GetComponent<Components::Camera>(entity);
+	auto camera = m_World->GetComponent<Components::Camera>(entity);
 	
 	if (camera != nullptr) {
 		auto transform = m_World->GetComponent<Components::Transform>(entity);
@@ -74,7 +74,7 @@ void dd::Systems::ScreenShakeSystem::UpdateEntity(double dt, EntityID entity, En
 		} else {
 			m_CameraPosition = transform->Position;
 		}
-	}*/
+	}
 }
 
 bool dd::Systems::ScreenShakeSystem::OnPause(const dd::Events::Pause &event)

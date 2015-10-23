@@ -35,18 +35,17 @@ void dd::Systems::AnimationSystem::Update(double dt)
 
 		if (animationComponent->Speed != 0.0) {
 			double nextTime = animationComponent->Time + animationComponent->Speed * dt;
-			if (glm::abs(nextTime) > animation->Duration) {
-				if (!animationComponent->Loop) {
-					animationComponent->Time = glm::sign(nextTime) * animation->Duration;
-					animationComponent->Speed = 0.0;
-					LOG_DEBUG("Animation \"%s\" on Entity %i finished.", animationComponent->Name.c_str(), ent);
-					Events::AnimationComplete e;
-					e.Entity = ent;
-					e.Animation = animationComponent->Name;
+			if (!animationComponent->Loop && glm::abs(nextTime) > animation->Duration) {
+				animationComponent->Time = glm::sign(nextTime) * animation->Duration;
+				animationComponent->Speed = 0.0;
+				LOG_DEBUG("Animation \"%s\" on Entity %i finished.", animationComponent->Name.c_str(), ent);
+				Events::AnimationComplete e;
+				e.Entity = ent;
+				e.Animation = animationComponent->Name;
 					EventBroker->Publish(e);
-				}
+			} else {
+				animationComponent->Time = nextTime;
 			}
-			animationComponent->Time = nextTime;
 		}
 	}
 }
