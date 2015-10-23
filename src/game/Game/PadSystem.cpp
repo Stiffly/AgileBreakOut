@@ -56,6 +56,7 @@ void dd::Systems::PadSystem::Initialize()
         cModel->ModelFile = "Models/Ship/Ship.obj";
 
         auto pad = m_World->AddComponent<Components::Pad>(ent);
+		pad->SlowdownModifier = 10.f;
         m_World->CommitEntity(ent);
 
         m_Edge = 3.2 - (ctransform->Scale.x / 2);

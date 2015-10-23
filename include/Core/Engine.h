@@ -34,6 +34,7 @@
 #include "CTemplate.h"
 #include "Core/ConfigFile.h"
 #include "Core/EventBroker.h"
+#include "Input/InputSystem.h"
 #include "Rendering/CModel.h"
 #include "Rendering/CSprite.h"
 #include "Rendering/CPointLight.h"
@@ -176,6 +177,9 @@ public:
 		m_World->ComponentFactory.Register<Components::InkBlasterBrick>();
 		m_World->ComponentFactory.Register<Components::KrakenAttackBrick>();
 
+		//m_World->SystemFactory.Register<Systems::InputSystem>(
+		//	[this]() { return new Systems::InputSystem(m_World.get(), m_EventBroker); });
+		//m_World->AddSystem<Systems::InputSystem>();
 		m_World->SystemFactory.Register<Systems::LevelSystem>(
 			[this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LevelSystem>();
@@ -257,9 +261,10 @@ public:
 		m_LastTime = currentTime;
 
 		// Update input
+		m_EventBroker->Swap();
 		m_InputManager->Update(dt);
-		// Swap event queues to get fresh input data in the read queue
-		//m_EventBroker->Swap();
+		//m_EventBroker->Process<Systems::InputSystem>();
+		m_EventBroker->Swap();
 
 		//ResourceManager::Update();
 		if (m_GameIsRunning) {
@@ -284,6 +289,7 @@ public:
 		m_EventBroker->Process<Engine>();
 		// Swap event queues
 		m_EventBroker->Swap();
+		m_EventBroker->Clear();
 
 		glfwPollEvents();
 	}
