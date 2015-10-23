@@ -77,7 +77,19 @@ void dd::Systems::LevelSystem::Initialize()
 		auto t_halfPipe2 = m_World->CloneEntity(t_halfPipe);
 		auto transform2 = m_World->GetComponent<Components::Transform>(t_halfPipe);
 		transform2->Position = glm::vec3(0.f, 34.6f, -15.f); //Halfpipe Value
+
+		// Added to prevent white borders around screen shake
+		{
+			auto halfPipeBackground = m_World->CreateEntity();
+			auto transform = m_World->AddComponent<Components::Transform>(halfPipeBackground);
+			transform->Position = glm::vec3(0.f, 0.f, -15.f);
+			transform->Scale = glm::vec3(6.f, 6.f, 10.f) * 2.f;
+			auto model = m_World->AddComponent<Components::Model>(halfPipeBackground);
+			model->ModelFile = "Models/Halfpipe.obj";
+			m_World->CommitEntity(halfPipeBackground);
+		}
 	}
+
 
 	//Background
 
