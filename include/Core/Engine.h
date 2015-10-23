@@ -34,9 +34,11 @@
 #include "CTemplate.h"
 #include "Core/ConfigFile.h"
 #include "Core/EventBroker.h"
+#include "Input/InputSystem.h"
 #include "Rendering/CModel.h"
 #include "Rendering/CSprite.h"
 #include "Rendering/CPointLight.h"
+#include "Rendering/CCamera.h"
 #include "Transform/TransformSystem.h"
 #include "Sound/SoundSystem.h"
 #include "Sound/CCollisionSound.h"
@@ -67,6 +69,7 @@
 
 #include "Game/BrickComponents.h"
 
+#include "Game/ScreenShakeSystem.h"
 #include "Game/EScreenShake.h"
 
 #include "Physics/PhysicsSystem.h"
@@ -147,6 +150,7 @@ public:
 
 		m_World->ComponentFactory.Register<Components::Sprite>();
 
+		m_World->ComponentFactory.Register<Components::Camera>();
 		m_World->ComponentFactory.Register<Components::RectangleShape>();
 		m_World->ComponentFactory.Register<Components::Physics>();
 		m_World->ComponentFactory.Register<Components::Ball>();
@@ -173,6 +177,9 @@ public:
 		m_World->ComponentFactory.Register<Components::InkBlasterBrick>();
 		m_World->ComponentFactory.Register<Components::KrakenAttackBrick>();
 
+		//m_World->SystemFactory.Register<Systems::InputSystem>(
+		//	[this]() { return new Systems::InputSystem(m_World.get(), m_EventBroker); });
+		//m_World->AddSystem<Systems::InputSystem>();
 		m_World->SystemFactory.Register<Systems::LevelSystem>(
 			[this]() { return new Systems::LevelSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LevelSystem>();
@@ -209,6 +216,9 @@ public:
 		m_World->SystemFactory.Register<Systems::LifeSystem>(
 			[this]() { return new Systems::LifeSystem(m_World.get(), m_EventBroker); });
 		m_World->AddSystem<Systems::LifeSystem>();
+		m_World->SystemFactory.Register<Systems::ScreenShakeSystem>(
+			[this]() { return new Systems::ScreenShakeSystem(m_World.get(), m_EventBroker); });
+		m_World->AddSystem<Systems::ScreenShakeSystem>();
 
 		m_World->ComponentFactory.Register<Components::Model>();
 		m_World->ComponentFactory.Register<Components::Template>();
@@ -251,9 +261,10 @@ public:
 		m_LastTime = currentTime;
 
 		// Update input
+		m_EventBroker->Swap();
 		m_InputManager->Update(dt);
-		// Swap event queues to get fresh input data in the read queue
-		//m_EventBroker->Swap();
+		//m_EventBroker->Process<Systems::InputSystem>();
+		m_EventBroker->Swap();
 
 		//ResourceManager::Update();
 		if (m_GameIsRunning) {
@@ -271,8 +282,6 @@ public:
 			TEMPAddToRenderQueue();
 		}
 
-		std::unique_ptr<dd::Camera> defaultCamera = nullptr;
-
 		// Render scene
 		//TODO send renderqueue to draw.
 		m_Renderer->Draw(m_RendererQueue);
@@ -280,6 +289,7 @@ public:
 		m_EventBroker->Process<Engine>();
 		// Swap event queues
 		m_EventBroker->Swap();
+		m_EventBroker->Clear();
 
 		glfwPollEvents();
 	}
@@ -292,6 +302,20 @@ public:
 	{
 		if (!m_TransformSystem)
 			m_TransformSystem = m_World->GetSystem<Systems::TransformSystem>();
+		
+		// HACK: How do we handle multiple cameras? Maybe view and projection matrices in render queue...
+		auto cameras = m_World->GetComponentsOfType<Components::Camera>();
+		if (cameras != nullptr) {
+			for (auto& component : *cameras) {
+				auto camera = static_cast<Components::Camera*>(component.get());
+				auto transform = m_World->GetComponent<Components::Transform>(camera->Entity);
+				m_Renderer->Camera()->SetPosition(transform->Position);
+				m_Renderer->Camera()->SetOrientation(transform->Orientation);
+				m_Renderer->Camera()->SetFOV(camera->FOV);
+				m_Renderer->Camera()->SetNearClip(camera->NearClip);
+				m_Renderer->Camera()->SetFarClip(camera->FarClip);
+			}
+		}
 
 		for (auto &pair : *m_World->GetEntities())
 		{

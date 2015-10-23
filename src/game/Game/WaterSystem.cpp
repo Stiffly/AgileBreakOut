@@ -57,7 +57,7 @@ void dd::Systems::WaterSystem::UpdateEntity(double dt, EntityID entity, EntityID
 				if (transform->Position.y < m_SubmergedHeight) {
 					brickPart->Submerged = true;
 					m_BrickPartCounters[brickPart->NumberOfPartsInBrick]++;
-					std::cout << "Parts: " << m_BrickPartCounters[brickPart->NumberOfPartsInBrick] << " of " << brickPart->NumberOfPartsInBrick << std::endl;
+					//std::cout << "Parts: " << m_BrickPartCounters[brickPart->NumberOfPartsInBrick] << " of " << brickPart->NumberOfPartsInBrick << std::endl;
 					if (m_BrickPartCounters[brickPart->NumberOfPartsInBrick] >= brickPart->NumberOfPartsInBrick) {
 						m_BrickPartCounters[brickPart->NumberOfPartsInBrick] = 0;
 						Events::RaiseWater e;

@@ -121,6 +121,7 @@ public:
 	int Process();
 	int Process(std::string contextTypeName);
 	void Swap();
+	void Clear();
 	void Unsubscribe(BaseEventRelay &relay);
 
 private:

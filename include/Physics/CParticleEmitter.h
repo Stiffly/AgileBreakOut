@@ -26,6 +26,8 @@ struct ParticleEmitter : public Component
 	//values to interpolate between.
 	std::vector<glm::vec3> ScaleValues;
 	std::vector<float> AlphaValues;
+	std::vector<glm::vec3> VelocityValues;
+
 
     //System variables
     float GravityScale = 1.0f;
