@@ -28,6 +28,7 @@ void dd::Systems::BallSystem::Initialize()
     EVENT_SUBSCRIBE_MEMBER(m_EActionButton, &BallSystem::OnActionButton);
 	EVENT_SUBSCRIBE_MEMBER(m_EStageCleared, &BallSystem::OnStageCleared);
 	EVENT_SUBSCRIBE_MEMBER(m_EArrivedAtNewStage, &BallSystem::OnArrivedToNewStage);
+	EVENT_SUBSCRIBE_MEMBER(m_EAnimationComplete, &BallSystem::OnAnimationComplete);
 
 
     //OctoBall
@@ -39,7 +40,7 @@ void dd::Systems::BallSystem::Initialize()
         transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
 		transform->Orientation = glm::quat();
         auto model = m_World->AddComponent<Components::Model>(ent);
-        model->ModelFile = "Models/Sid/Sid.dae";
+        model->ModelFile = "Models/Sid/Sid_Flying.dae";
 		auto animation = m_World->AddComponent<Components::Animation>(ent);
 		animation->Speed = 1.0;
         std::shared_ptr<Components::CircleShape> circleShape = m_World->AddComponent<Components::CircleShape>(ent);
@@ -118,13 +119,32 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 				/*std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
 				float random = dist(m_RandomGenerator);*/
                 transformBall->Velocity = glm::normalize(ballComponent->SavedSpeed) * ballComponent->Speed;
+
+				auto cAnim = m_World->GetComponent<Components::Animation>(entity);
+				cAnim->Loop = false;
+				cAnim->Speed = 2.f;
+				cAnim->Time = 0.f; 
 				//transform->Velocity = glm::normalize(glm::vec3(0, 1, 0)) * ballComponent->Speed;
-            } else if (!ballComponent->Sticky) {
+			} else {
                 transformBall->Velocity = glm::vec3(0.f, 0.f, 0.f);
-                //transform->Position = glm::vec3(0.0f, -3.f, -10.f);
-				if (m_First) {
-					transformBall->Orientation = glm::quat();
-					m_First = false;
+
+				auto cModel = m_World->GetComponent<Components::Model>(entity);
+				cModel->ModelFile = "Models/Sid/Sid_Jump.dae";
+
+				auto cAnim = m_World->GetComponent<Components::Animation>(entity);
+				cAnim->Speed = 0.f;
+				cAnim->Time = 0.f;
+				cAnim->Loop = false;
+
+				if (!ballComponent->Sticky) {
+					auto transform = m_World->GetComponent<Components::Transform>(entity);
+					transform->Velocity = glm::vec3(0.f, 0.f, 0.f);
+					//transform->Position = glm::vec3(0.0f, -3.f, -10.f);
+
+					if (m_First) {
+						transform->Orientation = glm::quat();
+						m_First = false;
+					}
 				}
                 return;
             }
@@ -138,6 +158,12 @@ void dd::Systems::BallSystem::UpdateEntity(double dt, EntityID entity, EntityID 
 				if (m_StickyCounter > 0) {
 					m_Sticky = true;
 				}
+
+				auto cAnim = m_World->GetComponent<Components::Animation>(entity);
+				cAnim->Speed = 2.f;
+				cAnim->Time = 0.f;
+				cAnim->Loop = false;
+
 				ballComponent->Sticky = false;
 			}
 		}
@@ -330,7 +356,7 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 					m_Waiting = true;
 					m_InkBlockedWaiting = true;
 					ballComponent->Sticky = true;
-					ballComponent->StickyPlacement = glm::vec3(0, 0.5f, 0);
+					ballComponent->StickyPlacement = glm::vec3(0, 0.25f, 0);
 					ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
 					ballTransform->Velocity = glm::vec3(0.f, 0.f, 0.f);
 				}
@@ -340,11 +366,19 @@ bool dd::Systems::BallSystem::Contact(const Events::Contact &event)
 				m_Waiting = true;
 				ballComponent->Sticky = true;
 				//ballComponent->StickyPlacement = ballTransform->Position - padTransform->Position;
-				ballComponent->StickyPlacement = glm::vec3(0, 0.5f, 0);
+				ballComponent->StickyPlacement = glm::vec3(0, 0.25f, 0);
 				ballComponent->SavedSpeed = glm::normalize(glm::vec3(x, y, 0.f)) * ballComponent->Speed;
 				ballTransform->Velocity *= -1;
 				Events::StickyAttachedToPad e;
 				EventBroker->Publish(e);
+
+
+				auto cModel = m_World->GetComponent<Components::Model>(ballEntity);
+				cModel->ModelFile = "Models/Sid/Sid_Jump.dae";
+				auto cAnim = m_World->GetComponent<Components::Animation>(ballEntity);
+				cAnim->Loop = false;
+				cAnim->Speed = 0.f;
+				cAnim->Time = 0.f;
 				return true;
 			}
 		}
@@ -395,10 +429,7 @@ void dd::Systems::BallSystem::ResolveContacts()
 		auto ballComponent = m_World->GetComponent<Components::Ball>(entity);
 		reflectedVelocity = glm::normalize(reflectedVelocity) * ballComponent->Speed;
         transform->Velocity = glm::vec3(reflectedVelocity, 0.f);
-
     }
-
-
     m_Contacts.clear();
 }
 
@@ -474,6 +505,14 @@ bool dd::Systems::BallSystem::OnInkBlasterOver(const dd::Events::InkBlasterOver 
 	auto ballComponent = m_World->GetComponent<Components::Ball>(event.Ball);
 	auto transform = m_World->GetComponent<Components::Transform>(event.Ball);
 
+
+	auto cModel = m_World->GetComponent<Components::Model>(event.Ball);
+	cModel->ModelFile = "Models/Sid/Sid_Jump.dae";
+
+	auto cAnim = m_World->GetComponent<Components::Animation>(event.Ball);
+	cAnim->Speed = 2.f;
+	cAnim->Loop = false;
+
 	m_InkBlaster = false;
 	m_InkAttached = false;
 	m_InkBlockedWaiting = false;
@@ -517,6 +556,23 @@ bool dd::Systems::BallSystem::OnStageCleared(const dd::Events::StageCleared &eve
 bool dd::Systems::BallSystem::OnArrivedToNewStage(const dd::Events::ArrivedAtNewStage &event)
 {
 	m_StageBlockedWaiting = false;
+	return true;
+}
+
+bool dd::Systems::BallSystem::OnAnimationComplete(const dd::Events::AnimationComplete &event)
+{
+	auto model = m_World->GetComponent<Components::Model>(event.Entity);
+	if (model) {
+		if (model->ModelFile == "Models/Sid/Sid_Jump.dae") {
+			model->ModelFile = "Models/Sid/Sid_Flying.dae";
+
+			auto anim = m_World->GetComponent<Components::Animation>(event.Entity);
+			anim->Speed = 1.f;
+			anim->Loop = true;
+			anim->Time = 0.f;
+		}
+	}
+
 	return true;
 }
 

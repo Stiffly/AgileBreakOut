@@ -37,8 +37,8 @@ public:
 	void SetFullscreen(bool fullscreen) { m_Fullscreen = fullscreen; }
 	bool VSYNC() const { return m_VSYNC; }
 	void SetVSYNC(bool vsync) { m_VSYNC = vsync; }
-	const dd::Camera* Camera() const { return m_Camera; }
-	void SetCamera(const dd::Camera* camera)
+	dd::Camera* Camera() const { return m_Camera; }
+	void SetCamera(dd::Camera* camera)
 	{
 		if (camera == nullptr) {
 			m_Camera = m_DefaultCamera.get();
@@ -55,7 +55,7 @@ protected:
 	bool m_Fullscreen = false;
 	bool m_VSYNC = false;
 	std::unique_ptr<dd::Camera> m_DefaultCamera = nullptr;
-	const dd::Camera* m_Camera = nullptr;
+	dd::Camera* m_Camera = nullptr;
 	GLFWwindow* m_Window = nullptr;
 };
 

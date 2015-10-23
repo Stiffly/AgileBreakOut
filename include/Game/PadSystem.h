@@ -54,6 +54,7 @@
 #include "Rendering/CAnimation.h"
 
 #include "Game/EBrickGenerating.h"
+#include "Game/EBreakAllBricks.h"
 
 
 namespace dd
