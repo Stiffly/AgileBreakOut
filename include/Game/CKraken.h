@@ -15,7 +15,7 @@ namespace Components
 
 struct Kraken : Component {
 
-    int MaxHealth = 30;
+    int MaxHealth = 18;
 	int Health = MaxHealth;
 	int CurrentAction = 3;
 	float RetreatSpeed = 0.2;
