@@ -25,6 +25,8 @@
 #include "Game/EKrakenAttackEnd.h"
 
 #include "Rendering/CAnimation.h"
+#include "Physics/CParticleEmitter.h"
+#include "Physics/ECreateParticleSequence.h"
 
 
 namespace dd

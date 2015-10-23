@@ -180,6 +180,8 @@ private:
 	bool m_BrickGenerating = false;
 	dd::Events::BrickGenerating m_BrickGeneratingEvent;
 
+	bool m_BreakAllBricks = false;
+
     dd::EventRelay<LevelSystem, dd::Events::Contact> m_EContact;
     dd::EventRelay<LevelSystem, dd::Events::ScoreEvent> m_EScoreEvent;
     dd::EventRelay<LevelSystem, dd::Events::MultiBall> m_EMultiBall;
@@ -207,7 +209,7 @@ private:
     bool OnHitPad(const dd::Events::HitPad &event);
 	bool OnBrickGenerating(const dd::Events::BrickGenerating &event);
 	bool BrickGenerating(const dd::Events::BrickGenerating &event);
-	void GetBrickSet(int Set);
+	void GetBrickSet(int Set, int SetCluster);
 	bool OnKrakenDefeated(const dd::Events::KrakenDefeated &event);
 
     void GetNextLevel();

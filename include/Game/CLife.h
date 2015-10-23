@@ -16,8 +16,12 @@ namespace Components
 struct Life : Component 
 {
     int Number = 0;
-	float SinusAltitude = 1;
+	float SinusAltitude = 0;
+	float Amplitude = 1;
+	float Frequency = 1;
+	float SinusSpeed = 1;
 	bool Left = false;
+	bool Dead = false;
 };
 
 }

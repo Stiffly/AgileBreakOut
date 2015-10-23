@@ -281,6 +281,12 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 
     auto brick = m_World->GetComponent<Components::Brick>(entity);
     if (brick != nullptr) {
+		if (m_BreakAllBricks) {
+			if (!brick->Removed) {
+				brick->Removed = true;
+				BrickHit(entity, entity, 1);
+			}
+		}
 
 		auto transform = m_World->GetComponent<Components::Transform>(entity);
 		if (brick->BeingGenerated) {
@@ -328,6 +334,16 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     }
 
     auto ball = m_World->GetComponent<Components::Ball>(entity);
+
+	if (ball != nullptr) {
+		if (m_BrickGenerating) {
+			auto transform = m_World->GetComponent<Components::Transform>(entity);
+			if (transform->Position.y < 0 && transform->Velocity.y < 0) {
+				m_BrickGenerating = false;
+				BrickGenerating(m_BrickGeneratingEvent);
+			}
+		}
+	}
 
     if (NumberOfBricks() <= 0 && m_LooseBricks <= 0 && !Restarting() && !m_Cleared) {
         if (MultiBalls() <= 0 && PowerUps() <= 0) {
@@ -482,7 +498,7 @@ bool dd::Systems::LevelSystem::OnBrickGenerating(const dd::Events::BrickGenerati
 
 bool dd::Systems::LevelSystem::BrickGenerating(const dd::Events::BrickGenerating &event)
 {
-	GetBrickSet(event.Set);
+	GetBrickSet(event.Set, event.SetCluster);
 
 	int rows = 6;
 	int lines = 7;
@@ -520,7 +536,7 @@ bool dd::Systems::LevelSystem::BrickGenerating(const dd::Events::BrickGenerating
 	return true;
 }
 
-void dd::Systems::LevelSystem::GetBrickSet(int set) // These are sets the Kraken gets!
+void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are sets the Kraken gets!
 {
 	std::array<int, 42> level;
 	std::array<glm::vec4, 42> color;
@@ -552,101 +568,282 @@ void dd::Systems::LevelSystem::GetBrickSet(int set) // These are sets the Kraken
 	glm::vec4 m = glm::vec4(1, 0, 1, 1);
 	glm::vec4 d = glm::vec4(0, 0, 0, 1);
 
-	if (set == 1) {
-		level =
-		{1, 0, 0, 0, 0, 0, 1,
-		 1, 0, 0, 0, 0, 0, 1,
-		 1, 0, 0, 0, 0, 0, 1,
-		 1, 1, 1, 1, 1, 1, 2,
-		 1, 1, 1, 1, 1, 1, 1,
-		 0, 0, 0, 0, 0, 0, 0};
-		color =
-		{r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r, 
-		 r, r, r, r, r, r, r};
-	}
-	else if (set == 2) {
-		level =
-		{0, 0, 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0,
-		 3, 0, 1, 0, 1, 0, 1,
-		 0, 1, 0, 1, 0, 1, 0,
-		 1, 0, 1, 0, 1, 0, 1,
-		 0, 0, 0, 0, 0, 0, 0};
-		color =
-		{y, y, y, y, y, y, y,
-		 y, y, y, y, y, y, y,
-		 y, y, y, y, y, y, y,
-		 y, y, y, y, y, y, y,
-		 y, y, y, y, y, y, y, 
-		 y, y, y, y, y, y, y};
-	}
-	else if (set == 3) {
-		level =
-		{0, 0, 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0,
-		 1, 0, 1, 0, 1, 0, 1,
-		 0, 1, 1, 1, 1, 1, 0,
-		 0, 0, 4, 1, 1, 0, 0,
-		 0, 0, 0, 1, 0, 0, 0};
-		color =
-		{b, b, b, b, b, b, b,
-		 b, b, b, b, b, b, b,
-		 b, b, b, b, b, b, b,
-		 b, b, b, b, b, b, b,
-		 b, b, b, b, b, b, b, 
-		 b, b, b, b, b, b, b};
-	}
-	else if (set == 4) {
-		level =
-		{0, 0, 0, 0, 0, 0, 0,
-		 1, 1, 1, 1, 1, 3, 1,
-		 0, 0, 0, 0, 0, 0, 0,
-		 1, 1, 1, 1, 1, 1, 1,
-		 0, 0, 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0};
-		color =
-		{m, m, m, m, m, m, m,
-		 m, m, m, m, m, m, m,
-		 m, m, m, m, m, m, m,
-		 m, m, m, m, m, m, m,
-		 m, m, m, m, m, m, m, 
-		 m, m, m, m, m, m, m};
-	}
-	else if (set == 5) {
-		level =
-		{0, 0, 0, 0, 0, 0, 0,
-		 0, 1, 1, 0, 1, 1, 0,
-		 0, 1, 2, 0, 1, 1, 0,
-		 0, 1, 1, 0, 1, 1, 0,
-		 0, 1, 1, 0, 1, 1, 0,
-		 0, 0, 0, 0, 0, 0, 0};
-		color =
-		{g, g, g, g, g, g, g,
-		 g, g, g, g, g, g, g,
-		 g, g, g, g, g, g, g,
-		 g, g, g, g, g, g, g,
-		 g, g, g, g, g, g, g, 
-		 g, g, g, g, g, g, g};
-	}
-	else if (set == 6) {
-		level =
-		{0, 0, 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0, 0, 0,
-		 1, 1, 1, 1, 1, 1, 1,
-		 1, 1, 1, 1, 1, 1, 1,
-		 0, 0, 0, 0, 0, 0, 0};
-		color =
-		{r, r, r, r, r, r, r, 
-		 r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r,
-		 r, r, r, r, r, r, r, 
-		 r, r, r, r, r, r, r};
+	if (setCluster == 0) {
+		if (set == 1) {
+			level = // The Charge
+			{1, 0, 0, 0, 0, 0, 1,
+			 0, 1, 0, 0, 0, 1, 0,
+			 0, 0, 1, 0, 1, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r };
+		} else if (set == 2) {
+			level = // The Audience
+			{0, 0, 0, 0, 0, 0, 0,
+			 1, 0, 0, 0, 0, 0, 1,
+			 1, 0, 0, 0, 0, 0, 1,
+			 1, 0, 0, 0, 0, 0, 1,
+			 1, 0, 0, 0, 0, 0, 1,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y };
+		} else if (set == 3) {
+			level = // The Alien Defense
+			{0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 1, 0, 0, 0, 1, 0,
+			 1, 1, 1, 0, 1, 1, 1,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b };
+		} else if (set == 4) {
+			level = // The Scales (right)
+			{1, 1, 1, 0, 0, 0, 0,
+			 1, 1, 1, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 1, 1, 1,
+			 0, 0, 0, 0, 1, 1, 1 };
+			color =
+			{m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m };
+		} else if (set == 5) {
+			level = // The Scales (left)
+			{0, 0, 0, 0, 1, 1, 1,
+			 0, 0, 0, 0, 1, 1, 1,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 1, 1, 1, 0, 0, 0, 0,
+			 1, 1, 1, 0, 0, 0, 0 };
+			color =
+			{g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g };
+		} else if (set == 6) {
+			level = // The Sword
+			{0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 1, 1, 1, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0 };
+			color =
+			{c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c };
+		}
+	} else if (setCluster == 1) {
+		if (set == 1) {
+			level = // The Wall
+			{1, 0, 0, 0, 0, 0, 1,
+			 1, 0, 0, 0, 0, 0, 1,
+			 1, 0, 0, 0, 0, 0, 1,
+			 1, 1, 1, 1, 1, 1, 2,
+			 1, 1, 1, 1, 1, 1, 1,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r };
+		} else if (set == 2) {
+			level = // The Checkerboard
+			{0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 3, 0, 1, 0, 1, 0, 1,
+			 0, 1, 0, 1, 0, 1, 0,
+			 1, 0, 1, 0, 1, 0, 1,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y };
+		} else if (set == 3) {
+			level = // The Fighter Jet
+			{0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0,
+			 1, 0, 1, 0, 1, 0, 1,
+			 0, 1, 1, 1, 1, 1, 0,
+			 0, 0, 4, 1, 1, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0 };
+			color =
+			{b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b };
+		} else if (set == 4) {
+			level = // The Formation
+			{0, 0, 0, 0, 0, 0, 0,
+			 1, 1, 1, 1, 1, 3, 1,
+			 0, 0, 0, 0, 0, 0, 0,
+			 1, 1, 1, 1, 1, 1, 1,
+			 0, 0, 0, 0, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color = 
+			{m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m };
+		} else if (set == 5) {
+			level = // The Pillars
+			{0, 0, 0, 0, 0, 0, 0,
+			 0, 1, 1, 0, 1, 1, 0,
+			 0, 1, 2, 0, 1, 1, 0,
+			 0, 1, 1, 0, 1, 1, 0,
+			 0, 1, 1, 0, 1, 1, 0,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g };
+		} else if (set == 6) {
+			level = // The Treasure Chest
+			{0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 1, 1, 1, 0, 0,
+			 0, 1, 1, 5, 1, 1, 0,
+			 0, 0, 1, 1, 1, 0, 0,
+			 0, 0, 0, 1, 0, 0, 0,
+			 0, 0, 0, 0, 0, 0, 0 };
+			color =
+			{c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c };
+		}
+	} else if (setCluster == 2) {
+		if (set == 1) {
+			level = // The Butterfly
+			{1, 0, 0, 1, 0, 0, 1,
+			 1, 1, 0, 1, 0, 1, 1,
+			 1, 1, 1, 1, 1, 1, 1,
+			 1, 1, 0, 1, 0, 1, 1, 
+			 1, 0, 0, 2, 0, 0, 1,
+			 1, 0, 0, 1, 0, 0, 3 };
+			color =
+			{r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r,
+			 r, r, r, r, r, r, r };
+		} else if (set == 2) {
+			level = // The Cross
+			{1, 1, 0, 0, 0, 1, 1,
+			 0, 4, 1, 0, 1, 1, 0,
+			 0, 0, 1, 1, 1, 0, 0,
+			 0, 0, 1, 3, 1, 0, 0,
+			 0, 1, 1, 0, 1, 1, 0,
+			 1, 1, 0, 0, 0, 1, 1 };
+			color =
+			{y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y,
+			 y, y, y, y, y, y, y };
+		} else if (set == 3) {
+			level = // The Inverted Cross
+			{0, 0, 1, 6, 1, 0, 0,
+			 1, 0, 0, 1, 0, 0, 1,
+			 1, 1, 0, 0, 0, 1, 3,
+			 1, 1, 0, 0, 0, 1, 1,
+			 1, 0, 0, 1, 0, 0, 1,
+			 0, 0, 1, 1, 1, 0, 0 };
+			color =
+			{b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b,
+			 b, b, b, b, b, b, b };
+		} else if (set == 4) {
+			level = // The Great Wall
+			{1, 1, 1, 1, 1, 1, 1,
+			 1, 1, 1, 1, 1, 1, 1,
+			 0, 0, 0, 0, 0, 0, 0,
+			 1, 1, 1, 1, 1, 5, 1,
+			 0, 0, 0, 0, 0, 0, 0,
+			 1, 3, 1, 1, 1, 1, 1 };
+			color =
+			{m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m,
+			 m, m, m, m, m, m, m };
+		} else if (set == 5) {
+			level = // The Champion
+			{0, 0, 1, 1, 1, 0, 0,
+			 0, 0, 1, 1, 2, 0, 0,
+			 0, 0, 1, 1, 1, 0, 0,
+			 1, 1, 1, 0, 1, 1, 1,
+			 5, 1, 1, 0, 1, 1, 1,
+			 1, 1, 1, 0, 1, 1, 1 };
+			color =
+			{g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g,
+			 g, g, g, g, g, g, g };
+		} else if (set == 6) {
+			level = // The Dog. What, you can't see it? XD
+			{0, 1, 1, 1, 1, 1, 0,
+			 1, 1, 2, 1, 2, 1, 1,
+			 1, 1, 1, 1, 1, 1, 1,
+			 1, 0, 1, 1, 1, 0, 1,
+			 1, 0, 1, 1, 1, 0, 1,
+			 0, 0, 0, 3, 0, 0, 0 };
+			color =
+			{c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c,
+			 c, c, c, c, c, c, c };
+		}
 	}
 
 	std::copy(std::begin(level), std::end(level), std::begin(m_BrickSet));
@@ -932,8 +1129,13 @@ bool dd::Systems::LevelSystem::OnPowerUpTaken(const dd::Events::PowerUpTaken &ev
 bool dd::Systems::LevelSystem::OnKrakenDefeated(const dd::Events::KrakenDefeated &event)
 {
 	m_BrickGenerating = false;
+	m_BreakAllBricks = true;
 	SetNumberOfBricks(NumberOfBricks() - 1);
 	m_LooseBricks--;
+
+	Events::ScoreEvent e;
+	e.Score = 1000;
+	EventBroker->Publish(e);
 
 	std::cout << m_LooseBricks << std::endl;
 
@@ -943,6 +1145,7 @@ bool dd::Systems::LevelSystem::OnKrakenDefeated(const dd::Events::KrakenDefeated
 bool dd::Systems::LevelSystem::OnStageCleared(const dd::Events::StageCleared &event)
 {
     if (!m_Cleared) {
+		m_BreakAllBricks = false;
         m_Cleared = true;
         SetRestarting(true);
         Events::ResetBall e;
@@ -1041,10 +1244,10 @@ void dd::Systems::LevelSystem::GetNextLevel()
             level =
                     {0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 100, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0};
+                     0, 0, 0, 0, 0, 0, 0,
+                     0, 0, 0, 100, 0, 0, 0};
 			color = 
 					{w, w, w, w, w, w, w,
 					 w, w, w, w, w, w, w,
@@ -1217,10 +1420,6 @@ void dd::Systems::LevelSystem::GetNextLevel()
 bool dd::Systems::LevelSystem::OnHitPad(const dd::Events::HitPad &event)
 {
     m_Cleared = false;
-	if (m_BrickGenerating) {
-		m_BrickGenerating = false;
-		BrickGenerating(m_BrickGeneratingEvent);
-	}
     return true;
 }
 

@@ -12,6 +12,7 @@
 #include "Core/CTemplate.h"
 #include "Core/EventBroker.h"
 #include "Core/World.h"
+#include "Rendering/CCamera.h"
 #include "Game/EPause.h"
 #include "Game/EResume.h"
 #include "Game/EScreenShake.h"

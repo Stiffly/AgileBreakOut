@@ -17,13 +17,14 @@ struct Kraken : Component {
 
     int MaxHealth = 30;
 	int Health = MaxHealth;
-	int CurrentAction = 1;
+	int CurrentAction = 3;
+	float RetreatSpeed = 0.2;
 	
 	const int Idle = 1;
 	const int Grabbing = 2;
-	const int Taunting = 3;
-	const int Moving = 4;
-	const int BrickGenerating = 5;
+	const int BrickGenerating = 3;
+	const int BrickGenerating2 = 4;
+	const int Waiting = 5;
 	// Idle. Generating bricks. Taunting. No idea.
 };
 

@@ -19,6 +19,7 @@ struct BrickGenerating : Event
 	glm::vec3 Origin2;
 	int TargetLine;
 	int Set;
+	int SetCluster;
 };
 
 }
