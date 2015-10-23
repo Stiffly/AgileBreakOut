@@ -23,6 +23,7 @@ void dd::Systems::LevelSystem::Initialize()
 	EVENT_SUBSCRIBE_MEMBER(m_EResume, &LevelSystem::OnResume);
 	EVENT_SUBSCRIBE_MEMBER(m_EHitPad, &LevelSystem::OnHitPad);
 	EVENT_SUBSCRIBE_MEMBER(m_EBrickGenerating, &LevelSystem::OnBrickGenerating);
+	EVENT_SUBSCRIBE_MEMBER(m_EBreakAllBricks, &LevelSystem::OnBreakAllBricks);
 	EVENT_SUBSCRIBE_MEMBER(m_EKrakenDefeated, &LevelSystem::OnKrakenDefeated);
 
 	m_GodMode = ResourceManager::Load<ConfigFile>("Config.ini")->GetValue<bool>("Cheat.GodMode", false);
@@ -300,12 +301,18 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
 		}
 	}
 
+	if (m_BreakAllBricks) {
+		if (m_LooseBricks == 1 && m_KrakenBattle) {
+			m_BreakAllBricks = false;
+		}
+	}
+
     auto brick = m_World->GetComponent<Components::Brick>(entity);
     if (brick != nullptr) {
 		if (m_BreakAllBricks) {
 			if (!brick->Removed) {
 				brick->Removed = true;
-				BrickHit(entity, entity, 1);
+				BrickHit(entity, entity, 0, false);
 			}
 		}
 
@@ -357,7 +364,7 @@ void dd::Systems::LevelSystem::UpdateEntity(double dt, EntityID entity, EntityID
     auto ball = m_World->GetComponent<Components::Ball>(entity);
 
 	if (ball != nullptr) {
-		if (m_BrickGenerating) {
+		if (m_BrickGenerating && !m_BreakAllBricks) {
 			auto transform = m_World->GetComponent<Components::Transform>(entity);
 			if (transform->Position.y < 0 && transform->Velocity.y < 0) {
 				m_BrickGenerating = false;
@@ -498,6 +505,7 @@ EntityID dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spac
 		model->ModelFile = "Models/Brick/KrakenBrick.obj";
 
 	} else if (typeInt == Kraken) {
+		m_KrakenBattle = true;
 		Events::KrakenAppear e;
 		e.Position = transform->Position;
 		e.Health = 10;
@@ -512,6 +520,7 @@ EntityID dd::Systems::LevelSystem::CreateBrick(int row, int line, glm::vec2 spac
 
 bool dd::Systems::LevelSystem::OnBrickGenerating(const dd::Events::BrickGenerating &event)
 {
+	m_BreakAllBricks = true;
 	m_BrickGenerating = true;
 	m_BrickGeneratingEvent = event;
 	return true;
@@ -544,7 +553,7 @@ bool dd::Systems::LevelSystem::BrickGenerating(const dd::Events::BrickGenerating
 					}
 					brick->GenerationGoal = e.GoalPosition;
 					e.Entity = ent;
-					e.Speed = 6;
+					e.Speed = event.Speed;
 					e.Queue = false;
 					EventBroker->Publish(e);
 					m_LooseBricks++;
@@ -554,6 +563,12 @@ bool dd::Systems::LevelSystem::BrickGenerating(const dd::Events::BrickGenerating
 			getter++;
 		}
 	}
+	return true;
+}
+
+bool dd::Systems::LevelSystem::OnBreakAllBricks(const dd::Events::BreakAllBricks &event)
+{
+	m_BreakAllBricks = true;
 	return true;
 }
 
@@ -608,10 +623,10 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 		} else if (set == 2) {
 			level = // The Audience
 			{0, 0, 0, 0, 0, 0, 0,
+			 4, 0, 0, 0, 0, 0, 1,
 			 1, 0, 0, 0, 0, 0, 1,
 			 1, 0, 0, 0, 0, 0, 1,
-			 1, 0, 0, 0, 0, 0, 1,
-			 1, 0, 0, 0, 0, 0, 1,
+			 1, 0, 0, 0, 0, 0, 6,
 			 0, 0, 0, 0, 0, 0, 0 };
 			color =
 			{y, y, y, y, y, y, y,
@@ -625,8 +640,8 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 			{0, 0, 0, 0, 0, 0, 0,
 			 0, 0, 0, 0, 0, 0, 0,
 			 0, 0, 0, 0, 0, 0, 0,
-			 0, 1, 0, 0, 0, 1, 0,
-			 1, 1, 1, 0, 1, 1, 1,
+			 0, 3, 0, 0, 0, 1, 0,
+			 1, 1, 6, 0, 1, 1, 1,
 			 0, 0, 0, 0, 0, 0, 0 };
 			color =
 			{b, b, b, b, b, b, b,
@@ -638,11 +653,11 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 		} else if (set == 4) {
 			level = // The Scales (right)
 			{1, 1, 1, 0, 0, 0, 0,
-			 1, 1, 1, 0, 0, 0, 0,
+			 1, 1, 6, 0, 0, 0, 0,
 			 0, 0, 0, 0, 0, 0, 0,
 			 0, 0, 0, 0, 0, 0, 0,
 			 0, 0, 0, 0, 1, 1, 1,
-			 0, 0, 0, 0, 1, 1, 1 };
+			 0, 0, 0, 0, 1, 4, 1 };
 			color =
 			{m, m, m, m, m, m, m,
 			 m, m, m, m, m, m, m,
@@ -653,11 +668,11 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 		} else if (set == 5) {
 			level = // The Scales (left)
 			{0, 0, 0, 0, 1, 1, 1,
-			 0, 0, 0, 0, 1, 1, 1,
+			 0, 0, 0, 0, 1, 3, 1,
 			 0, 0, 0, 0, 0, 0, 0,
 			 0, 0, 0, 0, 0, 0, 0,
 			 1, 1, 1, 0, 0, 0, 0,
-			 1, 1, 1, 0, 0, 0, 0 };
+			 1, 6, 1, 0, 0, 0, 0 };
 			color =
 			{g, g, g, g, g, g, g,
 			 g, g, g, g, g, g, g,
@@ -668,7 +683,7 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 		} else if (set == 6) {
 			level = // The Sword
 			{0, 0, 0, 1, 0, 0, 0,
-			 0, 0, 1, 1, 1, 0, 0,
+			 0, 0, 6, 2, 6, 0, 0,
 			 0, 0, 0, 1, 0, 0, 0,
 			 0, 0, 0, 1, 0, 0, 0,
 			 0, 0, 0, 1, 0, 0, 0,
@@ -686,8 +701,8 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 			level = // The Wall
 			{1, 0, 0, 0, 0, 0, 1,
 			 1, 0, 0, 0, 0, 0, 1,
-			 1, 0, 0, 0, 0, 0, 1,
-			 1, 1, 1, 1, 1, 1, 2,
+			 6, 0, 0, 0, 0, 0, 6,
+			 1, 1, 1, 1, 1, 1, 1,
 			 1, 1, 1, 1, 1, 1, 1,
 			 0, 0, 0, 0, 0, 0, 0 };
 			color =
@@ -701,7 +716,7 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 			level = // The Checkerboard
 			{0, 0, 0, 0, 0, 0, 0,
 			 0, 0, 0, 0, 0, 0, 0,
-			 3, 0, 1, 0, 1, 0, 1,
+			 3, 0, 1, 0, 6, 0, 1,
 			 0, 1, 0, 1, 0, 1, 0,
 			 1, 0, 1, 0, 1, 0, 1,
 			 0, 0, 0, 0, 0, 0, 0 };
@@ -716,7 +731,7 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 			level = // The Fighter Jet
 			{0, 0, 0, 0, 0, 0, 0,
 			 0, 0, 0, 0, 0, 0, 0,
-			 1, 0, 1, 0, 1, 0, 1,
+			 6, 0, 1, 0, 1, 0, 6,
 			 0, 1, 1, 1, 1, 1, 0,
 			 0, 0, 4, 1, 1, 0, 0,
 			 0, 0, 0, 1, 0, 0, 0 };
@@ -730,9 +745,9 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 		} else if (set == 4) {
 			level = // The Formation
 			{0, 0, 0, 0, 0, 0, 0,
-			 1, 1, 1, 1, 1, 3, 1,
+			 1, 1, 4, 1, 1, 3, 1,
 			 0, 0, 0, 0, 0, 0, 0,
-			 1, 1, 1, 1, 1, 1, 1,
+			 1, 1, 6, 1, 1, 1, 1,
 			 0, 0, 0, 0, 0, 0, 0,
 			 0, 0, 0, 0, 0, 0, 0 };
 			color = 
@@ -746,9 +761,9 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 			level = // The Pillars
 			{0, 0, 0, 0, 0, 0, 0,
 			 0, 1, 1, 0, 1, 1, 0,
-			 0, 1, 2, 0, 1, 1, 0,
+			 0, 6, 1, 0, 1, 6, 0,
 			 0, 1, 1, 0, 1, 1, 0,
-			 0, 1, 1, 0, 1, 1, 0,
+			 0, 1, 3, 0, 3, 1, 0,
 			 0, 0, 0, 0, 0, 0, 0 };
 			color =
 			{g, g, g, g, g, g, g,
@@ -761,8 +776,8 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 			level = // The Treasure Chest
 			{0, 0, 0, 1, 0, 0, 0,
 			 0, 0, 1, 1, 1, 0, 0,
-			 0, 1, 1, 5, 1, 1, 0,
-			 0, 0, 1, 1, 1, 0, 0,
+			 0, 1, 1, 2, 1, 1, 0,
+			 0, 0, 1, 6, 1, 0, 0,
 			 0, 0, 0, 1, 0, 0, 0,
 			 0, 0, 0, 0, 0, 0, 0 };
 			color =
@@ -776,11 +791,11 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 	} else if (setCluster == 2) {
 		if (set == 1) {
 			level = // The Butterfly
-			{1, 0, 0, 1, 0, 0, 1,
-			 1, 1, 0, 1, 0, 1, 1,
-			 1, 1, 1, 1, 1, 1, 1,
+			{4, 0, 0, 1, 0, 0, 1,
+			 1, 6, 0, 1, 0, 6, 1,
+			 1, 1, 1, 6, 1, 1, 1,
 			 1, 1, 0, 1, 0, 1, 1, 
-			 1, 0, 0, 2, 0, 0, 1,
+			 1, 0, 0, 1, 0, 0, 1,
 			 1, 0, 0, 1, 0, 0, 3 };
 			color =
 			{r, r, r, r, r, r, r,
@@ -792,7 +807,7 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 		} else if (set == 2) {
 			level = // The Cross
 			{1, 1, 0, 0, 0, 1, 1,
-			 0, 4, 1, 0, 1, 1, 0,
+			 0, 4, 1, 0, 1, 6, 0,
 			 0, 0, 1, 1, 1, 0, 0,
 			 0, 0, 1, 3, 1, 0, 0,
 			 0, 1, 1, 0, 1, 1, 0,
@@ -806,11 +821,11 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 			 y, y, y, y, y, y, y };
 		} else if (set == 3) {
 			level = // The Inverted Cross
-			{0, 0, 1, 6, 1, 0, 0,
-			 1, 0, 0, 1, 0, 0, 1,
-			 1, 1, 0, 0, 0, 1, 3,
+			{0, 0, 1, 1, 1, 0, 0,
+			 1, 0, 0, 6, 0, 0, 1,
+			 4, 1, 0, 0, 0, 1, 3,
 			 1, 1, 0, 0, 0, 1, 1,
-			 1, 0, 0, 1, 0, 0, 1,
+			 1, 0, 0, 6, 0, 0, 1,
 			 0, 0, 1, 1, 1, 0, 0 };
 			color =
 			{b, b, b, b, b, b, b,
@@ -822,11 +837,11 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 		} else if (set == 4) {
 			level = // The Great Wall
 			{1, 1, 1, 1, 1, 1, 1,
-			 1, 1, 1, 1, 1, 1, 1,
+			 1, 1, 6, 1, 1, 1, 1,
 			 0, 0, 0, 0, 0, 0, 0,
-			 1, 1, 1, 1, 1, 5, 1,
+			 1, 6, 1, 1, 1, 1, 1,
 			 0, 0, 0, 0, 0, 0, 0,
-			 1, 3, 1, 1, 1, 1, 1 };
+			 1, 3, 1, 1, 1, 1, 5 };
 			color =
 			{m, m, m, m, m, m, m,
 			 m, m, m, m, m, m, m,
@@ -837,10 +852,10 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 		} else if (set == 5) {
 			level = // The Champion
 			{0, 0, 1, 1, 1, 0, 0,
-			 0, 0, 1, 1, 2, 0, 0,
+			 0, 0, 1, 1, 1, 0, 0,
 			 0, 0, 1, 1, 1, 0, 0,
 			 1, 1, 1, 0, 1, 1, 1,
-			 5, 1, 1, 0, 1, 1, 1,
+			 3, 6, 1, 0, 1, 6, 1,
 			 1, 1, 1, 0, 1, 1, 1 };
 			color =
 			{g, g, g, g, g, g, g,
@@ -851,10 +866,10 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 			 g, g, g, g, g, g, g };
 		} else if (set == 6) {
 			level = // The Dog. What, you can't see it? XD
-			{0, 1, 1, 1, 1, 1, 0,
-			 1, 1, 2, 1, 2, 1, 1,
+			{0, 1, 1, 6, 1, 1, 0,
+			 1, 1, 4, 5, 4, 1, 1,
 			 1, 1, 1, 1, 1, 1, 1,
-			 1, 0, 1, 1, 1, 0, 1,
+			 6, 0, 1, 1, 1, 0, 6,
 			 1, 0, 1, 1, 1, 0, 1,
 			 0, 0, 0, 3, 0, 0, 0 };
 			color =
@@ -933,7 +948,7 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 		// For when a brick gets shot.
 		brick->Removed = true;
 		m_World->RemoveEntity(entityShot);
-		BrickHit(entityShot, entityBrick, 1);
+		BrickHit(entityShot, entityBrick, 1, true);
 		//ep.Radius = 0.05;
 
 		return true;
@@ -949,13 +964,13 @@ bool dd::Systems::LevelSystem::OnContact(const dd::Events::Contact &event)
 		ec.Ball = entityBall;
 		EventBroker->Publish(ec);
 
-		BrickHit(entityBall, entityBrick, ball->Combo);
+		BrickHit(entityBall, entityBrick, ball->Combo, true);
     }
 
     return true;
 }
 
-void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBrick, int combo)
+void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBrick, int combo, bool activatePowerUps)
 {
 	auto brick = m_World->GetComponent<Components::Brick>(entityBrick);
 	auto physicsComponent = m_World->GetComponent<Components::Physics>(entityBrick);
@@ -972,47 +987,49 @@ void dd::Systems::LevelSystem::BrickHit(EntityID entityHitter, EntityID entityBr
 	}
 
 	// Check if the brick is any kind of special.
-	auto multi = m_World->GetComponent<Components::MultiBallBrick>(entityBrick);
-	if (multi != nullptr) {
-		Events::MultiBall e;
-		e.padTransform = transformComponentBrick;
-		EventBroker->Publish(e);
-	}
-	else {
-		auto buoy = m_World->GetComponent<Components::LifebuoyBrick>(entityBrick);
-		if (buoy != nullptr) {
-			Events::Lifebuoy e;
-			e.Transform = transformComponentBrick;
+	if (activatePowerUps) {
+		auto multi = m_World->GetComponent<Components::MultiBallBrick>(entityBrick);
+		if (multi != nullptr) {
+			Events::MultiBall e;
+			e.padTransform = transformComponentBrick;
 			EventBroker->Publish(e);
 		}
 		else {
-			auto sticky = m_World->GetComponent<Components::StickyBrick>(entityBrick);
-			if (sticky != nullptr) {
-				Events::StickyPad e;
+			auto buoy = m_World->GetComponent<Components::LifebuoyBrick>(entityBrick);
+			if (buoy != nullptr) {
+				Events::Lifebuoy e;
 				e.Transform = transformComponentBrick;
-				e.Times = 3;
 				EventBroker->Publish(e);
 			}
 			else {
-				auto ink = m_World->GetComponent<Components::InkBlasterBrick>(entityBrick);
-				if (ink != nullptr) {
-					Events::InkBlaster e;
+				auto sticky = m_World->GetComponent<Components::StickyBrick>(entityBrick);
+				if (sticky != nullptr) {
+					Events::StickyPad e;
 					e.Transform = transformComponentBrick;
-					e.Shots = 5;
-					e.Speed = 7;
+					e.Times = 3;
 					EventBroker->Publish(e);
 				}
 				else {
-					auto kraken = m_World->GetComponent<Components::KrakenAttackBrick>(entityBrick);
-					if (kraken != nullptr) {
-						Events::KrakenAttack e;
-						e.ChargeUpdate = 0;
-						e.KrakenStrength = 0.1;
-						e.PlayerStrength = 0.05;
+					auto ink = m_World->GetComponent<Components::InkBlasterBrick>(entityBrick);
+					if (ink != nullptr) {
+						Events::InkBlaster e;
+						e.Transform = transformComponentBrick;
+						e.Shots = 5;
+						e.Speed = 7;
 						EventBroker->Publish(e);
 					}
 					else {
+						auto kraken = m_World->GetComponent<Components::KrakenAttackBrick>(entityBrick);
+						if (kraken != nullptr) {
+							Events::KrakenAttack e;
+							e.ChargeUpdate = 0;
+							e.KrakenStrength = 0.1;
+							e.PlayerStrength = 0.05;
+							EventBroker->Publish(e);
+						}
+						else {
 
+						}
 					}
 				}
 			}
@@ -1149,6 +1166,7 @@ bool dd::Systems::LevelSystem::OnPowerUpTaken(const dd::Events::PowerUpTaken &ev
 
 bool dd::Systems::LevelSystem::OnKrakenDefeated(const dd::Events::KrakenDefeated &event)
 {
+	m_KrakenBattle = false;
 	m_BrickGenerating = false;
 	m_BreakAllBricks = true;
 	SetNumberOfBricks(NumberOfBricks() - 1);

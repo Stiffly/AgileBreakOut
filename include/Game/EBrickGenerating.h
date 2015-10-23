@@ -20,6 +20,7 @@ struct BrickGenerating : Event
 	int TargetLine;
 	int Set;
 	int SetCluster;
+	int Speed = 6;
 };
 
 }

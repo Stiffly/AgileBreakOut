@@ -124,7 +124,7 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 		if (ball->Waiting || ball->Sticky) {
 			if (m_ResetBall && ball->Waiting) {
 				ball->StickyPlacement = glm::vec3(0.f, 0.f, 0.f);
-				ball->StickyPlacement.y += 0.45f;
+				ball->StickyPlacement.y += 0.25f;
 				m_ResetBall = false;
 			}
 			auto ballTransform = m_World->GetComponent<Components::Transform>(entity);
@@ -293,6 +293,10 @@ bool dd::Systems::PadSystem::OnKeyDown(const dd::Events::KeyDown &event) {
 		e.Origin1 = glm::vec3(-5, 7, -10);
 		e.Origin2 = glm::vec3(5, 7, -10);
 		e.Set = 1;
+		e.SetCluster = 1;
+		EventBroker->Publish(e);
+	} else if (val == GLFW_KEY_C) {
+		Events::BreakAllBricks e;
 		EventBroker->Publish(e);
 	} else if (val == GLFW_KEY_L) {
 		Events::Lifebuoy e;
