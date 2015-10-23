@@ -44,7 +44,7 @@ void dd::Systems::LifebuoySystem::Initialize()
 
 void dd::Systems::LifebuoySystem::Update(double dt)
 {
-	for (auto it = m_Lifebuoys.begin(); it != m_Lifebuoys.end();) {
+	/*for (auto it = m_Lifebuoys.begin(); it != m_Lifebuoys.end();) { //Niklas note: Jag fortstatte få fel efter ni gick hem, och jag förstod inte det här så jag gjorde om som jag visste hur i UpdateEntity.
 		
 		auto transformComponent = m_World->GetComponent<Components::Transform>(it->Entity);
 		auto lifebuoyComponent = m_World->GetComponent<Components::Lifebuoy>(it->Entity);
@@ -80,7 +80,7 @@ void dd::Systems::LifebuoySystem::Update(double dt)
 
 			++it;
 		}
-	}
+	}*/
 
 	if (IsPaused()) {
 		return;
@@ -103,6 +103,38 @@ void dd::Systems::LifebuoySystem::UpdateEntity(double dt, EntityID entity, Entit
     }
     auto templateCheck = m_World->GetComponent<Components::Template>(entity);
     if (templateCheck != nullptr){ return; }
+
+	auto lifebuoyComponent = m_World->GetComponent<Components::Lifebuoy>(entity);
+
+	if (lifebuoyComponent != nullptr) {
+		auto transformComponent = m_World->GetComponent<Components::Transform>(entity);
+
+		if (transformComponent->Position.y < m_DownEdge) {
+			m_World->RemoveEntity(entity);
+			//m_Lifebuoys.erase(it++);
+		}
+		else {
+
+			if (transformComponent->Position.x > m_RightEdge) {
+				transformComponent->Position = glm::vec3(m_LeftEdge + 0.1f, transformComponent->Position.y, transformComponent->Position.z);
+			}
+			else if (transformComponent->Position.x < m_LeftEdge) {
+				transformComponent->Position = glm::vec3(m_RightEdge - 0.1f, transformComponent->Position.y, transformComponent->Position.z);
+			}
+
+			if (lifebuoyComponent->Hits <= 0) {
+				auto physicsComponent = m_World->GetComponent<Components::Physics>(entity);
+				physicsComponent->Mask = CollisionLayer::Type::LifeBuoy;
+				physicsComponent->GravityScale = 10.f;
+				auto modelComponent = m_World->GetComponent<Components::Model>(entity);
+				modelComponent->Color = glm::vec4(0.5f, 0.5f, 0.5f, 0.f);
+			}
+
+			if (transformComponent->Position.y < m_DownLimit && lifebuoyComponent->Hits > 0) {
+				transformComponent->Position.y = m_DownLimit;
+			}
+		}
+	}
 }
 
 bool dd::Systems::LifebuoySystem::OnPause(const dd::Events::Pause &event)
@@ -160,28 +192,30 @@ bool dd::Systems::LifebuoySystem::OnLifebuoyHit(const dd::Events::LifebuoyHit &e
 {
 	auto transformComponent = m_World->GetComponent<Components::Transform>(event.Lifebuoy);
 	auto lifebuoyComponent = m_World->GetComponent<Components::Lifebuoy>(event.Lifebuoy);
-	lifebuoyComponent->Hits -= 1;
-	auto modelComponent = m_World->GetComponent<Components::Model>(event.Lifebuoy);
-	modelComponent->ModelFile = "Models/Lifebuoy/Lifebuoy" + std::to_string(5 - lifebuoyComponent->Hits) + ".obj";
+	if (lifebuoyComponent != nullptr) {
+		lifebuoyComponent->Hits -= 1;
+		auto modelComponent = m_World->GetComponent<Components::Model>(event.Lifebuoy);
+		modelComponent->ModelFile = "Models/Lifebuoy/Lifebuoy" + std::to_string(5 - lifebuoyComponent->Hits) + ".obj";
 
-	Events::CreateParticleSequence e;
-	e.EmitterLifeTime = 4;
-	e.EmittingAngle = glm::half_pi<float>();
-	e.Spread = 0.5f;
-	e.NumberOfTicks = 1;
-	e.ParticleLifeTime = 2.f;
-	e.ParticlesPerTick = 1;
-	e.Position = transformComponent->Position;
-	e.ScaleValues.clear();
-	e.ScaleValues.push_back(glm::vec3(0.5f));
-	e.ScaleValues.push_back(glm::vec3(2.f, 2.f, 0.2f));
-	e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
-	e.Color = glm::vec4(1, 0, 0, 1);
-	e.AlphaValues.clear();
-	e.AlphaValues.push_back(1.f);
-	e.AlphaValues.push_back(0.f);
-	e.Speed = 10.f;
-	EventBroker->Publish(e);
+		Events::CreateParticleSequence e;
+		e.EmitterLifeTime = 4;
+		e.EmittingAngle = glm::half_pi<float>();
+		e.Spread = 0.5f;
+		e.NumberOfTicks = 1;
+		e.ParticleLifeTime = 2.f;
+		e.ParticlesPerTick = 1;
+		e.Position = transformComponent->Position;
+		e.ScaleValues.clear();
+		e.ScaleValues.push_back(glm::vec3(0.5f));
+		e.ScaleValues.push_back(glm::vec3(2.f, 2.f, 0.2f));
+		e.SpriteFile = "Textures/Particles/Cloud_Particle.png";
+		e.Color = glm::vec4(1, 0, 0, 1);
+		e.AlphaValues.clear();
+		e.AlphaValues.push_back(1.f);
+		e.AlphaValues.push_back(0.f);
+		e.Speed = 10.f;
+		EventBroker->Publish(e);
+	}
 
 	return true;
 }

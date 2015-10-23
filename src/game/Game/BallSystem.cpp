@@ -471,17 +471,17 @@ bool dd::Systems::BallSystem::OnMultiBall(const dd::Events::MultiBall &event)
     ball2->Waiting = false;
     auto padTransform = event.padTransform;
     float x1 = padTransform->Position.x/* - 2*/, x2 = padTransform->Position.x/* + 2*/;
-    if (x1 < -m_EdgeX) {
-        x1 = m_EdgeX - 0.2;
+    if (x1 < -m_EdgeX + 0.4) {
+        x1 = m_EdgeX - 0.7;
     }
-    if (x2 > m_EdgeX) {
-        x2 = -m_EdgeX + 0.2;
+    if (x2 > m_EdgeX - 0.4) {
+        x2 = -m_EdgeX + 0.7;
     }
     transform1->Position = glm::vec3(x1, -5.5, -10);
     transform2->Position = glm::vec3(x2, -5.5, -10);
 
-    transform1->Velocity = glm::normalize(glm::vec3(5, 5 ,0.f)) * ball1->Speed;
-    transform2->Velocity = glm::normalize(glm::vec3(-5, 5 ,0.f)) * ball2->Speed;
+    transform1->Velocity = glm::normalize(glm::vec3(2.5, 5 ,0.f)) * ball1->Speed;
+    transform2->Velocity = glm::normalize(glm::vec3(-2.5, 5 ,0.f)) * ball2->Speed;
 
     SetMultiBalls(MultiBalls() + 2);
     //std::cout << MultiBalls() << std::endl;

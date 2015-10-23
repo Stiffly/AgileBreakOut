@@ -105,7 +105,7 @@ private:
 	std::mt19937 m_RandomGenerator;
 
     float m_XMovementMultiplier = 2.f;
-    float m_EdgeX = 3.4f; //Actually 3.2, but anyways.
+    float m_EdgeX = 3.2f; 
     float m_EdgeY = 5.2f;
     int m_MultiBalls = 0;
     bool m_ReplaceBall = false;
