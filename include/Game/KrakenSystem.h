@@ -103,6 +103,7 @@ private:
 	bool OnBrickGenerating(const dd::Events::BrickGenerating &event);
 	bool OnArrivedAtNewStage(const dd::Events::ArrivedAtNewStage &event);
 	void GetBrickSet();
+	void CreateBloodEffect(glm::vec3);
 };
 
 }

@@ -337,47 +337,7 @@ bool dd::Systems::KrakenSystem::OnKrakenHit(const dd::Events::KrakenHit &event)
 	m_KrakenCurrentSecondsToAction = m_KrakenMaxSecondsToAction - (modifier * timeDifferenceBetweenMaxAndMin);
 	// If modifier is 1, MaxSeconds is 15, MinSeconds is 5, then... 15 - (1 * 10), meaning 5.
 
-	auto ball = m_World->GetComponent<Components::Transform>(event.Hitter);
-	if (ball != nullptr) {
-		//Particle trail
-		Events::CreateParticleSequence trail;
-		trail.parent = event.Hitter;
-		trail.AlphaValues.push_back(1.f);
-		trail.AlphaValues.push_back(0.f);
-		trail.ScaleValues.push_back(glm::vec3(0.08f));
-		trail.ScaleValues.push_back(glm::vec3(0.f));
-		trail.RadiusDistribution = 2;
-		trail.EmitterLifeTime = 1.f;
-		trail.ParticleLifeTime = 1.f;
-		trail.ParticlesPerTick = 1;
-		trail.SpawnRate = 0.5f;
-		trail.Speed = 10.f;
-		trail.EmittingAngle = glm::half_pi<float>();
-		trail.SpriteFile = "Textures/Particles/FadeBall.png";
-		trail.Color = glm::vec4(1, 0, 0, 1);
-		//p.Spread = ...
-		EventBroker->Publish(trail);
-	}
-
-	//ParticlePoof
-	Events::CreateParticleSequence poof;
-	poof.EmitterLifeTime = 4;
-	poof.EmittingAngle = glm::half_pi<float>();
-	poof.Spread = 0.5f;
-	poof.NumberOfTicks = 1;
-	poof.ParticleLifeTime = 1.5f;
-	poof.ParticlesPerTick = 2;
-	poof.Position = event.PlaceHit;
-	poof.ScaleValues.clear();
-	poof.ScaleValues.push_back(glm::vec3(0.5f));
-	poof.ScaleValues.push_back(glm::vec3(2.f, 2.f, 0.2f));
-	poof.SpriteFile = "Textures/Particles/Cloud_Particle.png";
-	poof.Color = glm::vec4(1, 0, 0, 1);
-	poof.AlphaValues.clear();
-	poof.AlphaValues.push_back(1.f);
-	poof.AlphaValues.push_back(0.f);
-	poof.Speed = 20;
-	EventBroker->Publish(poof);
+	CreateBloodEffect(event.PlaceHit);
 
 	//std::cout << kraken->Health << std::endl;
 	//kraken->Health = -1;
@@ -494,4 +454,70 @@ bool dd::Systems::KrakenSystem::OnArrivedAtNewStage(const dd::Events::ArrivedAtN
 		m_KrakenHasArrived = true;
 	}
 	return true;
+}
+
+void dd::Systems::KrakenSystem::CreateBloodEffect(glm::vec3 pos)
+{
+	//ParticlePoof
+	Events::CreateParticleSequence dust;
+	dust.EmitterLifeTime = 4;
+	dust.EmittingAngle = glm::half_pi<float>();
+	dust.Spread = 0.5f;
+	dust.NumberOfTicks = 1;
+	dust.ParticleLifeTime = 1.f;
+	dust.ParticlesPerTick = 1;
+	dust.Position = pos;
+	dust.ScaleValues.clear();
+	dust.ScaleValues.push_back(glm::vec3(0.5f));
+	dust.ScaleValues.push_back(glm::vec3(2.f, 2.f, 0.2f));
+	dust.SpriteFile = "Textures/Particles/Cloud_Particle.png";
+	dust.Color = glm::vec4(1, 0, 0, 1);
+	dust.AlphaValues.clear();
+	dust.AlphaValues.push_back(1.f);
+	dust.AlphaValues.push_back(0.f);
+	dust.Speed = 20;
+	EventBroker->Publish(dust);
+	std::uniform_real_distribution<float> dist(glm::pi<float>(), glm::two_pi<float>());
+	for (int i = 0; i < 3; i++) {
+		float angle = dist(m_RandomGenerator);
+
+		Events::CreateParticleSequence squirt;
+		squirt.EmitterLifeTime = 0.3f;
+		squirt.EmittingAngle = angle;
+		squirt.Spread = 0;
+		squirt.SpawnRate = 0.01f;
+		squirt.ParticleLifeTime = 0.5f;
+		squirt.ParticlesPerTick = 1;
+		squirt.Position = pos;
+		squirt.ScaleValues.clear();
+		squirt.ScaleValues.push_back(glm::vec3(0.09f));
+		squirt.SpriteFile = "Textures/Particles/FadeBall.png";
+		squirt.Color = glm::vec4(1, 0, 0, 1);
+		squirt.AlphaValues.clear();
+		squirt.AlphaValues.push_back(1.f);
+		squirt.AlphaValues.push_back(0.f);
+		squirt.Speed = 1000;
+		EventBroker->Publish(squirt);
+	}
+	Events::CreateParticleSequence drop;
+	drop.EmitterLifeTime = 7.f;
+	drop.SpawnRate = 0.1f;
+	//drop.EmittingAngle = glm::two_pi<float>() + glm::pi<float>();
+	drop.EmittingAngle = -glm::half_pi<float>();
+	drop.Spread = 0;
+	//drop.Spread = glm::two_pi<float>();
+	drop.ParticleLifeTime = 1.f;
+	drop.ParticlesPerTick = 2;
+	drop.Position = pos;
+	drop.ScaleValues.clear();
+	drop.ScaleValues.push_back(glm::vec3(.15f));
+	drop.ScaleValues.push_back(glm::vec3(0.1f));
+	drop.SpriteFile = "Textures/Particles/FadeBall.png";
+	drop.Color = glm::vec4(1, 0, 0, 1);
+	drop.AlphaValues.clear();
+	drop.AlphaValues.push_back(1.f);
+	drop.AlphaValues.push_back(0.f);
+	drop.GravityScale = 0;
+	drop.Speed = 300;
+	EventBroker->Publish(drop);
 }

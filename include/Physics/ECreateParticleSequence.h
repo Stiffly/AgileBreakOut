@@ -29,6 +29,7 @@ struct CreateParticleSequence : public Event
 	bool DefaultScale = false;
 	std::vector<glm::vec3> ScaleValues;
 	std::vector<float> AlphaValues;
+	std::vector<glm::vec3> VelocityValues;
 
     //Particle
     std::string SpriteFile = "";
