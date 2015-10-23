@@ -41,8 +41,10 @@ public:
 		m_FPSCounter = new GUI::FPSCounter(this, "FPSCounter");
 
 		m_KrakenAttackSlider = new Slider(this, "KrakenSlider");
-		m_KrakenAttackSlider->SetTexture("Textures/GUI/Menu/SliderBackground.png");
-		m_KrakenAttackSlider->SetTextureReleased("Textures/GUI/Menu/SliderHandle.png");
+		m_KrakenAttackSlider->SetTexture("Textures/GUI/KrakenSlider/KrakenArmSliderBackground.png");
+		m_KrakenAttackSlider->SetTextureReleased("Textures/GUI/KrakenSlider/SpaceSpam.png");
+		m_KrakenAttackSlider->SetTexturePressed("Textures/GUI/KrakenSlider/SpaceHit.png");
+
 		m_KrakenAttackSlider->SetLeft(Width / 2 - m_KrakenAttackSlider->Width / 2);
 		m_KrakenAttackSlider->Y = 800;
 		m_KrakenAttackSlider->Hide();
