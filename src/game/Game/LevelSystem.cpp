@@ -792,7 +792,7 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 		if (set == 1) {
 			level = // The Butterfly
 			{4, 0, 0, 1, 0, 0, 1,
-			 1, 6, 0, 1, 0, 6, 1,
+			 1, 6, 0, 1, 0, 1, 1,
 			 1, 1, 1, 6, 1, 1, 1,
 			 1, 1, 0, 1, 0, 1, 1, 
 			 1, 0, 0, 1, 0, 0, 1,
@@ -841,7 +841,7 @@ void dd::Systems::LevelSystem::GetBrickSet(int set, int setCluster) // These are
 			 0, 0, 0, 0, 0, 0, 0,
 			 1, 6, 1, 1, 1, 1, 1,
 			 0, 0, 0, 0, 0, 0, 0,
-			 1, 3, 1, 1, 1, 1, 5 };
+			 1, 3, 1, 1, 1, 1, 1 };
 			color =
 			{m, m, m, m, m, m, m,
 			 m, m, m, m, m, m, m,

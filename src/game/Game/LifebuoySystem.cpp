@@ -76,6 +76,19 @@ void dd::Systems::LifebuoySystem::Update(double dt)
 			++it;
 		}
 	}
+
+	if (IsPaused()) {
+		return;
+	}
+	
+	if (m_Lifebuoy) {
+		m_Timer += dt;
+		if (m_Timer > m_WaitingTime) {
+			m_Timer = 0;
+			m_Lifebuoy = false;
+			Lifebuoy(m_SavedEvent);
+		}
+	}
 }
 
 void dd::Systems::LifebuoySystem::UpdateEntity(double dt, EntityID entity, EntityID parent)
@@ -113,7 +126,14 @@ bool dd::Systems::LifebuoySystem::OnContact(const dd::Events::Contact &event)
     return true;
 }
 
-bool dd::Systems::LifebuoySystem::OnLifebuoy(const dd::Events::Lifebuoy &event) 
+bool dd::Systems::LifebuoySystem::OnLifebuoy(const dd::Events::Lifebuoy &event)
+{
+	m_Lifebuoy = true;
+	m_SavedEvent = event;
+	return true;
+}
+
+bool dd::Systems::LifebuoySystem::Lifebuoy(const dd::Events::Lifebuoy &event) 
 {
 	auto ent = m_World->CloneEntity(m_Template);
 	m_World->SetProperty(ent, "Name", "Lifebuoy");
@@ -121,7 +141,8 @@ bool dd::Systems::LifebuoySystem::OnLifebuoy(const dd::Events::Lifebuoy &event)
 	auto transform = m_World->GetComponent<Components::Transform>(ent);
 	auto physics = m_World->GetComponent<Components::Physics>(ent);
 	physics->CollisionType = CollisionType::Type::Dynamic;
-	transform->Position = glm::vec3(0.f, 0.f, -10.f);
+	//transform->Position = glm::vec3(0.f, 0.f, -10.f);
+	transform->Position = event.Transform->Position;
 	transform->Velocity = glm::vec3(20.f, 3.f, 0.f);
 	LifebuoyInfo info;
 	info.Entity = ent;

@@ -47,6 +47,10 @@ public:
 private:
 	bool m_Pause = false;
 	EntityID m_Template;
+	Events::Lifebuoy m_SavedEvent;
+	bool m_Lifebuoy = false;
+	float m_Timer;
+	float m_WaitingTime = 0.4;
 
 	dd::EventRelay<LifebuoySystem, dd::Events::Contact> m_EContact;
 	dd::EventRelay<LifebuoySystem, dd::Events::Pause> m_EPause;
@@ -58,6 +62,7 @@ private:
 	bool OnPause(const dd::Events::Pause &event);
 	bool OnResume(const dd::Events::Resume &event);
 	bool OnLifebuoy(const dd::Events::Lifebuoy &event);
+	bool Lifebuoy(const dd::Events::Lifebuoy &event);
 	bool OnLifebuoyHit(const dd::Events::LifebuoyHit &event);
 
 	struct LifebuoyInfo
