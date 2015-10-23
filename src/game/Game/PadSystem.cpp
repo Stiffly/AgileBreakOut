@@ -129,14 +129,19 @@ void dd::Systems::PadSystem::UpdateEntity(double dt, EntityID entity, EntityID p
 			auto ballTransform = m_World->GetComponent<Components::Transform>(entity);
 			ballTransform->Position = m_PadTransform->Position;
 			ballTransform->Position += ball->StickyPlacement;
-			glm::vec2 dir = glm::normalize(glm::vec2(ball->SavedSpeed.x, ball->SavedSpeed.y));
-			glm::vec2 up = glm::vec2(0.f, 1.f);
-			float angle = glm::acos(glm::dot<float>(dir, up)) * glm::sign(dir.x);
-			ballTransform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, -1.f));
-			if (ball->Sticky) {
-				m_StickTransform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, 1.f));
-				m_StickTransform->Position = ballTransform->Position;
+			if (ball->Loaded) {
+				ballTransform->Orientation = glm::quat();
+			} else {
+				glm::vec2 dir = glm::normalize(glm::vec2(ball->SavedSpeed.x, ball->SavedSpeed.y));
+				glm::vec2 up = glm::vec2(0.f, 1.f);
+				float angle = glm::acos(glm::dot<float>(dir, up)) * glm::sign(dir.x);
+				ballTransform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, -1.f));
+				if (ball->Sticky) {
+					m_StickTransform->Orientation = glm::rotate(glm::quat(), angle, glm::vec3(0.f, 0.f, 1.f));
+					m_StickTransform->Position = ballTransform->Position;
+				}
 			}
+			
 		}
 		if (!m_StickyAim->Aiming) {
 			m_StickTransform->Position = glm::vec3(30.f, 0.f, 0.f);

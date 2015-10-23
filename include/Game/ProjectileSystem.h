@@ -30,6 +30,7 @@
 #include "Game/CProjectile.h"
 #include "Game/CBall.h"
 #include "Rendering/CSprite.h"
+#include "Rendering/CAnimation.h"
 
 namespace dd
 {

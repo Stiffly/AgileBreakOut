@@ -9,7 +9,7 @@ namespace dd
 namespace Events
 {
 
-struct AnimationComplete
+struct AnimationComplete : Event
 {
 	EntityID Entity;
 	std::string Animation;
