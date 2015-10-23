@@ -49,6 +49,11 @@ void dd::Systems::LifebuoySystem::Update(double dt)
 		auto transformComponent = m_World->GetComponent<Components::Transform>(it->Entity);
 		auto lifebuoyComponent = m_World->GetComponent<Components::Lifebuoy>(it->Entity);
 
+		if (!m_World->ValidEntity(it->Entity)){
+			m_Lifebuoys.erase(it++);
+		}
+
+
 		if (transformComponent->Position.y < m_DownEdge) {
 			m_World->RemoveEntity(it->Entity);
 			m_Lifebuoys.erase(it++);
