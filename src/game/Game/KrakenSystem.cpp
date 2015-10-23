@@ -118,51 +118,51 @@ void dd::Systems::KrakenSystem::UpdateEntity(double dt, EntityID entity, EntityI
 			krakenAttack.PlayerStrength = 0.05;
 			EventBroker->Publish(krakenAttack);
 			break;
-// 		case 3: // Brick Generating
-// 			{
-// 				m_NumberOfActions++;
-// 				kraken->CurrentAction = 1;
-// 				Events::BrickGenerating e;
-// 				e.Origin1 = glm::vec3(-5, 7, -10);
-// 				e.Origin2 = glm::vec3(5, 7, -10);
-// 				if (kraken->Health > 20) {
-// 					e.SetCluster = 0;
-// 				} else if (kraken->Health > 10) {
-// 					e.SetCluster = 1;
-// 				} else {
-// 					e.SetCluster = 2;
-// 				}
-// 				std::uniform_real_distribution<float> dist(1, 6.999f);
-// 				float random = dist(m_RandomGenerator);
-// 				e.Set = random;
-// 				EventBroker->Publish(e);
-// 				break;
-// 			}
-// 		case 4: // Brick Generating second case
-// 			{
-// 				kraken->CurrentAction = 1;
-// 				Events::BrickGenerating e;
-// 				e.Origin1 = glm::vec3(-5, 7, -10);
-// 				e.Origin2 = glm::vec3(5, 7, -10);
-// 				if (kraken->Health > 20) {
-// 					e.SetCluster = 0;
-// 				} else if (kraken->Health > 10) {
-// 					e.SetCluster = 1;
-// 				} else {
-// 					e.SetCluster = 2;
-// 				}
-// 				std::uniform_real_distribution<float> dist(1, 6.999f);
-// 				float random = dist(m_RandomGenerator);
-// 				e.Set = random;
-// 				EventBroker->Publish(e);
-// 				break;
-// 			}
-// 		case 5: // Taunting
-// 			if (m_ReturnToIdle) {
-// 				m_ReturnToIdle = false;
-// 				kraken->CurrentAction = Idle;
-// 			}
-// 			break;
+		case 3: // Brick Generating
+			{
+				m_NumberOfActions++;
+				kraken->CurrentAction = 1;
+				Events::BrickGenerating e;
+				e.Origin1 = glm::vec3(-5, 7, -10);
+				e.Origin2 = glm::vec3(5, 7, -10);
+				if (kraken->Health > 20) {
+					e.SetCluster = 0;
+				} else if (kraken->Health > 10) {
+					e.SetCluster = 1;
+				} else {
+					e.SetCluster = 2;
+				}
+				std::uniform_real_distribution<float> dist(1, 6.999f);
+				float random = dist(m_RandomGenerator);
+				e.Set = random;
+				EventBroker->Publish(e);
+				break;
+			}
+		case 4: // Brick Generating second case
+			{
+				kraken->CurrentAction = 1;
+				Events::BrickGenerating e;
+				e.Origin1 = glm::vec3(-5, 7, -10);
+				e.Origin2 = glm::vec3(5, 7, -10);
+				if (kraken->Health > 20) {
+					e.SetCluster = 0;
+				} else if (kraken->Health > 10) {
+					e.SetCluster = 1;
+				} else {
+					e.SetCluster = 2;
+				}
+				std::uniform_real_distribution<float> dist(1, 6.999f);
+				float random = dist(m_RandomGenerator);
+				e.Set = random;
+				EventBroker->Publish(e);
+				break;
+			}
+		case 5: // Taunting
+			if (m_ReturnToIdle) {
+				m_ReturnToIdle = false;
+				kraken->CurrentAction = Idle;
+			}
+			break;
 		default:
 			//LOG_INFO("Something's probably off about the random number generator.");
 			break;
@@ -289,28 +289,6 @@ bool dd::Systems::KrakenSystem::OnKrakenHit(const dd::Events::KrakenHit &event)
 	m_KrakenCurrentSecondsToAction = m_KrakenMaxSecondsToAction - (modifier * timeDifferenceBetweenMaxAndMin);
 	// If modifier is 1, MaxSeconds is 15, MinSeconds is 5, then... 15 - (1 * 10), meaning 5.
 
-	auto ball = m_World->GetComponent<Components::Transform>(event.Hitter);
-	if (ball != nullptr) {
-// 		//Particle trail
-// 		Events::CreateParticleSequence trail;
-// 		trail.parent = event.Hitter;
-// 		trail.AlphaValues.push_back(1.f);
-// 		trail.AlphaValues.push_back(0.f);
-// 		trail.ScaleValues.push_back(glm::vec3(0.08f));
-// 		trail.ScaleValues.push_back(glm::vec3(0.f));
-// 		trail.RadiusDistribution = 2;
-// 		trail.EmitterLifeTime = 1.f;
-// 		trail.ParticleLifeTime = 1.f;
-// 		trail.ParticlesPerTick = 1;
-// 		trail.SpawnRate = 0.5f;
-// 		trail.Speed = 10.f;
-// 		trail.EmittingAngle = glm::half_pi<float>();
-// 		trail.SpriteFile = "Textures/Particles/FadeBall.png";
-// 		trail.Color = glm::vec4(1, 0, 0, 1);
-// 		//p.Spread = ...
-// 		EventBroker->Publish(trail);
-	}
-
 	CreateBloodEffect(transform->Position);
 
 	//std::cout << kraken->Health << std::endl;
@@ -429,7 +407,7 @@ void dd::Systems::KrakenSystem::CreateBloodEffect(glm::vec3 pos)
 	dust.EmittingAngle = glm::half_pi<float>();
 	dust.Spread = 0.5f;
 	dust.NumberOfTicks = 1;
-	dust.ParticleLifeTime = 2.f;
+	dust.ParticleLifeTime = 1.f;
 	dust.ParticlesPerTick = 1;
 	dust.Position = pos;
 	dust.ScaleValues.clear();
@@ -447,7 +425,7 @@ void dd::Systems::KrakenSystem::CreateBloodEffect(glm::vec3 pos)
 		float angle = dist(m_RandomGenerator);
 
 		Events::CreateParticleSequence squirt;
-		squirt.EmitterLifeTime = 0.5f;
+		squirt.EmitterLifeTime = 0.3f;
 		squirt.EmittingAngle = angle;
 		squirt.Spread = 0;
 		squirt.SpawnRate = 0.01f;
@@ -465,19 +443,24 @@ void dd::Systems::KrakenSystem::CreateBloodEffect(glm::vec3 pos)
 		EventBroker->Publish(squirt);
 	}
 	Events::CreateParticleSequence drop;
-	drop.EmitterLifeTime = 0.5f;
-	drop.EmittingAngle = glm::two_pi<float>() + glm::pi<float>();
-	drop.Spread = glm::two_pi<float>();
-	drop.ParticleLifeTime = 0.5f;
-	drop.ParticlesPerTick = 5;
+	drop.EmitterLifeTime = 7.f;
+	drop.SpawnRate = 0.1f;
+	//drop.EmittingAngle = glm::two_pi<float>() + glm::pi<float>();
+	drop.EmittingAngle = -glm::half_pi<float>();
+	drop.Spread = 0;
+	//drop.Spread = glm::two_pi<float>();
+	drop.ParticleLifeTime = 1.f;
+	drop.ParticlesPerTick = 2;
 	drop.Position = pos;
 	drop.ScaleValues.clear();
-	drop.ScaleValues.push_back(glm::vec3(0.2f));
+	drop.ScaleValues.push_back(glm::vec3(.15f));
+	drop.ScaleValues.push_back(glm::vec3(0.1f));
 	drop.SpriteFile = "Textures/Particles/FadeBall.png";
 	drop.Color = glm::vec4(1, 0, 0, 1);
 	drop.AlphaValues.clear();
 	drop.AlphaValues.push_back(1.f);
 	drop.AlphaValues.push_back(0.f);
-	drop.Speed = 100;
+	drop.GravityScale = 0;
+	drop.Speed = 300;
 	EventBroker->Publish(drop);
 }

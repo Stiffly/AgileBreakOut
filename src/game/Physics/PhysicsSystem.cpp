@@ -222,10 +222,10 @@ void dd::Systems::PhysicsSystem::Update(double dt)
             for (auto i : m_EntitiesToParticleHandle[e]){
                 EntityID entity = i.first;
                 const b2ParticleHandle *particleH = i.second;
-
+				
                 b2Vec2 positionB2 = positionBuffer[particleH->GetIndex()];
                 glm::vec2 position = glm::vec2(positionB2.x, positionB2.y);
-
+				
                 EntityID entityParent = m_World->GetEntityParent(entity);
                 glm::vec3 parentTransform = glm::vec3(0.f);
                 if(entityParent) {
@@ -592,7 +592,7 @@ void dd::Systems::PhysicsSystem::UpdateParticleEmitters(double dt)
 	
 			
 			//Random z-value
-            std::uniform_real_distribution<float> dist(0, 1);
+            std::uniform_real_distribution<float> dist(0, 0.1);
             float zDistribution = dist(gen);
 			particleTransform->Position = glm::vec3(emitterTransform->Position.x, emitterTransform->Position.y, -9.5f + zDistribution);
 			particleTransform->Scale = particleTemplate->Scale;
@@ -730,6 +730,7 @@ bool dd::Systems::PhysicsSystem::CreateParticleSequence(const Events::CreatePart
 	particleEmitter->RadiusDistribution = event.RadiusDistribution;
 	particleEmitter->DefaultScale = event.DefaultScale;
 	particleEmitter->ScaleValues = event.ScaleValues;
+	particleEmitter->VelocityValues = event.VelocityValues;
 	{
 		//Creating Particle Template
 		auto particle = m_World->CreateEntity(emitter);
